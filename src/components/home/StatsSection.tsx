@@ -41,10 +41,10 @@ export const StatsSection: React.FC = () => {
               variants={staggerItem}
               className="text-center"
             >
-              <div className="inline-block p-1 bg-gradient-to-br from-primary-400 to-primary-600 rounded-xl mb-4">
-                <div className="bg-neutral-950 rounded-lg p-5">
-                  <p className="text-4xl md:text-5xl font-bold text-primary-500 mb-2">{stat.value}</p>
-                  <p className="text-neutral-400">{stat.label}</p>
+              <div className="inline-block p-1 bg-gradient-to-br from-primary-400 to-primary-600 rounded-xl">
+                <div className="bg-neutral-950 rounded-lg p-6 flex flex-col justify-center items-center h-48">
+                  <p className="text-4xl md:text-5xl font-bold text-primary-500">{stat.value}</p>
+                  <p className="text-neutral-400 mt-2">{stat.label}</p>
                 </div>
               </div>
             </motion.div>

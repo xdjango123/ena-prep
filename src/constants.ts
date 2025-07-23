@@ -1,0 +1,1 @@
+export const ENA_LOGO_RECT = '/images/logo-rect.svg'; 

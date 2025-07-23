@@ -3,34 +3,26 @@ import { TestimonialType } from '../types';
 export const testimonials: TestimonialType[] = [
   {
     id: '1',
-    name: 'Sophie Dubois',
-    role: 'Diplômée ENA 2023',
-    content: 'Grâce à cette plateforme, j\'ai pu structurer efficacement mes révisions. Les examens blancs étaient particulièrement fidèles aux véritables épreuves de l\'ENA.',
+    name: 'Jean Guy Edga',
+    role: 'Admis au concours 2023',
+    content: "La plateforme est juste exceptionnelle. Les fiches de révision, les tests et le suivi personnalisé m'ont permis de réussir le concours du premier coup. Je recommande à 100%!",
     rating: 5,
-    avatar: 'https://images.pexels.com/photos/3762800/pexels-photo-3762800.jpeg?auto=compress&cs=tinysrgb&w=120&h=120&dpr=1'
+    avatar: 'https://ui-avatars.com/api/?name=Jean+Guy+Edga&background=random',
   },
   {
     id: '2',
-    name: 'Thomas Moreau',
-    role: 'Admis ENA 2022',
-    content: 'Le module de culture générale m\'a permis de combler mes lacunes rapidement. Je recommande vivement ce site à tous ceux qui visent l\'excellence.',
+    name: 'Michelle Double',
+    role: 'Étudiante en préparation',
+    content: "Une préparation très complète qui couvre tous les aspects du concours. Les professeurs sont très réactifs et les cours en direct sont un vrai plus. Je me sens beaucoup plus en confiance.",
     rating: 5,
-    avatar: 'https://images.pexels.com/photos/2379005/pexels-photo-2379005.jpeg?auto=compress&cs=tinysrgb&w=120&h=120&dpr=1'
+    avatar: 'https://ui-avatars.com/api/?name=Michelle+Double&background=random',
   },
   {
     id: '3',
-    name: 'Lucie Martin',
-    role: 'Étudiante en préparation',
-    content: 'Les simulations d\'entretien ont été déterminantes dans ma réussite. Les corrections personnalisées m\'ont permis de progresser constamment.',
-    rating: 4,
-    avatar: 'https://images.pexels.com/photos/3765114/pexels-photo-3765114.jpeg?auto=compress&cs=tinysrgb&w=120&h=120&dpr=1'
-  },
-  {
-    id: '4',
-    name: 'Alexandre Petit',
-    role: 'Admis ENA 2023',
-    content: 'Le suivi personnalisé et les statistiques de progression m\'ont aidé à identifier mes points faibles et à les corriger efficacement avant l\'examen.',
+    name: 'Abdoul W. Kone',
+    role: 'Ancien élève',
+    content: "J'avais essayé d'autres préparations sans succès. Avec ENA Préparation, j'ai enfin trouvé une méthode qui marche. Les exercices de logique sont particulièrement bien faits.",
     rating: 5,
-    avatar: 'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=120&h=120&dpr=1'
-  }
+    avatar: 'https://ui-avatars.com/api/?name=Abdoul+W+Kone&background=random',
+  },
 ];

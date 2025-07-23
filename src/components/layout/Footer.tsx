@@ -40,15 +40,15 @@ export const Footer: React.FC = () => {
           <div>
             <Link to="/" className="flex items-center gap-2 text-primary-500 font-bold text-xl mb-4">
               <GraduationCap size={28} />
-              <span>ENA Préparation</span>
+              <span>ENAplus<sup className="text-sm">+</sup></span>
             </Link>
             <p className="text-neutral-400 mb-6">
-              La référence pour la préparation au concours de l'ENA. Nous vous accompagnons vers la réussite.
+              Le site de référence pour réussir l'ENA. Nous vous accompagnons vers la réussite.
             </p>
             <div className="space-y-3">
               <div className="flex items-center gap-3 text-neutral-400">
                 <Mail size={18} />
-                <span>contact@ena-preparation.fr</span>
+                <span>contact@enaplus.fr</span>
               </div>
               <div className="flex items-center gap-3 text-neutral-400">
                 <Phone size={18} />
@@ -138,7 +138,7 @@ export const Footer: React.FC = () => {
         </div>
         
         <div className="pt-8 border-t border-neutral-800 text-center text-neutral-500">
-          <p>© {currentYear} ENA Préparation. Tous droits réservés.</p>
+          <p>© {currentYear} ENAplus. Tous droits réservés.</p>
         </div>
       </Container>
     </footer>

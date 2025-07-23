@@ -1,170 +1,145 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
-import { GraduationCap, AlertCircle, Loader } from 'lucide-react';
-import { Container } from '../components/ui/Container';
-import { Card, CardContent } from '../components/ui/Card';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import { Button } from '../components/ui/Button';
-import { fadeIn } from '../utils/animations';
+import { Input } from '../components/ui/Input';
+import { Label } from '../components/ui/Label';
 import { useAuth } from '../contexts/AuthContext';
+import { CheckCircle, Loader, GraduationCap, BookOpen, Target, Award } from 'lucide-react';
+
+const loginSchema = z.object({
+  email: z.string().email({ message: "L'email n'est pas valide" }),
+  password: z.string().min(1, { message: "Le mot de passe est requis" }),
+});
+
+type LoginFormValues = z.infer<typeof loginSchema>;
 
 const LoginPage: React.FC = () => {
-  const { login, isAuthenticated, isLoading } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema)
+  });
 
-  // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
       navigate('/dashboard');
     }
   }, [isAuthenticated, navigate]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: LoginFormValues) => {
     setError('');
-    setIsSubmitting(true);
-
     try {
-      await login(email, password);
-      // The useEffect above will handle the redirect
+      await login(data.email, data.password);
+      navigate('/dashboard');
     } catch (err) {
-      setError('Email ou mot de passe incorrect');
-    } finally {
-      setIsSubmitting(false);
+      setError('Email ou mot de passe incorrect.');
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-neutral-50">
-        <div className="text-center">
-          <Loader className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-600" />
-          <p className="text-gray-600">Vérification de votre session...</p>
-        </div>
-      </div>
-    );
-  }
+  const benefits = [
+    "Accès à des milliers de questions",
+    "Tests pratiques et examens blancs",
+    "Suivi de progression personnalisé",
+    "Recommandations intelligentes",
+  ];
 
   return (
-    <div className="min-h-screen pt-32 pb-12 bg-neutral-50">
-      <Container size="sm">
-        <motion.div
-          variants={fadeIn}
-          initial="hidden"
-          animate="visible"
-        >
-          <div className="text-center mb-8">
-            <Link to="/" className="inline-flex items-center gap-2 text-primary-500 font-bold text-2xl">
-              <GraduationCap size={32} />
-              <span>ENA Préparation</span>
-            </Link>
-            <h1 className="text-3xl font-bold mt-6 mb-2">Connexion</h1>
-            <p className="text-neutral-700">
-              Accédez à votre espace personnel de préparation
-            </p>
+    <div className="min-h-screen flex">
+      {/* Left Panel with Custom Educational Theme */}
+      <div className="hidden lg:flex w-1/2 bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800 p-12 flex-col justify-between relative overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-20 left-20">
+            <BookOpen className="w-32 h-32 text-white transform rotate-12" />
+          </div>
+          <div className="absolute top-40 right-32">
+            <GraduationCap className="w-24 h-24 text-white transform -rotate-12" />
+          </div>
+          <div className="absolute bottom-40 left-32">
+            <Target className="w-28 h-28 text-white transform rotate-45" />
+          </div>
+          <div className="absolute bottom-20 right-20">
+            <Award className="w-20 h-20 text-white transform -rotate-45" />
+          </div>
+        </div>
+        
+        {/* Content */}
+        <div className="relative z-10">
+          <div className="mb-8">
+            <GraduationCap className="w-16 h-16 text-primary-200 mb-6" />
+          <h2 className="text-4xl font-bold text-white mb-6">
+            Rejoignez des milliers d'étudiants et réussissez votre concours
+          </h2>
+            <p className="text-primary-100 text-lg mb-8">
+            Notre plateforme vous donne tous les outils pour maîtriser chaque épreuve et atteindre vos objectifs.
+          </p>
           </div>
           
-          <Card>
-            <CardContent className="p-8">
-              {error && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-md flex items-center gap-2 text-red-700">
-                  <AlertCircle className="w-5 h-5" />
-                  <span>{error}</span>
-                </div>
-              )}
+          <ul className="space-y-4">
+            {benefits.map((benefit, i) => (
+              <li key={i} className="flex items-center gap-3">
+                <CheckCircle className="w-6 h-6 text-primary-300 flex-shrink-0" />
+                <span className="text-white text-lg">{benefit}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        
+        <div className="text-primary-200 text-sm relative z-10">
+          © {new Date().getFullYear()} ENAplus. Tous droits réservés.
+        </div>
+      </div>
 
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-neutral-700 mb-1">
-                    Email
-                  </label>
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-4 py-2 border border-neutral-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                    placeholder="votre@email.com"
-                  />
-                </div>
-                
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label htmlFor="password" className="block text-sm font-medium text-neutral-700">
-                      Mot de passe
-                    </label>
+      {/* Right Panel */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-neutral-50">
+        <div className="w-full max-w-md p-8 space-y-8 bg-white shadow-lg rounded-xl">
+          <div>
+            <h2 className="text-center text-3xl font-extrabold text-neutral-900">
+              Se connecter
+            </h2>
+            <p className="mt-2 text-center text-sm text-neutral-600">
+              Ou <Link to="/signup" className="font-medium text-primary-600 hover:text-primary-500">créez un compte</Link> si vous n'en avez pas
+            </p>
+          </div>
+          <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
+            {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" type="email" autoComplete="email" {...register('email')} error={errors.email?.message} />
+            </div>
+            
+            <div>
+                <div className="flex items-center justify-between">
+                    <Label htmlFor="password">Mot de passe</Label>
                     <Link to="/mot-de-passe-oublie" className="text-sm text-primary-600 hover:text-primary-500">
                       Mot de passe oublié ?
                     </Link>
-                  </div>
-                  <input
-                    id="password"
-                    name="password"
-                    type="password"
-                    autoComplete="current-password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-4 py-2 border border-neutral-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                  />
                 </div>
-                
-                <div className="flex items-center">
-                  <input
-                    id="remember-me"
-                    name="remember-me"
-                    type="checkbox"
-                    className="h-4 w-4 text-primary-500 border-neutral-300 rounded focus:ring-primary-500"
-                  />
-                  <label htmlFor="remember-me" className="ml-2 block text-sm text-neutral-700">
-                    Se souvenir de moi
-                  </label>
-                </div>
-                
-                <Button 
-                  type="submit" 
-                  variant="primary" 
-                  fullWidth 
-                  size="lg"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? (
-                    <div className="flex items-center justify-center gap-2">
-                      <Loader className="w-5 h-5 animate-spin" />
-                      <span>Connexion...</span>
-                    </div>
-                  ) : (
-                    'Se connecter'
-                  )}
-                </Button>
-              </form>
+              <Input id="password" type="password" autoComplete="current-password" {...register('password')} error={errors.password?.message} />
+            </div>
+            
+            <div className="flex items-center">
+              <input id="remember-me" name="remember-me" type="checkbox" className="h-4 w-4 text-primary-500 border-neutral-300 rounded focus:ring-primary-500" />
+              <label htmlFor="remember-me" className="ml-2 block text-sm text-neutral-700">Se souvenir de moi</label>
+            </div>
 
-              {/* Demo hint */}
-              <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
-                <p className="text-sm text-blue-700">
-                  <strong>Mode démo :</strong> Utilisez n'importe quel email et mot de passe pour vous connecter.
-                </p>
-              </div>
-              
-              <div className="mt-8 pt-6 border-t border-neutral-200 text-center">
-                <p className="text-neutral-700">
-                  Vous n'avez pas encore de compte ?{' '}
-                  <Link to="/inscription" className="text-primary-600 font-medium hover:text-primary-500">
-                    Inscrivez-vous
-                  </Link>
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      </Container>
+            <div>
+              <Button type="submit" fullWidth disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <Loader className="w-5 h-5 animate-spin" />
+                    <span>Connexion...</span>
+                  </div>
+                ) : 'Se connecter'}
+              </Button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   );
 };

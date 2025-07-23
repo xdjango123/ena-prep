@@ -2,49 +2,62 @@ import { PricingTierType } from '../types';
 
 export const pricingTiers: PricingTierType[] = [
   {
-    id: 'free',
-    name: 'Découverte',
-    price: 'Gratuit',
-    description: 'Accès limité aux ressources de base pour découvrir la plateforme',
+    id: 'cm',
+    name: 'Prépa CM',
+    price: '10 000 FCFA',
+    description: 'Accès complet au concours Cour Moyen (CM)',
     features: [
-      'Accès à 10 questions par matière',
-      'Articles de blog éducatifs',
-      'Guide d\'introduction à l\'ENA',
-      'Forum communautaire (lecture seule)'
+      'Accès illimité aux questions CM',
+      'Examens blancs chronométrés',
+      'Corrections détaillées',
+      'Suivi de progression',
+      'Support par email'
     ],
-    buttonText: 'Commencer gratuitement'
+    buttonText: 'S\'abonner CM'
   },
   {
-    id: 'premium',
-    name: 'Premium',
-    price: '39,99€/mois',
-    description: 'Accès complet à toutes les ressources et fonctionnalités',
+    id: 'cms',
+    name: 'Prépa CMS',
+    price: '15 000 FCFA',
+    description: 'Accès complet au concours Cour Moyen Supérieur (CMS)',
+    features: [
+      'Accès illimité aux questions CMS',
+      'Examens blancs chronométrés',
+      'Corrections détaillées',
+      'Suivi de progression',
+      'Support par email'
+    ],
+    buttonText: 'S\'abonner CMS'
+  },
+  {
+    id: 'cs',
+    name: 'Prépa CS',
+    price: '20 000 FCFA',
+    description: 'Accès complet au concours Cour Supérieur (CS)',
+    features: [
+      'Accès illimité aux questions CS',
+      'Examens blancs chronométrés',
+      'Corrections détaillées',
+      'Suivi de progression',
+      'Support par email'
+    ],
+    buttonText: 'S\'abonner CS'
+  },
+  {
+    id: 'all',
+    name: 'Accès Total',
+    price: '40 000 FCFA',
+    description: 'Accès à tous les concours (CM, CMS, CS)',
     popular: true,
     features: [
       'Accès illimité à toutes les questions',
-      'Examens blancs chronométrés',
-      'Suivi de progression personnalisé',
-      'Corrections détaillées et personnalisées',
-      'Accès à la communauté d\'entraide',
+      'Examens blancs pour tous les niveaux',
+      'Corrections détaillées',
+      'Suivi de progression avancé',
       'Séminaires mensuels en ligne',
-      'Garantie de remboursement de 30 jours'
+      'Accès prioritaire aux nouveautés',
+      'Support prioritaire 7j/7'
     ],
-    buttonText: 'S\'abonner maintenant'
-  },
-  {
-    id: 'coaching',
-    name: 'Coaching',
-    price: '99,99€/mois',
-    description: 'L\'expérience Premium avec un coach personnel pour un accompagnement sur mesure',
-    features: [
-      'Tous les avantages Premium',
-      '2 sessions de coaching individuel par mois',
-      'Feedback personnalisé sur vos réponses',
-      'Plan d\'étude sur mesure',
-      'Préparation à l\'entretien oral',
-      'Accès prioritaire aux nouveaux contenus',
-      'Support 7j/7 par email'
-    ],
-    buttonText: 'Démarrer avec un coach'
+    buttonText: 'Accès complet'
   }
 ];

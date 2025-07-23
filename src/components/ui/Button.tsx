@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import clsx from 'clsx';
 
-type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost';
+type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'accent' | 'success';
 type ButtonSize = 'sm' | 'md' | 'lg';
 
 interface ButtonProps {
@@ -31,7 +31,7 @@ export const Button: React.FC<ButtonProps> = ({
   fullWidth = false,
 }) => {
   const baseStyles = clsx(
-    'inline-flex items-center justify-center font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2',
+    'inline-flex items-center justify-center font-medium rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-offset-2',
     {
       'w-full': fullWidth,
       'px-3 py-1.5 text-sm': size === 'sm',
@@ -39,20 +39,28 @@ export const Button: React.FC<ButtonProps> = ({
       'px-6 py-3 text-lg': size === 'lg',
       
       // Primary variant
-      'bg-primary-500 text-white hover:bg-primary-600 focus:ring-primary-500': 
+      'bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500 shadow-sm hover:shadow-md': 
         variant === 'primary' && !disabled,
       
       // Secondary variant
-      'bg-neutral-800 text-white hover:bg-neutral-700 focus:ring-neutral-700':
+      'bg-background-700 text-white hover:bg-background-800 focus:ring-background-600 shadow-sm hover:shadow-md':
         variant === 'secondary' && !disabled,
       
       // Outline variant
-      'border border-primary-500 text-primary-500 bg-transparent hover:bg-primary-50 focus:ring-primary-500':
+      'border border-primary-600 text-primary-600 bg-transparent hover:bg-primary-50 focus:ring-primary-500':
         variant === 'outline' && !disabled,
       
       // Ghost variant
-      'text-neutral-800 bg-transparent hover:bg-neutral-100 focus:ring-neutral-500':
+      'text-background-700 bg-transparent hover:bg-background-100 focus:ring-background-500':
         variant === 'ghost' && !disabled,
+      
+      // Accent variant
+      'bg-accent-400 text-background-900 hover:bg-accent-500 focus:ring-accent-400 shadow-sm hover:shadow-md':
+        variant === 'accent' && !disabled,
+      
+      // Success variant
+      'bg-success-600 text-white hover:bg-success-700 focus:ring-success-500 shadow-sm hover:shadow-md':
+        variant === 'success' && !disabled,
       
       // Disabled state
       'opacity-50 cursor-not-allowed': disabled,

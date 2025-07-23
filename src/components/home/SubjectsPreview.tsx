@@ -1,65 +1,92 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
-import { ChevronRight } from 'lucide-react';
-import * as Icons from 'lucide-react';
 import { Container } from '../ui/Container';
 import { Section, SectionHeader } from '../ui/Section';
-import { Card, CardContent } from '../ui/Card';
-import { subjects } from '../../data/subjects';
 import { staggerContainer, staggerItem } from '../../utils/animations';
+import { Award, GraduationCap, Star } from 'lucide-react';
+
+const concours = [
+  {
+    id: 'cm',
+    title: 'CM (Cour Moyen)',
+    price: '10 000 FCFA',
+    icon: GraduationCap,
+    color: 'blue',
+    description: "Pour les titulaires du BEPC ou BAC. Durée : 3h00. Niveau fondamental."
+  },
+  {
+    id: 'cms',
+    title: 'CMS (Cour Moyen Supérieur)',
+    price: '15 000 FCFA',
+    icon: Award,
+    color: 'orange',
+    description: "Pour les titulaires d'une Licence (BAC+3). Durée : 3h30. Difficulté intermédiaire."
+  },
+  {
+    id: 'cs',
+    title: 'CS (Cour Supérieur)',
+    price: '20 000 FCFA',
+    icon: Star,
+    color: 'red',
+    description: "Pour les titulaires d'un Master (BAC+5). Durée : 4h00. Niveau avancé."
+  }
+];
+
+const colorMap = {
+  blue: {
+    bg: 'bg-blue-50',
+    hoverBg: 'hover:bg-blue-100',
+    text: 'text-blue-800',
+    buttonBg: 'bg-blue-500',
+  },
+  orange: {
+    bg: 'bg-orange-50',
+    hoverBg: 'hover:bg-orange-100',
+    text: 'text-orange-800',
+    buttonBg: 'bg-orange-500',
+  },
+  red: {
+    bg: 'bg-red-50',
+    hoverBg: 'hover:bg-red-100',
+    text: 'text-red-800',
+    buttonBg: 'bg-red-500',
+  },
+};
 
 export const SubjectsPreview: React.FC = () => {
   return (
     <Section>
       <Container>
         <SectionHeader
-          title="Nos matières"
-          subtitle="Découvrez les différentes épreuves du concours et préparez-vous efficacement"
+          title="Concours et matières"
+          subtitle="Chaque concours comprend 3 matières : Culture Générale, Anglais, Logique"
         />
-        
         <motion.div
           variants={staggerContainer(0.1)}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-50px" }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+          className="grid grid-cols-1 md:grid-cols-3 gap-8"
         >
-          {subjects.map((subject) => {
-            // @ts-ignore - Dynamic icon component
-            const IconComponent = Icons[subject.icon] || Icons.BookOpen;
-            
+          {concours.map((c) => {
+            const Icon = c.icon;
+            const colors = colorMap[c.color as keyof typeof colorMap];
             return (
-              <motion.div key={subject.id} variants={staggerItem}>
-                <Link to={`/matieres/${subject.id}`}>
-                  <Card interactive className="h-full transition-all hover:scale-105">
-                    <CardContent className="flex flex-col items-center text-center">
-                      <div className="w-16 h-16 rounded-full bg-primary-100 flex items-center justify-center mb-4">
-                        <IconComponent size={28} className="text-primary-500" />
-                      </div>
-                      <h3 className="text-xl font-bold mb-2">{subject.title}</h3>
-                      <p className="text-neutral-700 text-sm mb-4">{subject.description}</p>
-                      <div className="mt-auto flex items-center text-primary-500 font-medium">
-                        <span>En savoir plus</span>
-                        <ChevronRight size={16} className="ml-1" />
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
+              <motion.div key={c.id} variants={staggerItem}>
+                <div className={`p-8 rounded-xl h-full flex flex-col shadow-sm transition-all ${colors.bg} ${colors.hoverBg}`}>
+                  <div className="flex-grow flex flex-col items-center text-center">
+                    <div className={`w-14 h-14 rounded-full flex items-center justify-center mb-5 ${colors.buttonBg}`}>
+                      <Icon className="w-8 h-8 text-white" />
+                    </div>
+                    <h3 className={`text-xl font-bold mb-2 ${colors.text}`}>{c.title}</h3>
+                    <div className="text-lg font-semibold mb-2 text-gray-900">{c.price}</div>
+                    <p className="text-neutral-600 mb-2">{c.description}</p>
+                  </div>
+                </div>
               </motion.div>
             );
           })}
         </motion.div>
-        
-        <div className="text-center mt-10">
-          <Link 
-            to="/matieres" 
-            className="inline-flex items-center text-lg font-medium text-primary-500 hover:text-primary-600"
-          >
-            Voir toutes les matières
-            <ChevronRight size={20} className="ml-1" />
-          </Link>
-        </div>
       </Container>
     </Section>
   );

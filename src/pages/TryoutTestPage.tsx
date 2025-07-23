@@ -5,7 +5,7 @@ import { Clock, ChevronRight, ChevronLeft, Check, TestTube, Play } from 'lucide-
 
 interface Question {
   id: string;
-  subject: 'general_knowledge' | 'english' | 'numerical_aptitude' | 'french';
+  subject: 'general_knowledge' | 'english' | 'logic';
   question: string;
   options: string[];
   correctAnswer: number;
@@ -28,45 +28,52 @@ const TRYOUT_QUESTIONS: Question[] = [
   },
   {
     id: '3',
+    subject: 'general_knowledge',
+    question: 'Qui est le premier président du Sénégal ?',
+    options: ['Abdoulaye Wade', 'Abdou Diouf', 'Léopold Sédar Senghor', 'Macky Sall'],
+    correctAnswer: 2
+  },
+  {
+    id: '4',
     subject: 'english',
     question: 'Choose the correct sentence:',
     options: ['I have went to school', 'I have gone to school', 'I have go to school', 'I has gone to school'],
     correctAnswer: 1
   },
   {
-    id: '4',
+    id: '5',
     subject: 'english',
     question: 'What is the past tense of "run"?',
     options: ['runned', 'ran', 'runed', 'running'],
     correctAnswer: 1
   },
   {
-    id: '5',
-    subject: 'numerical_aptitude',
-    question: 'Si 3x + 7 = 22, quelle est la valeur de x ?',
-    options: ['3', '4', '5', '6'],
-    correctAnswer: 2
-  },
-  {
     id: '6',
-    subject: 'numerical_aptitude',
-    question: 'Quel est le résultat de 15% de 200 ?',
-    options: ['25', '30', '35', '40'],
+    subject: 'english',
+    question: 'Which word is a synonym for "happy"?',
+    options: ['Sad', 'Joyful', 'Angry', 'Tired'],
     correctAnswer: 1
   },
   {
     id: '7',
-    subject: 'french',
-    question: 'Quel est le participe passé du verbe "voir" ?',
-    options: ['voir', 'voyant', 'vu', 'voit'],
-    correctAnswer: 2
+    subject: 'logic',
+    question: 'Si tous les chats sont des mammifères et que tous les mammifères ont un cœur, alors tous les chats ont un cœur. Cette affirmation est-elle vraie ou fausse ?',
+    options: ['Vrai', 'Faux'],
+    correctAnswer: 0
   },
   {
     id: '8',
-    subject: 'french',
-    question: 'Complétez la phrase : "Il faut que tu _____ tes devoirs."',
-    options: ['fais', 'fasses', 'fait', 'faire'],
-    correctAnswer: 1
+    subject: 'logic',
+    question: 'Quel est le prochain nombre dans la séquence : 2, 4, 8, 16, ... ?',
+    options: ['20', '24', '32', '64'],
+    correctAnswer: 2
+  },
+  {
+    id: '9',
+    subject: 'logic',
+    question: 'Un train quitte Paris à 14h00 et roule à 120 km/h. Un autre train quitte Paris à 15h00 et roule à 180 km/h dans la même direction. À quelle heure le deuxième train rattrapera-t-il le premier ?',
+    options: ['16h00', '17h00', '18h00', '19h00'],
+    correctAnswer: 2
   }
 ];
 
@@ -158,8 +165,7 @@ export default function TryoutTestPage() {
     const names: Record<string, string> = {
       'general_knowledge': 'Culture Générale',
       'english': 'Anglais',
-      'numerical_aptitude': 'Aptitude Numérique',
-      'french': 'Français'
+      'logic': 'Logique'
     };
     return names[subject] || subject;
   };

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User, AuthContextType } from '../types/auth';
+import { User, AuthContextType, ExamLevel } from '../types/auth';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -26,13 +26,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const token = localStorage.getItem('authToken');
         if (token) {
           // In a real app, validate token with backend
-          // For now, simulate a logged-in user
+          // For now, simulate a logged-in user with integral tier for testing
           setUser({
             id: '1',
             name: 'Django Yepidan',
             email: 'django@example.com',
-            subscriptionStatus: 'active',
+            subscriptionStatus: 'integral', // Change this to test different tiers: 'free', 'premium', 'integral'
             createdAt: new Date(),
+            examLevel: 'CM',
+            hasCompletedEvaluation: false,
+            // selectedCategory: 'CM', // Uncomment for premium tier testing
           });
         }
       } catch (error) {
@@ -51,13 +54,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Mock successful login
+      // Mock successful login - you can change subscriptionStatus here to test different tiers
       const userData: User = {
         id: '1',
         name: 'Django Yepidan',
         email,
-        subscriptionStatus: 'active',
+        subscriptionStatus: 'integral', // Change to 'free', 'premium', or 'integral' for testing
         createdAt: new Date(),
+        examLevel: 'CM',
+        hasCompletedEvaluation: false,
+        // selectedCategory: 'CM', // Add this for premium tier testing
       };
       
       setUser(userData);
@@ -66,6 +72,47 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       throw new Error('Login failed');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const signup = async (email: string, password: string, firstName: string, lastName: string, examLevel: ExamLevel) => {
+    setIsLoading(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const newUser: User = {
+        id: new Date().getTime().toString(),
+        name: `${firstName} ${lastName}`,
+        email,
+        subscriptionStatus: 'free', // New users start with free tier
+        createdAt: new Date(),
+        examLevel,
+        hasCompletedEvaluation: false,
+      };
+      
+      setUser(newUser);
+      localStorage.setItem('authToken', 'mock-jwt-token');
+    } catch (error) {
+      throw new Error('Signup failed');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const updateUserProfile = async (updates: Partial<User>) => {
+    if (!user) return;
+    
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      const updatedUser = { ...user, ...updates };
+      setUser(updatedUser);
+      
+      // In a real app, you'd also update localStorage or send to backend
+    } catch (error) {
+      throw new Error('Profile update failed');
     }
   };
 
@@ -78,8 +125,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     user,
     isLoading,
     login,
+    signup,
     logout,
     isAuthenticated: !!user,
+    updateUserProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -3,8 +3,6 @@ export interface SubjectType {
   title: string;
   description: string;
   icon: string;
-  sampleQuestion: string;
-  sampleAnswer?: string;
 }
 
 export interface TestimonialType {
@@ -30,4 +28,20 @@ export interface FAQType {
   question: string;
   answer: string;
   category: 'exam' | 'platform' | 'subscription';
+}
+
+export interface EvaluationQuestion {
+  id: string;
+  subject: 'anglais' | 'cultureGenerale' | 'logique';
+  difficulty: 'CM' | 'CMS' | 'CS';
+  question: string;
+  options: string[];
+  correctAnswer: number;
+  explanation?: string;
+}
+
+export interface EvaluationAnswer {
+  questionId: string;
+  selectedAnswer: number;
+  timeSpent: number;
 }

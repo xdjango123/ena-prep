@@ -26,19 +26,11 @@ export const CTASection: React.FC = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Button 
-                to="/inscription" 
+                to="/signup" 
                 variant="secondary" 
                 size="lg"
               >
                 S'inscrire maintenant
-              </Button>
-              <Button 
-                to="/tarification" 
-                variant="outline" 
-                size="lg"
-                className="border-white text-white hover:bg-white hover:text-primary-500"
-              >
-                Voir les formules
               </Button>
             </div>
           </motion.div>

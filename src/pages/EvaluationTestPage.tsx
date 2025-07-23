@@ -1,186 +1,260 @@
 import React, { useState } from 'react';
-import { TestTube, Play, Clock, Target, BookOpen, TrendingUp, Award, Users, ChevronRight } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { Container } from '../components/ui/Container';
+import { Button } from '../components/ui/Button';
+import { motion } from 'framer-motion';
+import { 
+  TrendingUp, 
+  BookOpen, 
+  Clock, 
+  Target,
+  CheckCircle2,
+  AlertCircle,
+  Info,
+  Award,
+  Play,
+  RotateCcw,
+  TestTube2
+} from 'lucide-react';
 
-export default function EvaluationTestPage() {
-  const navigate = useNavigate();
-  const [showTestInfo, setShowTestInfo] = useState(false);
+const EvaluationTestPage: React.FC = () => {
+  const { user } = useAuth();
 
-  const testStats = [
-    { label: 'Questions', value: '8', icon: BookOpen },
-    { label: 'Durée', value: '10 min', icon: Clock },
-    { label: 'Matières', value: '4', icon: Target }
-  ];
+  const hasResults = user?.evaluationResults;
 
-  const subjects = [
-    { name: 'Culture Générale', questions: 2, color: 'bg-purple-100 text-purple-800' },
-    { name: 'Anglais', questions: 2, color: 'bg-blue-100 text-blue-800' },
-    { name: 'Aptitude Numérique', questions: 2, color: 'bg-green-100 text-green-800' },
-    { name: 'Français', questions: 2, color: 'bg-orange-100 text-orange-800' }
-  ];
-
-  const previousResults = JSON.parse(localStorage.getItem('tryout_results') || '[]');
-
-  const startTest = () => {
-    navigate('/dashboard/tryout/test');
+  // Mock test data
+  const mockTestData = {
+    totalQuestions: 15,
+    duration: 10,
+    subjects: [
+      { name: 'Anglais', questions: 5, color: 'bg-blue-100 text-blue-800' },
+      { name: 'Culture Générale', questions: 5, color: 'bg-green-100 text-green-800' },
+      { name: 'Logique', questions: 5, color: 'bg-yellow-100 text-yellow-800' }
+    ]
   };
 
-  return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl p-6 text-white">
-        <div className="flex items-center gap-3 mb-4">
-          <TestTube className="w-8 h-8" />
-          <h1 className="text-2xl font-bold">Test d'évaluation</h1>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {testStats.map((stat, index) => (
-            <div key={index} className="text-center">
-              <div className="text-3xl font-bold">{stat.value}</div>
-              <div className="text-purple-100 flex items-center justify-center gap-1">
-                <stat.icon className="w-4 h-4" />
-                {stat.label}
-              </div>
+  const renderContent = () => {
+    if (!hasResults) {
+      return (
+        <div className="space-y-8">
+          {/* No Results State */}
+          <div className="bg-white rounded-2xl shadow-lg p-6 text-center">
+            <div className="p-3 bg-blue-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+              <TestTube2 className="w-8 h-8 text-blue-600" />
             </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <button 
-          onClick={startTest}
-          className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow cursor-pointer text-left"
-        >
-          <Play className="w-8 h-8 text-purple-600 mb-2" />
-          <h3 className="font-semibold text-gray-900">Commencer le test</h3>
-          <p className="text-sm text-gray-600">Évaluation complète</p>
-        </button>
-        <button 
-          onClick={() => setShowTestInfo(!showTestInfo)}
-          className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow cursor-pointer text-left"
-        >
-          <BookOpen className="w-8 h-8 text-purple-600 mb-2" />
-          <h3 className="font-semibold text-gray-900">Informations</h3>
-          <p className="text-sm text-gray-600">Détails du test</p>
-        </button>
-        <Link to="/dashboard/analytics" className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow cursor-pointer">
-          <TrendingUp className="w-8 h-8 text-purple-600 mb-2" />
-          <h3 className="font-semibold text-gray-900">Mes résultats</h3>
-          <p className="text-sm text-gray-600">Historique des tests</p>
-        </Link>
-        <Link to="/dashboard/study-plan" className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow cursor-pointer">
-          <Target className="w-8 h-8 text-purple-600 mb-2" />
-          <h3 className="font-semibold text-gray-900">Plan d'étude</h3>
-          <p className="text-sm text-gray-600">Recommandations</p>
-        </Link>
-      </div>
-
-      {/* Test Information */}
-      {showTestInfo && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-gray-900">Informations sur le test</h2>
-            <button
-              onClick={() => setShowTestInfo(false)}
-              className="text-gray-500 hover:text-gray-700"
-            >
-              ✕
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div>
-              <h3 className="font-semibold text-gray-900 mb-3">Structure du test</h3>
-              <div className="space-y-2">
-                {subjects.map((subject, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <span className="font-medium text-gray-900">{subject.name}</span>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${subject.color}`}>
+            <h3 className="text-xl font-bold text-gray-800 mb-3">
+              Aucun test d'évaluation complété
+            </h3>
+            <p className="text-gray-600 mb-6 max-w-lg mx-auto">
+              Commencez par passer votre test d'évaluation personnalisée pour découvrir 
+              vos forces et axes d'amélioration.
+            </p>
+            
+            <Button size="lg" className="bg-primary-600 hover:bg-primary-700 mb-6">
+              <Play className="w-5 h-5 mr-2" />
+              Commencer le test d'évaluation
+            </Button>
+            
+            {/* Mock Test Preview */}
+            <div className="bg-gray-50 rounded-xl p-6">
+              <h4 className="font-semibold text-gray-800 mb-4">Aperçu du test</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div className="text-center p-4 bg-white rounded-lg">
+                  <Clock className="w-6 h-6 text-blue-600 mx-auto mb-2" />
+                  <div className="font-semibold">{mockTestData.duration} minutes</div>
+                  <div className="text-sm text-gray-600">Durée totale</div>
+                </div>
+                <div className="text-center p-4 bg-white rounded-lg">
+                  <Target className="w-6 h-6 text-green-600 mx-auto mb-2" />
+                  <div className="font-semibold">{mockTestData.totalQuestions} questions</div>
+                  <div className="text-sm text-gray-600">Au total</div>
+                </div>
+                <div className="text-center p-4 bg-white rounded-lg">
+                  <BookOpen className="w-6 h-6 text-purple-600 mx-auto mb-2" />
+                  <div className="font-semibold">3 matières</div>
+                  <div className="text-sm text-gray-600">Différentes</div>
+                </div>
+              </div>
+              
+              <div className="space-y-3">
+                {mockTestData.subjects.map((subject, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 bg-white rounded-lg">
+                    <span className="font-medium">{subject.name}</span>
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${subject.color}`}>
                       {subject.questions} questions
                     </span>
                   </div>
                 ))}
               </div>
             </div>
+          </div>
+        </div>
+      );
+    }
 
+    const { overallScore, subjectScores, strengths, weaknesses, recommendations } = hasResults;
+
+    return (
+      <div className="space-y-8">
+        {/* Results Header */}
+        <div className="bg-gradient-to-r from-primary-500 to-primary-600 text-white p-8 rounded-2xl shadow-lg">
+          <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-semibold text-gray-900 mb-3">Instructions</h3>
-              <ul className="space-y-2 text-sm text-gray-600">
-                <li className="flex items-start gap-2">
-                  <span className="text-purple-600 font-bold">•</span>
-                  Vous avez 10 minutes pour répondre à 8 questions
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-purple-600 font-bold">•</span>
-                  Une seule réponse par question
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-purple-600 font-bold">•</span>
-                  Vous pouvez naviguer entre les questions
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-purple-600 font-bold">•</span>
-                  Le test se termine automatiquement à la fin du temps
-                </li>
-              </ul>
+              <h2 className="text-3xl font-bold mb-2">Vos Résultats</h2>
+              <p className="text-primary-100">Analyse complète de votre test d'évaluation</p>
+            </div>
+            <Button variant="secondary" onClick={() => window.location.reload()}>
+              <RotateCcw className="w-4 h-4 mr-2" />
+              Repasser le test
+            </Button>
+          </div>
+        </div>
+
+        {/* Overall Score */}
+        <div className="bg-white rounded-2xl shadow-lg p-8">
+          <div className="text-center">
+            <div className="p-4 bg-yellow-100 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
+              <Award className="w-10 h-10 text-yellow-600" />
+            </div>
+            <h3 className="text-2xl font-bold text-gray-800 mb-2">Score Global</h3>
+            <div className="text-6xl font-bold text-primary-600 mb-4">{overallScore}%</div>
+            <p className="text-gray-600 text-lg">
+              {overallScore >= 70 ? 'Excellent niveau ! 🎉' : 
+               overallScore >= 50 ? 'Bon niveau, continuez vos efforts 💪' : 
+               'Des améliorations sont nécessaires 📚'}
+            </p>
+          </div>
+        </div>
+
+        {/* Subject Breakdown */}
+        <div className="bg-white rounded-2xl shadow-lg p-8">
+          <h3 className="text-2xl font-bold text-gray-800 mb-6">Détail par matière</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="p-6 bg-blue-50 rounded-xl border border-blue-200">
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="font-bold text-blue-800">Anglais</h4>
+                <div className="text-2xl font-bold text-blue-600">{subjectScores.anglais}%</div>
+              </div>
+              <div className="w-full bg-blue-200 rounded-full h-3">
+                <div 
+                  className="bg-blue-600 h-3 rounded-full transition-all duration-500"
+                  style={{ width: `${subjectScores.anglais}%` }}
+                />
+              </div>
+            </div>
+
+            <div className="p-6 bg-green-50 rounded-xl border border-green-200">
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="font-bold text-green-800">Culture Générale</h4>
+                <div className="text-2xl font-bold text-green-600">{subjectScores.cultureGenerale}%</div>
+              </div>
+              <div className="w-full bg-green-200 rounded-full h-3">
+                <div 
+                  className="bg-green-600 h-3 rounded-full transition-all duration-500"
+                  style={{ width: `${subjectScores.cultureGenerale}%` }}
+                />
+              </div>
+            </div>
+
+            <div className="p-6 bg-yellow-50 rounded-xl border border-yellow-200">
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="font-bold text-yellow-800">Logique</h4>
+                <div className="text-2xl font-bold text-yellow-600">{subjectScores.logique}%</div>
+              </div>
+              <div className="w-full bg-yellow-200 rounded-full h-3">
+                <div 
+                  className="bg-yellow-600 h-3 rounded-full transition-all duration-500"
+                  style={{ width: `${subjectScores.logique}%` }}
+                />
+              </div>
             </div>
           </div>
-
-          <div className="text-center">
-            <button
-              onClick={startTest}
-              className="bg-purple-600 text-white px-8 py-3 rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2 mx-auto"
-            >
-              <Play className="w-5 h-5" />
-              Commencer maintenant
-            </button>
-          </div>
         </div>
-      )}
 
-      {/* Previous Results */}
-      {previousResults.length > 0 && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Derniers résultats</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {previousResults.slice(0, 2).map((result: any, index: number) => (
-              <div key={index} className="border border-gray-200 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-gray-500">
-                    {new Date(result.completedAt).toLocaleDateString()}
-                  </span>
-                  <span className="text-lg font-bold text-purple-600">
-                    {Math.round(result.results.reduce((acc: number, r: any) => acc + r.score, 0) / result.results.length)}%
-                  </span>
-                </div>
-                <div className="text-sm text-gray-600">
-                  Temps: {Math.floor(result.timeSpent / 60)}:{(result.timeSpent % 60).toString().padStart(2, '0')}
-                </div>
+        {/* Strengths and Weaknesses */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {strengths.length > 0 && (
+            <div className="bg-white rounded-2xl shadow-lg p-8">
+              <div className="flex items-center gap-3 mb-6">
+                <CheckCircle2 className="w-6 h-6 text-green-600" />
+                <h3 className="text-xl font-bold text-green-800">Points forts</h3>
               </div>
-            ))}
-          </div>
-        </div>
-      )}
+              <ul className="space-y-3">
+                {strengths.map((strength: string, index: number) => (
+                  <li key={index} className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
+                    <div className="w-2 h-2 bg-green-500 rounded-full" />
+                    <span className="text-green-700">{strength}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
-      {/* Default Continue Learning */}
-      {!showTestInfo && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Prêt pour votre évaluation ?</h2>
-            <button 
-              onClick={startTest}
-              className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2"
-            >
-              <Play className="w-4 h-4" />
-              Commencer
-            </button>
+          {weaknesses.length > 0 && (
+            <div className="bg-white rounded-2xl shadow-lg p-8">
+              <div className="flex items-center gap-3 mb-6">
+                <Target className="w-6 h-6 text-red-600" />
+                <h3 className="text-xl font-bold text-red-800">À améliorer</h3>
+              </div>
+              <ul className="space-y-3">
+                {weaknesses.map((weakness: string, index: number) => (
+                  <li key={index} className="flex items-center gap-3 p-3 bg-red-50 rounded-lg">
+                    <div className="w-2 h-2 bg-red-500 rounded-full" />
+                    <span className="text-red-700">{weakness}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+
+        {/* Recommendations */}
+        {recommendations.length > 0 && (
+          <div className="bg-white rounded-2xl shadow-lg p-8">
+            <div className="flex items-center gap-3 mb-6">
+              <TrendingUp className="w-6 h-6 text-blue-600" />
+              <h3 className="text-xl font-bold text-blue-800">Recommandations personnalisées</h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {recommendations.map((recommendation: string, index: number) => (
+                <div key={index} className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <p className="text-blue-700">{recommendation}</p>
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="text-gray-600">
-            <p>Ce test d'évaluation vous permettra de connaître votre niveau actuel dans les 4 matières principales du concours ENA.</p>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <Container className="py-8">
+        {/* Page Title - Compact */}
+        <div className="bg-gradient-to-r from-primary-500 to-primary-600 text-white p-6 rounded-2xl shadow-lg mb-8">
+          <div className="text-center">
+            <div className="p-3 bg-white/20 rounded-full w-16 h-16 mx-auto mb-3 flex items-center justify-center">
+              <TestTube2 className="w-8 h-8 text-white" />
+            </div>
+            <h1 className="text-3xl font-bold mb-2 text-white">Test d'Évaluation</h1>
+            <p className="text-white/90">
+              Découvrez votre niveau et obtenez des recommandations personnalisées
+            </p>
           </div>
         </div>
-      )}
+
+        {/* Content */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          {renderContent()}
+        </motion.div>
+      </Container>
     </div>
   );
-} 
+};
+
+export default EvaluationTestPage; 
