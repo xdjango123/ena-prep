@@ -125,9 +125,12 @@ export default function DashboardPage() {
         <div className="bg-gradient-to-r from-primary-600 to-primary-700 text-white p-8 rounded-2xl shadow-lg mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold mb-2 text-white">
+              <h1 className="text-3xl font-bold mb-2">
                 Bonjour, {user?.name}! 👋
               </h1>
+              <p className="text-primary-100 text-lg">
+                Qu'allons-nous réviser aujourd'hui ?
+              </p>
             </div>
             
             {/* User Profile Labels - Better positioned */}
@@ -145,26 +148,24 @@ export default function DashboardPage() {
                   </span>
                 </div>
               )}
+              {user?.subscriptionStatus && (
+                <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border ${getSubscriptionColor(user.subscriptionStatus)}`}>
+                  {getSubscriptionIcon(user.subscriptionStatus)}
+                  <span>{getSubscriptionLabel(user.subscriptionStatus)}</span>
+                </div>
+              )}
             </div>
           </div>
           
-          {/* Integral message at bottom */}
-          {user?.subscriptionStatus && (
-            <div className="mt-6 flex justify-between items-center">
-              <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border ${getSubscriptionColor(user.subscriptionStatus)}`}>
-                {getSubscriptionIcon(user.subscriptionStatus)}
-                <span>{getSubscriptionLabel(user.subscriptionStatus)}</span>
-              </div>
-              
-              {/* Home page link positioned at bottom right */}
-              <Link 
-                to="/" 
-                className="text-sm text-primary-100 hover:text-white transition-colors underline"
-              >
-                ← Retour à l'accueil
-              </Link>
-            </div>
-          )}
+          {/* Home page link positioned at bottom */}
+          <div className="mt-6 text-right">
+            <Link 
+              to="/" 
+              className="text-sm text-primary-100 hover:text-white transition-colors underline"
+            >
+              ← Retour à l'accueil
+            </Link>
+          </div>
         </div>
 
         {/* Main Actions - Cleaner Grid */}

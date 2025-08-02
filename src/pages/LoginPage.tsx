@@ -90,7 +90,7 @@ const LoginPage: React.FC = () => {
         </div>
         
         <div className="text-primary-200 text-sm relative z-10">
-          © {new Date().getFullYear()} ENAplus. Tous droits réservés.
+                      © {new Date().getFullYear()} PrepaENA. Tous droits réservés.
         </div>
       </div>
 

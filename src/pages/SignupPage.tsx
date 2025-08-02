@@ -94,7 +94,7 @@ const SignupPage: React.FC = () => {
         </div>
         
         <div className="text-primary-200 text-sm relative z-10">
-          © {new Date().getFullYear()} ENAplus<sup className="text-xs">+</sup>. Tous droits réservés.
+                      © {new Date().getFullYear()} PrepaENA. Tous droits réservés.
         </div>
       </div>
 

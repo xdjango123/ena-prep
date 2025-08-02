@@ -175,8 +175,8 @@ export default function LogicPage() {
                 score={88}
                 testsTaken={6}
                 timeSpent={9}
-                gradientFrom="from-primary-600"
-                gradientTo="to-primary-700"
+                gradientFrom="from-orange-500"
+                gradientTo="to-orange-600"
             />
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

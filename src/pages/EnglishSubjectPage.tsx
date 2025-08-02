@@ -180,8 +180,8 @@ export default function EnglishSubjectPage() {
         score={82}
         testsTaken={4}
         timeSpent={2}
-        gradientFrom="from-primary-600"
-        gradientTo="to-primary-700"
+        gradientFrom="from-green-500"
+        gradientTo="to-green-600"
       />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

@@ -72,29 +72,29 @@ export const Sidebar: React.FC = () => {
       <Link
         key={item.id}
         to={item.path}
-        className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 mb-1 ${
+        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors mb-1 ${
           active 
-            ? (isSubItem ? 'bg-primary-100 text-primary-700 font-medium' : 'bg-primary-600 text-white font-semibold shadow-sm')
-            : 'text-background-700 hover:bg-background-100 hover:text-background-900'
+            ? (isSubItem ? 'bg-blue-50 text-blue-600' : 'bg-blue-100 text-blue-600 font-semibold')
+            : ''
         } ${!isOpen ? 'justify-center' : ''}`}
       >
         {item.icon}
-        {isOpen && <span className="font-medium">{item.label}</span>}
+        {isOpen && <span>{item.label}</span>}
       </Link>
     );
   }
 
   return (
-    <div className={`h-screen fixed top-0 left-0 bg-white border-r border-background-200 flex flex-col transition-all duration-300 z-20 ${isOpen ? 'w-64' : 'w-20'}`}>
+    <div className={`h-screen fixed top-0 left-0 bg-white border-r border-gray-200 flex flex-col transition-all duration-300 z-20 ${isOpen ? 'w-64' : 'w-20'}`}>
       {/* Logo and Toggle */}
-      <div className="flex items-center justify-between p-4 border-b border-background-200 h-16 shrink-0">
+      <div className="flex items-center justify-between p-4 border-b border-gray-200 h-16 shrink-0">
         {isOpen && (
-          <Link to="/" className="flex items-center gap-2 text-primary-600 font-bold text-lg">
+          <Link to="/" className="flex items-center gap-2 text-primary-500 font-bold text-lg">
                           <GraduationCap size={24} />
-              <span>ENAplus<sup className="text-sm">+</sup></span>
+                              <span>PrepaENA</span>
           </Link>
         )}
-        <button onClick={toggle} className="p-2 rounded-lg text-background-600 hover:bg-background-100">
+        <button onClick={toggle} className="p-2 rounded-lg text-gray-500 hover:bg-gray-100">
           <Menu className="w-5 h-5" />
         </button>
       </div>
@@ -109,11 +109,11 @@ export const Sidebar: React.FC = () => {
             <li>
               <button
                 onClick={() => setMatiereOpen(!isMatiereOpen)}
-                className={`flex items-center justify-between w-full gap-3 px-4 py-3 rounded-lg text-background-700 hover:bg-background-100 hover:text-background-900 transition-all duration-200 mb-1 ${!isOpen ? 'justify-center' : ''}`}
+                className={`flex items-center justify-between w-full gap-3 px-3 py-2.5 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors mb-1 ${!isOpen ? 'justify-center' : ''}`}
               >
                 <div className="flex items-center gap-3">
                   <BookCopy className="w-5 h-5" />
-                  {isOpen && <span className="font-medium">Matières</span>}
+                  {isOpen && <span>Matières</span>}
                 </div>
                 {isOpen && (isMatiereOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />)}
               </button>
@@ -130,7 +130,7 @@ export const Sidebar: React.FC = () => {
             </li>
           </ul>
 
-          {isOpen && <h2 className="px-4 mt-6 mb-3 text-xs font-semibold text-background-500 uppercase tracking-wider">Communauté</h2>}
+          {isOpen && <h2 className="px-3 mt-6 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Communauté</h2>}
           <ul>
             {communityItems.map(item => (
               <li key={item.id}>{renderLink({ id: item.id, label: item.label, icon: item.icon as React.ReactElement, path: item.path! })}</li>
@@ -140,12 +140,12 @@ export const Sidebar: React.FC = () => {
       </div>
 
       {/* User Area */}
-      <div className="p-4 border-t border-background-200 shrink-0">
-        <Link to="/dashboard/profile" className={`flex items-center p-3 rounded-lg hover:bg-background-100 transition-all duration-200 ${!isOpen ? 'justify-center' : ''}`}>
+      <div className="p-4 border-t border-gray-200 shrink-0">
+        <Link to="/dashboard/profile" className={`flex items-center p-2 rounded-lg hover:bg-gray-100 ${!isOpen ? 'justify-center' : ''}`}>
           <img src={`https://ui-avatars.com/api/?name=${user?.name}&background=random`} alt="User avatar" className="w-8 h-8 rounded-full" />
-          {isOpen && <span className="ml-3 font-semibold text-background-700 truncate">{user?.name}</span>}
+          {isOpen && <span className="ml-3 font-semibold text-gray-700 truncate">{user?.name}</span>}
         </Link>
-        <button onClick={handleLogout} className={`w-full flex items-center p-3 mt-2 rounded-lg text-red-600 hover:bg-red-50 transition-all duration-200 ${!isOpen ? 'justify-center' : ''}`}>
+        <button onClick={handleLogout} className={`w-full flex items-center p-2 mt-2 rounded-lg text-red-600 hover:bg-red-50 ${!isOpen ? 'justify-center' : ''}`}>
           <LogOut className="w-5 h-5" />
           {isOpen && <span className="ml-3 font-semibold">Se déconnecter</span>}
         </button>

@@ -59,7 +59,7 @@ export const Header: React.FC = () => {
               className="flex items-center gap-2 text-white font-bold text-xl"
             >
               <GraduationCap size={28} />
-              <span>ENAplus<sup className="text-sm">+</sup></span>
+              <span>PrepaENA</span>
             </Link>
           </div>
 
