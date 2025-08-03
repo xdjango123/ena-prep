@@ -34,7 +34,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             subscriptionStatus: 'integral', // Change this to test different tiers: 'free', 'premium', 'integral'
             createdAt: new Date(),
             examLevel: 'CM',
-            hasCompletedEvaluation: false,
+            hasCompletedEvaluation: true, // Always true since we removed evaluation requirement
             // selectedCategory: 'CM', // Uncomment for premium tier testing
           });
         }
@@ -62,7 +62,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         subscriptionStatus: 'integral', // Change to 'free', 'premium', or 'integral' for testing
         createdAt: new Date(),
         examLevel: 'CM',
-        hasCompletedEvaluation: false,
+        hasCompletedEvaluation: true, // Always true since we removed evaluation requirement
         // selectedCategory: 'CM', // Add this for premium tier testing
       };
       
@@ -88,7 +88,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         subscriptionStatus: 'free', // New users start with free tier
         createdAt: new Date(),
         examLevel,
-        hasCompletedEvaluation: false,
+        hasCompletedEvaluation: true, // Always true since we removed evaluation requirement
       };
       
       setUser(newUser);

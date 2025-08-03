@@ -5,7 +5,6 @@ import { QuizSeries } from '../components/quiz/QuizSeries';
 import { QuizReview } from '../components/quiz/QuizReview';
 import { QuizCards } from '../components/quiz/QuizCards';
 import { QuizResult } from '../components/quiz/QuizResult';
-import { ChallengeQuiz } from '../components/quiz/ChallengeQuiz';
 import { getQuestionsBySubject, Question } from '../data/quizQuestions';
 import {
     TestDetails,
@@ -48,8 +47,8 @@ const lastTest = { name: 'Practice Test 2', completed: 15, total: 20 };
 const recommendation = "You've mastered Vocabulary! Next, focus on Reading Comprehension.";
 
 export default function EnglishSubjectPage() {
-  const [view, setView] = useState<'main' | 'summary' | 'quiz' | 'review' | 'learn' | 'challenge' | 'results'>('main');
-  const [activeSection, setActiveSection] = useState<'practice' | 'quiz' | 'challenge' | null>('quiz');
+  const [view, setView] = useState<'main' | 'summary' | 'quiz' | 'review' | 'learn' | 'results'>('main');
+  const [activeSection, setActiveSection] = useState<'practice' | 'quiz' | null>('quiz');
   const [selectedTest, setSelectedTest] = useState<TestDetails | null>(null);
   const [lastAnswers, setLastAnswers] = useState<Map<number, string | number>>(new Map());
   const [activeTopic, setActiveTopic] = useState('All');
@@ -63,7 +62,7 @@ export default function EnglishSubjectPage() {
 
   const pausedTestState = getQuizState('Anglais');
 
-  const handleSectionToggle = (section: 'practice' | 'quiz' | 'challenge') => {
+  const handleSectionToggle = (section: 'practice' | 'quiz') => {
     setActiveSection(prev => (prev === section ? null : section));
   };
 
@@ -87,10 +86,6 @@ export default function EnglishSubjectPage() {
 
   if (view === 'learn') {
     return <QuizCards subject="English" subjectColor="green" onExit={() => setView('main')} />
-  }
-
-  if (view === 'challenge') {
-    return <ChallengeQuiz subject="English" onExit={() => setView('main')} />
   }
 
   if (view === 'quiz' && selectedTest) {
@@ -184,10 +179,9 @@ export default function EnglishSubjectPage() {
         gradientTo="to-green-600"
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <ActionButton icon={Trophy} title="Quiz" color="green" active={activeSection === 'quiz'} onClick={() => handleSectionToggle('quiz')} />
         <ActionButton icon={Target} title="Practice Test" color="green" active={activeSection === 'practice'} onClick={() => handleSectionToggle('practice')} />
-        <ActionButton icon={Zap} title="Challenge" color="green" active={activeSection === 'challenge'} onClick={() => handleSectionToggle('challenge')} />
       </div>
 
       {activeSection === 'practice' && (
@@ -232,23 +226,6 @@ export default function EnglishSubjectPage() {
                     Commencer l'apprentissage
                 </button>
             </div>
-      )}
-
-      {activeSection === 'challenge' && (
-        <div className="bg-white rounded-xl shadow-sm border p-8 mt-4 text-center">
-            <Zap className="w-16 h-16 text-green-500 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold mb-3">Défi Hebdomadaire</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto mb-6">
-                Testez vos connaissances avec notre défi hebdomadaire ! Répondez à 10 questions en 5 minutes et voyez comment vous vous situez.
-            </p>
-            <button 
-                onClick={() => setView('challenge')}
-                className="inline-flex items-center gap-2 px-8 py-3 rounded-lg bg-green-500 text-white font-semibold hover:bg-green-600 transition-colors"
-            >
-                <Play className="w-5 h-5" />
-                Commencer le Défi
-            </button>
-        </div>
       )}
     </div>
   );

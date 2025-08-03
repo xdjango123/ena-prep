@@ -42,22 +42,5 @@ export const pricingTiers: PricingTierType[] = [
       'Support par email'
     ],
     buttonText: 'S\'abonner CS'
-  },
-  {
-    id: 'all',
-    name: 'Accès Total',
-    price: '40 000 FCFA',
-    description: 'Accès à tous les concours (CM, CMS, CS)',
-    popular: true,
-    features: [
-      'Accès illimité à toutes les questions',
-      'Examens blancs pour tous les niveaux',
-      'Corrections détaillées',
-      'Suivi de progression avancé',
-      'Séminaires mensuels en ligne',
-      'Accès prioritaire aux nouveautés',
-      'Support prioritaire 7j/7'
-    ],
-    buttonText: 'Accès complet'
   }
 ];

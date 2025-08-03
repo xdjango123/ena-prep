@@ -3,7 +3,6 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Menu, 
   LayoutDashboard, 
-  TestTube2, 
   BookCopy, 
   Globe, 
   Languages, 
@@ -51,7 +50,6 @@ export const Sidebar: React.FC = () => {
 
   const navLinks = [
     { id: 'dashboard', label: 'Tableau de bord', icon: <LayoutDashboard className="w-5 h-5" />, path: '/dashboard' },
-    { id: 'evaluation', label: 'Test d\'évaluation', icon: <TestTube2 className="w-5 h-5" />, path: '/dashboard/evaluation-test' },
   ];
   
   const matiereLinks = [

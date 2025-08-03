@@ -17,7 +17,6 @@ import ReviewsPage from './pages/ReviewsPage';
 import PricingPage from './pages/PricingPage';
 import FAQPage from './pages/FAQPage';
 import PracticePage from './pages/PracticePage';
-import EvaluationTestPage from './pages/EvaluationTestPage';
 import ForumPage from './pages/ForumPage';
 import TutorPage from './pages/TutorPage';
 import ProfilePage from './pages/ProfilePage';
@@ -53,7 +52,6 @@ function App() {
               <Route path="/dashboard" element={<DashboardLayout><Outlet /></DashboardLayout>}>
                 <Route index element={<DashboardPage />} />
                 <Route path="practice" element={<PracticePage />} />
-                <Route path="evaluation-test" element={<EvaluationTestPage />} />
                 
                 {/* Subject Pages */}
                 <Route path="subject/general-knowledge" element={<GeneralKnowledgePage />} />

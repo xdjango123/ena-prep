@@ -125,7 +125,7 @@ export default function DashboardPage() {
         <div className="bg-gradient-to-r from-primary-600 to-primary-700 text-white p-8 rounded-2xl shadow-lg mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold mb-2">
+              <h1 className="text-3xl font-bold mb-2 text-white">
                 Bonjour, {user?.name}! 👋
               </h1>
               <p className="text-primary-100 text-lg">

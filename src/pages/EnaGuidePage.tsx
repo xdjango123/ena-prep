@@ -385,8 +385,8 @@ const EnaGuidePage: React.FC = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button to="/dashboard/evaluation-test" variant="secondary" size="lg">
-              Faire le test d'évaluation
+            <Button to="/dashboard/practice" variant="secondary" size="lg">
+              Commencer la pratique
             </Button>
             <Button to="/tarification" variant="outline" size="lg" className="border-white text-white hover:bg-white hover:text-blue-600">
               Voir nos formules
