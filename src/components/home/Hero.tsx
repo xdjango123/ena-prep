@@ -71,6 +71,21 @@ export const Hero: React.FC = () => {
 
   return (
     <section className="pt-10 pb-10 bg-gradient-to-br from-neutral-100 via-white to-primary-50 overflow-visible relative">
+      {/* Background Image */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div 
+          className="absolute inset-0 opacity-[0.15] bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: `url('https://images.pexels.com/photos/3183150/pexels-photo-3183150.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&dpr=2')`,
+            backgroundPosition: 'center right',
+            backgroundSize: 'cover'
+          }}
+        ></div>
+        
+        {/* Overlay to ensure text readability */}
+        <div className="absolute inset-0 bg-gradient-to-r from-white/85 via-white/60 to-transparent"></div>
+      </div>
+
       {/* Enhanced Background decorative elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {/* Floating icons with more variety */}
@@ -203,37 +218,6 @@ export const Hero: React.FC = () => {
             animate="visible"
             className="max-w-5xl mx-auto"
           >
-            {/* Enhanced title with icons */}
-            <motion.div 
-              variants={staggerItem}
-              className="flex items-center justify-center gap-4 mb-6"
-            >
-              <motion.div
-                initial={{ scale: 0, rotate: -180 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="p-3 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full shadow-lg"
-              >
-                <GraduationCap className="w-8 h-8 text-white" />
-              </motion.div>
-              <motion.div
-                initial={{ scale: 0, rotate: 180 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-                className="p-3 bg-gradient-to-br from-accent-500 to-accent-600 rounded-full shadow-lg"
-              >
-                <BookOpen className="w-8 h-8 text-white" />
-              </motion.div>
-              <motion.div
-                initial={{ scale: 0, rotate: -180 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{ duration: 0.6, delay: 0.6 }}
-                className="p-3 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-full shadow-lg"
-              >
-                <Zap className="w-8 h-8 text-white" />
-              </motion.div>
-            </motion.div>
-
             <motion.h1 
               variants={staggerItem}
               className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-neutral-950 leading-tight mb-6"
