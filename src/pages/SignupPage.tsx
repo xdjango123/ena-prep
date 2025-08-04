@@ -1,13 +1,12 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Label } from '../components/ui/Label';
-import { useAuth } from '../contexts/AuthContext';
-import { ExamLevel } from '../types/auth';
+import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
 import { CheckCircle, GraduationCap, BookOpen, Target, Award } from 'lucide-react';
 
 const signupSchema = z.object({
@@ -25,16 +24,65 @@ const signupSchema = z.object({
 type SignupFormValues = z.infer<typeof signupSchema>;
 
 const SignupPage: React.FC = () => {
-  const { signup } = useAuth();
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<SignupFormValues>({
+  const { signUp } = useSupabaseAuth();
+  const navigate = useNavigate();
+  const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const { register, handleSubmit, formState: { errors } } = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema)
   });
 
   const onSubmit = async (data: SignupFormValues) => {
+    setIsSubmitting(true);
+    setError(null);
+
     try {
-      await signup(data.email, data.password, data.firstName, data.lastName, data.examLevel as ExamLevel);
+      console.log('Form submitted with data:', { ...data, password: '[HIDDEN]' });
+      
+      // Map exam level to plan name
+      const planName = data.examLevel === 'CM' ? 'Prépa CM' : 
+                      data.examLevel === 'CMS' ? 'Prépa CMS' : 'Prépa CS';
+
+      console.log('Mapped plan name:', planName);
+
+      const { error } = await signUp(
+        data.email, 
+        data.password, 
+        data.firstName, 
+        data.lastName, 
+        data.examLevel,
+        planName
+      );
+
+      if (error) {
+        console.error('Signup returned error:', error);
+        let errorMessage = 'Une erreur est survenue lors de la création du compte';
+        
+        if (error.message) {
+          errorMessage = error.message;
+        } else if (error.details) {
+          errorMessage = `Erreur: ${error.details}`;
+        } else if (error.hint) {
+          errorMessage = `Erreur: ${error.hint}`;
+        }
+        
+        setError(errorMessage);
+                      } else {
+                  console.log('Signup successful');
+                  // Show success message instead of redirecting
+                  setError(null);
+                  setSuccessMessage('Compte créé avec succès! Veuillez vérifier votre email pour confirmer votre compte avant de vous connecter.');
+                  setTimeout(() => {
+                    navigate('/login');
+                  }, 3000);
+                }
     } catch (error) {
-      console.error(error);
+      console.error('Unexpected signup error:', error);
+      setError('Une erreur inattendue est survenue');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -109,6 +157,19 @@ const SignupPage: React.FC = () => {
               Ou <Link to="/login" className="font-medium text-primary-600 hover:text-primary-500">connectez-vous</Link> si vous avez déjà un compte
             </p>
           </div>
+
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-md p-4">
+              <p className="text-red-600 text-sm">{error}</p>
+            </div>
+          )}
+
+          {successMessage && (
+            <div className="bg-green-50 border border-green-200 rounded-md p-4">
+              <p className="text-green-600 text-sm">{successMessage}</p>
+            </div>
+          )}
+
           <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
             <div className="grid grid-cols-2 gap-4">
               <div>

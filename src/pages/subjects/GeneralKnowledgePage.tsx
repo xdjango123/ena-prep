@@ -6,6 +6,8 @@ import { QuizReview } from '../../components/quiz/QuizReview';
 import { QuizCards } from '../../components/quiz/QuizCards';
 import { QuizResult } from '../../components/quiz/QuizResult';
 import { getQuestionsBySubject, Question } from '../../data/quizQuestions';
+import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
+import { TestResultService } from '../../services/testResultService';
 import {
 	TestDetails,
 	ActionButton,
@@ -28,25 +30,26 @@ const clearQuizState = (subject: string) => {
 }
 
 const practiceTests = [
-    { id: 'p1', name: 'Practice Test 1', questions: 20, time: 25, topic: 'History' },
-    { id: 'p2', name: 'Practice Test 2', questions: 20, time: 25, topic: 'Geography' },
-    { id: 'p3', name: 'Practice Test 3', questions: 25, time: 30, topic: 'Current Events' },
-    { id: 'p4', name: 'Practice Test 4', questions: 25, time: 30, topic: 'History' },
-    { id: 'p5', name: 'Practice Test 5', questions: 15, time: 20, topic: 'Geography' },
+    { id: 'p1', name: 'Practice Test 1', questions: 10, time: 15, topic: 'History' },
+    { id: 'p2', name: 'Practice Test 2', questions: 10, time: 15, topic: 'Geography' },
+    { id: 'p3', name: 'Practice Test 3', questions: 10, time: 15, topic: 'Current Events' },
+    { id: 'p4', name: 'Practice Test 4', questions: 10, time: 15, topic: 'History' },
+    { id: 'p5', name: 'Practice Test 5', questions: 10, time: 15, topic: 'Geography' },
 ];
 
 const topics = ['All', 'History', 'Geography', 'Current Events'];
 
 const quizzes = [
-    { id: 'q1', name: 'Quiz 1', questions: 50, time: 60 },
-    { id: 'q2', name: 'Quiz 2', questions: 50, time: 60 },
-    { id: 'q3', name: 'Quiz 3', questions: 50, time: 60 },
+    { id: 'q1', name: 'Quiz 1', questions: 10, time: 20 },
+    { id: 'q2', name: 'Quiz 2', questions: 10, time: 20 },
+    { id: 'q3', name: 'Quiz 3', questions: 10, time: 20 },
 ];
 
 const lastTest = { name: 'Practice Test 2', completed: 10, total: 20 };
 const recommendation = "You're doing great in History! Try focusing on Current Events next.";
 
 export const GeneralKnowledgePage: React.FC = () => {
+	const { profile, user } = useSupabaseAuth();
 	const [view, setView] = useState<'main' | 'summary' | 'quiz' | 'review' | 'learn' | 'results'>('main');
 	const [activeSection, setActiveSection] = useState<'practice' | 'quiz' | null>('quiz');
 	const [selectedTest, setSelectedTest] = useState<TestDetails | null>(null);
@@ -54,6 +57,15 @@ export const GeneralKnowledgePage: React.FC = () => {
     const [activeTopic, setActiveTopic] = useState('All');
 	const [testResults, setTestResults] = useState<Record<string, { score: number; timeSpent: number }>>({});
 	const [lastResult, setLastResult] = useState<{ score: number, correctAnswers: number, totalQuestions: number, timeSpent: number } | null>(null);
+	const [questions, setQuestions] = useState<Question[]>([]);
+	const [isLoadingQuestions, setIsLoadingQuestions] = useState(false);
+	
+	// Statistics state
+	const [statistics, setStatistics] = useState({
+		score: 0,
+		testsTaken: 0,
+		timeSpent: 0
+	});
 
 	const pausedTestState = getQuizState('Culture Générale');
 
@@ -61,6 +73,53 @@ export const GeneralKnowledgePage: React.FC = () => {
 		const loadedResults = JSON.parse(localStorage.getItem('culture_generale_test_results') || '{}');
 		setTestResults(loadedResults);
 	}, []);
+
+	// Fetch statistics from database
+	useEffect(() => {
+		const fetchStatistics = async () => {
+			if (!user?.id) return;
+			
+			try {
+				// Get average score for CG category
+				const score = await TestResultService.getAverageScore(user.id, 'CG');
+				
+				// Get test count for CG category
+				const testResults = await TestResultService.getTestResultsByCategory(user.id, 'CG');
+				const testsTaken = testResults.length;
+				
+				// Calculate time spent (assuming 15 minutes per test for now)
+				const timeSpent = Math.round(testsTaken * 15 / 60); // Convert to hours
+				
+				setStatistics({
+					score,
+					testsTaken,
+					timeSpent
+				});
+			} catch (error) {
+				console.error('Error fetching statistics:', error);
+			}
+		};
+
+		fetchStatistics();
+	}, [user?.id]);
+
+	// Load questions from database
+	useEffect(() => {
+		const loadQuestions = async () => {
+			setIsLoadingQuestions(true);
+			try {
+				const examType = profile?.exam_type as 'CM' | 'CMS' | 'CS' | undefined;
+				const loadedQuestions = await getQuestionsBySubject('culture-generale', examType);
+				setQuestions(loadedQuestions);
+			} catch (error) {
+				console.error('Error loading questions:', error);
+			} finally {
+				setIsLoadingQuestions(false);
+			}
+		};
+
+		loadQuestions();
+	}, [profile?.exam_type]);
 
 	const handleSectionToggle = (section: 'practice' | 'quiz') => {
 		setActiveSection(prev => (prev === section ? null : section));
@@ -74,7 +133,9 @@ export const GeneralKnowledgePage: React.FC = () => {
 		setView('summary');
 	};
 
-	const startQuiz = () => setView('quiz');
+	const startQuiz = () => {
+		setView('quiz');
+	};
 
     const filteredPracticeTests = activeTopic === 'All' 
     ? practiceTests 
@@ -84,33 +145,27 @@ export const GeneralKnowledgePage: React.FC = () => {
 		return <QuizCards subject="Culture Générale" subjectColor="blue" onExit={() => setView('main')} />
 	}
 
-	if (view === 'quiz' && selectedTest) {
+	if (view === 'quiz') {
+		if (!selectedTest) {
+			return (
+				<div className="flex items-center justify-center min-h-screen">
+					<div className="text-center">
+						<div className="text-red-600 text-xl mb-4">Erreur: Aucun test sélectionné</div>
+						<button 
+							onClick={() => setView('main')} 
+							className="px-6 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600"
+						>
+							Retour au menu principal
+						</button>
+					</div>
+				</div>
+			);
+		}
 		return (
-			<QuizSeries
+			<QuizCards
 				subject="Culture Générale"
 				subjectColor="blue"
-				questions={getQuestionsBySubject('culture-generale')}
-				duration={selectedTest.time * 60}
 				onExit={() => { setView('main'); setActiveSection(null); }}
-				onFinish={(answers, timeSpent) => {
-					const correctAnswers = getQuestionsBySubject('culture-generale').reduce((count, q) => {
-						return answers.get(q.id) === q.correctAnswer ? count + 1 : count;
-					}, 0);
-					const score = Math.round((correctAnswers / getQuestionsBySubject('culture-generale').length) * 100);
-
-					const newResults = { ...testResults, [selectedTest.id]: { score, timeSpent } };
-					localStorage.setItem('culture_generale_test_results', JSON.stringify(newResults));
-					setTestResults(newResults);
-
-					setLastResult({
-						score,
-						correctAnswers,
-						totalQuestions: getQuestionsBySubject('culture-generale').length,
-						timeSpent
-					});
-					setLastAnswers(answers);
-					setView('results');
-				}}
 			/>
 		);
 	}
@@ -135,7 +190,7 @@ export const GeneralKnowledgePage: React.FC = () => {
 	if (view === 'review') {
 		return (
 			<QuizReview 
-				questions={getQuestionsBySubject('culture-generale')} 
+				questions={questions} 
 				userAnswers={lastAnswers}
 				onBack={() => setView('main')}
 			/>
@@ -168,9 +223,9 @@ export const GeneralKnowledgePage: React.FC = () => {
 			<SubjectHeader 
 				subjectName="Culture Générale"
 				icon={Globe}
-				score={78}
-				testsTaken={8}
-				timeSpent={12}
+				score={statistics.score}
+				testsTaken={statistics.testsTaken}
+				timeSpent={statistics.timeSpent}
 				gradientFrom="from-blue-500"
 				gradientTo="to-blue-600"
 			/>

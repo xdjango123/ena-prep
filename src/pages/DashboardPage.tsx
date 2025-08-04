@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
+import { TestResultService } from '../services/testResultService';
 import { 
   BookOpen, 
   BrainCircuit, 
@@ -57,66 +58,98 @@ const subjects: Subject[] = [
 ];
 
 export default function DashboardPage() {
-  const { user } = useAuth();
+  const { user, profile, subscription } = useSupabaseAuth();
   const navigate = useNavigate();
-  const [overallProgress, setOverallProgress] = useState(49); // Mock progress
+  const [overallProgress, setOverallProgress] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (user) {
+      fetchUserProgress();
+    }
+  }, [user]);
+
+  const fetchUserProgress = async () => {
+    if (!user) return;
+
+    try {
+      const averageScore = await TestResultService.getAverageScore(user.id);
+      setOverallProgress(averageScore);
+    } catch (error) {
+      console.error('Error fetching user progress:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const getExamLevelLabel = (level: string) => {
     switch (level) {
       case 'CM': return 'Cour Moyen';
       case 'CMS': return 'Cour Moyen Supérieur';
       case 'CS': return 'Cour Supérieur';
+      case 'ALL': return 'Tous niveaux';
       default: return level;
     }
   };
 
-
-  const getSubscriptionLabel = (status: string) => {
-    switch (status) {
-      case 'integral': return 'Intégral';
-      case 'premium': return 'Premium';
-      case 'free': return 'Gratuit';
-      default: return status;
+  const getSubscriptionLabel = (planName: string) => {
+    switch (planName) {
+      case 'Prépa CM': return 'Prépa CM';
+      case 'Prépa CMS': return 'Prépa CMS';
+      case 'Prépa CS': return 'Prépa CS';
+      default: return planName;
     }
   };
 
-  const getSubscriptionColor = (status: string) => {
-    switch (status) {
-      case 'integral': return 'bg-primary-100 text-primary-700 border-primary-200';
-      case 'premium': return 'bg-accent-100 text-accent-700 border-accent-200';
-      case 'free': return 'bg-background-100 text-background-700 border-background-200';
+  const getSubscriptionColor = (planName: string) => {
+    switch (planName) {
+      case 'Prépa CM': return 'bg-primary-100 text-primary-700 border-primary-200';
+      case 'Prépa CMS': return 'bg-accent-100 text-accent-700 border-accent-200';
+      case 'Prépa CS': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
       default: return 'bg-background-100 text-background-700 border-background-200';
     }
   };
 
-  const getSubscriptionIcon = (status: string) => {
-    switch (status) {
-      case 'integral': return <Crown size={16} />;
-      case 'premium': return <Star size={16} />;
-      case 'free': return <Award size={16} />;
+  const getSubscriptionIcon = (planName: string) => {
+    switch (planName) {
+      case 'Prépa CM': return <Crown size={16} />;
+      case 'Prépa CMS': return <Star size={16} />;
       default: return <Award size={16} />;
     }
   };
 
-  // Get available categories based on subscription tier
+  // Get available categories based on subscription
   const getAvailableCategories = () => {
-    if (!user) return [];
+    if (!subscription) return [];
     
-    switch (user.subscriptionStatus) {
-      case 'free':
-        return []; // No categories for free tier
-      case 'premium':
-        // Premium users can only access their selected category
-        return user.selectedCategory ? [user.selectedCategory] : [];
-      case 'integral':
-        // Integral users have access to all categories
-        return ['CM', 'CMS', 'CS'];
+    switch (subscription.plan_name) {
+      case 'Prépa CM':
+        return ['CM'];
+      case 'Prépa CMS':
+        return ['CMS'];
+      case 'Prépa CS':
+        return ['CS'];
       default:
         return [];
     }
   };
 
+  // Check if user has active subscription
+  const hasActiveSubscription = subscription && subscription.is_active;
+
   const availableCategories = getAvailableCategories();
+  const userName = profile ? profile['First Name'] : user?.email || 'Utilisateur';
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Chargement...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -126,7 +159,7 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold mb-2 text-white">
-                Bonjour, {user?.name}! 👋
+                Bonjour, {userName}! 👋
               </h1>
               <p className="text-primary-100 text-lg">
                 Qu'allons-nous réviser aujourd'hui ?
@@ -135,23 +168,10 @@ export default function DashboardPage() {
             
             {/* User Profile Labels - Better positioned */}
             <div className="flex flex-col items-end gap-3">
-              {user?.examLevel && availableCategories.length > 0 && (
-                <div className="flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm text-white rounded-full text-sm font-medium border border-white/30">
-                  <GraduationCap size={16} />
-                  <span>
-                    {user.subscriptionStatus === 'premium' && user.selectedCategory 
-                      ? getExamLevelLabel(user.selectedCategory)
-                      : user.subscriptionStatus === 'integral'
-                        ? 'Tous niveaux'
-                        : getExamLevelLabel(user.examLevel)
-                    }
-                  </span>
-                </div>
-              )}
-              {user?.subscriptionStatus && (
-                <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border ${getSubscriptionColor(user.subscriptionStatus)}`}>
-                  {getSubscriptionIcon(user.subscriptionStatus)}
-                  <span>{getSubscriptionLabel(user.subscriptionStatus)}</span>
+              {hasActiveSubscription && subscription && subscription.plan_name !== 'Prépa CS' && (
+                <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border ${getSubscriptionColor(subscription.plan_name)}`}>
+                  {getSubscriptionIcon(subscription.plan_name)}
+                  <span>{getSubscriptionLabel(subscription.plan_name)}</span>
                 </div>
               )}
             </div>
@@ -186,8 +206,8 @@ export default function DashboardPage() {
           </div>
           
           {/* Subjects Section - Conditional rendering based on subscription */}
-          {user?.subscriptionStatus === 'free' ? (
-            // Free tier - show upgrade message
+          {!hasActiveSubscription ? (
+            // No active subscription - show upgrade message
             <div className="bg-white p-8 rounded-2xl shadow-lg border border-background-200">
               <div className="text-center">
                 <div className="p-4 bg-background-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
@@ -207,7 +227,7 @@ export default function DashboardPage() {
               </div>
             </div>
           ) : (
-            // Premium/Integral tiers - show subjects
+            // Has subscription - show subjects
           <div className="bg-white p-8 rounded-2xl shadow-lg border border-background-200">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold text-background-800">Matières</h2>
@@ -217,7 +237,7 @@ export default function DashboardPage() {
                   <div className="relative group inline-block ml-1">
                     <Info className="w-4 h-4 text-background-400 cursor-pointer group-hover:text-accent-500 transition-colors" />
                     <div className="absolute left-1/2 -translate-x-1/2 mt-2 w-64 bg-white text-background-700 text-xs rounded-lg shadow-lg p-3 z-10 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200">
-                      Votre progression est basée sur votre score initial au test d'évaluation et la moyenne de vos scores aux tests de pratique dans chaque matière.
+                      Votre progression est basée sur la moyenne de vos scores aux tests de pratique dans chaque matière.
                     </div>
                   </div>
                 </div>
@@ -246,10 +266,7 @@ export default function DashboardPage() {
               ) : (
                 <div className="text-center py-8">
                   <p className="text-background-500 mb-4">
-                    {user?.subscriptionStatus === 'premium' 
-                      ? 'Veuillez sélectionner votre catégorie d\'examen dans votre profil.'
-                      : 'Aucune matière disponible pour votre abonnement actuel.'
-                    }
+                    Aucune matière disponible pour votre abonnement actuel.
                   </p>
                   <Link 
                     to="/dashboard/profile"

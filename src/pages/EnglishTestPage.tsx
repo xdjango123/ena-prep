@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
 import { Clock, ChevronRight, ChevronLeft, Check, X, AlertCircle } from 'lucide-react';
 import { ENGLISH_QUESTIONS, EnglishQuestion, getMixedTest } from '../data/englishQuestions';
 
@@ -18,7 +18,7 @@ interface TestConfig {
 }
 
 export default function EnglishTestPage() {
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
   const navigate = useNavigate();
   
   const [testConfig, setTestConfig] = useState<TestConfig | null>(null);

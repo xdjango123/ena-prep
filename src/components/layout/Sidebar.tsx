@@ -17,7 +17,7 @@ import {
   GraduationCap
 } from 'lucide-react';
 import { useSidebar } from '../../contexts/SidebarContext';
-import { useAuth } from '../../contexts/AuthContext';
+import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
 
 interface NavItem {
   id: string;
@@ -29,13 +29,13 @@ interface NavItem {
 
 export const Sidebar: React.FC = () => {
   const { isOpen, toggle } = useSidebar();
-  const { user, logout } = useAuth();
+  const { user, profile, signOut } = useSupabaseAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [isMatiereOpen, setMatiereOpen] = useState(true);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await signOut();
     navigate('/');
   };
 
@@ -81,6 +81,8 @@ export const Sidebar: React.FC = () => {
       </Link>
     );
   }
+
+  const userName = profile ? `${profile['First Name']} ${profile['Last Name']}` : user?.email || 'Utilisateur';
 
   return (
     <div className={`h-screen fixed top-0 left-0 bg-white border-r border-gray-200 flex flex-col transition-all duration-300 z-20 ${isOpen ? 'w-64' : 'w-20'}`}>
@@ -140,8 +142,8 @@ export const Sidebar: React.FC = () => {
       {/* User Area */}
       <div className="p-4 border-t border-gray-200 shrink-0">
         <Link to="/dashboard/profile" className={`flex items-center p-2 rounded-lg hover:bg-gray-100 ${!isOpen ? 'justify-center' : ''}`}>
-          <img src={`https://ui-avatars.com/api/?name=${user?.name}&background=random`} alt="User avatar" className="w-8 h-8 rounded-full" />
-          {isOpen && <span className="ml-3 font-semibold text-gray-700 truncate">{user?.name}</span>}
+          <img src={`https://ui-avatars.com/api/?name=${userName}&background=random`} alt="User avatar" className="w-8 h-8 rounded-full" />
+          {isOpen && <span className="ml-3 font-semibold text-gray-700 truncate">{userName}</span>}
         </Link>
         <button onClick={handleLogout} className={`w-full flex items-center p-2 mt-2 rounded-lg text-red-600 hover:bg-red-50 ${!isOpen ? 'justify-center' : ''}`}>
           <LogOut className="w-5 h-5" />

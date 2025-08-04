@@ -4,7 +4,7 @@ import { Clock, CheckCircle, AlertCircle } from 'lucide-react';
 import { evaluationQuestions } from '../../data/evaluationQuestions';
 import { EvaluationAnswer, EvaluationQuestion } from '../../types';
 import { EvaluationResult } from '../../types/auth';
-import { useAuth } from '../../contexts/AuthContext';
+import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
 import { Button } from '../ui/Button';
 
 interface EvaluationModalProps {
@@ -13,7 +13,7 @@ interface EvaluationModalProps {
 }
 
 export const EvaluationModal: React.FC<EvaluationModalProps> = ({ isOpen, onComplete }) => {
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<EvaluationAnswer[]>([]);
   const [timeRemaining, setTimeRemaining] = useState(600); // 10 minutes in seconds

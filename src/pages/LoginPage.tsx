@@ -6,7 +6,7 @@ import * as z from 'zod';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Label } from '../components/ui/Label';
-import { useAuth } from '../contexts/AuthContext';
+import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
 import { CheckCircle, Loader, GraduationCap, BookOpen, Target, Award } from 'lucide-react';
 
 const loginSchema = z.object({
@@ -17,26 +17,38 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 const LoginPage: React.FC = () => {
-  const { login, isAuthenticated } = useAuth();
+  const { signIn, user, isLoading } = useSupabaseAuth();
   const navigate = useNavigate();
   const [error, setError] = useState('');
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginFormValues>({
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema)
   });
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (user && !isLoading) {
       navigate('/dashboard');
     }
-  }, [isAuthenticated, navigate]);
+  }, [user, isLoading, navigate]);
 
   const onSubmit = async (data: LoginFormValues) => {
+    setIsSubmitting(true);
     setError('');
+    
     try {
-      await login(data.email, data.password);
-      navigate('/dashboard');
+      const { error } = await signIn(data.email, data.password);
+      
+      if (error) {
+        setError(error.message || 'Email ou mot de passe incorrect.');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err) {
-      setError('Email ou mot de passe incorrect.');
+      setError('Une erreur inattendue est survenue.');
+      console.error('Login error:', err);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -105,8 +117,14 @@ const LoginPage: React.FC = () => {
               Ou <Link to="/signup" className="font-medium text-primary-600 hover:text-primary-500">créez un compte</Link> si vous n'en avez pas
             </p>
           </div>
+          
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-md p-4">
+              <p className="text-red-600 text-sm text-center">{error}</p>
+            </div>
+          )}
+          
           <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
-            {error && <p className="text-red-500 text-sm text-center">{error}</p>}
             <div>
               <Label htmlFor="email">Email</Label>
               <Input id="email" type="email" autoComplete="email" {...register('email')} error={errors.email?.message} />
@@ -128,7 +146,7 @@ const LoginPage: React.FC = () => {
             </div>
 
             <div>
-              <Button type="submit" fullWidth disabled={isSubmitting}>
+              <Button type="submit" fullWidth disabled={isSubmitting || isLoading}>
                 {isSubmitting ? (
                   <div className="flex items-center justify-center gap-2">
                     <Loader className="w-5 h-5 animate-spin" />

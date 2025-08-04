@@ -86,9 +86,43 @@ export const QuizSeries: React.FC<QuizSeriesProps> = ({
 
   const currentQuestion = questions[currentQuestionIndex];
   const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
-  const isCurrentQuestionAnswered = answeredQuestions.has(currentQuestion.id);
+  const isCurrentQuestionAnswered = currentQuestion ? answeredQuestions.has(currentQuestion.id) : false;
   const canGoNext = currentQuestionIndex < questions.length - 1 && isCurrentQuestionAnswered;
   const canGoPrevious = currentQuestionIndex > 0;
+
+  // Add early return if no questions
+  if (!questions || questions.length === 0) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="text-red-600 text-xl mb-4">Erreur: Aucune question disponible</div>
+          <button 
+            onClick={onExit} 
+            className="px-6 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600"
+          >
+            Retour au menu principal
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Add null check for currentQuestion
+  if (!currentQuestion) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="text-red-600 text-xl mb-4">Erreur: Question non trouvée</div>
+          <button 
+            onClick={onExit} 
+            className="px-6 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600"
+          >
+            Retour au menu principal
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // Timer
   useEffect(() => {
@@ -113,12 +147,14 @@ export const QuizSeries: React.FC<QuizSeriesProps> = ({
   };
 
   const handleAnswerSelect = (answer: string | number) => {
+    if (!currentQuestion) return;
     setSelectedAnswer(answer);
     setUserAnswers(prev => new Map(prev).set(currentQuestion.id, answer));
   };
 
   // Load previously selected answer when changing questions
   useEffect(() => {
+    if (!currentQuestion) return;
     const previousAnswer = userAnswers.get(currentQuestion.id);
     if (previousAnswer !== undefined) {
       setSelectedAnswer(previousAnswer);
@@ -126,15 +162,28 @@ export const QuizSeries: React.FC<QuizSeriesProps> = ({
       setSelectedAnswer(null);
     }
     setShowResult(false);
-  }, [currentQuestionIndex, userAnswers, currentQuestion.id]);
+  }, [currentQuestionIndex, userAnswers, currentQuestion?.id]);
 
   const handleSubmitAnswer = () => {
-    if (selectedAnswer === null) return;
+    if (!currentQuestion || selectedAnswer === null) return;
 
     // Store the user's answer
     setUserAnswers(prev => new Map([...prev, [currentQuestion.id, selectedAnswer]]));
 
-    const isCorrect = selectedAnswer === currentQuestion.correctAnswer;
+    // More robust comparison logic
+    const isCorrect = (() => {
+      if (currentQuestion.type === 'multiple-choice' && typeof currentQuestion.correctAnswer === 'number') {
+        // For multiple choice, compare the selected option with the correct option text
+        const correctOptionText = currentQuestion.options?.[currentQuestion.correctAnswer];
+        return selectedAnswer === correctOptionText;
+      } else if (currentQuestion.type === 'true-false') {
+        // For true/false, compare strings
+        return String(selectedAnswer).toLowerCase() === String(currentQuestion.correctAnswer).toLowerCase();
+      }
+      // Fallback comparison
+      return selectedAnswer === currentQuestion.correctAnswer;
+    })();
+
     if (isCorrect && !answeredQuestions.has(currentQuestion.id)) {
       setCorrectAnswers(prev => prev + 1);
     }
@@ -153,6 +202,7 @@ export const QuizSeries: React.FC<QuizSeriesProps> = ({
   };
 
   const handleSkipQuestion = () => {
+    if (!currentQuestion) return;
     setAnsweredQuestions(prev => new Set([...prev, currentQuestion.id]));
     handleNextQuestion();
   };
@@ -203,6 +253,42 @@ export const QuizSeries: React.FC<QuizSeriesProps> = ({
     }
   };
 
+  // Helper function to get color classes safely
+  const getColorClasses = (base: string, variant: string = '500', type: 'bg' | 'text' | 'border' = 'bg') => {
+    const colorMap: Record<string, Record<string, Record<string, string>>> = {
+      'blue': {
+        '100': { 'bg': 'bg-blue-100', 'text': 'text-blue-100', 'border': 'border-blue-100' },
+        '200': { 'bg': 'bg-blue-200', 'text': 'text-blue-200', 'border': 'border-blue-200' },
+        '500': { 'bg': 'bg-blue-500', 'text': 'text-blue-500', 'border': 'border-blue-500' },
+        '600': { 'bg': 'bg-blue-600', 'text': 'text-blue-600', 'border': 'border-blue-600' },
+        '800': { 'bg': 'bg-blue-800', 'text': 'text-blue-800', 'border': 'border-blue-800' }
+      },
+      'green': {
+        '100': { 'bg': 'bg-green-100', 'text': 'text-green-100', 'border': 'border-green-100' },
+        '200': { 'bg': 'bg-green-200', 'text': 'text-green-200', 'border': 'border-green-200' },
+        '500': { 'bg': 'bg-green-500', 'text': 'text-green-500', 'border': 'border-green-500' },
+        '600': { 'bg': 'bg-green-600', 'text': 'text-green-600', 'border': 'border-green-600' },
+        '800': { 'bg': 'bg-green-800', 'text': 'text-green-800', 'border': 'border-green-800' }
+      },
+      'yellow': {
+        '100': { 'bg': 'bg-yellow-100', 'text': 'text-yellow-100', 'border': 'border-yellow-100' },
+        '200': { 'bg': 'bg-yellow-200', 'text': 'text-yellow-200', 'border': 'border-yellow-200' },
+        '500': { 'bg': 'bg-yellow-500', 'text': 'text-yellow-500', 'border': 'border-yellow-500' },
+        '600': { 'bg': 'bg-yellow-600', 'text': 'text-yellow-600', 'border': 'border-yellow-600' },
+        '800': { 'bg': 'bg-yellow-800', 'text': 'text-yellow-800', 'border': 'border-yellow-800' }
+      },
+      'purple': {
+        '100': { 'bg': 'bg-purple-100', 'text': 'text-purple-100', 'border': 'border-purple-100' },
+        '200': { 'bg': 'bg-purple-200', 'text': 'text-purple-200', 'border': 'border-purple-200' },
+        '500': { 'bg': 'bg-purple-500', 'text': 'text-purple-500', 'border': 'border-purple-500' },
+        '600': { 'bg': 'bg-purple-600', 'text': 'text-purple-600', 'border': 'border-purple-600' },
+        '800': { 'bg': 'bg-purple-800', 'text': 'text-purple-800', 'border': 'border-purple-800' }
+      }
+    };
+    
+    return colorMap[subjectColor]?.[variant]?.[type] || colorMap['blue'][variant][type];
+  };
+
   if (isCompleted) {
     return null;
   }
@@ -214,8 +300,8 @@ export const QuizSeries: React.FC<QuizSeriesProps> = ({
         <div className="max-w-4xl mx-auto p-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
-                <div className={`p-2 bg-${subjectColor}-100 rounded-lg`}>
-                    <Brain className={`w-6 h-6 text-${subjectColor}-600`} />
+                <div className={`p-2 ${getColorClasses(subjectColor, '100', 'bg')} rounded-lg`}>
+                    <Brain className={`w-6 h-6 ${getColorClasses(subjectColor, '600', 'text')}`} />
                 </div>
                 <div>
                     <h1 className="text-xl font-bold text-gray-800">{subject}</h1>
@@ -239,7 +325,7 @@ export const QuizSeries: React.FC<QuizSeriesProps> = ({
       <div className="my-4 px-4">
         <div className="h-2 bg-gray-200 rounded-full">
           <div 
-            className={`h-2 rounded-full bg-${subjectColor}-500 transition-all duration-300`}
+            className={`h-2 rounded-full ${getColorClasses(subjectColor, '500', 'bg')} transition-all duration-300`}
             style={{ width: `${progress}%` }}
           ></div>
         </div>
@@ -253,9 +339,9 @@ export const QuizSeries: React.FC<QuizSeriesProps> = ({
               key={q.id}
               onClick={() => setCurrentQuestionIndex(index)}
               className={`w-8 h-8 rounded-full text-sm font-semibold transition-colors
-                ${index === currentQuestionIndex ? `bg-${subjectColor}-500 text-white` : ''}
-                ${userAnswers.has(q.id) ? `bg-${subjectColor}-200 text-${subjectColor}-800` : 'bg-gray-200 text-gray-700'}
-                ${index !== currentQuestionIndex && `hover:bg-${subjectColor}-100`}
+                ${index === currentQuestionIndex ? `${getColorClasses(subjectColor, '500', 'bg')} text-white` : ''}
+                ${userAnswers.has(q.id) ? `${getColorClasses(subjectColor, '200', 'bg')} ${getColorClasses(subjectColor, '800', 'text')}` : 'bg-gray-200 text-gray-700'}
+                ${index !== currentQuestionIndex && `hover:${getColorClasses(subjectColor, '100', 'bg')}`}
               `}
             >
               {index + 1}
@@ -276,7 +362,7 @@ export const QuizSeries: React.FC<QuizSeriesProps> = ({
                 <div
                   key={index}
                   onClick={() => handleAnswerSelect(index)}
-                  className={`p-4 border rounded-lg cursor-pointer transition-all duration-200 ${isSelected ? `bg-${subjectColor}-100 border-${subjectColor}-500 shadow-md` : 'bg-white border-gray-200 hover:border-gray-300'}`}
+                  className={`p-4 border rounded-lg cursor-pointer transition-all duration-200 ${isSelected ? `${getColorClasses(subjectColor, '100', 'bg')} ${getColorClasses(subjectColor, '500', 'border')} shadow-md` : 'bg-white border-gray-200 hover:border-gray-300'}`}
                 >
                   {option}
                 </div>
@@ -289,7 +375,7 @@ export const QuizSeries: React.FC<QuizSeriesProps> = ({
                 <div
                   key={option}
                   onClick={() => handleAnswerSelect(answerValue)}
-                  className={`p-4 border rounded-lg cursor-pointer transition-all duration-200 ${isSelected ? `bg-${subjectColor}-100 border-${subjectColor}-500 shadow-md` : 'bg-white border-gray-200 hover:border-gray-300'}`}
+                  className={`p-4 border rounded-lg cursor-pointer transition-all duration-200 ${isSelected ? `${getColorClasses(subjectColor, '100', 'bg')} ${getColorClasses(subjectColor, '500', 'border')} shadow-md` : 'bg-white border-gray-200 hover:border-gray-300'}`}
                 >
                   {option}
                 </div>

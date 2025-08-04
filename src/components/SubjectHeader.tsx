@@ -39,7 +39,7 @@ export const SubjectHeader: React.FC<SubjectHeaderProps> = ({
           <div className="text-white/90 flex items-center gap-1.5 group relative">
             Score
             <Info className="w-4 h-4 cursor-help" />
-            <div className="absolute bottom-full mb-2 w-64 p-3 bg-background-800 text-white text-sm rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+            <div className="absolute bottom-full mb-2 w-64 p-3 bg-gray-800 text-white text-sm rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
               Ceci est le score moyen de tous les tests pratiques que vous avez terminés dans cette matière.
             </div>
           </div>

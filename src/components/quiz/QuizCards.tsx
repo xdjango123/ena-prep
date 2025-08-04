@@ -1,6 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { getQuestionsBySubject, Question } from '../../data/quizQuestions';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
 
 interface QuizCardsProps {
     subject: string;
@@ -50,7 +51,29 @@ const QuestionCard: React.FC<{
         ? question.options?.[question.correctAnswer]
         : question.correctAnswer;
     
-    const isCorrect = userAnswer === correctAnswerValue;
+    // More robust comparison logic
+    const isCorrect = (() => {
+        if (question.type === 'multiple-choice' && typeof question.correctAnswer === 'number') {
+            // For multiple choice, compare the selected option with the correct option text
+            const correctOptionText = question.options?.[question.correctAnswer];
+            return userAnswer === correctOptionText;
+        } else if (question.type === 'true-false') {
+            // For true/false, compare strings
+            return String(userAnswer).toLowerCase() === String(question.correctAnswer).toLowerCase();
+        }
+        // Fallback comparison
+        return userAnswer === correctAnswerValue;
+    })();
+
+    // Ensure correctAnswerValue is always the correct option text for display
+    const displayCorrectAnswer = (() => {
+        if (question.type === 'multiple-choice' && typeof question.correctAnswer === 'number') {
+            return question.options?.[question.correctAnswer] || 'Unknown';
+        } else if (question.type === 'true-false') {
+            return String(question.correctAnswer);
+        }
+        return String(question.correctAnswer);
+    })();
     
     const renderOptions = () => {
         if (question.type === 'multiple-choice' && question.options) {
@@ -96,7 +119,7 @@ const QuestionCard: React.FC<{
                         <h3 className={`text-2xl font-bold ${isCorrect ? 'text-green-800' : 'text-red-800'}`}>
                             {isCorrect ? "Correct!" : "Incorrect"}
                         </h3>
-                        {!isCorrect && <p className="mt-2 text-gray-800 text-lg">The correct answer is: <strong>{String(correctAnswerValue)}</strong></p>}
+                        {!isCorrect && <p className="mt-2 text-gray-800 text-lg">The correct answer is: <strong>{String(displayCorrectAnswer)}</strong></p>}
                     </div>
                     {question.explanation && <p className="mt-6 text-gray-700 text-lg">{question.explanation}</p>}
                     <p className="mt-8 text-sm text-gray-500">Click anywhere on the card to flip back.</p>
@@ -108,10 +131,34 @@ const QuestionCard: React.FC<{
 
 
 export const QuizCards: React.FC<QuizCardsProps> = ({ subject, subjectColor, onExit }) => {
-    const questions = useMemo(() => getQuestionsBySubject(subject.toLowerCase().replace(' ', '-')).slice(0, 20), [subject]);
+    const [questions, setQuestions] = useState<Question[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [flippedCards, setFlippedCards] = useState<Set<number>>(new Set());
     const [userAnswers, setUserAnswers] = useState<Map<number, string | number>>(new Map());
+
+    const { profile } = useSupabaseAuth();
+
+    useEffect(() => {
+        const fetchQuestions = async () => {
+            setLoading(true);
+            try {
+                const subjectLower = subject.toLowerCase().replace(' ', '-');
+                const examType = profile?.exam_type as 'CM' | 'CMS' | 'CS' | undefined;
+                // Add cache-busting parameter to force fresh data
+                const questions = await getQuestionsBySubject(subjectLower, examType);
+                setQuestions(questions.slice(0, 10)); // Limit to 10 questions
+            } catch (err) {
+                setError('Failed to fetch questions');
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchQuestions();
+    }, [subject, profile?.exam_type]);
 
     const colorClasses = {
         blue: {
@@ -153,6 +200,18 @@ export const QuizCards: React.FC<QuizCardsProps> = ({ subject, subjectColor, onE
     
     const currentQuestion = questions[currentQuestionIndex];
 
+    if (loading) {
+        return <div className="text-center py-8">Loading...</div>;
+    }
+
+    if (error) {
+        return <div className="text-center py-8 text-red-500">{error}</div>;
+    }
+
+    if (!currentQuestion) {
+        return <div className="text-center py-8">No questions available for this subject.</div>;
+    }
+
     return (
         <div className="p-6 bg-gray-50 min-h-full flex flex-col">
             <div className="flex justify-between items-center mb-4">
@@ -170,7 +229,16 @@ export const QuizCards: React.FC<QuizCardsProps> = ({ subject, subjectColor, onE
                         className={`w-10 h-10 rounded-full text-sm font-semibold transition-all flex items-center justify-center
                             ${index === currentQuestionIndex ? colors.activePagination : ''}
                             ${userAnswers.has(q.id) 
-                                ? (userAnswers.get(q.id) === (q.type === 'multiple-choice' ? q.options?.[q.correctAnswer as number] : q.correctAnswer) ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800') 
+                                ? (() => {
+                                    // More robust comparison logic for pagination display
+                                    if (q.type === 'multiple-choice' && typeof q.correctAnswer === 'number') {
+                                        const correctOptionText = q.options?.[q.correctAnswer];
+                                        return userAnswers.get(q.id) === correctOptionText ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800';
+                                    } else if (q.type === 'true-false') {
+                                        return String(userAnswers.get(q.id)).toLowerCase() === String(q.correctAnswer).toLowerCase() ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800';
+                                    }
+                                    return userAnswers.get(q.id) === q.correctAnswer ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800';
+                                  })()
                                 : 'bg-white border border-gray-300 text-gray-600'}
                         `}
                     >

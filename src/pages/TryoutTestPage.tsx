@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
 import { Clock, ChevronRight, ChevronLeft, Check, TestTube, Play } from 'lucide-react';
 
 interface Question {
@@ -80,7 +80,7 @@ const TRYOUT_QUESTIONS: Question[] = [
 const TIMER_DURATION = 10 * 60; // 10 minutes in seconds
 
 export default function TryoutTestPage() {
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
   const navigate = useNavigate();
   
   const [currentQuestion, setCurrentQuestion] = useState(0);

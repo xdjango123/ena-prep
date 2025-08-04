@@ -4,7 +4,10 @@ import { Container } from '../components/ui/Container';
 import { Button } from '../components/ui/Button';
 import { Clock, CheckCircle, XCircle, Lock, Award, Star, Crown, ChevronDown } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useAuth } from '../contexts/AuthContext';
+import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
+import { VisitorService } from '../services/visitorService';
+import { TestResultService } from '../services/testResultService';
+import { QuestionService, QuestionWithPassage } from '../services/questionService';
 
 // Sample quiz data - in a real app this would come from an API
 const quizData = [
@@ -150,7 +153,7 @@ const examTypes = [
 type QuizState = 'intro' | 'inProgress' | 'results';
 
 const QuickQuizPage: React.FC = () => {
-  const { user } = useAuth();
+  const { user, logUserAttempt } = useSupabaseAuth();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   // Use state for examType so user can change it before starting
@@ -160,6 +163,16 @@ const QuickQuizPage: React.FC = () => {
   const [userAnswers, setUserAnswers] = useState<(number | null)[]>(new Array(15).fill(null));
   const [timeLeft, setTimeLeft] = useState(600); // 10 minutes in seconds
   const [quizStarted, setQuizStarted] = useState(false);
+  const [visitorId, setVisitorId] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Track visitor when component mounts
+    const trackVisitor = async () => {
+      const id = await VisitorService.trackVisitor();
+      setVisitorId(id);
+    };
+    trackVisitor();
+  }, []);
 
   useEffect(() => {
     if (quizStarted && timeLeft > 0 && quizState === 'inProgress') {
@@ -211,9 +224,34 @@ const QuickQuizPage: React.FC = () => {
     }
   };
 
-  const handleFinishQuiz = () => {
+  const handleFinishQuiz = async () => {
     setQuizState('results');
     setQuizStarted(false);
+
+    const score = calculateScore();
+
+    // Save quiz result and log attempt
+    if (user) {
+      // Save to test_results table for authenticated users
+      await TestResultService.saveTestResult(
+        user.id,
+        'Quick',
+        'CG', // Using CG as the main category for quick quiz
+        score.percentage
+      );
+
+      // Log user attempt
+      await logUserAttempt(
+        'Quick',
+        'CG',
+        undefined,
+        undefined,
+        score.percentage
+      );
+    } else if (visitorId) {
+      // Update visitor record for anonymous users
+      await VisitorService.updateQuizResult(visitorId, score.percentage);
+    }
   };
 
   const calculateScore = () => {

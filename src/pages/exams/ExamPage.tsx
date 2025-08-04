@@ -1,26 +1,40 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
 import { FileText, Play, ArrowLeft, Lock, Clock, Target, Shield, Award, Crown } from 'lucide-react';
 
 export const ExamPage: React.FC = () => {
     const navigate = useNavigate();
-    const { user } = useAuth();
-    const [selectedCategory, setSelectedCategory] = useState<'CM' | 'CMS' | 'CS'>('CM');
-
-    // Get available categories based on subscription tier
-    const getAvailableCategories = () => {
-        if (!user) return [];
+    const { user, subscription } = useSupabaseAuth();
+    // Set initial category based on user's subscription
+    const getInitialCategory = (): 'CM' | 'CMS' | 'CS' => {
+        if (!subscription) return 'CM';
         
-        switch (user.subscriptionStatus) {
-            case 'free':
-                return []; // No categories for free tier
-            case 'premium':
-                // Premium users can only access their selected category
-                return user.selectedCategory ? [user.selectedCategory] : [];
-            case 'integral':
-                // Integral users have access to all categories
-                return ['CM', 'CMS', 'CS'];
+        switch (subscription.plan_name) {
+            case 'Prépa CM':
+                return 'CM';
+            case 'Prépa CMS':
+                return 'CMS';
+            case 'Prépa CS':
+                return 'CS';
+            default:
+                return 'CM';
+        }
+    };
+
+    const [selectedCategory, setSelectedCategory] = useState<'CM' | 'CMS' | 'CS'>(getInitialCategory());
+
+    // Get available categories based on subscription
+    const getAvailableCategories = () => {
+        if (!subscription) return [];
+        
+        switch (subscription.plan_name) {
+            case 'Prépa CM':
+                return ['CM'];
+            case 'Prépa CMS':
+                return ['CMS'];
+            case 'Prépa CS':
+                return ['CS'];
             default:
                 return [];
         }
@@ -105,18 +119,17 @@ export const ExamPage: React.FC = () => {
 
     const getAccessMessage = (category: typeof examCategories[0]) => {
         if (!category.accessible) {
-            if (user?.subscriptionStatus === 'free') {
-                return "Nécessite un abonnement Premium ou Intégral";
-            } else if (user?.subscriptionStatus === 'premium') {
-                return "Non inclus dans votre catégorie sélectionnée";
+            if (!subscription || !subscription.is_active) {
+                return "Nécessite un abonnement actif";
+            } else {
+                return `Non inclus dans votre plan ${subscription.plan_name}`;
             }
-            return "Accès non autorisé";
         }
         return "";
     };
 
-    // If user is free tier, show upgrade message
-    if (user?.subscriptionStatus === 'free') {
+    // If user doesn't have an active subscription, show upgrade message
+    if (!subscription || !subscription.is_active) {
         return (
             <div className="p-8 bg-gray-50 min-h-full">
                 <div className="max-w-4xl mx-auto">
@@ -138,9 +151,9 @@ export const ExamPage: React.FC = () => {
                         <div className="p-4 bg-gray-100 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
                             <Crown className="w-10 h-10 text-gray-400" />
                         </div>
-                        <h2 className="text-2xl font-semibold text-gray-800 mb-4">Accès Premium Requis</h2>
+                        <h2 className="text-2xl font-semibold text-gray-800 mb-4">Abonnement Requis</h2>
                         <p className="text-gray-600 mb-8 text-lg leading-relaxed max-w-2xl mx-auto">
-                            Les examens blancs sont réservés aux abonnés Premium et Intégral. 
+                            Les examens blancs sont réservés aux utilisateurs avec un abonnement actif. 
                             Passez à un abonnement payant pour accéder aux simulations d'examens en conditions réelles.
                         </p>
                         <div className="flex justify-center gap-4">
@@ -165,17 +178,13 @@ export const ExamPage: React.FC = () => {
     }
 
     return (
-        <div className="p-8 bg-gray-50 min-h-full relative">
-            {/* Overlay for locked state */}
-            <div className="absolute inset-0 bg-gray-300/20 z-10"></div>
-            
-            <div className="max-w-6xl mx-auto relative z-20">
+        <div className="p-8 bg-gray-50 min-h-full">
+            <div className="max-w-6xl mx-auto">
                 <div className="flex items-center justify-between mb-8">
                     <div className="flex items-center gap-4">
                         <FileText className="w-10 h-10 text-gray-400" />
                         <div className="flex items-center gap-3">
                             <h1 className="text-4xl font-bold text-gray-600">Examens Blancs</h1>
-                            <Lock className="text-4xl text-gray-500" />
                         </div>
                     </div>
                     <Link to="/dashboard" className="text-sm font-medium text-primary-500 hover:text-primary-600 transition-colors flex items-center gap-1.5">
@@ -185,26 +194,26 @@ export const ExamPage: React.FC = () => {
                 </div>
 
                 {/* Exam Description */}
-                <div className="bg-white/80 p-8 rounded-xl shadow-md border mb-8">
+                <div className="bg-white p-8 rounded-xl shadow-md border mb-8">
                     <h2 className="text-2xl font-semibold text-gray-800 mb-6">L'Expérience d'Examen ENA</h2>
                     
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-                        <div className="text-center p-4 bg-blue-50/80 rounded-lg border border-blue-200">
+                        <div className="text-center p-4 bg-blue-50 rounded-lg border border-blue-200">
                             <Clock className="w-8 h-8 text-blue-600 mx-auto mb-2" />
                             <div className="font-bold text-blue-800">3 heures</div>
                             <div className="text-sm text-blue-600">Durée totale</div>
                         </div>
-                        <div className="text-center p-4 bg-green-50/80 rounded-lg border border-green-200">
+                        <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
                             <Target className="w-8 h-8 text-green-600 mx-auto mb-2" />
                             <div className="font-bold text-green-800">20 questions</div>
                             <div className="text-sm text-green-600">Par matière</div>
                         </div>
-                        <div className="text-center p-4 bg-purple-50/80 rounded-lg border border-purple-200">
+                        <div className="text-center p-4 bg-purple-50 rounded-lg border border-purple-200">
                             <Shield className="w-8 h-8 text-purple-600 mx-auto mb-2" />
                             <div className="font-bold text-purple-800">Environnement</div>
                             <div className="text-sm text-purple-600">Sécurisé</div>
                         </div>
-                        <div className="text-center p-4 bg-orange-50/80 rounded-lg border border-orange-200">
+                        <div className="text-center p-4 bg-orange-50 rounded-lg border border-orange-200">
                             <Award className="w-8 h-8 text-orange-600 mx-auto mb-2" />
                             <div className="font-bold text-orange-800">Notation ENA</div>
                             <div className="text-sm text-orange-600">+1, 0, -1</div>
@@ -234,42 +243,25 @@ export const ExamPage: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Category Selection - Only show if user has access to categories */}
+                {/* Category Display - Show user's exam level */}
                 {availableCategories.length > 0 && (
                     <div className="mb-8">
                         <h3 className="text-xl font-semibold text-gray-700 mb-4">
-                            {user?.subscriptionStatus === 'premium' 
-                                ? 'Votre niveau :' 
-                                : 'Choisissez votre niveau :'
-                            }
+                            Votre niveau : {subscription?.plan_name}
                         </h3>
                         <div className="flex gap-4">
-                            {examCategories.map((category) => (
-                                <div key={category.id} className="relative group">
-                                    <button
-                                        onClick={() => handleCategoryChange(category.id as 'CM' | 'CMS' | 'CS')}
-                                        disabled={!category.accessible}
-                                        className={`
-                                            px-6 py-3 rounded-full font-medium text-sm transition-all border-2
-                                            ${selectedCategory === category.id && category.accessible
-                                                ? `${category.color} text-white border-transparent`
-                                                : category.accessible
-                                                    ? `${category.bgColor} ${category.textColor} ${category.borderColor} hover:${category.color} hover:text-white`
-                                                    : 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
-                                            }
-                                        `}
-                                    >
-                                        {category.shortName}
-                                        {!category.accessible && <Lock className="w-4 h-4 ml-2 inline" />}
-                                    </button>
-                                    
-                                    {!category.accessible && (
-                                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                                            {getAccessMessage(category)}
+                            {examCategories
+                                .filter(category => category.accessible)
+                                .map((category) => (
+                                    <div key={category.id} className="relative">
+                                        <div className={`
+                                            px-6 py-3 rounded-full font-medium text-sm border-2
+                                            ${category.color} text-white border-transparent
+                                        `}>
+                                            {category.shortName}
                                         </div>
-                                    )}
-                                </div>
-                            ))}
+                                    </div>
+                                ))}
                         </div>
                         <p className="text-sm text-gray-500 mt-2">
                             {examCategories.find(cat => cat.id === selectedCategory)?.name}
@@ -288,7 +280,7 @@ export const ExamPage: React.FC = () => {
                                         <div className="flex items-center gap-3 mb-2">
                                             <h4 className="text-lg font-bold text-gray-800">{exam.title}</h4>
                                             <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">
-                                                {selectedCategory}
+                                                {subscription?.plan_name}
                                             </span>
                                         </div>
                                         <p className="text-gray-600 mb-2">{exam.description}</p>
@@ -320,10 +312,7 @@ export const ExamPage: React.FC = () => {
                         </div>
                         <h3 className="text-xl font-bold text-gray-800 mb-3">Aucun examen disponible</h3>
                         <p className="text-gray-600 mb-6">
-                            {user?.subscriptionStatus === 'premium' 
-                                ? 'Veuillez sélectionner votre catégorie d\'examen dans votre profil pour accéder aux examens.'
-                                : 'Aucun examen disponible pour votre abonnement actuel.'
-                            }
+                            Aucun examen disponible pour votre abonnement actuel.
                         </p>
                         <Link 
                             to="/dashboard/profile"

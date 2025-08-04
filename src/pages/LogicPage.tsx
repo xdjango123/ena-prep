@@ -6,6 +6,8 @@ import { QuizReview } from '../components/quiz/QuizReview';
 import { QuizCards } from '../components/quiz/QuizCards';
 import { QuizResult } from '../components/quiz/QuizResult';
 import { getQuestionsBySubject, Question } from '../data/quizQuestions';
+import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
+import { TestResultService } from '../services/testResultService';
 import {
     TestDetails,
     ActionButton,
@@ -28,38 +30,95 @@ const clearQuizState = (subject: string) => {
 }
 
 const practiceTests = [
-    { id: 'p1', name: 'Practice Test 1', questions: 20, time: 25, topic: 'Deductive Reasoning' },
-    { id: 'p2', name: 'Practice Test 2', questions: 20, time: 25, topic: 'Inductive Reasoning' },
-    { id: 'p3', name: 'Practice Test 3', questions: 25, time: 30, topic: 'Abstract Reasoning' },
-    { id: 'p4', name: 'Practice Test 4', questions: 25, time: 30, topic: 'Deductive Reasoning' },
+    { id: 'p1', name: 'Practice Test 1', questions: 10, time: 15, topic: 'Deductive Reasoning' },
+    { id: 'p2', name: 'Practice Test 2', questions: 10, time: 15, topic: 'Inductive Reasoning' },
+    { id: 'p3', name: 'Practice Test 3', questions: 10, time: 15, topic: 'Abstract Reasoning' },
+    { id: 'p4', name: 'Practice Test 4', questions: 10, time: 15, topic: 'Deductive Reasoning' },
 ];
 
 const topics = ['All', 'Deductive Reasoning', 'Inductive Reasoning', 'Abstract Reasoning'];
 
 const quizzes = [
-    { id: 'q1', name: 'Quiz 1', questions: 50, time: 60 },
-    { id: 'q2', name: 'Quiz 2', questions: 50, time: 60 },
-    { id: 'q3', name: 'Quiz 3', questions: 50, time: 60 },
+    { id: 'q1', name: 'Quiz 1', questions: 10, time: 20 },
+    { id: 'q2', name: 'Quiz 2', questions: 10, time: 20 },
+    { id: 'q3', name: 'Quiz 3', questions: 10, time: 20 },
 ];
 
 const lastTest = { name: 'Practice Test 1', completed: 5, total: 20 };
 const recommendation = "Your logical reasoning is improving! Keep it up.";
 
 export default function LogicPage() {
-    const [view, setView] = useState<'main' | 'summary' | 'quiz' | 'review' | 'learn' | 'results'>('main');
-    const [activeSection, setActiveSection] = useState<'practice' | 'quiz' | null>('quiz');
-    const [selectedTest, setSelectedTest] = useState<TestDetails | null>(null);
-    const [lastAnswers, setLastAnswers] = useState<Map<number, string | number>>(new Map());
-    const [activeTopic, setActiveTopic] = useState('All');
-    const [testResults, setTestResults] = useState<Record<string, { score: number; timeSpent: number }>>({});
-    const [lastResult, setLastResult] = useState<{ score: number, correctAnswers: number, totalQuestions: number, timeSpent: number } | null>(null);
+	const { profile, user } = useSupabaseAuth();
+	const [view, setView] = useState<'main' | 'summary' | 'quiz' | 'review' | 'learn' | 'results'>('main');
+	const [activeSection, setActiveSection] = useState<'practice' | 'quiz' | null>('quiz');
+	const [selectedTest, setSelectedTest] = useState<TestDetails | null>(null);
+	const [lastAnswers, setLastAnswers] = useState<Map<number, string | number>>(new Map());
+	const [activeTopic, setActiveTopic] = useState('All');
+	const [testResults, setTestResults] = useState<Record<string, { score: number; timeSpent: number }>>({});
+	const [lastResult, setLastResult] = useState<{ score: number, correctAnswers: number, totalQuestions: number, timeSpent: number } | null>(null);
+	const [questions, setQuestions] = useState<Question[]>([]);
+	const [isLoadingQuestions, setIsLoadingQuestions] = useState(false);
+	
+	// Statistics state
+	const [statistics, setStatistics] = useState({
+		score: 0,
+		testsTaken: 0,
+		timeSpent: 0
+	});
 
     const pausedTestState = getQuizState('Logique');
 
-    useEffect(() => {
-        const loadedResults = JSON.parse(localStorage.getItem('logic_test_results') || '{}');
-        setTestResults(loadedResults);
-    }, []);
+    	useEffect(() => {
+		const loadedResults = JSON.parse(localStorage.getItem('logic_test_results') || '{}');
+		setTestResults(loadedResults);
+	}, []);
+
+	// Fetch statistics from database
+	useEffect(() => {
+		const fetchStatistics = async () => {
+			if (!user?.id) return;
+			
+			try {
+				// Get average score for LOG category
+				const score = await TestResultService.getAverageScore(user.id, 'LOG');
+				
+				// Get test count for LOG category
+				const testResults = await TestResultService.getTestResultsByCategory(user.id, 'LOG');
+				const testsTaken = testResults.length;
+				
+				// Calculate time spent (assuming 15 minutes per test for now)
+				const timeSpent = Math.round(testsTaken * 15 / 60); // Convert to hours
+				
+				setStatistics({
+					score,
+					testsTaken,
+					timeSpent
+				});
+			} catch (error) {
+				console.error('Error fetching statistics:', error);
+			}
+		};
+
+		fetchStatistics();
+	}, [user?.id]);
+
+	// Load questions from database
+	useEffect(() => {
+		const loadQuestions = async () => {
+			setIsLoadingQuestions(true);
+			try {
+				const examType = profile?.exam_type as 'CM' | 'CMS' | 'CS' | undefined;
+				const loadedQuestions = await getQuestionsBySubject('logique', examType);
+				setQuestions(loadedQuestions);
+			} catch (error) {
+				console.error('Error loading questions:', error);
+			} finally {
+				setIsLoadingQuestions(false);
+			}
+		};
+
+		loadQuestions();
+	}, [profile?.exam_type]);
 
     const handleSectionToggle = (section: 'practice' | 'quiz') => {
         setActiveSection(prev => (prev === section ? null : section));
@@ -84,32 +143,56 @@ export default function LogicPage() {
     }
 
     if (view === 'quiz' && selectedTest) {
+        if (isLoadingQuestions) {
+            return (
+                <div className="flex items-center justify-center min-h-screen">
+                    <div className="text-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-600 mx-auto"></div>
+                        <p className="mt-4 text-gray-600">Chargement des questions...</p>
+                    </div>
+                </div>
+            );
+        }
+
         return (
             <QuizSeries
                 subject="Logique"
                 subjectColor="yellow"
-                questions={getQuestionsBySubject('logique')}
+                questions={questions}
                 duration={selectedTest.time * 60}
                 onExit={() => { setView('main'); setActiveSection(null); }}
                 onFinish={(answers, timeSpent) => {
-                    const correctAnswers = getQuestionsBySubject('logique').reduce((count, q) => {
-                        return answers.get(q.id) === q.correctAnswer ? count + 1 : count;
-                    }, 0);
-                    const score = Math.round((correctAnswers / getQuestionsBySubject('logique').length) * 100);
+					const correctAnswers = questions.reduce((count, q) => {
+						// More robust comparison logic
+						const isCorrect = (() => {
+							if (q.type === 'multiple-choice' && typeof q.correctAnswer === 'number') {
+								// For multiple choice, compare the selected option with the correct option text
+								const correctOptionText = q.options?.[q.correctAnswer];
+								return answers.get(q.id) === correctOptionText;
+							} else if (q.type === 'true-false') {
+								// For true/false, compare strings
+								return String(answers.get(q.id)).toLowerCase() === String(q.correctAnswer).toLowerCase();
+							}
+							// Fallback comparison
+							return answers.get(q.id) === q.correctAnswer;
+						})();
+						return isCorrect ? count + 1 : count;
+					}, 0);
+					const score = Math.round((correctAnswers / questions.length) * 100);
 
-                    const newResults = { ...testResults, [selectedTest.id]: { score, timeSpent } };
-                    localStorage.setItem('logic_test_results', JSON.stringify(newResults));
-                    setTestResults(newResults);
+					const newResults = { ...testResults, [selectedTest.id]: { score, timeSpent } };
+					localStorage.setItem('logic_test_results', JSON.stringify(newResults));
+					setTestResults(newResults);
 
-                    setLastResult({
-                        score,
-                        correctAnswers,
-                        totalQuestions: getQuestionsBySubject('logique').length,
-                        timeSpent
-                    });
-                    setLastAnswers(answers);
-                    setView('results');
-                }}
+					setLastResult({
+						score,
+						correctAnswers,
+						totalQuestions: questions.length,
+						timeSpent
+					});
+					setLastAnswers(answers);
+					setView('results');
+				}}
             />
         );
     }
@@ -134,7 +217,7 @@ export default function LogicPage() {
     if (view === 'review') {
         return (
             <QuizReview 
-                questions={getQuestionsBySubject('logique')} 
+                questions={questions} 
                 userAnswers={lastAnswers}
                 onBack={() => setView('main')}
             />
@@ -167,9 +250,9 @@ export default function LogicPage() {
             <SubjectHeader 
                 subjectName="Logique"
                 icon={BrainCircuit}
-                score={88}
-                testsTaken={6}
-                timeSpent={9}
+                score={statistics.score}
+                testsTaken={statistics.testsTaken}
+                timeSpent={statistics.timeSpent}
                 gradientFrom="from-orange-500"
                 gradientTo="to-orange-600"
             />

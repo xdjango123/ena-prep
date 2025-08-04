@@ -4,7 +4,7 @@ import { Menu, X, GraduationCap, LogOut, User, Settings, CreditCard, TrendingUp,
 import { motion, AnimatePresence } from 'framer-motion';
 import { Container } from '../ui/Container';
 import { Button } from '../ui/Button';
-import { useAuth } from '../../contexts/AuthContext';
+import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
 
 const navigation = [
   { name: 'Accueil', to: '/' },
@@ -15,7 +15,9 @@ const navigation = [
 ];
 
 export const Header: React.FC = () => {
-  const { isAuthenticated, user, logout } = useAuth();
+  const { user, profile, signOut } = useSupabaseAuth();
+  const isAuthenticated = !!user;
+  const userName = profile ? `${profile['First Name']} ${profile['Last Name']}` : user?.email || 'Utilisateur';
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -39,8 +41,8 @@ export const Header: React.FC = () => {
     };
   }, [isUserMenuOpen]);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await signOut();
     setIsUserMenuOpen(false);
   };
 
@@ -95,7 +97,7 @@ export const Header: React.FC = () => {
                     className="flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium text-white/90 hover:text-white hover:bg-primary-700"
                 >
                   <User className="w-5 h-5" />
-                  <span>{user?.name}</span>
+                  <span>{userName}</span>
                 </Link>
                 
                 <AnimatePresence>
@@ -107,7 +109,7 @@ export const Header: React.FC = () => {
                     className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg py-1 z-50 border"
                   >
                     <div className="px-4 py-2 text-sm text-gray-500 border-b">
-                        Connecté en tant que <strong>{user?.name}</strong>
+                        Connecté en tant que <strong>{userName}</strong>
                     </div>
                     <Link
                       to="/dashboard"
@@ -208,7 +210,7 @@ export const Header: React.FC = () => {
                   {isAuthenticated ? (
                     <div className="space-y-2">
                       <div className="px-3 py-2 text-sm font-medium text-white/70">
-                        Connecté en tant que {user?.name}
+                        Connecté en tant que {userName}
                       </div>
                       <Link
                         to="/dashboard"

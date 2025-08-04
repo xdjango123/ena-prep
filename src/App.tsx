@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
+import { SupabaseAuthProvider } from './contexts/SupabaseAuthContext';
 import { SidebarProvider } from './contexts/SidebarContext';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
@@ -35,7 +35,7 @@ const PlaceholderPage: React.FC<{ title: string }> = ({ title }) => (
 
 function App() {
   return (
-    <AuthProvider>
+    <SupabaseAuthProvider>
       <Router>
         <ScrollToTop />
         <SidebarProvider>
@@ -76,7 +76,7 @@ function App() {
             </Routes>
           </SidebarProvider>
         </Router>
-    </AuthProvider>
+    </SupabaseAuthProvider>
   );
 }
 

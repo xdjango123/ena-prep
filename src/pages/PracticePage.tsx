@@ -26,9 +26,9 @@ export default function PracticePage() {
       <Header />
       <main className="flex-1 py-12">
         <Container>
-          <div className="max-w-3xl mx-auto text-center mb-12">
-            <h1 className="text-4xl font-bold text-gray-800">Choisissez votre mode de pratique</h1>
-            <p className="mt-4 text-lg text-gray-600">
+          <div className="max-w-3xl mx-auto text-center mb-12 pt-8">
+            <h1 className="text-4xl font-bold text-gray-800 mb-4">Choisissez votre mode de pratique</h1>
+            <p className="text-lg text-gray-600">
               Lancez une série de questions aléatoires pour un défi surprise, ou concentrez-vous sur une matière spécifique.
             </p>
           </div>
