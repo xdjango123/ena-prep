@@ -17,6 +17,8 @@ import {
 } from './SubjectComponents';
 import { SubjectHeader } from '../../components/SubjectHeader';
 
+type ViewType = 'main' | 'summary' | 'quiz' | 'review' | 'results' | 'learn';
+
 const getQuizState = (subject: string) => {
 	const savedState = localStorage.getItem(`quizState_${subject}`);
 	if (savedState) {
@@ -50,8 +52,8 @@ const recommendation = "You're doing great in History! Try focusing on Current E
 
 export const GeneralKnowledgePage: React.FC = () => {
 	const { profile, user } = useSupabaseAuth();
-	const [view, setView] = useState<'main' | 'summary' | 'quiz' | 'review' | 'learn' | 'results'>('main');
-	const [activeSection, setActiveSection] = useState<'practice' | 'quiz' | null>('quiz');
+	const [view, setView] = useState<ViewType>('main');
+	const [activeSection, setActiveSection] = useState<'quiz' | 'practice' | null>(null);
 	const [selectedTest, setSelectedTest] = useState<TestDetails | null>(null);
 	const [lastAnswers, setLastAnswers] = useState<Map<number, string | number>>(new Map());
     const [activeTopic, setActiveTopic] = useState('All');
@@ -121,20 +123,41 @@ export const GeneralKnowledgePage: React.FC = () => {
 		loadQuestions();
 	}, [profile?.exam_type]);
 
-	const handleSectionToggle = (section: 'practice' | 'quiz') => {
-		setActiveSection(prev => (prev === section ? null : section));
+	// Scroll to top when component mounts
+	useEffect(() => {
+		window.scrollTo({ top: 0, behavior: 'smooth' });
+	}, []);
+
+	// Handle section toggle with scroll management
+	const handleSectionToggle = (section: 'quiz' | 'practice') => {
+		setActiveSection(section);
+		// Scroll to top of the page when switching sections
+		window.scrollTo({ top: 0, behavior: 'smooth' });
 	};
 
+	// Handle view changes with scroll management
+	const handleViewChange = (newView: ViewType) => {
+		setView(newView);
+		// Scroll to top when changing views
+		window.scrollTo({ top: 0, behavior: 'smooth' });
+	};
+
+	// Handle start quiz with scroll management
+	const startQuiz = () => {
+		setView('quiz');
+		// Scroll to top when starting quiz
+		window.scrollTo({ top: 0, behavior: 'smooth' });
+	};
+
+	// Handle start practice test
 	const handleStart = (test: TestDetails) => {
 		if (activeSection === 'practice') {
 			clearQuizState('Culture Générale');
 		}
 		setSelectedTest(test);
 		setView('summary');
-	};
-
-	const startQuiz = () => {
-		setView('quiz');
+		// Scroll to top when starting test
+		window.scrollTo({ top: 0, behavior: 'smooth' });
 	};
 
     const filteredPracticeTests = activeTopic === 'All' 
@@ -219,7 +242,7 @@ export const GeneralKnowledgePage: React.FC = () => {
 	}
 
 	return (
-		<div className="p-6 space-y-6">
+		<div className="p-4 lg:p-6 space-y-4 lg:space-y-6 pb-20">
 			<SubjectHeader 
 				subjectName="Culture Générale"
 				icon={Globe}
@@ -236,9 +259,9 @@ export const GeneralKnowledgePage: React.FC = () => {
 			</div>
 
 			{activeSection === 'practice' && (
-				<div className="space-y-6">
-					<div className="bg-white rounded-xl shadow-sm border p-6">
-						<h2 className="text-xl font-bold mb-4">Practice by Topic</h2>
+				<div className="space-y-4 lg:space-y-6">
+					<div className="bg-white rounded-xl shadow-sm border p-4 lg:p-6">
+						<h2 className="text-lg lg:text-xl font-bold mb-4">Practice by Topic</h2>
 						<div className="flex flex-wrap gap-2 mb-6">
 							{topics.map(topic => (
 								<FilterPill key={topic} topic={topic} activeTopic={activeTopic} setActiveTopic={setActiveTopic} color="blue" />
@@ -263,15 +286,15 @@ export const GeneralKnowledgePage: React.FC = () => {
 			)}
 
 			{activeSection === 'quiz' && (
-				<div className="bg-white rounded-xl shadow-sm border p-8 mt-4 text-center">
-					<Trophy className="w-16 h-16 text-blue-500 mx-auto mb-4" />
-					<h2 className="text-2xl font-bold mb-3">Apprenez avec des quiz interactifs</h2>
-					<p className="text-gray-600 max-w-2xl mx-auto mb-6">
+				<div className="bg-white rounded-xl shadow-sm border p-6 lg:p-8 mt-4 text-center">
+					<Trophy className="w-12 h-12 lg:w-16 lg:h-16 text-blue-500 mx-auto mb-4" />
+					<h2 className="text-xl lg:text-2xl font-bold mb-3">Apprenez avec des quiz interactifs</h2>
+					<p className="text-gray-600 max-w-2xl mx-auto mb-6 text-sm lg:text-base">
 						Nos quiz d'apprentissage sont conçus pour vous aider à maîtriser les concepts une question à la fois. Obtenez des commentaires immédiats, retournez les cartes pour voir les explications et apprenez à votre propre rythme.
 					</p>
 					<button 
 						onClick={() => setView('learn')}
-						className="inline-flex items-center gap-2 px-8 py-3 rounded-lg bg-blue-500 text-white font-semibold hover:bg-blue-600 transition-colors"
+						className="inline-flex items-center gap-2 px-6 lg:px-8 py-3 rounded-lg bg-blue-500 text-white font-semibold hover:bg-blue-600 transition-colors"
 					>
 						<Play className="w-5 h-5" />
 						Commencer l'apprentissage

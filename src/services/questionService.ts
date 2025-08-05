@@ -125,15 +125,17 @@ export class QuestionService {
       const { data, error } = await query;
       
       if (error) {
-        console.error('Error fetching questions:', error);
+        console.error('❌ Error fetching questions:', error);
         return [];
       }
       
       // Shuffle the questions to randomize them
       const shuffled = data.sort(() => Math.random() - 0.5);
-      return shuffled.slice(0, limit);
+      const result = shuffled.slice(0, limit);
+      
+      return result;
     } catch (error) {
-      console.error('Error in getRandomQuestions:', error);
+      console.error('❌ Error in getRandomQuestions:', error);
       return [];
     }
   }

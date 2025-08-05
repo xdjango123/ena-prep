@@ -102,27 +102,62 @@ const QuestionCard: React.FC<{
     };
 
     return (
-        <div className="perspective-1000 w-full max-w-2xl mx-auto h-[28rem]" onClick={() => { if(isFlipped) toggleFlip() }}>
-            <div className={`relative w-full h-full transition-transform duration-700 transform-style-3d ${isFlipped ? 'rotate-y-180' : ''}`}>
-                {/* Front of the card */}
-                <div className="absolute w-full h-full backface-hidden bg-white rounded-xl shadow-lg border p-6 flex flex-col justify-between">
-                    <h3 className="text-xl font-semibold text-gray-800">{question.question}</h3>
-                    <div className="space-y-3 my-4">{renderOptions()}</div>
-                    <button onClick={(e) => { e.stopPropagation(); handleSubmit(); }} disabled={selectedOption === null} className={`mt-auto w-full py-3 px-5 rounded-lg text-white font-semibold transition-all text-lg ${colors.button} disabled:bg-gray-300`}>
-                        Submit
-                    </button>
+        <div 
+            className={`w-full max-w-2xl mx-auto cursor-pointer transition-all duration-500 transform-gpu ${
+                isFlipped ? 'rotate-y-180' : ''
+            }`}
+            onClick={toggleFlip}
+        >
+            <div className={`relative w-full h-full ${isFlipped ? 'rotate-y-180' : ''}`}>
+                {/* Front of card */}
+                <div className={`w-full bg-white rounded-2xl shadow-lg p-6 lg:p-8 border-2 transition-all ${
+                    isFlipped ? 'opacity-0' : 'opacity-100'
+                }`}>
+                    <div className="text-center mb-6">
+                        <h2 className="text-lg lg:text-xl font-bold text-gray-800 mb-4">{question.question}</h2>
+                    </div>
+                    
+                    <div className="space-y-3">
+                        {renderOptions()}
+                    </div>
+                    
+                    {selectedOption !== null && (
+                        <div className="mt-6 text-center">
+                            <button
+                                onClick={(e) => { e.stopPropagation(); handleSubmit(); }}
+                                className={`px-6 py-3 rounded-lg font-semibold text-white transition-colors ${colors.button}`}
+                            >
+                                Valider ma réponse
+                            </button>
+                        </div>
+                    )}
                 </div>
 
-                {/* Back of the card */}
-                <div className="absolute w-full h-full backface-hidden rotate-y-180 bg-white rounded-xl shadow-lg border p-6 flex flex-col justify-center items-center text-center">
-                    <div className={`w-full p-4 rounded-lg ${isCorrect ? 'bg-green-100' : 'bg-red-100'}`}>
-                        <h3 className={`text-2xl font-bold ${isCorrect ? 'text-green-800' : 'text-red-800'}`}>
-                            {isCorrect ? "Correct!" : "Incorrect"}
-                        </h3>
-                        {!isCorrect && <p className="mt-2 text-gray-800 text-lg">The correct answer is: <strong>{String(displayCorrectAnswer)}</strong></p>}
+                {/* Back of card */}
+                <div className={`absolute inset-0 w-full bg-white rounded-2xl shadow-lg p-6 lg:p-8 border-2 transition-all ${
+                    isFlipped ? 'opacity-100' : 'opacity-0'
+                }`}>
+                    <div className="text-center">
+                        <div className={`mb-4 p-4 rounded-lg ${
+                            isCorrect ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                            <div className="font-bold text-lg mb-2">
+                                {isCorrect ? 'Correct !' : 'Incorrect'}
+                            </div>
+                            <div className="text-sm">
+                                La réponse correcte est : {displayCorrectAnswer}
+                            </div>
+                        </div>
+                        
+                        <div className="mb-6">
+                            <h3 className="font-bold text-gray-800 mb-2">Explication :</h3>
+                            <p className="text-gray-600 text-sm lg:text-base">{question.explanation}</p>
+                        </div>
+                        
+                        <p className="text-sm text-gray-500">
+                            Cliquez n'importe où sur la carte pour revenir
+                        </p>
                     </div>
-                    {question.explanation && <p className="mt-6 text-gray-700 text-lg">{question.explanation}</p>}
-                    <p className="mt-8 text-sm text-gray-500">Click anywhere on the card to flip back.</p>
                 </div>
             </div>
         </div>
@@ -144,11 +179,26 @@ export const QuizCards: React.FC<QuizCardsProps> = ({ subject, subjectColor, onE
         const fetchQuestions = async () => {
             setLoading(true);
             try {
-                const subjectLower = subject.toLowerCase().replace(' ', '-');
+                // Map the subject name to the correct database category
+                let subjectLower;
+                if (subject.toLowerCase().includes('culture')) {
+                    subjectLower = 'culture-generale';
+                } else if (subject.toLowerCase().includes('anglais') || subject.toLowerCase().includes('english')) {
+                    subjectLower = 'english';
+                } else if (subject.toLowerCase().includes('logique') || subject.toLowerCase().includes('logic')) {
+                    subjectLower = 'logique';
+                } else {
+                    subjectLower = subject.toLowerCase().replace(' ', '-');
+                }
+                
                 const examType = profile?.exam_type as 'CM' | 'CMS' | 'CS' | undefined;
+                
                 // Add cache-busting parameter to force fresh data
                 const questions = await getQuestionsBySubject(subjectLower, examType);
                 setQuestions(questions.slice(0, 10)); // Limit to 10 questions
+                
+                // Scroll to top when questions are loaded
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             } catch (err) {
                 setError('Failed to fetch questions');
                 console.error(err);
@@ -156,7 +206,6 @@ export const QuizCards: React.FC<QuizCardsProps> = ({ subject, subjectColor, onE
                 setLoading(false);
             }
         };
-
         fetchQuestions();
     }, [subject, profile?.exam_type]);
 
@@ -191,11 +240,19 @@ export const QuizCards: React.FC<QuizCardsProps> = ({ subject, subjectColor, onE
     };
 
     const goToNext = () => {
-        setCurrentQuestionIndex(prev => (prev + 1) % questions.length);
+        if (currentQuestionIndex < questions.length - 1) {
+            setCurrentQuestionIndex(currentQuestionIndex + 1);
+            // Scroll to top when navigating to next question
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
     };
 
     const goToPrevious = () => {
-        setCurrentQuestionIndex(prev => (prev - 1 + questions.length) % questions.length);
+        if (currentQuestionIndex > 0) {
+            setCurrentQuestionIndex(currentQuestionIndex - 1);
+            // Scroll to top when navigating to previous question
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
     };
     
     const currentQuestion = questions[currentQuestionIndex];
@@ -213,60 +270,64 @@ export const QuizCards: React.FC<QuizCardsProps> = ({ subject, subjectColor, onE
     }
 
     return (
-        <div className="p-6 bg-gray-50 min-h-full flex flex-col">
+        <div className="p-4 lg:p-6 bg-gray-50 min-h-full flex flex-col">
             <div className="flex justify-between items-center mb-4">
-                <h1 className="text-3xl font-bold text-gray-800">Quiz: {subject}</h1>
+                <h1 className="text-2xl lg:text-3xl font-bold text-gray-800">Quiz: {subject}</h1>
                 <button onClick={onExit} className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors">
-                    <X className="w-6 h-6 text-gray-700" />
+                    <X className="w-5 h-5 lg:w-6 lg:h-6 text-gray-700" />
                 </button>
             </div>
 
-            <div className="flex flex-wrap justify-center gap-2 mb-8">
+            <div className="flex flex-wrap justify-center gap-2 mb-6 lg:mb-8">
                 {questions.map((q, index) => (
                     <button 
                         key={q.id}
-                        onClick={() => setCurrentQuestionIndex(index)}
-                        className={`w-10 h-10 rounded-full text-sm font-semibold transition-all flex items-center justify-center
-                            ${index === currentQuestionIndex ? colors.activePagination : ''}
-                            ${userAnswers.has(q.id) 
-                                ? (() => {
-                                    // More robust comparison logic for pagination display
-                                    if (q.type === 'multiple-choice' && typeof q.correctAnswer === 'number') {
-                                        const correctOptionText = q.options?.[q.correctAnswer];
-                                        return userAnswers.get(q.id) === correctOptionText ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800';
-                                    } else if (q.type === 'true-false') {
-                                        return String(userAnswers.get(q.id)).toLowerCase() === String(q.correctAnswer).toLowerCase() ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800';
-                                    }
-                                    return userAnswers.get(q.id) === q.correctAnswer ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800';
-                                  })()
-                                : 'bg-white border border-gray-300 text-gray-600'}
-                        `}
+                        onClick={() => {
+                            setCurrentQuestionIndex(index);
+                            // Scroll to top when clicking pagination button
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }}
+                        className={`w-8 h-8 lg:w-10 lg:h-10 rounded-full text-xs lg:text-sm font-semibold transition-all flex items-center justify-center
+                            ${index === currentQuestionIndex 
+                                ? colors.activePagination 
+                                : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                            }`}
                     >
                         {index + 1}
                     </button>
                 ))}
             </div>
-            
-            <div className="flex-grow flex items-center justify-center">
-                {currentQuestion && (
-                    <QuestionCard 
-                        key={currentQuestion.id}
-                        question={currentQuestion}
-                        isFlipped={flippedCards.has(currentQuestion.id)}
-                        userAnswer={userAnswers.get(currentQuestion.id) || null}
-                        onAnswer={(answer) => handleAnswer(currentQuestion.id, answer)}
-                        toggleFlip={() => toggleFlip(currentQuestion.id)}
-                        color={subjectColor}
-                    />
-                )}
+
+            <div className="flex-1 flex items-center justify-center">
+                <QuestionCard
+                    question={currentQuestion}
+                    isFlipped={flippedCards.has(currentQuestion.id)}
+                    userAnswer={userAnswers.get(currentQuestion.id) || null}
+                    onAnswer={(answer) => handleAnswer(currentQuestion.id, answer)}
+                    toggleFlip={() => toggleFlip(currentQuestion.id)}
+                    color={subjectColor}
+                />
             </div>
 
-            <div className="flex justify-between items-center mt-8 max-w-2xl w-full mx-auto">
-                <button onClick={goToPrevious} className="flex items-center gap-2 px-6 py-3 rounded-lg bg-white border border-gray-300 hover:bg-gray-100 transition-colors">
-                    <ChevronLeft className="w-5 h-5" /> Previous
+            <div className="flex justify-between items-center mt-6 lg:mt-8">
+                <button
+                    onClick={goToPrevious}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 transition-colors"
+                >
+                    <ChevronLeft className="w-5 h-5" />
+                    <span className="hidden sm:inline">Précédent</span>
                 </button>
-                <button onClick={goToNext} className="flex items-center gap-2 px-6 py-3 rounded-lg bg-white border border-gray-300 hover:bg-gray-100 transition-colors">
-                    Next <ChevronRight className="w-5 h-5" />
+                
+                <div className="text-sm text-gray-600">
+                    {currentQuestionIndex + 1} / {questions.length}
+                </div>
+                
+                <button
+                    onClick={goToNext}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 transition-colors"
+                >
+                    <span className="hidden sm:inline">Suivant</span>
+                    <ChevronRight className="w-5 h-5" />
                 </button>
             </div>
         </div>

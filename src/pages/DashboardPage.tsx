@@ -67,6 +67,8 @@ export default function DashboardPage() {
     if (user) {
       fetchUserProgress();
     }
+    // Scroll to top when component mounts
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [user]);
 
   const fetchUserProgress = async () => {
@@ -80,6 +82,13 @@ export default function DashboardPage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Handle navigation with scroll management
+  const handleNavigation = (path: string) => {
+    navigate(path);
+    // Scroll to top when navigating
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const getExamLevelLabel = (level: string) => {
@@ -114,6 +123,7 @@ export default function DashboardPage() {
     switch (planName) {
       case 'Prépa CM': return <Crown size={16} />;
       case 'Prépa CMS': return <Star size={16} />;
+      case 'Prépa CS': return <Award size={16} />;
       default: return <Award size={16} />;
     }
   };
@@ -153,22 +163,22 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="p-6 max-w-7xl mx-auto">
+      <div className="p-4 lg:p-6 max-w-7xl mx-auto pb-20">
         {/* Welcome Header - Cleaner Design */}
-        <div className="bg-gradient-to-r from-primary-600 to-primary-700 text-white p-8 rounded-2xl shadow-lg mb-8">
-          <div className="flex items-center justify-between">
+        <div className="bg-gradient-to-r from-primary-600 to-primary-700 text-white p-6 lg:p-8 rounded-2xl shadow-lg mb-6 lg:mb-8">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold mb-2 text-white">
+              <h1 className="text-2xl lg:text-3xl font-bold mb-2 text-white">
                 Bonjour, {userName}! 👋
               </h1>
-              <p className="text-primary-100 text-lg">
+              <p className="text-primary-100 text-base lg:text-lg">
                 Qu'allons-nous réviser aujourd'hui ?
               </p>
             </div>
             
             {/* User Profile Labels - Better positioned */}
-            <div className="flex flex-col items-end gap-3">
-              {hasActiveSubscription && subscription && subscription.plan_name !== 'Prépa CS' && (
+            <div className="flex flex-col items-start lg:items-end gap-3">
+              {hasActiveSubscription && subscription && (
                 <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border ${getSubscriptionColor(subscription.plan_name)}`}>
                   {getSubscriptionIcon(subscription.plan_name)}
                   <span>{getSubscriptionLabel(subscription.plan_name)}</span>
@@ -189,19 +199,19 @@ export default function DashboardPage() {
         </div>
 
         {/* Main Actions - Cleaner Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 mb-6 lg:mb-8">
           {/* Practice Section */}
-          <div className="bg-gradient-to-br from-accent-400 to-accent-500 text-background-900 p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all cursor-pointer"
-               onClick={() => navigate('/dashboard/practice')}>
+          <div className="bg-gradient-to-br from-accent-400 to-accent-500 text-background-900 p-6 lg:p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all cursor-pointer"
+               onClick={() => handleNavigation('/dashboard/practice')}>
             <div className="flex items-center justify-between">
               <div>
                 <div className="p-3 bg-white/20 rounded-lg w-fit mb-4">
-                  <Sparkles className="w-8 h-8" />
+                  <Sparkles className="w-6 h-6 lg:w-8 lg:h-8" />
                 </div>
-                <h2 className="text-2xl font-bold mb-2">Practice</h2>
-                <p className="text-background-800">Lancer une série de questions</p>
+                <h2 className="text-xl lg:text-2xl font-bold mb-2">Practice</h2>
+                <p className="text-background-800 text-sm lg:text-base">Lancer une série de questions</p>
               </div>
-              <ChevronRight className="w-8 h-8 opacity-70" />
+              <ChevronRight className="w-6 h-6 lg:w-8 lg:h-8 opacity-70" />
             </div>
           </div>
           
@@ -228,10 +238,10 @@ export default function DashboardPage() {
             </div>
           ) : (
             // Has subscription - show subjects
-          <div className="bg-white p-8 rounded-2xl shadow-lg border border-background-200">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-background-800">Matières</h2>
-              <div className="text-right">
+          <div className="bg-white p-6 lg:p-8 rounded-2xl shadow-lg border border-background-200">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6 gap-4">
+              <h2 className="text-xl lg:text-2xl font-bold text-background-800">Matières</h2>
+              <div className="text-left lg:text-right">
                 <div className="text-sm text-background-600 mb-1 flex items-center gap-1">
                   Progression
                   <div className="relative group inline-block ml-1">
@@ -251,7 +261,7 @@ export default function DashboardPage() {
             </div>
             
               {availableCategories.length > 0 ? (
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {subjects.map(subject => (
                 <Link 
                   to={subject.path} 
@@ -281,9 +291,9 @@ export default function DashboardPage() {
         </div>
 
         {/* Secondary Actions - Cleaner Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
           <Link to="/dashboard/exams" 
-                className="bg-white p-6 rounded-xl shadow-md border border-background-200 hover:shadow-lg hover:border-primary-300 transition-all group relative">
+                className="bg-white p-4 lg:p-6 rounded-xl shadow-md border border-background-200 hover:shadow-lg hover:border-primary-300 transition-all group relative">
             <div className="absolute top-4 right-4">
               <Lock className="w-5 h-5 text-background-400" />
             </div>
@@ -299,7 +309,7 @@ export default function DashboardPage() {
           </Link>
           
           <Link to="/dashboard/tutor" 
-                className="bg-white p-6 rounded-xl shadow-md border border-background-200 hover:shadow-lg hover:border-success-300 transition-all group">
+                className="bg-white p-4 lg:p-6 rounded-xl shadow-md border border-background-200 hover:shadow-lg hover:border-success-300 transition-all group">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-success-100 rounded-lg group-hover:bg-success-200 transition-colors">
                 <Users className="w-6 h-6 text-success-600" />
@@ -312,7 +322,7 @@ export default function DashboardPage() {
           </Link>
           
           <Link to="/dashboard/forum" 
-                className="bg-white p-6 rounded-xl shadow-md border border-background-200 hover:shadow-lg hover:border-accent-300 transition-all group">
+                className="bg-white p-4 lg:p-6 rounded-xl shadow-md border border-background-200 hover:shadow-lg hover:border-accent-300 transition-all group">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-accent-100 rounded-lg group-hover:bg-accent-200 transition-colors">
                 <Users className="w-6 h-6 text-accent-600" />

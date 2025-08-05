@@ -100,7 +100,7 @@ const ProfilePage: React.FC = () => {
               <h2 className="text-2xl font-bold text-gray-800">{userName}</h2>
               <p className="text-gray-600">{user?.email}</p>
               <div className="flex items-center gap-3 mt-2">
-                {subscription && subscription.plan_name !== 'Prépa CS' && (
+                {subscription && (
                   <span className={`px-3 py-1 rounded-full text-sm font-medium ${getSubscriptionColor(subscription.is_active)}`}>
                     {getSubscriptionLabel(subscription.plan_name)}
                   </span>
@@ -189,7 +189,7 @@ const ProfilePage: React.FC = () => {
             <div>
               <h3 className="text-lg font-semibold text-gray-800">Abonnement</h3>
               <p className="text-gray-600">
-                {subscription && subscription.plan_name !== 'Prépa CS' ? getSubscriptionLabel(subscription.plan_name) : 'Aucun abonnement'}
+                {subscription ? getSubscriptionLabel(subscription.plan_name) : 'Aucun abonnement'}
               </p>
             </div>
           </div>

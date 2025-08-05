@@ -85,16 +85,18 @@ export const Sidebar: React.FC = () => {
   const userName = profile ? `${profile['First Name']} ${profile['Last Name']}` : user?.email || 'Utilisateur';
 
   return (
-    <div className={`h-screen fixed top-0 left-0 bg-white border-r border-gray-200 flex flex-col transition-all duration-300 z-20 ${isOpen ? 'w-64' : 'w-20'}`}>
-      {/* Logo and Toggle */}
+    <div className={`h-screen bg-white border-r border-gray-200 flex flex-col transition-all duration-300 z-50 lg:z-20 ${
+      isOpen ? 'w-64' : 'w-20'
+    }`}>
+      {/* Logo and Toggle - Hide toggle on mobile since it's handled by DashboardLayout */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200 h-16 shrink-0">
         {isOpen && (
           <Link to="/" className="flex items-center gap-2 text-primary-500 font-bold text-lg">
-                          <GraduationCap size={24} />
-                              <span>PrepaENA</span>
+            <GraduationCap size={24} />
+            <span>PrepaENA</span>
           </Link>
         )}
-        <button onClick={toggle} className="p-2 rounded-lg text-gray-500 hover:bg-gray-100">
+        <button onClick={toggle} className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 lg:block hidden">
           <Menu className="w-5 h-5" />
         </button>
       </div>

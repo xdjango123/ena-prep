@@ -71,6 +71,9 @@ export const QuizSeries: React.FC<QuizSeriesProps> = ({
         setUserAnswers(savedState.userAnswers);
         setTimeRemaining(savedState.timeRemaining);
     }
+    
+    // Scroll to top when component mounts
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [subject]);
 
   useEffect(() => {
@@ -83,6 +86,11 @@ export const QuizSeries: React.FC<QuizSeriesProps> = ({
         });
     }
   }, [subject, currentQuestionIndex, answeredQuestions, userAnswers, timeRemaining, isCompleted]);
+
+  // Scroll to top when question changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentQuestionIndex]);
 
   const currentQuestion = questions[currentQuestionIndex];
   const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
@@ -208,29 +216,38 @@ export const QuizSeries: React.FC<QuizSeriesProps> = ({
   };
 
   const handleNextQuestion = () => {
-    if (currentQuestionIndex < questions.length - 1) {
+    if (canGoNext) {
       setCurrentQuestionIndex(prev => prev + 1);
-    } else {
-      handleFinishQuiz();
+      setSelectedAnswer(null);
+      setShowResult(false);
+      // Scroll to top when navigating to next question
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
   const handlePreviousQuestion = () => {
-    if (currentQuestionIndex > 0) {
+    if (canGoPrevious) {
       setCurrentQuestionIndex(prev => prev - 1);
+      setSelectedAnswer(null);
+      setShowResult(false);
+      // Scroll to top when navigating to previous question
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
   const handleFinishQuiz = () => {
     setIsCompleted(true);
-    onFinish(userAnswers, timeRemaining);
     clearQuizState(subject);
+    onFinish(userAnswers, duration - timeRemaining);
+    // Scroll to top when finishing quiz
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleExit = () => {
-    if (window.confirm('Êtes-vous sûr de vouloir quitter la série ? Votre progression ne sera pas sauvegardée.')) {
-      onExit();
-    }
+    clearQuizState(subject);
+    onExit();
+    // Scroll to top when exiting quiz
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const getQuestionTypeIcon = (type: string) => {

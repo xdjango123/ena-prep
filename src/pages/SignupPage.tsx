@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -26,13 +26,23 @@ type SignupFormValues = z.infer<typeof signupSchema>;
 const SignupPage: React.FC = () => {
   const { signUp } = useSupabaseAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const { register, handleSubmit, formState: { errors } } = useForm<SignupFormValues>({
+  const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema)
   });
+
+  // Handle competition parameter from URL
+  useEffect(() => {
+    const competition = searchParams.get('competition');
+    if (competition) {
+      console.log('🎯 Competition selected from URL:', competition);
+      setValue('examLevel', competition.toUpperCase());
+    }
+  }, [searchParams, setValue]);
 
   const onSubmit = async (data: SignupFormValues) => {
     setIsSubmitting(true);

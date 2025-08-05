@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
 import { FileText, Play, ArrowLeft, Lock, Clock, Target, Shield, Award, Crown } from 'lucide-react';
@@ -6,6 +6,12 @@ import { FileText, Play, ArrowLeft, Lock, Clock, Target, Shield, Award, Crown } 
 export const ExamPage: React.FC = () => {
     const navigate = useNavigate();
     const { user, subscription } = useSupabaseAuth();
+    
+    // Scroll to top when component mounts
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, []);
+    
     // Set initial category based on user's subscription
     const getInitialCategory = (): 'CM' | 'CMS' | 'CS' => {
         if (!subscription) return 'CM';
@@ -131,7 +137,7 @@ export const ExamPage: React.FC = () => {
     // If user doesn't have an active subscription, show upgrade message
     if (!subscription || !subscription.is_active) {
         return (
-            <div className="p-8 bg-gray-50 min-h-full">
+            <div className="p-8 bg-gray-50 pb-20">
                 <div className="max-w-4xl mx-auto">
                     <div className="flex items-center justify-between mb-8">
                         <div className="flex items-center gap-4">
@@ -178,7 +184,7 @@ export const ExamPage: React.FC = () => {
     }
 
     return (
-        <div className="p-8 bg-gray-50 min-h-full">
+        <div className="p-8 bg-gray-50 pb-20">
             <div className="max-w-6xl mx-auto">
                 <div className="flex items-center justify-between mb-8">
                     <div className="flex items-center gap-4">

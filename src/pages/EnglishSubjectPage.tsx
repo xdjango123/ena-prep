@@ -67,9 +67,17 @@ export default function EnglishSubjectPage() {
     timeSpent: 0
   });
 
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
   useEffect(() => {
     const loadedResults = JSON.parse(localStorage.getItem('english_test_results') || '{}');
     setTestResults(loadedResults);
+    
+    // Scroll to top when component mounts
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
   // Fetch statistics from database
@@ -123,6 +131,8 @@ export default function EnglishSubjectPage() {
 
   const handleSectionToggle = (section: 'practice' | 'quiz') => {
     setActiveSection(prev => (prev === section ? null : section));
+    // Scroll to top when switching sections
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleStart = (test: TestDetails) => {
@@ -131,13 +141,21 @@ export default function EnglishSubjectPage() {
     }
     setSelectedTest(test);
     setView('summary');
+    // Scroll to top when starting test
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const resumePractice = () => {
     setView('quiz');
+    // Scroll to top when resuming practice
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const startQuiz = () => setView('quiz');
+  const startQuiz = () => {
+    setView('quiz');
+    // Scroll to top when starting quiz
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const filteredPracticeTests = activeTopic === 'All' 
     ? practiceTests 
@@ -251,7 +269,7 @@ export default function EnglishSubjectPage() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 lg:p-6 space-y-6 pb-20">
       <SubjectHeader 
         subjectName="Anglais"
         icon={Languages}
