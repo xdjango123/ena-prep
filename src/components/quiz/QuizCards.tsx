@@ -53,16 +53,16 @@ const QuestionCard: React.FC<{
     
     // More robust comparison logic
     const isCorrect = (() => {
-        if (question.type === 'multiple-choice' && typeof question.correctAnswer === 'number') {
-            // For multiple choice, compare the selected option with the correct option text
-            const correctOptionText = question.options?.[question.correctAnswer];
-            return userAnswer === correctOptionText;
-        } else if (question.type === 'true-false') {
-            // For true/false, compare strings
-            return String(userAnswer).toLowerCase() === String(question.correctAnswer).toLowerCase();
-        }
-        // Fallback comparison
-        return userAnswer === correctAnswerValue;
+      if (question.type === 'multiple-choice' && typeof question.correctAnswer === 'number') {
+        // For multiple choice, compare the selected option with the correct option text
+        const correctOptionText = question.options?.[question.correctAnswer];
+        return userAnswer === correctOptionText;
+      } else if (question.type === 'true-false') {
+        // For true/false, compare strings
+        return String(userAnswer).toLowerCase() === String(question.correctAnswer).toLowerCase();
+      }
+      // Fallback comparison
+      return userAnswer === correctAnswerValue;
     })();
 
     // Ensure correctAnswerValue is always the correct option text for display
@@ -103,12 +103,10 @@ const QuestionCard: React.FC<{
 
     return (
         <div 
-            className={`w-full max-w-2xl mx-auto cursor-pointer transition-all duration-500 transform-gpu ${
-                isFlipped ? 'rotate-y-180' : ''
-            }`}
+            className="w-full max-w-2xl mx-auto cursor-pointer transition-all duration-500"
             onClick={toggleFlip}
         >
-            <div className={`relative w-full h-full ${isFlipped ? 'rotate-y-180' : ''}`}>
+            <div className="relative w-full h-full">
                 {/* Front of card */}
                 <div className={`w-full bg-white rounded-2xl shadow-lg p-6 lg:p-8 border-2 transition-all ${
                     isFlipped ? 'opacity-0' : 'opacity-100'
@@ -143,6 +141,9 @@ const QuestionCard: React.FC<{
                         }`}>
                             <div className="font-bold text-lg mb-2">
                                 {isCorrect ? 'Correct !' : 'Incorrect'}
+                            </div>
+                            <div className="text-sm mb-2">
+                                Votre réponse : {userAnswer || 'Aucune réponse'}
                             </div>
                             <div className="text-sm">
                                 La réponse correcte est : {displayCorrectAnswer}

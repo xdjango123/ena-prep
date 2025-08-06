@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Clock, CheckCircle, XCircle, SkipForward, Home, Trophy, Brain, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, Clock, CheckCircle, XCircle, SkipForward, Home, Trophy, Brain, ChevronLeft, ChevronRight, Repeat } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface Question {
@@ -157,7 +157,30 @@ export const QuizSeries: React.FC<QuizSeriesProps> = ({
   const handleAnswerSelect = (answer: string | number) => {
     if (!currentQuestion) return;
     setSelectedAnswer(answer);
+    
+    // Store the user's answer immediately
     setUserAnswers(prev => new Map(prev).set(currentQuestion.id, answer));
+    
+    // Check if answer is correct and update correct answers count
+    const isCorrect = (() => {
+      if (currentQuestion.type === 'multiple-choice' && typeof currentQuestion.correctAnswer === 'number') {
+        // For multiple choice, compare the selected index with the correct index
+        return answer === currentQuestion.correctAnswer;
+      } else if (currentQuestion.type === 'true-false') {
+        // For true/false, compare strings
+        return String(answer).toLowerCase() === String(currentQuestion.correctAnswer).toLowerCase();
+      }
+      // Fallback comparison
+      return answer === currentQuestion.correctAnswer;
+    })();
+
+    // Update correct answers count if this question hasn't been answered before
+    if (isCorrect && !answeredQuestions.has(currentQuestion.id)) {
+      setCorrectAnswers(prev => prev + 1);
+    }
+    
+    // Mark question as answered
+    setAnsweredQuestions(prev => new Set([...prev, currentQuestion.id]));
   };
 
   // Load previously selected answer when changing questions
@@ -181,9 +204,8 @@ export const QuizSeries: React.FC<QuizSeriesProps> = ({
     // More robust comparison logic
     const isCorrect = (() => {
       if (currentQuestion.type === 'multiple-choice' && typeof currentQuestion.correctAnswer === 'number') {
-        // For multiple choice, compare the selected option with the correct option text
-        const correctOptionText = currentQuestion.options?.[currentQuestion.correctAnswer];
-        return selectedAnswer === correctOptionText;
+        // For multiple choice, compare the selected index with the correct index
+        return selectedAnswer === currentQuestion.correctAnswer;
       } else if (currentQuestion.type === 'true-false') {
         // For true/false, compare strings
         return String(selectedAnswer).toLowerCase() === String(currentQuestion.correctAnswer).toLowerCase();
@@ -216,7 +238,7 @@ export const QuizSeries: React.FC<QuizSeriesProps> = ({
   };
 
   const handleNextQuestion = () => {
-    if (canGoNext) {
+    if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
       setSelectedAnswer(null);
       setShowResult(false);
@@ -307,7 +329,214 @@ export const QuizSeries: React.FC<QuizSeriesProps> = ({
   };
 
   if (isCompleted) {
-    return null;
+    // Calculate results
+    const correctAnswers = questions.reduce((count, q) => {
+      const userAnswer = userAnswers.get(q.id);
+      if (q.type === 'multiple-choice' && typeof q.correctAnswer === 'number') {
+        // For multiple choice, compare the selected index with the correct index
+        return userAnswer === q.correctAnswer ? count + 1 : count;
+      } else if (q.type === 'true-false') {
+        // For true/false, compare strings
+        return String(userAnswer).toLowerCase() === String(q.correctAnswer).toLowerCase() ? count + 1 : count;
+      }
+      // Fallback comparison
+      return userAnswer === q.correctAnswer ? count + 1 : count;
+    }, 0);
+    
+    const score = Math.round((correctAnswers / questions.length) * 100);
+    const timeSpent = duration - timeRemaining;
+
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col p-4">
+        <div className="max-w-4xl mx-auto w-full">
+          {/* Results Header */}
+          <div className="bg-white rounded-2xl shadow-lg p-8 mb-6">
+            <div className="text-center">
+              <h1 className="text-3xl font-bold text-gray-900 mb-4">Test Terminé !</h1>
+              <p className="text-gray-600 mb-8">Voici vos résultats pour {subject}</p>
+              
+              {/* Score and Stats */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className={`text-3xl font-bold ${getColorClasses(subjectColor, '600', 'text')}`}>{score}%</h3>
+                  <p className="text-sm text-gray-500">Score</p>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="text-3xl font-bold">{correctAnswers}/{questions.length}</h3>
+                  <p className="text-sm text-gray-500">Correct</p>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="text-3xl font-bold">{formatTime(timeSpent)}</h3>
+                  <p className="text-sm text-gray-500">Temps</p>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="text-3xl font-bold">{questions.length}</h3>
+                  <p className="text-sm text-gray-500">Questions</p>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row justify-center gap-4">
+                <button 
+                  onClick={() => {
+                    setCurrentQuestionIndex(0);
+                    setUserAnswers(new Map());
+                    setTimeRemaining(duration);
+                    setIsCompleted(false);
+                    setSelectedAnswer(null);
+                  }}
+                  className={`flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 rounded-lg ${getColorClasses(subjectColor, '500', 'bg')} text-white font-semibold hover:${getColorClasses(subjectColor, '600', 'bg')} transition-colors`}
+                >
+                  <Repeat className="w-5 h-5" />
+                  Refaire le test
+                </button>
+                <button 
+                  onClick={onExit}
+                  className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 rounded-lg bg-gray-200 text-gray-800 font-semibold hover:bg-gray-300 transition-colors"
+                >
+                  Retour
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Question Corrections */}
+          <div className="bg-white rounded-2xl shadow-lg p-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Corrections</h2>
+            <div className="space-y-6">
+              {questions.map((question, index) => {
+                const userAnswer = userAnswers.get(question.id);
+                const isCorrect = (() => {
+                  if (question.type === 'multiple-choice' && typeof question.correctAnswer === 'number') {
+                    // For multiple choice, compare the selected index with the correct index
+                    return userAnswer === question.correctAnswer;
+                  } else if (question.type === 'true-false') {
+                    return String(userAnswer).toLowerCase() === String(question.correctAnswer).toLowerCase();
+                  }
+                  return userAnswer === question.correctAnswer;
+                })();
+
+                const getCorrectAnswerText = () => {
+                  if (question.type === 'multiple-choice' && typeof question.correctAnswer === 'number') {
+                    return question.options?.[question.correctAnswer];
+                  }
+                  return question.correctAnswer;
+                };
+
+                return (
+                  <div key={question.id} className="border border-gray-200 rounded-lg p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <span className="text-sm font-medium text-gray-600">Question {index + 1}</span>
+                      {isCorrect ? (
+                        <CheckCircle className="w-5 h-5 text-green-500" />
+                      ) : (
+                        <XCircle className="w-5 h-5 text-red-500" />
+                      )}
+                    </div>
+                    
+                    <h3 className="font-semibold text-gray-900 mb-4">{question.question}</h3>
+                    
+                    {question.type === 'multiple-choice' && question.options && (
+                      <div className="space-y-2 mb-4">
+                        {question.options.map((option, optionIndex) => {
+                          const isSelected = userAnswer === optionIndex; // Compare with index, not text
+                          const isCorrectOption = optionIndex === question.correctAnswer;
+                          
+                          return (
+                            <div
+                              key={optionIndex}
+                              className={`flex items-center gap-3 p-3 rounded-lg ${
+                                isCorrectOption
+                                  ? 'bg-green-50 border border-green-200'
+                                  : isSelected && !isCorrectOption
+                                  ? 'bg-red-50 border border-red-200'
+                                  : 'bg-gray-50'
+                              }`}
+                            >
+                              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium ${
+                                isCorrectOption
+                                  ? 'bg-green-500 text-white'
+                                  : isSelected && !isCorrectOption
+                                  ? 'bg-red-500 text-white'
+                                  : 'bg-gray-300 text-gray-700'
+                              }`}>
+                                {String.fromCharCode(65 + optionIndex)}
+                              </div>
+                              <span className={isCorrectOption ? 'font-medium' : ''}>
+                                {option}
+                              </span>
+                              {isCorrectOption && (
+                                <CheckCircle className="w-4 h-4 text-green-500 ml-auto" />
+                              )}
+                              {isSelected && !isCorrectOption && (
+                                <XCircle className="w-4 h-4 text-red-500 ml-auto" />
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                    
+                    {question.type === 'true-false' && (
+                      <div className="space-y-2 mb-4">
+                        {['Vrai', 'Faux'].map((option, optionIndex) => {
+                          const answerValue = optionIndex === 0 ? 'Vrai' : 'Faux';
+                          const isSelected = userAnswer === answerValue;
+                          const isCorrectOption = String(question.correctAnswer).toLowerCase() === answerValue.toLowerCase();
+                          
+                          return (
+                            <div
+                              key={option}
+                              className={`flex items-center gap-3 p-3 rounded-lg ${
+                                isCorrectOption
+                                  ? 'bg-green-50 border border-green-200'
+                                  : isSelected && !isCorrectOption
+                                  ? 'bg-red-50 border border-red-200'
+                                  : 'bg-gray-50'
+                              }`}
+                            >
+                              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium ${
+                                isCorrectOption
+                                  ? 'bg-green-500 text-white'
+                                  : isSelected && !isCorrectOption
+                                  ? 'bg-red-500 text-white'
+                                  : 'bg-gray-300 text-gray-700'
+                              }`}>
+                                {String.fromCharCode(65 + optionIndex)}
+                              </div>
+                              <span className={isCorrectOption ? 'font-medium' : ''}>
+                                {option}
+                              </span>
+                              {isCorrectOption && (
+                                <CheckCircle className="w-4 h-4 text-green-500 ml-auto" />
+                              )}
+                              {isSelected && !isCorrectOption && (
+                                <XCircle className="w-4 h-4 text-red-500 ml-auto" />
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                    
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                      <p className="text-blue-800 text-sm">
+                        <strong>Réponse correcte :</strong> {getCorrectAnswerText()}
+                      </p>
+                      {question.explanation && (
+                        <p className="text-blue-800 text-sm mt-2">
+                          <strong>Explication :</strong> {question.explanation}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -413,8 +642,8 @@ export const QuizSeries: React.FC<QuizSeriesProps> = ({
           Précédent
         </button>
         <button 
-          onClick={handleNextQuestion}
-          className="flex items-center gap-2 px-6 py-3 rounded-lg bg-white text-gray-700 font-semibold shadow-sm hover:bg-gray-100"
+          onClick={currentQuestionIndex === questions.length - 1 ? handleFinishQuiz : handleNextQuestion}
+          className="flex items-center gap-2 px-6 py-3 rounded-lg bg-white text-gray-700 font-semibold shadow-sm hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {currentQuestionIndex === questions.length - 1 ? 'Terminer' : 'Suivant'}
           <ChevronRight className="w-5 h-5" />

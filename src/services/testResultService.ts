@@ -9,7 +9,7 @@ export class TestResultService {
     testNumber?: number
   ): Promise<boolean> {
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('test_results')
         .insert({
           user_id: userId,
@@ -17,7 +17,8 @@ export class TestResultService {
           category: category,
           test_number: testNumber || null,
           score: score,
-        });
+        })
+        .select();
 
       if (error) {
         console.error('Error saving test result:', error);

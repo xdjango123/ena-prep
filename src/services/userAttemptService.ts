@@ -10,7 +10,7 @@ export class UserAttemptService {
     score?: number
   ): Promise<boolean> {
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('user_attempts')
         .insert({
           user_id: userId,
@@ -19,7 +19,8 @@ export class UserAttemptService {
           sub_category: subCategory || null,
           test_number: testNumber || null,
           score: score || null,
-        });
+        })
+        .select();
 
       if (error) {
         console.error('Error saving user attempt:', error);

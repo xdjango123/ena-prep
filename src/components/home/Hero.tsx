@@ -230,7 +230,7 @@ export const Hero: React.FC = () => {
               variants={staggerItem}
               className="text-2xl md:text-2.5xl text-neutral-700 mb-10 max-w-3xl mx-auto leading-relaxed"
             >
-              Maîtrisez chaque épreuve avec notre accompagnement complet et affrontez le concours sans crainte.
+              Maîtriser le 1er tour avec les meilleurs outils
             </motion.p>
             
             <motion.div 

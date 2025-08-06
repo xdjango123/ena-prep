@@ -8,6 +8,7 @@ import { QuizResult } from '../components/quiz/QuizResult';
 import { getQuestionsBySubject, Question } from '../data/quizQuestions';
 import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
 import { TestResultService } from '../services/testResultService';
+import { UserAttemptService } from '../services/userAttemptService';
 import {
     TestDetails,
     ActionButton,
@@ -68,18 +69,39 @@ export default function LogicPage() {
 
     const pausedTestState = getQuizState('Logique');
 
+    // Load test results from database
+    useEffect(() => {
+        const loadTestResults = async () => {
+            if (!user?.id) return;
+            
+            try {
+                const attempts = await UserAttemptService.getUserAttemptsByCategory(user.id, 'LOG');
+                const practiceAttempts = attempts.filter(attempt => attempt.test_type === 'Practice');
+                
+                const results: Record<string, { score: number; timeSpent: number }> = {};
+                practiceAttempts.forEach(attempt => {
+                    if (attempt.test_number && attempt.score !== null) {
+                        const testId = `p${attempt.test_number}`;
+                        results[testId] = {
+                            score: attempt.score,
+                            timeSpent: 15 // Assuming 15 minutes per test
+                        };
+                    }
+                });
+                
+                setTestResults(results);
+            } catch (error) {
+                console.error('Error loading test results:', error);
+            }
+        };
+
+        loadTestResults();
+    }, [user?.id]);
+
     // Scroll to top when component mounts
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, []);
-
-    	useEffect(() => {
-		const loadedResults = JSON.parse(localStorage.getItem('logic_test_results') || '{}');
-		setTestResults(loadedResults);
-		
-		// Scroll to top when component mounts
-		window.scrollTo({ top: 0, behavior: 'smooth' });
-	}, []);
 
 	// Fetch statistics from database
 	useEffect(() => {
@@ -87,12 +109,12 @@ export default function LogicPage() {
 			if (!user?.id) return;
 			
 			try {
-				// Get average score for LOG category
-				const score = await TestResultService.getAverageScore(user.id, 'LOG');
+				// Get average score for LOG category from user_attempts table
+				const score = await UserAttemptService.getAverageScore(user.id, 'LOG', 'Practice');
 				
-				// Get test count for LOG category
-				const testResults = await TestResultService.getTestResultsByCategory(user.id, 'LOG');
-				const testsTaken = testResults.length;
+				// Get test count for LOG category from user_attempts table
+				const attempts = await UserAttemptService.getUserAttemptsByCategory(user.id, 'LOG');
+				const testsTaken = attempts.filter(attempt => attempt.test_type === 'Practice').length;
 				
 				// Calculate time spent (assuming 15 minutes per test for now)
 				const timeSpent = Math.round(testsTaken * 15 / 60); // Convert to hours
@@ -109,6 +131,46 @@ export default function LogicPage() {
 
 		fetchStatistics();
 	}, [user?.id]);
+
+	// Function to refresh statistics
+	const refreshStatistics = async () => {
+		if (!user?.id) return;
+		
+		try {
+			// Get average score for LOG category from user_attempts table
+			const score = await UserAttemptService.getAverageScore(user.id, 'LOG', 'Practice');
+			
+			// Get test count for LOG category from user_attempts table
+			const attempts = await UserAttemptService.getUserAttemptsByCategory(user.id, 'LOG');
+			const testsTaken = attempts.filter(attempt => attempt.test_type === 'Practice').length;
+			
+			// Calculate time spent (assuming 15 minutes per test for now)
+			const timeSpent = Math.round(testsTaken * 15 / 60); // Convert to hours
+			
+			setStatistics({
+				score,
+				testsTaken,
+				timeSpent
+			});
+
+			// Also refresh individual test results
+			const practiceAttempts = attempts.filter(attempt => attempt.test_type === 'Practice');
+			const results: Record<string, { score: number; timeSpent: number }> = {};
+			practiceAttempts.forEach(attempt => {
+				if (attempt.test_number && attempt.score !== null) {
+					const testId = `p${attempt.test_number}`;
+					results[testId] = {
+						score: attempt.score,
+						timeSpent: 15 // Assuming 15 minutes per test
+					};
+				}
+			});
+			
+			setTestResults(results);
+		} catch (error) {
+			console.error('Error refreshing statistics:', error);
+		}
+	};
 
 	// Load questions from database
 	useEffect(() => {
@@ -177,14 +239,13 @@ export default function LogicPage() {
                 questions={questions}
                 duration={selectedTest.time * 60}
                 onExit={() => { setView('main'); setActiveSection(null); }}
-                onFinish={(answers, timeSpent) => {
+                onFinish={async (answers, timeSpent) => {
 					const correctAnswers = questions.reduce((count, q) => {
 						// More robust comparison logic
 						const isCorrect = (() => {
 							if (q.type === 'multiple-choice' && typeof q.correctAnswer === 'number') {
-								// For multiple choice, compare the selected option with the correct option text
-								const correctOptionText = q.options?.[q.correctAnswer];
-								return answers.get(q.id) === correctOptionText;
+								// For multiple choice, compare the selected index with the correct index
+								return answers.get(q.id) === q.correctAnswer;
 							} else if (q.type === 'true-false') {
 								// For true/false, compare strings
 								return String(answers.get(q.id)).toLowerCase() === String(q.correctAnswer).toLowerCase();
@@ -196,9 +257,32 @@ export default function LogicPage() {
 					}, 0);
 					const score = Math.round((correctAnswers / questions.length) * 100);
 
-					const newResults = { ...testResults, [selectedTest.id]: { score, timeSpent } };
-					localStorage.setItem('logic_test_results', JSON.stringify(newResults));
-					setTestResults(newResults);
+					// Save to database
+					if (user?.id && selectedTest) {
+						try {
+							await TestResultService.saveTestResult(
+								user.id,
+								'Practice',
+								'LOG',
+								score,
+								parseInt(selectedTest.id.replace('p', '')) // Extract test number from id
+							);
+							
+							await UserAttemptService.saveUserAttempt(
+								user.id,
+								'Practice',
+								'LOG',
+								undefined, // subCategory
+								parseInt(selectedTest.id.replace('p', '')), // testNumber
+								score // score
+							);
+							
+							// Refresh statistics after saving
+							await refreshStatistics();
+						} catch (error) {
+							console.error('Error saving test result to database:', error);
+						}
+					}
 
 					setLastResult({
 						score,

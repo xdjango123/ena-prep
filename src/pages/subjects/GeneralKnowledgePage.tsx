@@ -8,6 +8,7 @@ import { QuizResult } from '../../components/quiz/QuizResult';
 import { getQuestionsBySubject, Question } from '../../data/quizQuestions';
 import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
 import { TestResultService } from '../../services/testResultService';
+import { UserAttemptService } from '../../services/userAttemptService';
 import {
 	TestDetails,
 	ActionButton,
@@ -53,7 +54,7 @@ const recommendation = "You're doing great in History! Try focusing on Current E
 export const GeneralKnowledgePage: React.FC = () => {
 	const { profile, user } = useSupabaseAuth();
 	const [view, setView] = useState<ViewType>('main');
-	const [activeSection, setActiveSection] = useState<'quiz' | 'practice' | null>(null);
+	const [activeSection, setActiveSection] = useState<'quiz' | 'practice' | null>('quiz');
 	const [selectedTest, setSelectedTest] = useState<TestDetails | null>(null);
 	const [lastAnswers, setLastAnswers] = useState<Map<number, string | number>>(new Map());
     const [activeTopic, setActiveTopic] = useState('All');
@@ -71,10 +72,34 @@ export const GeneralKnowledgePage: React.FC = () => {
 
 	const pausedTestState = getQuizState('Culture Générale');
 
+	// Load test results from database
 	useEffect(() => {
-		const loadedResults = JSON.parse(localStorage.getItem('culture_generale_test_results') || '{}');
-		setTestResults(loadedResults);
-	}, []);
+		const loadTestResults = async () => {
+			if (!user?.id) return;
+			
+			try {
+				const attempts = await UserAttemptService.getUserAttemptsByCategory(user.id, 'CG');
+				const practiceAttempts = attempts.filter(attempt => attempt.test_type === 'Practice');
+				
+				const results: Record<string, { score: number; timeSpent: number }> = {};
+				practiceAttempts.forEach(attempt => {
+					if (attempt.test_number && attempt.score !== null) {
+						const testId = `p${attempt.test_number}`;
+						results[testId] = {
+							score: attempt.score,
+							timeSpent: 15 // Assuming 15 minutes per test
+						};
+					}
+				});
+				
+				setTestResults(results);
+			} catch (error) {
+				console.error('Error loading test results:', error);
+			}
+		};
+
+		loadTestResults();
+	}, [user?.id]);
 
 	// Fetch statistics from database
 	useEffect(() => {
@@ -82,12 +107,12 @@ export const GeneralKnowledgePage: React.FC = () => {
 			if (!user?.id) return;
 			
 			try {
-				// Get average score for CG category
-				const score = await TestResultService.getAverageScore(user.id, 'CG');
+				// Get average score for CG category from user_attempts table
+				const score = await UserAttemptService.getAverageScore(user.id, 'CG', 'Practice');
 				
-				// Get test count for CG category
-				const testResults = await TestResultService.getTestResultsByCategory(user.id, 'CG');
-				const testsTaken = testResults.length;
+				// Get test count for CG category from user_attempts table
+				const attempts = await UserAttemptService.getUserAttemptsByCategory(user.id, 'CG');
+				const testsTaken = attempts.filter(attempt => attempt.test_type === 'Practice').length;
 				
 				// Calculate time spent (assuming 15 minutes per test for now)
 				const timeSpent = Math.round(testsTaken * 15 / 60); // Convert to hours
@@ -105,6 +130,46 @@ export const GeneralKnowledgePage: React.FC = () => {
 		fetchStatistics();
 	}, [user?.id]);
 
+	// Function to refresh statistics
+	const refreshStatistics = async () => {
+		if (!user?.id) return;
+		
+		try {
+			// Get average score for CG category from user_attempts table
+			const score = await UserAttemptService.getAverageScore(user.id, 'CG', 'Practice');
+			
+			// Get test count for CG category from user_attempts table
+			const attempts = await UserAttemptService.getUserAttemptsByCategory(user.id, 'CG');
+			const testsTaken = attempts.filter(attempt => attempt.test_type === 'Practice').length;
+			
+			// Calculate time spent (assuming 15 minutes per test for now)
+			const timeSpent = Math.round(testsTaken * 15 / 60); // Convert to hours
+			
+			setStatistics({
+				score,
+				testsTaken,
+				timeSpent
+			});
+
+			// Also refresh individual test results
+			const practiceAttempts = attempts.filter(attempt => attempt.test_type === 'Practice');
+			const results: Record<string, { score: number; timeSpent: number }> = {};
+			practiceAttempts.forEach(attempt => {
+				if (attempt.test_number && attempt.score !== null) {
+					const testId = `p${attempt.test_number}`;
+					results[testId] = {
+						score: attempt.score,
+						timeSpent: 15 // Assuming 15 minutes per test
+					};
+				}
+			});
+			
+			setTestResults(results);
+		} catch (error) {
+			console.error('Error refreshing statistics:', error);
+		}
+	};
+
 	// Load questions from database
 	useEffect(() => {
 		const loadQuestions = async () => {
@@ -112,7 +177,7 @@ export const GeneralKnowledgePage: React.FC = () => {
 			try {
 				const examType = profile?.exam_type as 'CM' | 'CMS' | 'CS' | undefined;
 				const loadedQuestions = await getQuestionsBySubject('culture-generale', examType);
-				setQuestions(loadedQuestions);
+				setQuestions(loadedQuestions.slice(0, 10)); // Limit to 10 questions
 			} catch (error) {
 				console.error('Error loading questions:', error);
 			} finally {
@@ -184,11 +249,79 @@ export const GeneralKnowledgePage: React.FC = () => {
 				</div>
 			);
 		}
+
+		if (isLoadingQuestions) {
+			return (
+				<div className="flex items-center justify-center min-h-screen">
+					<div className="text-center">
+						<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+						<p className="mt-4 text-gray-600">Chargement des questions...</p>
+					</div>
+				</div>
+			);
+		}
+
 		return (
-			<QuizCards
+			<QuizSeries
 				subject="Culture Générale"
 				subjectColor="blue"
+				questions={questions}
+				duration={selectedTest.time * 60}
 				onExit={() => { setView('main'); setActiveSection(null); }}
+				onFinish={async (answers, timeSpent) => {
+					const correctAnswers = questions.reduce((count, q) => {
+						// More robust comparison logic
+						const isCorrect = (() => {
+							if (q.type === 'multiple-choice' && typeof q.correctAnswer === 'number') {
+								// For multiple choice, compare the selected index with the correct index
+								return answers.get(q.id) === q.correctAnswer;
+							} else if (q.type === 'true-false') {
+								// For true/false, compare strings
+								return String(answers.get(q.id)).toLowerCase() === String(q.correctAnswer).toLowerCase();
+							}
+							// Fallback comparison
+							return answers.get(q.id) === q.correctAnswer;
+						})();
+						return isCorrect ? count + 1 : count;
+					}, 0);
+					const score = Math.round((correctAnswers / questions.length) * 100);
+
+					// Save to database
+					if (user?.id && selectedTest) {
+						try {
+							await TestResultService.saveTestResult(
+								user.id,
+								'Practice',
+								'CG',
+								score,
+								parseInt(selectedTest.id.replace('p', '')) // Extract test number from id
+							);
+							
+							await UserAttemptService.saveUserAttempt(
+								user.id,
+								'Practice',
+								'CG',
+								undefined, // subCategory
+								parseInt(selectedTest.id.replace('p', '')), // testNumber
+								score // score
+							);
+							
+							// Refresh statistics after saving
+							await refreshStatistics();
+						} catch (error) {
+							console.error('Error saving test result to database:', error);
+						}
+					}
+
+					setLastResult({
+						score,
+						correctAnswers,
+						totalQuestions: questions.length,
+						timeSpent
+					});
+					setLastAnswers(answers);
+					setView('results');
+				}}
 			/>
 		);
 	}

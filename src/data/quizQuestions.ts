@@ -286,16 +286,7 @@ export const getQuestionsBySubject = async (subject: string, examType?: 'CM' | '
     });
   } catch (error) {
     console.error('Error fetching questions from database:', error);
-    // Fallback to hardcoded questions - limit to 10
-    switch (subject) {
-      case 'culture-generale':
-        return generalKnowledgeQuestions.slice(0, 10);
-      case 'english':
-        return englishQuestions.slice(0, 10);
-      case 'logique':
-        return logicQuestions.slice(0, 10);
-      default:
-        return [];
-    }
+    // Don't fallback to hardcoded questions - throw error to identify the issue
+    throw new Error(`Failed to fetch questions for ${subject} with exam type ${examType}: ${error}`);
   }
 }; 

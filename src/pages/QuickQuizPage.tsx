@@ -8,140 +8,9 @@ import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
 import { VisitorService } from '../services/visitorService';
 import { TestResultService } from '../services/testResultService';
 import { QuestionService, QuestionWithPassage } from '../services/questionService';
+import { getQuestionsBySubject } from '../data/quizQuestions';
 
-// Sample quiz data - in a real app this would come from an API
-const quizData = [
-  // Culture Générale
-  {
-    id: 1,
-    subject: 'Culture Générale',
-    question: "Quel philosophe des Lumières a écrit 'L'Esprit des lois' ?",
-    options: ['Voltaire', 'Montesquieu', 'Rousseau', 'Diderot'],
-    correctAnswer: 1,
-    explanation: "Montesquieu a publié 'L'Esprit des lois' en 1748, œuvre fondamentale sur la séparation des pouvoirs."
-  },
-  {
-    id: 2,
-    subject: 'Culture Générale',
-    question: "En quelle année la France a-t-elle adhéré à la Communauté européenne ?",
-    options: ['1951', '1957', '1973', '1986'],
-    correctAnswer: 1,
-    explanation: "La France fait partie des six pays fondateurs de la CEE en 1957 avec le traité de Rome."
-  },
-  {
-    id: 3,
-    subject: 'Culture Générale',
-    question: "Qui a présidé la Commission européenne de 1985 à 1995 ?",
-    options: ['Jacques Santer', 'Jacques Delors', 'Romano Prodi', 'José Manuel Barroso'],
-    correctAnswer: 1,
-    explanation: "Jacques Delors a marqué l'histoire européenne en présidant la Commission de 1985 à 1995."
-  },
-  {
-    id: 4,
-    subject: 'Culture Générale',
-    question: "Quel est le principe fondamental de la laïcité française ?",
-    options: ['Séparation Église-État', 'Liberté religieuse', 'Égalité des cultes', 'Toutes les réponses'],
-    correctAnswer: 3,
-    explanation: "La laïcité française repose sur ces trois principes complémentaires et indissociables."
-  },
-  {
-    id: 5,
-    subject: 'Culture Générale',
-    question: "Quel traité a créé l'Union européenne ?",
-    options: ['Traité de Rome', 'Traité de Maastricht', 'Traité de Lisbonne', 'Traité de Nice'],
-    correctAnswer: 1,
-    explanation: "Le traité de Maastricht, signé en 1992, a créé l'Union européenne."
-  },
-  
-  // Logique
-  {
-    id: 6,
-    subject: 'Logique',
-    question: "Si tous les A sont B et tous les B sont C, alors :",
-    options: ['Tous les C sont A', 'Tous les A sont C', 'Aucun A n\'est C', 'Impossible à déterminer'],
-    correctAnswer: 1,
-    explanation: "Par transitivité logique, si A⊆B et B⊆C, alors A⊆C."
-  },
-  {
-    id: 7,
-    subject: 'Logique',
-    question: "Dans une suite : 2, 6, 18, 54, ... Quel est le nombre suivant ?",
-    options: ['108', '162', '216', '270'],
-    correctAnswer: 1,
-    explanation: "Chaque terme est multiplié par 3 : 54 × 3 = 162."
-  },
-  {
-    id: 8,
-    subject: 'Logique',
-    question: "Si Pierre est plus grand que Paul et Paul est plus grand que Jacques, alors :",
-    options: ['Jacques est le plus petit', 'Pierre est le plus grand', 'Paul est de taille moyenne', 'Toutes les réponses'],
-    correctAnswer: 3,
-    explanation: "Toutes ces propositions découlent logiquement de la relation d'ordre donnée."
-  },
-  {
-    id: 9,
-    subject: 'Logique',
-    question: "Quelle est la négation de 'Tous les chats sont noirs' ?",
-    options: ['Aucun chat n\'est noir', 'Certains chats ne sont pas noirs', 'Tous les chats sont blancs', 'La plupart des chats ne sont pas noirs'],
-    correctAnswer: 1,
-    explanation: "La négation de 'tous' est 'au moins un... ne pas', soit 'certains ne sont pas'."
-  },
-  {
-    id: 10,
-    subject: 'Logique',
-    question: "Dans une série : 1, 4, 9, 16, 25, ... Quel est le motif ?",
-    options: ['Nombres premiers', 'Carrés parfaits', 'Multiples de 3', 'Suite de Fibonacci'],
-    correctAnswer: 1,
-    explanation: "Ce sont les carrés des nombres entiers : 1², 2², 3², 4², 5²..."
-  },
-  
-  // Anglais
-  {
-    id: 11,
-    subject: 'Anglais',
-    question: "Which word best completes: 'The government's economic policy has had a significant _____ on unemployment.'",
-    options: ['affect', 'effect', 'effort', 'efficient'],
-    correctAnswer: 1,
-    explanation: "'Effect' est un nom qui signifie 'résultat' ou 'conséquence'."
-  },
-  {
-    id: 12,
-    subject: 'Anglais',
-    question: "Choose the correct form: 'If I _____ you, I would accept the offer.'",
-    options: ['was', 'were', 'am', 'would be'],
-    correctAnswer: 1,
-    explanation: "'Were' est utilisé dans les conditionnels irréels avec tous les pronoms."
-  },
-  {
-    id: 13,
-    subject: 'Anglais',
-    question: "What does 'unprecedented' mean?",
-    options: ['Expected', 'Never done before', 'Very common', 'Slightly unusual'],
-    correctAnswer: 1,
-    explanation: "'Unprecedented' signifie 'sans précédent', jamais fait auparavant."
-  },
-  {
-    id: 14,
-    subject: 'Anglais',
-    question: "Which sentence is grammatically correct?",
-    options: [
-      'Neither of the proposals are acceptable',
-      'Neither of the proposals is acceptable', 
-      'Neither proposals are acceptable',
-      'Neither proposal are acceptable'
-    ],
-    correctAnswer: 1,
-    explanation: "'Neither' est singulier et requiert 'is', pas 'are'."
-  },
-  {
-    id: 15,
-    subject: 'Anglais',
-    question: "The word 'comprehensive' is closest in meaning to:",
-    options: ['Complex', 'Complete', 'Complicated', 'Competitive'],
-    correctAnswer: 1,
-    explanation: "'Comprehensive' signifie 'complet' ou 'exhaustif'."
-  }
-];
+// Remove the hardcoded quizData array and replace with dynamic fetching
 
 const examTypes = [
   { value: '', label: 'Sélectionnez votre niveau' },
@@ -152,18 +21,33 @@ const examTypes = [
 
 type QuizState = 'intro' | 'inProgress' | 'results';
 
+interface Question {
+  id: number;
+  type: 'multiple-choice' | 'true-false' | 'fill-blank' | 'matching';
+  question: string;
+  options?: string[];
+  correctAnswer: string | number;
+  explanation?: string;
+  difficulty: 'easy' | 'medium' | 'hard';
+  subject: string;
+}
+
 const QuickQuizPage: React.FC = () => {
   const { user, logUserAttempt } = useSupabaseAuth();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  // Use state for examType so user can change it before starting
   const [examType, setExamType] = useState(searchParams.get('type') || '');
   const [quizState, setQuizState] = useState<QuizState>('intro');
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [userAnswers, setUserAnswers] = useState<(number | null)[]>(new Array(15).fill(null));
+  const [userAnswers, setUserAnswers] = useState<(number | null)[]>([]);
   const [timeLeft, setTimeLeft] = useState(600); // 10 minutes in seconds
   const [quizStarted, setQuizStarted] = useState(false);
   const [visitorId, setVisitorId] = useState<string | null>(null);
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const { profile } = useSupabaseAuth();
 
   useEffect(() => {
     // Track visitor when component mounts
@@ -175,6 +59,13 @@ const QuickQuizPage: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    // Load questions when exam type changes
+    if (examType && quizState === 'intro') {
+      loadQuestions();
+    }
+  }, [examType]);
+
+  useEffect(() => {
     if (quizStarted && timeLeft > 0 && quizState === 'inProgress') {
       const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
       return () => clearTimeout(timer);
@@ -182,6 +73,56 @@ const QuickQuizPage: React.FC = () => {
       handleFinishQuiz();
     }
   }, [timeLeft, quizStarted, quizState]);
+
+  const loadQuestions = async () => {
+    if (!examType) return;
+    
+    setLoading(true);
+    setError(null);
+    try {
+      console.log('Loading questions for exam type:', examType);
+      
+      // Fetch questions for each subject based on exam type
+      const cgQuestions = await getQuestionsBySubject('culture-generale', examType as 'CM' | 'CMS' | 'CS');
+      const logicQuestions = await getQuestionsBySubject('logique', examType as 'CM' | 'CMS' | 'CS');
+      const englishQuestions = await getQuestionsBySubject('english', examType as 'CM' | 'CMS' | 'CS');
+
+      console.log('Questions loaded:', {
+        cg: cgQuestions.length,
+        logic: logicQuestions.length,
+        english: englishQuestions.length,
+        cgSample: cgQuestions[0]?.question,
+        logicSample: logicQuestions[0]?.question,
+        englishSample: englishQuestions[0]?.question
+      });
+
+      // Check if we have enough questions
+      if (cgQuestions.length === 0 && logicQuestions.length === 0 && englishQuestions.length === 0) {
+        throw new Error('Aucune question disponible pour ce niveau d\'examen. Veuillez réessayer plus tard.');
+      }
+
+      // Take 5 questions from each subject and shuffle them
+      const allQuestions = [
+        ...cgQuestions.slice(0, 5).map(q => ({ ...q, subject: 'Culture Générale' })),
+        ...logicQuestions.slice(0, 5).map(q => ({ ...q, subject: 'Logique' })),
+        ...englishQuestions.slice(0, 5).map(q => ({ ...q, subject: 'Anglais' }))
+      ];
+
+      console.log('Combined questions:', allQuestions.length);
+      console.log('Sample questions:', allQuestions.slice(0, 3).map(q => q.question));
+
+      // Shuffle the questions
+      const shuffledQuestions = allQuestions.sort(() => Math.random() - 0.5);
+      
+      setQuestions(shuffledQuestions);
+      setUserAnswers(new Array(shuffledQuestions.length).fill(null));
+    } catch (error) {
+      console.error('Error loading questions:', error);
+      setError(error instanceof Error ? error.message : 'Erreur lors du chargement des questions');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -198,10 +139,24 @@ const QuickQuizPage: React.FC = () => {
     }
   };
 
-  const handleStartQuiz = () => {
+  const handleStartQuiz = async () => {
     if (!examType) return;
-    setQuizState('inProgress');
-    setQuizStarted(true);
+    
+    if (error) {
+      // If there's an error, try to load questions again
+      await loadQuestions();
+      return;
+    }
+    
+    if (questions.length === 0) {
+      // If no questions loaded yet, load them first
+      await loadQuestions();
+    }
+    
+    if (questions.length > 0) {
+      setQuizState('inProgress');
+      setQuizStarted(true);
+    }
   };
 
   const handleAnswerSelect = (answerIndex: number) => {
@@ -211,7 +166,7 @@ const QuickQuizPage: React.FC = () => {
   };
 
   const handleNextQuestion = () => {
-    if (currentQuestion < quizData.length - 1) {
+    if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
     } else {
       handleFinishQuiz();
@@ -257,11 +212,26 @@ const QuickQuizPage: React.FC = () => {
   const calculateScore = () => {
     let correct = 0;
     userAnswers.forEach((answer, index) => {
-      if (answer === quizData[index].correctAnswer) {
+      const question = questions[index];
+      if (!question) return;
+      
+      let isCorrect = false;
+      if (question.type === 'multiple-choice' && typeof question.correctAnswer === 'number') {
+        const correctOptionText = question.options?.[question.correctAnswer];
+        isCorrect = answer === question.correctAnswer;
+      } else if (question.type === 'true-false') {
+        // For true-false, answer is 0 for "Vrai" and 1 for "Faux"
+        const correctAnswerIndex = String(question.correctAnswer).toLowerCase() === 'vrai' ? 0 : 1;
+        isCorrect = answer === correctAnswerIndex;
+      } else {
+        isCorrect = answer === question.correctAnswer;
+      }
+      
+      if (isCorrect) {
         correct++;
       }
     });
-    return { correct, total: quizData.length, percentage: Math.round((correct / quizData.length) * 100) };
+    return { correct, total: questions.length, percentage: Math.round((correct / questions.length) * 100) };
   };
 
   const getSubjectIcon = (subject: string) => {
@@ -351,10 +321,21 @@ const QuickQuizPage: React.FC = () => {
                   Testez votre niveau avec ce quiz express adapté au concours {examType ? getExamLabel(examType) : '...'}.
                   Vous aurez 10 minutes pour répondre à 15 questions réparties équitablement sur les trois matières principales.
                 </p>
+                {error && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <p className="text-red-800 text-sm">{error}</p>
+                    <button 
+                      onClick={loadQuestions}
+                      className="mt-2 text-red-600 hover:text-red-800 underline text-sm"
+                    >
+                      Réessayer
+                    </button>
+                  </div>
+                )}
               </div>
               <div className="mt-4 flex flex-col items-center space-y-4">
-                <Button size="lg" onClick={handleStartQuiz} className="w-full md:w-72" disabled={!examType}>
-                  Commencer le quiz
+                <Button size="lg" onClick={handleStartQuiz} className="w-full md:w-72" disabled={!examType || loading}>
+                  {loading ? 'Chargement...' : error ? 'Réessayer' : 'Commencer le quiz'}
                 </Button>
               </div>
             </motion.div>
@@ -367,8 +348,21 @@ const QuickQuizPage: React.FC = () => {
 
   // Quiz in Progress
   if (quizState === 'inProgress') {
-    const question = quizData[currentQuestion];
-    const progress = ((currentQuestion + 1) / quizData.length) * 100;
+    if (loading || questions.length === 0) {
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-neutral-100 to-white flex items-center justify-center">
+          <Container>
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Chargement des questions...</p>
+            </div>
+          </Container>
+        </div>
+      );
+    }
+
+    const question = questions[currentQuestion];
+    const progress = ((currentQuestion + 1) / questions.length) * 100;
 
     return (
       <div className="min-h-screen bg-gradient-to-br from-neutral-100 to-white">
@@ -382,7 +376,7 @@ const QuickQuizPage: React.FC = () => {
                   {formatTime(timeLeft)}
                 </div>
                 <span className="text-neutral-600">
-                  Question {currentQuestion + 1} sur {quizData.length}
+                  Question {currentQuestion + 1} sur {questions.length}
                 </span>
               </div>
               <div className="flex items-center gap-2">
@@ -418,7 +412,7 @@ const QuickQuizPage: React.FC = () => {
               </h2>
               
               <div className="space-y-4 mb-8">
-                {question.options.map((option, index) => (
+                {question.options && question.type === 'multiple-choice' && question.options.map((option, index) => (
                   <button
                     key={index}
                     onClick={() => handleAnswerSelect(index)}
@@ -440,6 +434,48 @@ const QuickQuizPage: React.FC = () => {
                     </div>
                   </button>
                 ))}
+                {question.type === 'true-false' && (
+                  <>
+                    <button
+                      onClick={() => handleAnswerSelect(0)}
+                      className={`w-full text-left p-4 rounded-lg border-2 transition-all duration-200 ${
+                        userAnswers[currentQuestion] === 0
+                          ? 'border-primary-500 bg-primary-50'
+                          : 'border-neutral-200 hover:border-primary-200 hover:bg-neutral-50'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center text-sm font-medium ${
+                          userAnswers[currentQuestion] === 0
+                            ? 'border-primary-500 bg-primary-500 text-white'
+                            : 'border-neutral-300'
+                        }`}>
+                          A
+                        </div>
+                        <span>Vrai</span>
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => handleAnswerSelect(1)}
+                      className={`w-full text-left p-4 rounded-lg border-2 transition-all duration-200 ${
+                        userAnswers[currentQuestion] === 1
+                          ? 'border-primary-500 bg-primary-50'
+                          : 'border-neutral-200 hover:border-primary-200 hover:bg-neutral-50'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center text-sm font-medium ${
+                          userAnswers[currentQuestion] === 1
+                            ? 'border-primary-500 bg-primary-500 text-white'
+                            : 'border-neutral-300'
+                        }`}>
+                          B
+                        </div>
+                        <span>Faux</span>
+                      </div>
+                    </button>
+                  </>
+                )}
               </div>
               
               <div className="flex justify-between">
@@ -455,7 +491,7 @@ const QuickQuizPage: React.FC = () => {
                   onClick={handleNextQuestion}
                   disabled={userAnswers[currentQuestion] === null}
                 >
-                  {currentQuestion === quizData.length - 1 ? 'Terminer' : 'Suivant'}
+                  {currentQuestion === questions.length - 1 ? 'Terminer' : 'Suivant'}
                 </Button>
               </div>
             </div>
@@ -466,6 +502,21 @@ const QuickQuizPage: React.FC = () => {
   }
 
   // Quiz Results
+  if (questions.length === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-neutral-100 to-white flex items-center justify-center">
+        <Container>
+          <div className="text-center">
+            <p className="text-gray-600">Aucune question disponible.</p>
+            <Button onClick={() => navigate('/')} className="mt-4">
+              Retour à l'accueil
+            </Button>
+          </div>
+        </Container>
+      </div>
+    );
+  }
+  
   const score = calculateScore();
   
   return (
@@ -505,92 +556,251 @@ const QuickQuizPage: React.FC = () => {
           </div>
 
           {/* Question Corrections */}
-          {!user && (
-            <div className="relative mt-4">
-              {/* 1 full card */}
-              <div className="bg-white border border-neutral-200 rounded-lg p-6 mb-4 shadow">
-                <div className="flex items-start gap-4 mb-4">
-                  <span className="text-lg">{getSubjectIcon(quizData[0].subject)}</span>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-sm font-medium text-neutral-600">Question 1</span>
-                      <span className="text-xs text-neutral-500">• {quizData[0].subject}</span>
-                      {userAnswers[0] === quizData[0].correctAnswer ?
-                        <CheckCircle className="w-5 h-5 text-green-500" /> :
-                        <XCircle className="w-5 h-5 text-red-500" />
-                      }
-                    </div>
-                    <h3 className="font-semibold text-neutral-900 mb-4">{quizData[0].question}</h3>
-                    <div className="space-y-2 mb-4">
-                      {quizData[0].options.map((option, optionIndex) => (
-                        <div
-                          key={optionIndex}
-                          className={`flex items-center gap-3 p-3 rounded-lg ${
-                            optionIndex === quizData[0].correctAnswer
-                              ? 'bg-green-50 border border-green-200'
-                              : userAnswers[0] === optionIndex && userAnswers[0] !== quizData[0].correctAnswer
-                              ? 'bg-red-50 border border-red-200'
-                              : 'bg-neutral-50'
-                          }`}
-                        >
+          <div className="relative mt-4">
+            {/* 1st full card */}
+            <div className="bg-white border border-neutral-200 rounded-lg p-6 mb-4 shadow">
+              <div className="flex items-start gap-4 mb-4">
+                <span className="text-lg">{getSubjectIcon(questions[0]?.subject || 'N/A')}</span>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-sm font-medium text-neutral-600">Question 1</span>
+                    <span className="text-xs text-neutral-500">• {questions[0]?.subject || 'N/A'}</span>
+                    {userAnswers[0] === questions[0]?.correctAnswer ?
+                      <CheckCircle className="w-5 h-5 text-green-500" /> :
+                      <XCircle className="w-5 h-5 text-red-500" />
+                    }
+                  </div>
+                  <h3 className="font-semibold text-neutral-900 mb-4">{questions[0]?.question || 'N/A'}</h3>
+                  <div className="space-y-2 mb-4">
+                    {questions[0]?.options && questions[0]?.type === 'multiple-choice' && questions[0]?.options.map((option, optionIndex) => (
+                      <div
+                        key={optionIndex}
+                        className={`flex items-center gap-3 p-3 rounded-lg ${
+                          optionIndex === questions[0]?.correctAnswer
+                            ? 'bg-green-50 border border-green-200'
+                            : userAnswers[0] === optionIndex && userAnswers[0] !== questions[0]?.correctAnswer
+                            ? 'bg-red-50 border border-red-200'
+                            : 'bg-neutral-50'
+                        }`}
+                      >
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium ${
+                          optionIndex === questions[0]?.correctAnswer
+                            ? 'bg-green-500 text-white'
+                            : userAnswers[0] === optionIndex && userAnswers[0] !== questions[0]?.correctAnswer
+                            ? 'bg-red-500 text-white'
+                            : 'bg-neutral-300 text-neutral-700'
+                        }`}>
+                          {String.fromCharCode(65 + optionIndex)}
+                        </div>
+                        <span className={optionIndex === questions[0]?.correctAnswer ? 'font-medium' : ''}>
+                          {option}
+                        </span>
+                        {optionIndex === questions[0]?.correctAnswer && (
+                          <CheckCircle className="w-4 h-4 text-green-500 ml-auto" />
+                        )}
+                        {userAnswers[0] === optionIndex && userAnswers[0] !== questions[0]?.correctAnswer && (
+                          <XCircle className="w-4 h-4 text-red-500 ml-auto" />
+                        )}
+                      </div>
+                    ))}
+                    {questions[0]?.type === 'true-false' && (
+                      <>
+                        <div className={`flex items-center gap-3 p-3 rounded-lg ${
+                          String(questions[0]?.correctAnswer).toLowerCase() === 'vrai'
+                            ? 'bg-green-50 border border-green-200'
+                            : userAnswers[0] === 0 && String(questions[0]?.correctAnswer).toLowerCase() !== 'vrai'
+                            ? 'bg-red-50 border border-red-200'
+                            : 'bg-neutral-50'
+                        }`}>
                           <div className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium ${
-                            optionIndex === quizData[0].correctAnswer
+                            String(questions[0]?.correctAnswer).toLowerCase() === 'vrai'
                               ? 'bg-green-500 text-white'
-                              : userAnswers[0] === optionIndex && userAnswers[0] !== quizData[0].correctAnswer
+                              : userAnswers[0] === 0 && String(questions[0]?.correctAnswer).toLowerCase() !== 'vrai'
                               ? 'bg-red-500 text-white'
                               : 'bg-neutral-300 text-neutral-700'
                           }`}>
-                            {String.fromCharCode(65 + optionIndex)}
+                            A
                           </div>
-                          <span className={optionIndex === quizData[0].correctAnswer ? 'font-medium' : ''}>
-                            {option}
-                          </span>
-                          {optionIndex === quizData[0].correctAnswer && (
+                          <span>Vrai</span>
+                          {String(questions[0]?.correctAnswer).toLowerCase() === 'vrai' && (
                             <CheckCircle className="w-4 h-4 text-green-500 ml-auto" />
                           )}
-                          {userAnswers[0] === optionIndex && userAnswers[0] !== quizData[0].correctAnswer && (
+                          {userAnswers[0] === 0 && String(questions[0]?.correctAnswer).toLowerCase() !== 'vrai' && (
                             <XCircle className="w-4 h-4 text-red-500 ml-auto" />
                           )}
                         </div>
-                      ))}
-                    </div>
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                      <p className="text-blue-800 text-sm">
-                        <strong>Explication :</strong> {quizData[0].explanation}
-                      </p>
-                    </div>
+                        <div className={`flex items-center gap-3 p-3 rounded-lg ${
+                          String(questions[0]?.correctAnswer).toLowerCase() === 'faux'
+                            ? 'bg-green-50 border border-green-200'
+                            : userAnswers[0] === 1 && String(questions[0]?.correctAnswer).toLowerCase() !== 'faux'
+                            ? 'bg-red-50 border border-red-200'
+                            : 'bg-neutral-50'
+                        }`}>
+                          <div className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium ${
+                            String(questions[0]?.correctAnswer).toLowerCase() === 'faux'
+                              ? 'bg-green-500 text-white'
+                              : userAnswers[0] === 1 && String(questions[0]?.correctAnswer).toLowerCase() !== 'faux'
+                              ? 'bg-red-500 text-white'
+                              : 'bg-neutral-300 text-neutral-700'
+                          }`}>
+                            B
+                          </div>
+                          <span>Faux</span>
+                          {String(questions[0]?.correctAnswer).toLowerCase() === 'faux' && (
+                            <CheckCircle className="w-4 h-4 text-green-500 ml-auto" />
+                          )}
+                          {userAnswers[0] === 1 && String(questions[0]?.correctAnswer).toLowerCase() !== 'faux' && (
+                            <XCircle className="w-4 h-4 text-red-500 ml-auto" />
+                          )}
+                        </div>
+                      </>
+                    )}
                   </div>
-                </div>
-              </div>
-              {/* 1 blurred card with shadow and overlay CTA */}
-              <div className="relative mb-8">
-                {/* Overlay CTA centered on blurred card */}
-                <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
-                  <div className="flex items-center gap-3 bg-white/80 rounded-lg px-6 py-3 shadow-lg pointer-events-auto">
-                    <Lock className="w-6 h-6 text-primary-500" />
-                    <Button size="md" to="/signup" variant="ghost" className="text-primary-700 font-bold text-lg px-2 py-1 pointer-events-auto">
-                      Voir tous les résultats
-                    </Button>
-                  </div>
-                </div>
-                <div className="absolute left-0 right-0 bottom-0 h-8 bg-black/10 rounded-b-lg blur-md z-10"></div>
-                <div className="bg-white border border-neutral-200 rounded-lg p-6 blur-sm opacity-70 shadow-lg relative z-0">
-                  <div className="flex items-start gap-4 mb-4">
-                    <span className="text-lg">{getSubjectIcon(quizData[1].subject)}</span>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-sm font-medium text-neutral-600">Question 2</span>
-                        <span className="text-xs text-neutral-500">• {quizData[1].subject}</span>
-                      </div>
-                      <div className="h-4 bg-neutral-200 rounded w-2/3 mb-2"></div>
-                      <div className="h-4 bg-neutral-200 rounded w-1/2 mb-2"></div>
-                      <div className="h-4 bg-neutral-200 rounded w-1/4"></div>
-                    </div>
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <p className="text-blue-800 text-sm">
+                      <strong>Explication :</strong> {questions[0]?.explanation || 'Aucune explication fournie.'}
+                    </p>
                   </div>
                 </div>
               </div>
             </div>
-          )}
+
+            {/* 2nd full card */}
+            <div className="bg-white border border-neutral-200 rounded-lg p-6 mb-4 shadow">
+              <div className="flex items-start gap-4 mb-4">
+                <span className="text-lg">{getSubjectIcon(questions[1]?.subject || 'N/A')}</span>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-sm font-medium text-neutral-600">Question 2</span>
+                    <span className="text-xs text-neutral-500">• {questions[1]?.subject || 'N/A'}</span>
+                    {userAnswers[1] === questions[1]?.correctAnswer ?
+                      <CheckCircle className="w-5 h-5 text-green-500" /> :
+                      <XCircle className="w-5 h-5 text-red-500" />
+                    }
+                  </div>
+                  <h3 className="font-semibold text-neutral-900 mb-4">{questions[1]?.question || 'N/A'}</h3>
+                  <div className="space-y-2 mb-4">
+                    {questions[1]?.options && questions[1]?.type === 'multiple-choice' && questions[1]?.options.map((option, optionIndex) => (
+                      <div
+                        key={optionIndex}
+                        className={`flex items-center gap-3 p-3 rounded-lg ${
+                          optionIndex === questions[1]?.correctAnswer
+                            ? 'bg-green-50 border border-green-200'
+                            : userAnswers[1] === optionIndex && userAnswers[1] !== questions[1]?.correctAnswer
+                            ? 'bg-red-50 border border-red-200'
+                            : 'bg-neutral-50'
+                        }`}
+                      >
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium ${
+                          optionIndex === questions[1]?.correctAnswer
+                            ? 'bg-green-500 text-white'
+                            : userAnswers[1] === optionIndex && userAnswers[1] !== questions[1]?.correctAnswer
+                            ? 'bg-red-500 text-white'
+                            : 'bg-neutral-300 text-neutral-700'
+                        }`}>
+                          {String.fromCharCode(65 + optionIndex)}
+                        </div>
+                        <span className={optionIndex === questions[1]?.correctAnswer ? 'font-medium' : ''}>
+                          {option}
+                        </span>
+                        {optionIndex === questions[1]?.correctAnswer && (
+                          <CheckCircle className="w-4 h-4 text-green-500 ml-auto" />
+                        )}
+                        {userAnswers[1] === optionIndex && userAnswers[1] !== questions[1]?.correctAnswer && (
+                          <XCircle className="w-4 h-4 text-red-500 ml-auto" />
+                        )}
+                      </div>
+                    ))}
+                    {questions[1]?.type === 'true-false' && (
+                      <>
+                        <div className={`flex items-center gap-3 p-3 rounded-lg ${
+                          String(questions[1]?.correctAnswer).toLowerCase() === 'vrai'
+                            ? 'bg-green-50 border border-green-200'
+                            : userAnswers[1] === 0 && String(questions[1]?.correctAnswer).toLowerCase() !== 'vrai'
+                            ? 'bg-red-50 border border-red-200'
+                            : 'bg-neutral-50'
+                        }`}>
+                          <div className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium ${
+                            String(questions[1]?.correctAnswer).toLowerCase() === 'vrai'
+                              ? 'bg-green-500 text-white'
+                              : userAnswers[1] === 0 && String(questions[1]?.correctAnswer).toLowerCase() !== 'vrai'
+                              ? 'bg-red-500 text-white'
+                              : 'bg-neutral-300 text-neutral-700'
+                          }`}>
+                            A
+                          </div>
+                          <span>Vrai</span>
+                          {String(questions[1]?.correctAnswer).toLowerCase() === 'vrai' && (
+                            <CheckCircle className="w-4 h-4 text-green-500 ml-auto" />
+                          )}
+                          {userAnswers[1] === 0 && String(questions[1]?.correctAnswer).toLowerCase() !== 'vrai' && (
+                            <XCircle className="w-4 h-4 text-red-500 ml-auto" />
+                          )}
+                        </div>
+                        <div className={`flex items-center gap-3 p-3 rounded-lg ${
+                          String(questions[1]?.correctAnswer).toLowerCase() === 'faux'
+                            ? 'bg-green-50 border border-green-200'
+                            : userAnswers[1] === 1 && String(questions[1]?.correctAnswer).toLowerCase() !== 'faux'
+                            ? 'bg-red-50 border border-red-200'
+                            : 'bg-neutral-50'
+                        }`}>
+                          <div className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium ${
+                            String(questions[1]?.correctAnswer).toLowerCase() === 'faux'
+                              ? 'bg-green-500 text-white'
+                              : userAnswers[1] === 1 && String(questions[1]?.correctAnswer).toLowerCase() !== 'faux'
+                              ? 'bg-red-500 text-white'
+                              : 'bg-neutral-300 text-neutral-700'
+                          }`}>
+                            B
+                          </div>
+                          <span>Faux</span>
+                          {String(questions[1]?.correctAnswer).toLowerCase() === 'faux' && (
+                            <CheckCircle className="w-4 h-4 text-green-500 ml-auto" />
+                          )}
+                          {userAnswers[1] === 1 && String(questions[1]?.correctAnswer).toLowerCase() !== 'faux' && (
+                            <XCircle className="w-4 h-4 text-red-500 ml-auto" />
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <p className="text-blue-800 text-sm">
+                      <strong>Explication :</strong> {questions[1]?.explanation || 'Aucune explication fournie.'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 3rd blurred card with shadow and overlay CTA */}
+            <div className="relative mb-8">
+              {/* Overlay CTA centered on blurred card */}
+              <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
+                <div className="flex items-center gap-3 bg-white/80 rounded-lg px-6 py-3 shadow-lg pointer-events-auto">
+                  <Lock className="w-6 h-6 text-primary-500" />
+                  <Button size="md" to="/signup" variant="ghost" className="text-primary-700 font-bold text-lg px-2 py-1 pointer-events-auto">
+                    Voir tous les résultats
+                  </Button>
+                </div>
+              </div>
+              <div className="absolute left-0 right-0 bottom-0 h-8 bg-black/10 rounded-b-lg blur-md z-10"></div>
+              <div className="bg-white border border-neutral-200 rounded-lg p-6 blur-sm opacity-70 shadow-lg relative z-0">
+                <div className="flex items-start gap-4 mb-4">
+                  <span className="text-lg">{getSubjectIcon(questions[2]?.subject || 'N/A')}</span>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-sm font-medium text-neutral-600">Question 3</span>
+                      <span className="text-xs text-neutral-500">• {questions[2]?.subject || 'N/A'}</span>
+                    </div>
+                    <div className="h-4 bg-neutral-200 rounded w-2/3 mb-2"></div>
+                    <div className="h-4 bg-neutral-200 rounded w-1/2 mb-2"></div>
+                    <div className="h-4 bg-neutral-200 rounded w-1/4"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
           
           <div className="mt-8 text-center">
             <Button onClick={() => navigate('/')} variant="outline" size="lg">
