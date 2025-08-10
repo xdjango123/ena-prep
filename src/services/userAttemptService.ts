@@ -185,4 +185,36 @@ export class UserAttemptService {
       return null;
     }
   }
+
+  static async getAverageScore(
+    userId: string,
+    category: string,
+    testType: string = 'practice'
+  ): Promise<number> {
+    try {
+      const { data, error } = await supabase
+        .from('user_attempts')
+        .select('score')
+        .eq('user_id', userId)
+        .eq('category', category)
+        .eq('test_type', testType)
+        .not('score', 'is', null);
+
+      if (error) {
+        console.error('Error fetching scores for average calculation:', error);
+        return 0;
+      }
+
+      if (!data || data.length === 0) {
+        return 0;
+      }
+
+      const scores = data.map(row => row.score).filter(score => score !== null) as number[];
+      const totalScore = scores.reduce((sum, score) => sum + score, 0);
+      return Math.round(totalScore / scores.length);
+    } catch (error) {
+      console.error('Error calculating average score:', error);
+      return 0;
+    }
+  }
 } 

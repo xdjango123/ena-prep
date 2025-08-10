@@ -292,6 +292,27 @@ export const QuizSeries: React.FC<QuizSeriesProps> = ({
     }
   };
 
+  // Function to get conditional subtitle based on score
+  const getSubtitle = (score: number) => {
+    if (score < 30) {
+      return 'Encore un effort, voici vos résultats.';
+    } else if (score >= 30 && score < 50) {
+      return 'Peut mieux faire, voici vos résultats.';
+    } else if (score >= 50 && score < 70) {
+      return 'En progrès, voici vos résultats.';
+    } else if (score >= 70 && score < 85) {
+      return 'Encourageant, voici vos résultats.';
+    } else if (score >= 85 && score < 95) {
+      return 'Très bien, voici vos résultats.';
+    } else if (score >= 95 && score < 100) {
+      return 'Excellent, voici vos résultats.';
+    } else if (score === 100) {
+      return 'Parfait, voici vos résultats.';
+    } else {
+      return 'Encore un effort, voici vos résultats.';
+    }
+  };
+
   // Helper function to get color classes safely
   const getColorClasses = (base: string, variant: string = '500', type: 'bg' | 'text' | 'border' = 'bg') => {
     const colorMap: Record<string, Record<string, Record<string, string>>> = {
@@ -353,7 +374,7 @@ export const QuizSeries: React.FC<QuizSeriesProps> = ({
           <div className="bg-white rounded-2xl shadow-lg p-8 mb-6">
             <div className="text-center">
               <h1 className="text-3xl font-bold text-gray-900 mb-4">Test Terminé !</h1>
-              <p className="text-gray-600 mb-8">Voici vos résultats pour {subject}</p>
+              <p className="text-gray-600 mb-8">{getSubtitle(score)}</p>
               
               {/* Score and Stats */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">

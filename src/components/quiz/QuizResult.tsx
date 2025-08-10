@@ -59,12 +59,22 @@ export const QuizResult: React.FC<QuizResultProps> = ({
 
   // Function to get conditional subtitle based on score
   const getSubtitle = (score: number) => {
-    if (score < 60) {
+    if (score < 30) {
+      return 'Encore un effort, voici vos résultats.';
+    } else if (score >= 30 && score < 50) {
+      return 'Peut mieux faire, voici vos résultats.';
+    } else if (score >= 50 && score < 70) {
       return 'En progrès, voici vos résultats.';
-    } else if (score >= 60 && score < 85) {
-      return 'Bien joué, voici vos résultats.';
+    } else if (score >= 70 && score < 85) {
+      return 'Encourageant, voici vos résultats.';
+    } else if (score >= 85 && score < 95) {
+      return 'Très bien, voici vos résultats.';
+    } else if (score >= 95 && score < 100) {
+      return 'Excellent, voici vos résultats.';
+    } else if (score === 100) {
+      return 'Parfait, voici vos résultats.';
     } else {
-      return 'Félicitations, voici vos résultats.';
+      return 'Encore un effort, voici vos résultats.';
     }
   };
 

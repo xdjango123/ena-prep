@@ -78,7 +78,7 @@ export default function LogicPage() {
             
             try {
                 const attempts = await UserAttemptService.getUserAttemptsByCategory(user.id, 'LOG');
-                const practiceAttempts = attempts.filter(attempt => attempt.test_type === 'Practice');
+                			const practiceAttempts = attempts.filter(attempt => attempt.test_type === 'practice');
                 
                 const results: Record<string, { score: number; timeSpent: number }> = {};
                 practiceAttempts.forEach(attempt => {
@@ -112,11 +112,11 @@ export default function LogicPage() {
 			
 			try {
 				// Get average score for LOG category from user_attempts table
-				const score = await UserAttemptService.getAverageScore(user.id, 'LOG', 'Practice');
+				const score = await UserAttemptService.getAverageScore(user.id, 'LOG', 'practice');
 				
 				// Get test count for LOG category from user_attempts table
 				const attempts = await UserAttemptService.getUserAttemptsByCategory(user.id, 'LOG');
-				const testsTaken = attempts.filter(attempt => attempt.test_type === 'Practice').length;
+				const testsTaken = attempts.filter(attempt => attempt.test_type === 'practice').length;
 				
 				// Calculate time spent (assuming 15 minutes per test for now)
 				const timeSpent = Math.round(testsTaken * 15 / 60); // Convert to hours
@@ -134,17 +134,24 @@ export default function LogicPage() {
 		fetchStatistics();
 	}, [user?.id]);
 
+	// Refresh statistics when returning to main view
+	useEffect(() => {
+		if (view === 'main' && user?.id) {
+			refreshStatistics();
+		}
+	}, [view, user?.id]);
+
 	// Function to refresh statistics
 	const refreshStatistics = async () => {
 		if (!user?.id) return;
 		
 		try {
 			// Get average score for LOG category from user_attempts table
-			const score = await UserAttemptService.getAverageScore(user.id, 'LOG', 'Practice');
+			const score = await UserAttemptService.getAverageScore(user.id, 'LOG', 'practice');
 			
 			// Get test count for LOG category from user_attempts table
 			const attempts = await UserAttemptService.getUserAttemptsByCategory(user.id, 'LOG');
-			const testsTaken = attempts.filter(attempt => attempt.test_type === 'Practice').length;
+			const testsTaken = attempts.filter(attempt => attempt.test_type === 'practice').length;
 			
 			// Calculate time spent (assuming 15 minutes per test for now)
 			const timeSpent = Math.round(testsTaken * 15 / 60); // Convert to hours
@@ -156,7 +163,7 @@ export default function LogicPage() {
 			});
 
 			// Also refresh individual test results
-			const practiceAttempts = attempts.filter(attempt => attempt.test_type === 'Practice');
+			const practiceAttempts = attempts.filter(attempt => attempt.test_type === 'practice');
 			const results: Record<string, { score: number; timeSpent: number }> = {};
 			practiceAttempts.forEach(attempt => {
 				if (attempt.test_number && attempt.score !== null) {
@@ -216,13 +223,55 @@ export default function LogicPage() {
 
 	// Handle review practice test
 	const handleReview = async (test: TestDetails) => {
-		// Load questions for this specific test
-		await loadQuestionsForTest(parseInt(test.id.replace('p', '')));
-		setSelectedTest(test);
-		setIsReviewMode(true);
-		setView('quiz');
-		// Scroll to top when starting review
-		window.scrollTo({ top: 0, behavior: 'smooth' });
+		try {
+			if (!user?.id) {
+				console.error('No user ID available for review');
+				return;
+			}
+
+			const testNumber = parseInt(test.id.replace('p', ''));
+			
+			// Try to get the actual test data from the database
+			const testData = await UserAttemptService.getTestDataForReview(user.id, 'LOG', testNumber);
+			
+			if (testData) {
+				// Use the actual test data from the database
+				console.log('Loading actual test data for review:', testData);
+				setQuestions(testData.questions);
+				setLastAnswers(testData.userAnswers);
+				setLastResult({
+					score: testData.score,
+					correctAnswers: testData.correctAnswers,
+					totalQuestions: testData.totalQuestions,
+					timeSpent: testData.timeSpent
+				});
+				setSelectedTest(test);
+				setIsReviewMode(false);
+				setView('results');
+			} else {
+				// Fallback: load questions and show results if no test data found
+				await loadQuestionsForTest(testNumber);
+				setSelectedTest(test);
+				const historicalAttempt = await UserAttemptService.getLatestTestAttempt(user.id, 'LOG', testNumber, 'practice');
+				if (historicalAttempt) {
+					setLastResult({
+						score: historicalAttempt.score || 0,
+						correctAnswers: Math.round((historicalAttempt.score || 0) * questions.length / 100),
+						totalQuestions: questions.length,
+						timeSpent: 15 * 60
+					});
+				}
+				setLastAnswers(new Map());
+				setIsReviewMode(false);
+				setView('results');
+			}
+			// Scroll to top when starting review
+			window.scrollTo({ top: 0, behavior: 'smooth' });
+		} catch (error) {
+			console.error('Error loading review data:', error);
+			setIsReviewMode(false);
+			setView('results');
+		}
 	};
 
     const handleSectionToggle = (section: 'practice' | 'quiz') => {
@@ -242,7 +291,7 @@ export default function LogicPage() {
         : practiceTests.filter(test => test.topic === activeTopic);
 
     if (view === 'learn') {
-        return <QuizCards subject="Logique" subjectColor="yellow" onExit={() => setView('main')} />
+        return <QuizCards subject="Logique" subjectColor="yellow" onExit={() => { setView('main'); setActiveSection('quiz'); }} />
     }
 
     if (view === 'quiz' && selectedTest) {
@@ -265,7 +314,7 @@ export default function LogicPage() {
                 duration={selectedTest.time * 60}
                 onExit={() => { 
                     setView('main'); 
-                    setActiveSection(null); 
+                    setActiveSection('practice'); 
                     setIsReviewMode(false);
                 }}
                 onFinish={async (answers, timeSpent) => {
@@ -291,7 +340,7 @@ export default function LogicPage() {
 						try {
 							await TestResultService.saveTestResult(
 								user.id,
-								'Practice',
+								'practice',
 								'LOG',
 								score,
 								parseInt(selectedTest.id.replace('p', '')) // Extract test number from id
@@ -299,7 +348,7 @@ export default function LogicPage() {
 							
 							await UserAttemptService.saveUserAttempt(
 								user.id,
-								'Practice',
+								'practice',
 								'LOG',
 								undefined, // subCategory
 								parseInt(selectedTest.id.replace('p', '')), // testNumber
@@ -322,7 +371,6 @@ export default function LogicPage() {
 					setLastAnswers(answers);
 					setView('results');
 				}}
-				isReviewMode={isReviewMode}
 			/>
         );
     }
@@ -331,6 +379,8 @@ export default function LogicPage() {
         return (
             <QuizResult
                 {...lastResult}
+                questions={questions}
+                userAnswers={lastAnswers}
                 subjectColor="yellow"
                 onRedo={() => {
                     setView('summary');

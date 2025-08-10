@@ -270,6 +270,27 @@ export const RandomPracticeTest: React.FC<RandomPracticeTestProps> = ({ onExit }
     }
   };
 
+  // Function to get conditional subtitle based on score
+  const getSubtitle = (score: number) => {
+    if (score < 30) {
+      return 'Encore un effort, voici vos résultats.';
+    } else if (score >= 30 && score < 50) {
+      return 'Peut mieux faire, voici vos résultats.';
+    } else if (score >= 50 && score < 70) {
+      return 'En progrès, voici vos résultats.';
+    } else if (score >= 70 && score < 85) {
+      return 'Encourageant, voici vos résultats.';
+    } else if (score >= 85 && score < 95) {
+      return 'Très bien, voici vos résultats.';
+    } else if (score >= 95 && score < 100) {
+      return 'Excellent, voici vos résultats.';
+    } else if (score === 100) {
+      return 'Parfait, voici vos résultats.';
+    } else {
+      return 'Encore un effort, voici vos résultats.';
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -319,7 +340,7 @@ export const RandomPracticeTest: React.FC<RandomPracticeTestProps> = ({ onExit }
           <div className="bg-white rounded-2xl shadow-lg p-8 mb-6">
             <div className="text-center">
               <h1 className="text-3xl font-bold text-gray-900 mb-4">Test Aléatoire Terminé !</h1>
-              <p className="text-gray-600 mb-8">Voici vos résultats pour ce test mixte</p>
+              <p className="text-gray-600 mb-8">{getSubtitle(score)}</p>
               
               {/* Score and Stats */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">

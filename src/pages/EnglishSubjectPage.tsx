@@ -253,7 +253,7 @@ export default function EnglishSubjectPage() {
     : practiceTests.filter(test => test.topic === activeTopic);
 
   if (view === 'learn') {
-    return <QuizCards subject="English" subjectColor="green" onExit={() => setView('main')} />
+    return <QuizCards subject="English" subjectColor="green" onExit={() => { setView('main'); setActiveSection('quiz'); }} />
   }
 
   if (view === 'quiz' && selectedTest) {
@@ -274,11 +274,9 @@ export default function EnglishSubjectPage() {
         subjectColor="green"
         questions={questions}
         duration={selectedTest.time * 60}
-        initialUserAnswers={isReviewMode ? lastAnswers : undefined}
-        isReviewMode={isReviewMode}
         onExit={() => { 
           setView('main'); 
-          setActiveSection(null); 
+          setActiveSection('practice'); 
           setIsReviewMode(false);
         }}
         onFinish={async (answers, timeSpent) => {

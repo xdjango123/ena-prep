@@ -344,7 +344,7 @@ export const GeneralKnowledgePage: React.FC = () => {
     : practiceTests.filter(test => test.topic === activeTopic);
 
 	if (view === 'learn') {
-		return <QuizCards subject="Culture Générale" subjectColor="blue" onExit={() => setView('main')} />
+		return <QuizCards subject="Culture Générale" subjectColor="blue" onExit={() => { setView('main'); setActiveSection('quiz'); }} />
 	}
 
 	if (view === 'quiz') {
@@ -381,11 +381,9 @@ export const GeneralKnowledgePage: React.FC = () => {
 					subjectColor="blue"
 					questions={questions}
 					duration={selectedTest.time * 60}
-					initialUserAnswers={isReviewMode ? lastAnswers : undefined}
-					isReviewMode={isReviewMode}
 					onExit={() => { 
 						setView('main'); 
-						setActiveSection(null); 
+						setActiveSection('practice'); 
 						setIsReviewMode(false);
 					}}
 					onFinish={async (answers, timeSpent) => {

@@ -177,6 +177,27 @@ export default function TryoutTestPage() {
     return 'Nécessite un travail approfondi. Ne vous découragez pas !';
   };
 
+  // Function to get conditional subtitle based on score
+  const getSubtitle = (score: number) => {
+    if (score < 30) {
+      return 'Encore un effort, voici vos résultats par matière.';
+    } else if (score >= 30 && score < 50) {
+      return 'Peut mieux faire, voici vos résultats par matière.';
+    } else if (score >= 50 && score < 70) {
+      return 'En progrès, voici vos résultats par matière.';
+    } else if (score >= 70 && score < 85) {
+      return 'Encourageant, voici vos résultats par matière.';
+    } else if (score >= 85 && score < 95) {
+      return 'Très bien, voici vos résultats par matière.';
+    } else if (score >= 95 && score < 100) {
+      return 'Excellent, voici vos résultats par matière.';
+    } else if (score === 100) {
+      return 'Parfait, voici vos résultats par matière.';
+    } else {
+      return 'Encore un effort, voici vos résultats par matière.';
+    }
+  };
+
   if (!hasStarted) {
     return (
       <div className="p-6">
@@ -220,7 +241,7 @@ export default function TryoutTestPage() {
                 <Check className="w-8 h-8 text-green-600" />
               </div>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">Test d'évaluation terminé !</h1>
-              <p className="text-gray-600">Voici vos résultats par matière</p>
+              <p className="text-gray-600">{getSubtitle(Math.round(results.reduce((sum: number, r: any) => sum + r.score, 0) / results.length))}</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">

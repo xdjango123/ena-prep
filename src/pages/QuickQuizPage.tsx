@@ -281,70 +281,70 @@ const QuickQuizPage: React.FC = () => {
   // Quiz Introduction
   if (quizState === 'intro') {
     return (
-      <div className="min-h-screen bg-white">
-        <Container className="py-8">
-          <div className="max-w-4xl mx-auto flex flex-col md:flex-row gap-12 items-start">
+      <div className="min-h-screen bg-white overflow-x-hidden">
+        <Container className="py-4 xs:py-6 sm:py-8">
+          <div className="max-w-4xl mx-auto flex flex-col gap-6 xs:gap-8 sm:gap-12 items-start">
             {/* LEFT: Title and intro */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="flex-1"
+              className="flex-1 w-full"
             >
-              <h1 className="text-4xl font-bold text-neutral-900 mb-6">Quiz Gratuit</h1>
-              <div className="bg-primary-50 rounded-lg p-6 mb-8">
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
-                  <label className="text-xl font-semibold text-primary-900 flex items-center gap-2">
-                    Niveau sélectionné :
-                    <div className="relative w-64">
+              <h1 className="text-2xl xs:text-3xl sm:text-4xl font-bold text-neutral-900 mb-4 xs:mb-6">Quiz Gratuit</h1>
+              <div className="bg-primary-50 rounded-lg p-4 xs:p-6 mb-6 xs:mb-8">
+                <div className="flex flex-col gap-4 mb-4">
+                  <label className="text-lg xs:text-xl font-semibold text-primary-900 flex flex-col xs:flex-row xs:items-center gap-2">
+                    <span>Niveau sélectionné :</span>
+                    <div className="relative w-full xs:w-64">
                       <select
                         id="examType"
                         value={examType}
                         onChange={e => setExamType(e.target.value)}
-                        className="w-full appearance-none bg-white border border-primary-400 rounded-lg px-4 py-2 pr-8 text-neutral-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 font-semibold"
+                        className="w-full appearance-none bg-white border border-primary-400 rounded-lg px-3 xs:px-4 py-2 pr-8 text-neutral-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 font-semibold text-sm xs:text-base"
                       >
                         {examTypes.map((type) => (
                           <option key={type.value} value={type.value}>{type.label}</option>
                         ))}
                       </select>
-                      <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-5 h-5 text-primary-400 pointer-events-none" />
+                      <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 xs:w-5 xs:h-5 text-primary-400 pointer-events-none" />
                     </div>
                   </label>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                  <div className="bg-white rounded-lg p-4">
-                    <div className="text-2xl mb-2">🏛️</div>
-                    <div className="font-semibold">Culture Générale</div>
-                    <div className="text-sm text-neutral-600">5 questions</div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 xs:gap-4 mb-6">
+                  <div className="bg-white rounded-lg p-3 xs:p-4">
+                    <div className="text-xl xs:text-2xl mb-2">🏛️</div>
+                    <div className="font-semibold text-sm xs:text-base">Culture Générale</div>
+                    <div className="text-xs xs:text-sm text-neutral-600">5 questions</div>
                   </div>
-                  <div className="bg-white rounded-lg p-4">
-                    <div className="text-2xl mb-2">🧠</div>
-                    <div className="font-semibold">Logique</div>
-                    <div className="text-sm text-neutral-600">5 questions</div>
+                  <div className="bg-white rounded-lg p-3 xs:p-4">
+                    <div className="text-xl xs:text-2xl mb-2">🧠</div>
+                    <div className="font-semibold text-sm xs:text-base">Logique</div>
+                    <div className="text-xs xs:text-sm text-neutral-600">5 questions</div>
                   </div>
-                  <div className="bg-white rounded-lg p-4">
-                    <div className="text-2xl mb-2">🇬🇧</div>
-                    <div className="font-semibold">Anglais</div>
-                    <div className="text-sm text-neutral-600">5 questions</div>
+                  <div className="bg-white rounded-lg p-3 xs:p-4 sm:col-span-2 md:col-span-1">
+                    <div className="text-xl xs:text-2xl mb-2">🇬🇧</div>
+                    <div className="font-semibold text-sm xs:text-base">Anglais</div>
+                    <div className="text-xs xs:text-sm text-neutral-600">5 questions</div>
                   </div>
                 </div>
-                <div className="flex items-center justify-start gap-4 text-neutral-700 mb-2">
+                <div className="flex flex-col xs:flex-row xs:items-center gap-2 xs:gap-4 text-neutral-700 mb-2 text-sm xs:text-base">
                   <div className="flex items-center gap-2">
-                    <Clock className="w-5 h-5" />
+                    <Clock className="w-4 h-4 xs:w-5 xs:h-5" />
                     <span>10 minutes</span>
                   </div>
-                  <div className="w-1 h-1 bg-neutral-400 rounded-full"></div>
+                  <div className="hidden xs:block w-1 h-1 bg-neutral-400 rounded-full"></div>
                   <span>15 questions</span>
-                  <div className="w-1 h-1 bg-neutral-400 rounded-full"></div>
+                  <div className="hidden xs:block w-1 h-1 bg-neutral-400 rounded-full"></div>
                   <span>QCM</span>
                 </div>
               </div>
-              <div className="space-y-4">
-                <p className="text-neutral-700">
+              <div className="space-y-3 xs:space-y-4">
+                <p className="text-neutral-700 text-sm xs:text-base leading-relaxed">
                   Testez votre niveau avec ce quiz express adapté au concours {examType ? getExamLabel(examType) : '...'}.
                   Vous aurez 10 minutes pour répondre à 15 questions réparties équitablement sur les trois matières principales.
                 </p>
                 {error && (
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-3 xs:p-4">
                     <p className="text-red-800 text-sm">{error}</p>
                     <button 
                       onClick={loadQuestions}
@@ -355,8 +355,8 @@ const QuickQuizPage: React.FC = () => {
                   </div>
                 )}
               </div>
-              <div className="mt-4 flex flex-col items-center space-y-4">
-                <Button size="lg" onClick={handleStartQuiz} className="w-full md:w-72" disabled={!examType || loading}>
+              <div className="mt-4 xs:mt-6 flex flex-col items-center space-y-3 xs:space-y-4">
+                <Button size="lg" onClick={handleStartQuiz} className="w-full sm:w-72" disabled={!examType || loading}>
                   {loading ? 'Chargement...' : error ? 'Réessayer' : 'Commencer le quiz'}
                 </Button>
               </div>
@@ -372,11 +372,11 @@ const QuickQuizPage: React.FC = () => {
   if (quizState === 'inProgress') {
     if (loading || questions.length === 0) {
       return (
-        <div className="min-h-screen bg-gradient-to-br from-neutral-100 to-white flex items-center justify-center">
+        <div className="min-h-screen bg-gradient-to-br from-neutral-100 to-white overflow-x-hidden flex items-center justify-center">
           <Container>
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Chargement des questions...</p>
+              <div className="animate-spin rounded-full h-10 w-10 xs:h-12 xs:w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+              <p className="text-gray-600 text-sm xs:text-base">Chargement des questions...</p>
             </div>
           </Container>
         </div>
@@ -387,28 +387,28 @@ const QuickQuizPage: React.FC = () => {
     const progress = ((currentQuestion + 1) / questions.length) * 100;
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-neutral-100 to-white">
-        <Container className="py-8">
+      <div className="min-h-screen bg-gradient-to-br from-neutral-100 to-white overflow-x-hidden">
+        <Container className="py-4 xs:py-6 sm:py-8">
           {/* Timer and Progress */}
-          <div className="max-w-3xl mx-auto mb-8">
-            <div className="bg-white rounded-lg shadow-sm p-4 flex justify-between items-center">
-              <div className="flex items-center gap-4">
-                <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${timeLeft <= 60 ? 'bg-red-100 text-red-700' : 'bg-primary-100 text-primary-700'}`}>
-                  <Clock className="w-4 h-4" />
+          <div className="max-w-3xl mx-auto mb-6 xs:mb-8">
+            <div className="bg-white rounded-lg shadow-sm p-3 xs:p-4">
+              <div className="flex flex-col xs:flex-row xs:items-center gap-3 xs:gap-4 mb-3 xs:mb-0">
+                <div className={`flex items-center gap-2 px-2 xs:px-3 py-1 rounded-full text-xs xs:text-sm font-medium ${timeLeft <= 60 ? 'bg-red-100 text-red-700' : 'bg-primary-100 text-primary-700'}`}>
+                  <Clock className="w-3 h-3 xs:w-4 xs:h-4" />
                   {formatTime(timeLeft)}
                 </div>
-                <span className="text-neutral-600">
+                <span className="text-sm xs:text-base text-neutral-600">
                   Question {currentQuestion + 1} sur {questions.length}
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-32 bg-neutral-200 rounded-full h-2">
+                <div className="w-24 xs:w-32 bg-neutral-200 rounded-full h-2">
                   <div 
                     className="bg-primary-500 h-2 rounded-full transition-all duration-300"
                     style={{ width: `${progress}%` }}
                   ></div>
                 </div>
-                <span className="text-sm text-neutral-600">{Math.round(progress)}%</span>
+                <span className="text-xs xs:text-sm text-neutral-600">{Math.round(progress)}%</span>
               </div>
             </div>
           </div>
@@ -420,39 +420,39 @@ const QuickQuizPage: React.FC = () => {
             animate={{ opacity: 1, x: 0 }}
             className="max-w-3xl mx-auto"
           >
-            <div className="bg-white rounded-xl shadow-lg p-8">
-              <div className="flex items-center gap-3 mb-6">
-                <span className="text-2xl">{getSubjectIcon(question.subject)}</span>
+            <div className="bg-white rounded-xl shadow-lg p-4 xs:p-6 sm:p-8">
+              <div className="flex items-center gap-3 mb-4 xs:mb-6">
+                <span className="text-xl xs:text-2xl">{getSubjectIcon(question.subject)}</span>
                 <div>
-                  <h3 className="font-semibold text-primary-600">{question.subject}</h3>
-                  <p className="text-sm text-neutral-600">Niveau {examType}</p>
+                  <h3 className="font-semibold text-primary-600 text-sm xs:text-base">{question.subject}</h3>
+                  <p className="text-xs xs:text-sm text-neutral-600">Niveau {examType}</p>
                 </div>
               </div>
               
-              <h2 className="text-xl font-semibold text-neutral-900 mb-8">
+              <h2 className="text-lg xs:text-xl font-semibold text-neutral-900 mb-6 xs:mb-8 leading-relaxed">
                 {question.question}
               </h2>
               
-              <div className="space-y-4 mb-8">
+              <div className="space-y-3 xs:space-y-4 mb-6 xs:mb-8">
                 {question.options && question.type === 'multiple-choice' && question.options.map((option, index) => (
                   <button
                     key={index}
                     onClick={() => handleAnswerSelect(index)}
-                    className={`w-full text-left p-4 rounded-lg border-2 transition-all duration-200 ${
+                    className={`w-full text-left p-3 xs:p-4 rounded-lg border-2 transition-all duration-200 ${
                       userAnswers[currentQuestion] === index
                         ? 'border-primary-500 bg-primary-50'
                         : 'border-neutral-200 hover:border-primary-200 hover:bg-neutral-50'
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center text-sm font-medium ${
+                      <div className={`w-5 h-5 xs:w-6 xs:h-6 rounded-full border-2 flex items-center justify-center text-xs xs:text-sm font-medium ${
                         userAnswers[currentQuestion] === index
                           ? 'border-primary-500 bg-primary-500 text-white'
                           : 'border-neutral-300'
                       }`}>
                         {String.fromCharCode(65 + index)}
                       </div>
-                      <span>{option}</span>
+                      <span className="text-sm xs:text-base">{option}</span>
                     </div>
                   </button>
                 ))}
@@ -460,51 +460,52 @@ const QuickQuizPage: React.FC = () => {
                   <>
                     <button
                       onClick={() => handleAnswerSelect(0)}
-                      className={`w-full text-left p-4 rounded-lg border-2 transition-all duration-200 ${
+                      className={`w-full text-left p-3 xs:p-4 rounded-lg border-2 transition-all duration-200 ${
                         userAnswers[currentQuestion] === 0
                           ? 'border-primary-500 bg-primary-50'
                           : 'border-neutral-200 hover:border-primary-200 hover:bg-neutral-50'
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center text-sm font-medium ${
+                        <div className={`w-5 h-5 xs:w-6 xs:h-6 rounded-full border-2 flex items-center justify-center text-xs xs:text-sm font-medium ${
                           userAnswers[currentQuestion] === 0
                             ? 'border-primary-500 bg-primary-500 text-white'
                             : 'border-neutral-300'
                         }`}>
                           A
                         </div>
-                        <span>Vrai</span>
+                        <span className="text-sm xs:text-base">Vrai</span>
                       </div>
                     </button>
                     <button
                       onClick={() => handleAnswerSelect(1)}
-                      className={`w-full text-left p-4 rounded-lg border-2 transition-all duration-200 ${
+                      className={`w-full text-left p-3 xs:p-4 rounded-lg border-2 transition-all duration-200 ${
                         userAnswers[currentQuestion] === 1
                           ? 'border-primary-500 bg-primary-50'
                           : 'border-neutral-200 hover:border-primary-200 hover:bg-neutral-50'
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center text-sm font-medium ${
+                        <div className={`w-5 h-5 xs:w-6 xs:h-6 rounded-full border-2 flex items-center justify-center text-xs xs:text-sm font-medium ${
                           userAnswers[currentQuestion] === 1
                             ? 'border-primary-500 bg-primary-500 text-white'
                             : 'border-neutral-300'
                         }`}>
                           B
                         </div>
-                        <span>Faux</span>
+                        <span className="text-sm xs:text-base">Faux</span>
                       </div>
                     </button>
                   </>
                 )}
               </div>
               
-              <div className="flex justify-between">
+              <div className="flex flex-col xs:flex-row justify-between gap-3 xs:gap-0">
                 <Button
                   variant="outline"
                   onClick={handlePrevQuestion}
                   disabled={currentQuestion === 0}
+                  className="w-full xs:w-auto"
                 >
                   Précédent
                 </Button>
@@ -512,6 +513,7 @@ const QuickQuizPage: React.FC = () => {
                 <Button
                   onClick={handleNextQuestion}
                   disabled={userAnswers[currentQuestion] === null}
+                  className="w-full xs:w-auto"
                 >
                   {currentQuestion === questions.length - 1 ? 'Terminer' : 'Suivant'}
                 </Button>
@@ -526,13 +528,11 @@ const QuickQuizPage: React.FC = () => {
   // Quiz Results
   if (questions.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-neutral-100 to-white flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-neutral-100 to-white overflow-x-hidden flex items-center justify-center">
         <Container>
           <div className="text-center">
-            <p className="text-gray-600">Aucune question disponible.</p>
-            <Button onClick={() => navigate('/')} className="mt-4">
-              Retour à l'accueil
-            </Button>
+            <p className="text-gray-600 text-sm xs:text-base">Aucune question disponible.</p>
+            <Button onClick={() => navigate('/')} className="mt-4 w-full xs:w-auto">Retour à l'accueil</Button>
           </div>
         </Container>
       </div>
@@ -542,64 +542,64 @@ const QuickQuizPage: React.FC = () => {
   const score = calculateScore();
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-neutral-100 to-white">
-      <Container className="py-12">
+    <div className="min-h-screen bg-gradient-to-br from-neutral-100 to-white overflow-x-hidden">
+      <Container className="py-6 xs:py-8 sm:py-12">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="max-w-4xl mx-auto"
         >
           {/* Results Summary */}
-          <div className="bg-white rounded-xl shadow-lg p-8 mb-8 text-center">
-            <h1 className="text-3xl font-bold text-neutral-900 mb-4">Résultats du Quiz</h1>
-            <p className="text-neutral-600 mb-6">Niveau {getExamLabel(examType)} ({examType})</p>
+          <div className="bg-white rounded-xl shadow-lg p-4 xs:p-6 sm:p-8 mb-6 xs:mb-8 text-center">
+            <h1 className="text-2xl xs:text-3xl font-bold text-neutral-900 mb-4">Résultats du Quiz</h1>
+            <p className="text-neutral-600 mb-6 text-sm xs:text-base">Niveau {getExamLabel(examType)} ({examType})</p>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="bg-primary-50 rounded-lg p-6">
-                <div className="text-3xl font-bold text-primary-600 mb-2">{score.correct}/{score.total}</div>
-                <div className="text-primary-800">Bonnes réponses</div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 xs:gap-6 mb-6 xs:mb-8">
+              <div className="bg-primary-50 rounded-lg p-4 xs:p-6">
+                <div className="text-2xl xs:text-3xl font-bold text-primary-600 mb-2">{score.correct}/{score.total}</div>
+                <div className="text-primary-800 text-sm xs:text-base">Bonnes réponses</div>
               </div>
-              <div className="bg-green-50 rounded-lg p-6">
-                <div className="text-3xl font-bold text-green-600 mb-2">{score.percentage}%</div>
-                <div className="text-green-800">Score global</div>
+              <div className="bg-green-50 rounded-lg p-4 xs:p-6">
+                <div className="text-2xl xs:text-3xl font-bold text-green-600 mb-2">{score.percentage}%</div>
+                <div className="text-green-800 text-sm xs:text-base">Score global</div>
               </div>
-              <div className="bg-blue-50 rounded-lg p-6">
-                <div className="text-3xl font-bold text-blue-600 mb-2">{formatTime(600 - timeLeft)}</div>
-                <div className="text-blue-800">Temps utilisé</div>
+              <div className="bg-blue-50 rounded-lg p-4 xs:p-6 sm:col-span-2 md:col-span-1">
+                <div className="text-2xl xs:text-3xl font-bold text-blue-600 mb-2">{formatTime(600 - timeLeft)}</div>
+                <div className="text-blue-800 text-sm xs:text-base">Temps utilisé</div>
               </div>
             </div>
             
             {/* Score Comment */}
-            <div className="mb-8">
-              <div className="inline-block px-6 py-3 rounded-full bg-primary-100 text-primary-700 font-semibold text-lg">
+            <div className="mb-6 xs:mb-8">
+              <div className="inline-block px-4 xs:px-6 py-2 xs:py-3 rounded-full bg-primary-100 text-primary-700 font-semibold text-base xs:text-lg">
                 {getScoreComment(score.percentage)}
               </div>
             </div>
             
             {/* Clean CTA for signup/login */}
-            <div className="flex flex-col md:flex-row justify-center items-center gap-3 mt-2">
-              <Button size="sm" to="/signup" className="px-6">Créer un compte</Button>
-              <span className="text-neutral-400">ou</span>
-              <Button size="sm" to="/login" variant="outline" className="px-6">Connectez-vous</Button>
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-3 mt-2">
+              <Button size="sm" to="/signup" className="px-4 xs:px-6 w-full sm:w-auto">Créer un compte</Button>
+              <span className="text-neutral-400 text-sm xs:text-base">ou</span>
+              <Button size="sm" to="/login" variant="outline" className="px-4 xs:px-6 w-full sm:w-auto">Connectez-vous</Button>
             </div>
           </div>
 
           {/* Question Corrections */}
           <div className="relative mt-4">
             {/* 1st full card */}
-            <div className="bg-white border border-neutral-200 rounded-lg p-6 mb-4 shadow">
-              <div className="flex items-start gap-4 mb-4">
-                <span className="text-lg">{getSubjectIcon(questions[0]?.subject || 'N/A')}</span>
+            <div className="bg-white border border-neutral-200 rounded-lg p-4 xs:p-6 mb-4 shadow">
+              <div className="flex items-start gap-3 xs:gap-4 mb-4">
+                <span className="text-base xs:text-lg">{getSubjectIcon(questions[0]?.subject || 'N/A')}</span>
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-sm font-medium text-neutral-600">Question 1</span>
                     <span className="text-xs text-neutral-500">• {questions[0]?.subject || 'N/A'}</span>
                     {userAnswers[0] === questions[0]?.correctAnswer ?
-                      <CheckCircle className="w-5 h-5 text-green-500" /> :
-                      <XCircle className="w-5 h-5 text-red-500" />
+                      <CheckCircle className="w-4 h-4 xs:w-5 xs:h-5 text-green-500" /> :
+                      <XCircle className="w-4 h-4 xs:w-5 xs:h-5 text-red-500" />
                     }
                   </div>
-                  <h3 className="font-semibold text-neutral-900 mb-4">{questions[0]?.question || 'N/A'}</h3>
+                  <h3 className="font-semibold text-neutral-900 mb-4 text-sm xs:text-base">{questions[0]?.question || 'N/A'}</h3>
                   <div className="space-y-2 mb-4">
                     {questions[0]?.options && questions[0]?.type === 'multiple-choice' && questions[0]?.options.map((option, optionIndex) => (
                       <div
