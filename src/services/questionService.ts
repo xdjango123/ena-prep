@@ -108,31 +108,78 @@ export class QuestionService {
     }
   }
 
-  static async getRandomQuestions(category: string, limit: number = 10, examType?: string): Promise<Question[]> {
+  static async getRandomQuestions(category: string, limit: number = 10, examType?: string, testNumber?: number): Promise<Question[]> {
     try {
       let query = supabase
         .from('questions')
         .select('*')
-        .eq('category', category)
-        .limit(limit);
+        .eq('category', category);
       
       if (examType && examType !== 'ALL') {
         query = query.eq('exam_type', examType);
       }
       
-      // Add cache-busting parameter
-      const timestamp = Date.now();
-      const { data, error } = await query;
+      // Fetch significantly more questions than needed to ensure good randomization
+      // For practice tests, we want different sets, so fetch more questions
+      const fetchLimit = testNumber !== undefined ? limit * 5 : limit * 3;
+      const { data, error } = await query.limit(fetchLimit);
       
       if (error) {
         console.error('❌ Error fetching questions:', error);
         return [];
       }
       
-      // Shuffle the questions to randomize them
-      const shuffled = data.sort(() => Math.random() - 0.5);
-      const result = shuffled.slice(0, limit);
+      if (!data || data.length === 0) {
+        console.log(`⚠️ No questions found for category: ${category}, exam type: ${examType}`);
+        return [];
+      }
       
+      // Create a proper seed for randomization
+      let seed: number;
+      
+      if (testNumber !== undefined) {
+        // For practice tests: use test number to ensure different questions per test
+        // Use a more complex seed to ensure different sets, not just reordering
+        seed = testNumber * 1000 + category.charCodeAt(0) * 100 + category.charCodeAt(1) * 10 + category.charCodeAt(2);
+        console.log(`🎯 Practice test mode: Using test number ${testNumber} as seed for ${category} (seed: ${seed})`);
+      } else {
+        // For daily quizzes: use date to ensure questions change daily
+        const today = new Date();
+        const dateSeed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+        seed = dateSeed + category.charCodeAt(0) * 100 + category.charCodeAt(1) * 10 + category.charCodeAt(2);
+        console.log(`📅 Daily quiz mode: Using date ${today.toDateString()} (${dateSeed}) as seed for ${category} (seed: ${seed})`);
+      }
+      
+      // Fisher-Yates shuffle with seeded randomization
+      const shuffled = [...data];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        // Generate a pseudo-random number based on the seed
+        seed = (seed * 9301 + 49297) % 233280;
+        const j = Math.floor((seed / 233280) * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      
+      // For practice tests, take questions from different parts of the shuffled array
+      // to ensure different sets, not just reordering
+      let result: Question[];
+      if (testNumber !== undefined) {
+        // Use test number to select different starting positions
+        const startIndex = (testNumber * 7) % Math.max(1, shuffled.length - limit);
+        result = shuffled.slice(startIndex, startIndex + limit);
+        console.log(`   📊 Practice test #${testNumber}: Selected questions ${startIndex + 1}-${startIndex + limit} from ${shuffled.length} available questions`);
+      } else {
+        // For daily quizzes, just take the first 'limit' questions
+        result = shuffled.slice(0, limit);
+        console.log(`   📊 Daily quiz: Selected first ${limit} questions from ${shuffled.length} available questions`);
+      }
+      
+      // Log sample questions to verify randomization
+      if (result.length > 0) {
+        const sampleQuestions = result.slice(0, 2).map(q => q.question_text.substring(0, 50) + '...');
+        console.log(`   🔍 Sample questions: ${sampleQuestions.join(' | ')}`);
+      }
+      
+      console.log(`✅ Fetched ${result.length} questions for ${category} with seed ${seed} (${testNumber !== undefined ? 'practice test' : 'daily quiz'} mode)`);
       return result;
     } catch (error) {
       console.error('❌ Error in getRandomQuestions:', error);

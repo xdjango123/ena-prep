@@ -70,8 +70,8 @@ export const Hero: React.FC = () => {
   }, [showQuiz]);
 
   return (
-    <section className="pt-10 pb-10 bg-gradient-to-br from-neutral-100 via-white to-primary-50 overflow-visible relative">
-      {/* Background Image */}
+    <section className="pt-6 xs:pt-8 sm:pt-10 pb-6 xs:pb-8 sm:pb-10 bg-gradient-to-br from-neutral-100 via-white to-primary-50 overflow-hidden relative">
+      {/* Simplified Background Image */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div 
           className="absolute inset-0 opacity-[0.15] bg-cover bg-center bg-no-repeat"
@@ -86,187 +86,103 @@ export const Hero: React.FC = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-white/85 via-white/60 to-transparent"></div>
       </div>
 
-      {/* Enhanced Background decorative elements */}
+      {/* Simplified Background decorative elements - Mobile optimized */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Floating icons with more variety */}
+        {/* Floating icons - Hidden on very small screens, simplified positioning */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 0.08, y: 0 }}
           transition={{ duration: 2, delay: 0.5 }}
-          className="absolute top-20 left-10 text-primary-300"
+          className="absolute top-8 xs:top-16 sm:top-20 left-2 xs:left-4 sm:left-10 text-primary-300 hidden xs:block"
         >
-          <Trophy className="w-16 h-16" />
+          <Trophy className="w-6 h-6 xs:w-8 xs:h-8 sm:w-10 sm:h-10 sm:w-12 sm:h-12" />
         </motion.div>
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 0.08, y: 0 }}
           transition={{ duration: 2, delay: 1 }}
-          className="absolute top-40 right-20 text-accent-300"
+          className="absolute top-16 xs:top-24 sm:top-32 right-2 xs:right-4 sm:right-20 text-accent-300 hidden xs:block"
         >
-          <Target className="w-12 h-12" />
+          <Target className="w-5 h-5 xs:w-6 xs:h-6 sm:w-8 sm:h-8 sm:w-10 sm:h-10" />
         </motion.div>
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 0.08, x: 0 }}
           transition={{ duration: 2, delay: 1.5 }}
-          className="absolute bottom-40 left-20 text-yellow-300"
+          className="absolute bottom-16 xs:bottom-24 sm:bottom-32 left-2 xs:left-4 sm:left-20 text-yellow-300 hidden xs:block"
         >
-          <Star className="w-14 h-14" />
-        </motion.div>
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 0.08, x: 0 }}
-          transition={{ duration: 2, delay: 2 }}
-          className="absolute bottom-20 right-10 text-green-300"
-        >
-          <Award className="w-10 h-10" />
+          <Star className="w-6 h-6 xs:w-8 xs:h-8 sm:w-10 sm:h-10 sm:w-12 sm:h-12" />
         </motion.div>
         
-        {/* Additional floating elements */}
-        <motion.div
-          initial={{ opacity: 0, rotate: -180 }}
-          animate={{ opacity: 0.06, rotate: 0 }}
-          transition={{ duration: 2.5, delay: 0.8 }}
-          className="absolute top-60 left-1/4 text-blue-300"
-        >
-          <Brain className="w-8 h-8" />
-        </motion.div>
-        <motion.div
-          initial={{ opacity: 0, scale: 0 }}
-          animate={{ opacity: 0.06, scale: 1 }}
-          transition={{ duration: 2, delay: 1.2 }}
-          className="absolute top-80 right-1/3 text-purple-300"
-        >
-          <Users className="w-10 h-10" />
-        </motion.div>
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 0.06, y: 0 }}
-          transition={{ duration: 2, delay: 1.8 }}
-          className="absolute bottom-60 left-1/3 text-orange-300"
-        >
-          <Clock className="w-9 h-9" />
-        </motion.div>
-        <motion.div
-          initial={{ opacity: 0, rotate: 180 }}
-          animate={{ opacity: 0.06, rotate: 0 }}
-          transition={{ duration: 2.5, delay: 2.2 }}
-          className="absolute bottom-40 right-1/4 text-teal-300"
-        >
-          <CheckCircle className="w-7 h-7" />
-        </motion.div>
+        {/* Simplified geometric patterns - Mobile optimized */}
+        <div className="absolute top-0 left-0 w-12 h-12 xs:w-16 xs:h-16 sm:w-20 sm:h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-primary-100 to-transparent rounded-full blur-2xl opacity-20 xs:opacity-30"></div>
+        <div className="absolute bottom-0 right-0 w-16 h-16 xs:w-20 xs:h-20 sm:w-24 xs:h-24 sm:w-32 sm:h-32 bg-gradient-to-tl from-accent-100 to-transparent rounded-full blur-2xl opacity-20 xs:opacity-30"></div>
         
-        {/* Enhanced geometric patterns */}
-        <div className="absolute top-0 left-0 w-32 h-32 bg-gradient-to-br from-primary-100 to-transparent rounded-full blur-3xl opacity-30"></div>
-        <div className="absolute bottom-0 right-0 w-40 h-40 bg-gradient-to-tl from-accent-100 to-transparent rounded-full blur-3xl opacity-30"></div>
-        <div className="absolute top-1/2 left-0 w-24 h-24 bg-gradient-to-r from-yellow-100 to-transparent rounded-full blur-2xl opacity-25"></div>
-        <div className="absolute top-1/3 right-0 w-28 h-28 bg-gradient-to-l from-green-100 to-transparent rounded-full blur-2xl opacity-25"></div>
-        
-        {/* Subtle grid pattern */}
-        <div className="absolute inset-0 opacity-[0.02]" style={{
+        {/* Subtle grid pattern - Reduced opacity on mobile */}
+        <div className="absolute inset-0 opacity-[0.01] xs:opacity-[0.02]" style={{
           backgroundImage: `radial-gradient(circle at 1px 1px, #3b82f6 1px, transparent 0)`,
-          backgroundSize: '40px 40px'
+          backgroundSize: '20px 20px'
         }}></div>
-        
-        {/* Floating particles */}
-        <motion.div
-          animate={{ 
-            y: [0, -10, 0],
-            opacity: [0.3, 0.6, 0.3]
-          }}
-          transition={{ 
-            duration: 4, 
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-          className="absolute top-1/4 left-1/6 w-2 h-2 bg-primary-400 rounded-full"
-        ></motion.div>
-        <motion.div
-          animate={{ 
-            y: [0, 15, 0],
-            opacity: [0.4, 0.7, 0.4]
-          }}
-          transition={{ 
-            duration: 5, 
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 1
-          }}
-          className="absolute top-3/4 right-1/5 w-1.5 h-1.5 bg-accent-400 rounded-full"
-        ></motion.div>
-        <motion.div
-          animate={{ 
-            y: [0, -8, 0],
-            opacity: [0.2, 0.5, 0.2]
-          }}
-          transition={{ 
-            duration: 3.5, 
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 2
-          }}
-          className="absolute bottom-1/3 left-1/4 w-1 h-1 bg-yellow-400 rounded-full"
-        ></motion.div>
       </div>
 
       <Container size="xl" className="relative z-10">
-        <div className="flex flex-col items-center text-center min-h-[60vh] justify-center">
-          {/* Main Hero Content - Centered */}
+        <div className="flex flex-col items-center text-center min-h-[60vh] xs:min-h-[65vh] sm:min-h-[70vh] justify-center py-8 xs:py-12 sm:py-16">
+          {/* Main Hero Content - Mobile optimized */}
           <motion.div
             variants={staggerContainer(0.1)}
             initial="hidden"
             animate="visible"
-            className="max-w-5xl mx-auto"
+            className="max-w-5xl mx-auto px-3 xs:px-4 sm:px-6"
           >
             <motion.h1 
               variants={staggerItem}
-              className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-neutral-950 leading-tight mb-6"
+              className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-neutral-950 leading-tight mb-4 xs:mb-6 px-2 xs:px-0"
             >
-              Votre <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-accent-600">Passport</span> vers<br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-accent-600">l'Excellence</span> ENA
+              Votre <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-accent-600">Outil de Reference </span><br className="block xs:hidden" />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-accent-600">pour Exceller a l'ENA</span>
             </motion.h1>
             
             <motion.p 
               variants={staggerItem}
-              className="text-2xl md:text-2.5xl text-neutral-700 mb-10 max-w-3xl mx-auto leading-relaxed"
+              className="text-lg xs:text-xl sm:text-2xl md:text-2.5xl text-neutral-700 mb-6 xs:mb-8 sm:mb-10 max-w-3xl mx-auto leading-relaxed px-3 xs:px-4 sm:px-0"
             >
-              Maîtriser le 1er tour avec les meilleurs outils
+              Preparez le 1er tour avec les meilleurs outils
             </motion.p>
             
             <motion.div 
               variants={staggerItem}
-              className="flex flex-col sm:flex-row gap-5 justify-center mb-8"
+              className="flex flex-col sm:flex-row gap-4 xs:gap-5 justify-center mb-6 xs:mb-8 px-3 xs:px-4 sm:px-0"
             >
-              <Button to="/signup" size="lg" className="text-lg py-4 px-8 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+              <Button to="/signup" size="lg" className="hidden md:inline-flex text-lg py-3 xs:py-4 px-6 xs:px-8 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
                 Inscription
               </Button>
               
-              {/* Dropdown container */}
-              <div className="relative" ref={dropdownRef}>
+              {/* Dropdown container - Mobile optimized */}
+              <div className="relative w-full sm:w-auto" ref={dropdownRef}>
                 <Button 
                   variant="outline" 
                   size="lg" 
-                  className="text-lg py-4 px-8 border-2 border-accent-500 text-accent-600 hover:bg-accent-500 hover:text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                  className="text-base xs:text-lg py-3 xs:py-4 px-6 xs:px-8 border-2 border-accent-500 text-accent-600 hover:bg-accent-500 hover:text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 w-full sm:w-auto"
                   onClick={() => setShowQuiz(!showQuiz)}
                 >
                   Commencez un quiz rapide
-                  <ChevronDown className={`w-5 h-5 ml-2 transition-transform duration-300 ${showQuiz ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`w-4 h-4 xs:w-5 xs:h-5 ml-2 transition-transform duration-300 ${showQuiz ? 'rotate-180' : ''}`} />
                 </Button>
                 
-                {/* Simple dropdown menu */}
+                {/* Simple dropdown menu - Mobile optimized */}
                 {showQuiz && (
                   <motion.div 
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="absolute top-full left-0 mt-2 bg-white border border-neutral-200 rounded-lg shadow-lg z-50 w-full min-w-[300px]"
+                    className="absolute top-full left-0 mt-2 bg-white border border-neutral-200 rounded-lg shadow-lg z-50 w-full min-w-[250px] xs:min-w-[280px] sm:min-w-[300px]"
                     style={{ minHeight: 'fit-content' }}
                   >
                     {examLevels.map((level, index) => (
                       <button
                         key={level.value}
                         onClick={() => handleQuizSelect(level.value)}
-                        className={`w-full px-4 py-3 text-left hover:bg-neutral-50 transition-colors ${
+                        className={`w-full px-3 xs:px-4 py-2 xs:py-3 text-left hover:bg-neutral-50 transition-colors text-sm xs:text-base ${
                           index === 0 ? 'rounded-t-lg' : ''
                         } ${
                           index === examLevels.length - 1 ? 'rounded-b-lg' : 'border-b border-neutral-100'
@@ -282,23 +198,23 @@ export const Hero: React.FC = () => {
             
             <motion.div 
               variants={fadeIn}
-              className="flex items-center justify-center"
+              className="flex items-center justify-center px-3 xs:px-4 sm:px-0"
             >
               <div className="flex -space-x-2">
                 {userAvatars.map((avatar, i) => (
                   <img
                     key={i}
-                    className="inline-block h-12 w-12 rounded-full ring-2 ring-white"
+                    className="inline-block h-8 w-8 xs:h-10 xs:w-10 sm:h-12 sm:w-12 rounded-full ring-2 ring-white"
                     src={avatar.type === 'image' ? avatar.src : `https://ui-avatars.com/api/?name=${avatar.name}&background=random&color=fff`}
                     alt={avatar.type === 'image' ? avatar.alt : avatar.name}
                   />
                 ))}
               </div>
-              <div className="ml-4 text-left">
-                <p className="text-base font-semibold text-neutral-950">
+              <div className="ml-3 xs:ml-4 text-left min-w-0">
+                <p className="text-xs xs:text-sm sm:text-base font-semibold text-neutral-950 truncate">
                   Rejoignez +1200 étudiants
                 </p>
-                <p className="text-sm text-neutral-600">
+                <p className="text-xs xs:text-sm text-neutral-600">
                   Déjà en préparation active
                 </p>
               </div>

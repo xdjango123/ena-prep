@@ -192,7 +192,7 @@ export const logicQuestions: Question[] = [
 
 import { QuestionService } from '../services/questionService';
 
-export const getQuestionsBySubject = async (subject: string, examType?: 'CM' | 'CMS' | 'CS'): Promise<Question[]> => {
+export const getQuestionsBySubject = async (subject: string, examType?: 'CM' | 'CMS' | 'CS', testNumber?: number): Promise<Question[]> => {
   try {
     let category: 'ANG' | 'CG' | 'LOG';
     
@@ -210,11 +210,31 @@ export const getQuestionsBySubject = async (subject: string, examType?: 'CM' | '
         return [];
     }
     
-    // Add cache-busting by including current timestamp
-    console.log(`🔄 Fetching fresh questions for ${category} at ${new Date().toISOString()}`);
+    // Log the mode we're in with clear indicators
+    if (testNumber !== undefined) {
+      console.log(`🎯 PRACTICE TEST MODE: Loading questions for ${category}, test #${testNumber}`);
+      console.log(`   → This will ensure different questions from other practice tests`);
+    } else {
+      console.log(`📅 DAILY QUIZ MODE: Loading questions for ${category}`);
+      console.log(`   → Questions will change daily, same questions throughout the day`);
+    }
     
-    // Get questions from database with exam type filtering - limit to 10 for practice
-    const dbQuestions = await QuestionService.getRandomQuestions(category, 10, examType);
+    // Get questions from database with proper seeding
+    // - For practice tests: pass testNumber to ensure different questions per test
+    // - For daily quizzes: don't pass testNumber so it uses daily date seeding
+    const dbQuestions = await QuestionService.getRandomQuestions(category, 10, examType, testNumber);
+    
+    if (!dbQuestions || dbQuestions.length === 0) {
+      console.warn(`⚠️ No questions returned for ${category}`);
+      return [];
+    }
+    
+    // Log the results with clear mode indication
+    if (testNumber !== undefined) {
+      console.log(`✅ PRACTICE TEST: Successfully fetched ${dbQuestions.length} questions for ${category} (test #${testNumber})`);
+    } else {
+      console.log(`✅ DAILY QUIZ: Successfully fetched ${dbQuestions.length} questions for ${category} (daily rotation)`);
+    }
     
     // Convert database questions to the expected format
     return dbQuestions.map((dbQ, index) => {

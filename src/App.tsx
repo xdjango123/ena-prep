@@ -23,6 +23,7 @@ import ProfilePage from './pages/ProfilePage';
 import EnaGuidePage from './pages/EnaGuidePage';
 import QuickQuizPage from './pages/QuickQuizPage';
 import ScrollToTop from './components/ScrollToTop';
+import { RandomPracticeTest } from './components/quiz/RandomPracticeTest';
 
 // A placeholder for pages that are not yet implemented
 const PlaceholderPage: React.FC<{ title: string }> = ({ title }) => (
@@ -52,6 +53,7 @@ function App() {
               <Route path="/dashboard" element={<DashboardLayout><Outlet /></DashboardLayout>}>
                 <Route index element={<DashboardPage />} />
                 <Route path="practice" element={<PracticePage />} />
+                <Route path="random-practice" element={<RandomPracticeTest onExit={() => window.history.back()} />} />
                 
                 {/* Subject Pages */}
                 <Route path="subject/general-knowledge" element={<GeneralKnowledgePage />} />

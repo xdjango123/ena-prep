@@ -3,82 +3,226 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    overflow-x: hidden;
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+  }
+
   body {
     @apply bg-background-50 text-background-800;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
-  
+
+  /* Prevent horizontal overflow on all elements */
+  * {
+    box-sizing: border-box;
+  }
+
+  /* Mobile-first typography */
   h1, h2, h3, h4, h5, h6 {
     @apply text-primary-600 font-semibold;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
   }
-  
+
   h1 {
-    @apply text-3xl md:text-4xl;
+    @apply text-2xl xs:text-3xl sm:text-4xl md:text-4xl;
   }
-  
+
   h2 {
-    @apply text-2xl md:text-3xl;
+    @apply text-xl xs:text-2xl sm:text-3xl md:text-3xl;
   }
-  
+
   h3 {
-    @apply text-xl md:text-2xl;
+    @apply text-lg xs:text-xl sm:text-2xl md:text-2xl;
   }
-  
+
   a {
     @apply text-primary-600 hover:text-primary-700 transition-colors;
   }
-  
+
   button {
     @apply transition-all duration-200;
+  }
+
+  /* Ensure text doesn't overflow on mobile */
+  p, span, div {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  /* Mobile-specific touch targets */
+  button, a, input, select, textarea {
+    min-height: 44px; /* iOS touch target minimum */
+  }
+
+  /* Ensure proper mobile scaling */
+  img, video, canvas, svg {
+    max-width: 100%;
+    height: auto;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-primary-600 hover:bg-primary-700 text-white font-medium px-4 py-2 rounded-lg shadow-sm hover:shadow-md transition-all;
+    @apply bg-primary-600 hover:bg-primary-700 text-white font-medium px-3 xs:px-4 py-2 rounded-lg shadow-sm hover:shadow-md transition-all;
   }
-  
+
   .btn-accent {
-    @apply bg-accent-400 hover:bg-accent-500 text-background-900 font-medium px-4 py-2 rounded-lg shadow-sm hover:shadow-md transition-all;
+    @apply bg-accent-400 hover:bg-accent-500 text-background-900 font-medium px-3 xs:px-4 py-2 rounded-lg shadow-sm hover:shadow-md transition-all;
   }
-  
+
   .btn-success {
-    @apply bg-success-600 hover:bg-success-700 text-white font-medium px-4 py-2 rounded-lg shadow-sm hover:shadow-md transition-all;
+    @apply bg-success-600 hover:bg-success-700 text-white font-medium px-3 xs:px-4 py-2 rounded-lg shadow-sm hover:shadow-md transition-all;
   }
-  
+
   .btn-outline {
-    @apply border border-primary-600 text-primary-600 hover:bg-primary-50 font-medium px-4 py-2 rounded-lg transition-all;
+    @apply border border-primary-600 text-primary-600 hover:bg-primary-50 font-medium px-3 xs:px-4 py-2 rounded-lg transition-all;
   }
-  
+
   .card {
-    @apply bg-white rounded-xl shadow-sm border border-background-200 p-6;
+    @apply bg-white rounded-xl shadow-sm border border-background-200 p-4 xs:p-6;
   }
-  
+
   .input-field {
     @apply w-full px-3 py-2 border border-background-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all;
   }
-  
+
   .success-state {
     @apply bg-success-50 border-success-200 text-success-800;
   }
-  
+
   .error-state {
     @apply bg-red-50 border-red-200 text-red-800;
   }
-  
+
   .perspective-1000 {
     perspective: 1000px;
   }
-  
+
   .transform-style-3d {
     transform-style: preserve-3d;
   }
-  
+
   .rotate-y-180 {
     transform: rotateY(180deg);
   }
-  
+
   .backface-hidden {
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
+  }
+
+  /* Essential mobile utilities - only for mobile-specific needs */
+  .mobile-safe {
+    @apply w-full;
+  }
+
+  /* Prevent text overflow */
+  .text-ellipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Mobile-specific touch targets */
+  .btn-mobile {
+    @apply w-full xs:w-auto px-4 py-3 text-base;
+    min-height: 44px; /* iOS touch target minimum */
+  }
+
+  /* Mobile-safe input sizing */
+  .input-mobile {
+    @apply w-full px-4 py-3 text-base;
+    min-height: 44px; /* iOS touch target minimum */
+  }
+
+  /* Mobile navigation utilities */
+  .mobile-nav {
+    @apply w-full overflow-x-hidden;
+  }
+
+  .mobile-menu-item {
+    @apply block w-full text-left px-3 py-3 text-sm xs:text-base;
+    min-height: 44px;
+  }
+
+  /* Mobile form utilities */
+  .mobile-form {
+    @apply w-full space-y-4;
+  }
+
+  .mobile-form-group {
+    @apply w-full;
+  }
+
+  .mobile-form-input {
+    @apply w-full px-3 py-3 text-base border border-gray-300 rounded-lg;
+    min-height: 44px;
+  }
+
+  /* Mobile card utilities */
+  .mobile-card {
+    @apply w-full p-4 xs:p-6 bg-white rounded-lg shadow-sm border border-gray-200;
+  }
+
+  /* Mobile spacing utilities */
+  .mobile-section {
+    @apply w-full py-6 xs:py-8 sm:py-12;
+  }
+
+  .mobile-container-padding {
+    @apply px-3 xs:px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Mobile text utilities */
+  .mobile-text-sm {
+    @apply text-xs xs:text-sm;
+  }
+
+  .mobile-text-base {
+    @apply text-sm xs:text-base;
+  }
+
+  .mobile-text-lg {
+    @apply text-base xs:text-lg;
+  }
+
+  .mobile-text-xl {
+    @apply text-lg xs:text-xl;
+  }
+
+  /* Mobile button utilities */
+  .mobile-btn-sm {
+    @apply px-3 py-2 text-sm min-h-[40px];
+  }
+
+  .mobile-btn-md {
+    @apply px-4 py-3 text-base min-h-[44px];
+  }
+
+  .mobile-btn-lg {
+    @apply px-6 py-4 text-lg min-h-[48px];
+  }
+
+  /* Mobile layout utilities */
+  .mobile-layout {
+    @apply w-full overflow-x-hidden;
+  }
+
+  .mobile-content {
+    @apply w-full px-3 xs:px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Mobile animation utilities */
+  .mobile-fade-in {
+    @apply opacity-0 animate-fade-in;
+  }
+
+  .mobile-slide-up {
+    @apply opacity-0 animate-slide-up;
   }
 }

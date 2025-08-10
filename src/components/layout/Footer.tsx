@@ -34,34 +34,34 @@ export const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
   
   return (
-    <footer className="bg-neutral-950 text-white pt-12 pb-8 mt-16">
+    <footer className="bg-neutral-950 text-white pt-12 pb-8 mt-16 w-full max-w-full overflow-x-hidden">
       <Container>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-          <div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12 w-full max-w-full overflow-x-hidden">
+          <div className="min-w-0">
             <Link to="/" className="flex items-center gap-2 text-primary-500 font-bold text-xl mb-4">
-              <GraduationCap size={28} />
-              <span>PrepaENA</span>
+              <GraduationCap size={28} className="flex-shrink-0" />
+              <span className="truncate">PrepaENA</span>
             </Link>
             <p className="text-neutral-400 mb-6">
               Le site de référence pour réussir l'ENA. Nous vous accompagnons vers la réussite.
             </p>
             <div className="space-y-3">
               <div className="flex items-center gap-3 text-neutral-400">
-                <Mail size={18} />
-                <span>contact@prepaena.fr</span>
+                <Mail size={18} className="flex-shrink-0" />
+                <span className="truncate">contact@prepaena.fr</span>
               </div>
               <div className="flex items-center gap-3 text-neutral-400">
-                <Phone size={18} />
-                <span>+225 XX-XX-XX-XX</span>
+                <Phone size={18} className="flex-shrink-0" />
+                <span className="truncate">+225 XX-XX-XX-XX</span>
               </div>
               <div className="flex items-center gap-3 text-neutral-400">
-                <MapPin size={18} />
-                <span>Abidjan, Côte d'Ivoire</span>
+                <MapPin size={18} className="flex-shrink-0" />
+                <span className="truncate">Abidjan, Côte d'Ivoire</span>
               </div>
             </div>
           </div>
           
-          <div>
+          <div className="min-w-0">
             <h3 className="text-lg font-semibold mb-4">Navigation</h3>
             <ul className="space-y-2">
               {footerNavigation.main.map((item) => (
@@ -74,14 +74,14 @@ export const Footer: React.FC = () => {
             </ul>
           </div>
           
-          <div>
+          <div className="min-w-0">
             <h3 className="text-lg font-semibold mb-4">Support</h3>
             <ul className="space-y-2">
               {footerNavigation.support.map((item) => (
                 <li key={item.name}>
-                  <Link to={item.to} className="text-neutral-400 hover:text-primary-500 transition-colors">
+                  <span className="text-neutral-400 cursor-default">
                     {item.name}
-                  </Link>
+                  </span>
                 </li>
               ))}
             </ul>
@@ -90,50 +90,29 @@ export const Footer: React.FC = () => {
             <ul className="space-y-2">
               {footerNavigation.legal.map((item) => (
                 <li key={item.name}>
-                  <Link to={item.to} className="text-neutral-400 hover:text-primary-500 transition-colors">
+                  <span className="text-neutral-400 cursor-default">
                     {item.name}
-                  </Link>
+                  </span>
                 </li>
               ))}
             </ul>
           </div>
           
-          <div>
+          <div className="min-w-0">
             <h3 className="text-lg font-semibold mb-4">Suivez-nous</h3>
-            <div className="flex space-x-4 mb-6">
+            <div className="flex space-x-4">
               {socialLinks.map((item) => {
                 const Icon = item.icon;
                 return (
-                  <a 
+                  <div 
                     key={item.name}
-                    href={item.href}
-                    className="text-neutral-400 hover:text-primary-500 transition-colors"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    className="text-neutral-400"
                   >
                     <Icon size={24} />
-                  </a>
+                  </div>
                 );
               })}
             </div>
-            
-            <h3 className="text-lg font-semibold mb-4">Newsletter</h3>
-            <p className="text-neutral-400 mb-3">
-              Recevez nos conseils et actualités
-            </p>
-            <form className="flex">
-              <input
-                type="email"
-                placeholder="Votre email"
-                className="px-4 py-2 bg-neutral-800 text-white rounded-l-md flex-1 focus:outline-none"
-              />
-              <button
-                type="submit"
-                className="bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 rounded-r-md transition-colors"
-              >
-                S'abonner
-              </button>
-            </form>
           </div>
         </div>
         

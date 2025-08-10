@@ -7,9 +7,34 @@ export class UserAttemptService {
     category: string,
     subCategory?: string,
     testNumber?: number,
-    score?: number
+    score?: number,
+    testData?: {
+      questions: any[]
+      userAnswers: [number, string | number][]
+      correctAnswers: number
+      totalQuestions: number
+      timeSpent: number
+    }
   ): Promise<boolean> {
     try {
+      console.log('Saving user attempt with detailed data:', { userId, testType, category, testNumber, score });
+      
+      // Delete any existing record for this user, category, and test number
+      if (testNumber) {
+        const { error: deleteError } = await supabase
+          .from('user_attempts')
+          .delete()
+          .eq('user_id', userId)
+          .eq('category', category)
+          .eq('test_number', testNumber)
+          .eq('test_type', testType);
+
+        if (deleteError) {
+          console.error('Error deleting existing user attempt:', deleteError);
+        }
+      }
+
+      // Insert new record with detailed test data
       const { data, error } = await supabase
         .from('user_attempts')
         .insert({
@@ -19,6 +44,7 @@ export class UserAttemptService {
           sub_category: subCategory || null,
           test_number: testNumber || null,
           score: score || null,
+          test_data: testData || null,
         })
         .select();
 
@@ -27,6 +53,7 @@ export class UserAttemptService {
         return false;
       }
 
+      console.log('Successfully saved user attempt with detailed data:', data?.[0]);
       return true;
     } catch (error) {
       console.error('Error saving user attempt:', error);
@@ -78,159 +105,84 @@ export class UserAttemptService {
     }
   }
 
-  static async getUserAttemptsByTestType(
+  static async getLatestTestAttempt(
     userId: string,
-    testType: string
-  ): Promise<UserAttempt[]> {
+    category: string,
+    testNumber: number,
+    testType: string = 'practice'
+  ): Promise<UserAttempt | null> {
     try {
       const { data, error } = await supabase
         .from('user_attempts')
         .select('*')
         .eq('user_id', userId)
+        .eq('category', category)
+        .eq('test_number', testNumber)
         .eq('test_type', testType)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching user attempts by test type:', error);
-        return [];
-      }
-
-      return data || [];
-    } catch (error) {
-      console.error('Error fetching user attempts by test type:', error);
-      return [];
-    }
-  }
-
-  static async getAverageScore(
-    userId: string,
-    category?: string,
-    testType?: string
-  ): Promise<number> {
-    try {
-      let query = supabase
-        .from('user_attempts')
-        .select('score')
-        .eq('user_id', userId)
-        .not('score', 'is', null);
-
-      if (category) {
-        query = query.eq('category', category);
-      }
-
-      if (testType) {
-        query = query.eq('test_type', testType);
-      }
-
-      const { data, error } = await query;
-
-      if (error) {
-        console.error('Error fetching average score:', error);
-        return 0;
-      }
-
-      if (!data || data.length === 0) {
-        return 0;
-      }
-
-      const totalScore = data.reduce((sum, attempt) => sum + (attempt.score || 0), 0);
-      return Math.round(totalScore / data.length);
-    } catch (error) {
-      console.error('Error calculating average score:', error);
-      return 0;
-    }
-  }
-
-  static async getAttemptCount(
-    userId: string,
-    category?: string,
-    testType?: string
-  ): Promise<number> {
-    try {
-      let query = supabase
-        .from('user_attempts')
-        .select('id', { count: 'exact' })
-        .eq('user_id', userId);
-
-      if (category) {
-        query = query.eq('category', category);
-      }
-
-      if (testType) {
-        query = query.eq('test_type', testType);
-      }
-
-      const { count, error } = await query;
-
-      if (error) {
-        console.error('Error fetching attempt count:', error);
-        return 0;
-      }
-
-      return count || 0;
-    } catch (error) {
-      console.error('Error fetching attempt count:', error);
-      return 0;
-    }
-  }
-
-  static async getBestScore(
-    userId: string,
-    category?: string,
-    testType?: string
-  ): Promise<number> {
-    try {
-      let query = supabase
-        .from('user_attempts')
-        .select('score')
-        .eq('user_id', userId)
-        .not('score', 'is', null)
-        .order('score', { ascending: false })
+        .order('created_at', { ascending: false })
         .limit(1);
 
-      if (category) {
-        query = query.eq('category', category);
-      }
-
-      if (testType) {
-        query = query.eq('test_type', testType);
-      }
-
-      const { data, error } = await query;
-
       if (error) {
-        console.error('Error fetching best score:', error);
-        return 0;
+        console.error('Error fetching latest test attempt:', error);
+        return null;
       }
 
-      return data?.[0]?.score || 0;
+      return data?.[0] || null;
     } catch (error) {
-      console.error('Error fetching best score:', error);
-      return 0;
+      console.error('Error fetching latest test attempt:', error);
+      return null;
     }
   }
 
-  static async getRecentAttempts(
+  static async getTestDataForReview(
     userId: string,
-    limit: number = 5
-  ): Promise<UserAttempt[]> {
+    category: string,
+    testNumber: number
+  ): Promise<{
+    questions: any[]
+    userAnswers: Map<number, string | number>
+    score: number
+    correctAnswers: number
+    totalQuestions: number
+    timeSpent: number
+  } | null> {
     try {
       const { data, error } = await supabase
         .from('user_attempts')
-        .select('*')
+        .select('test_data, score')
         .eq('user_id', userId)
+        .eq('category', category)
+        .eq('test_number', testNumber)
+        .eq('test_type', 'practice')
+        .not('test_data', 'is', null)
         .order('created_at', { ascending: false })
-        .limit(limit);
+        .limit(1);
 
       if (error) {
-        console.error('Error fetching recent attempts:', error);
-        return [];
+        console.error('Error fetching attempt with test_data for review:', error);
+        return null;
       }
 
-      return data || [];
+      const attempt = data?.[0] as { test_data: any; score: number } | undefined;
+      if (!attempt || !attempt.test_data) {
+        console.log('No test data found for review');
+        return null;
+      }
+
+      const { test_data } = attempt;
+      const userAnswers = new Map<number, string | number>(test_data.userAnswers as [number, string | number][]);
+
+      return {
+        questions: test_data.questions,
+        userAnswers,
+        score: attempt.score || 0,
+        correctAnswers: test_data.correctAnswers,
+        totalQuestions: test_data.totalQuestions,
+        timeSpent: test_data.timeSpent
+      };
     } catch (error) {
-      console.error('Error fetching recent attempts:', error);
-      return [];
+      console.error('Error getting test data for review:', error);
+      return null;
     }
   }
 } 

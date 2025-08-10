@@ -59,7 +59,9 @@ export default function LogicPage() {
 	const [lastResult, setLastResult] = useState<{ score: number, correctAnswers: number, totalQuestions: number, timeSpent: number } | null>(null);
 	const [questions, setQuestions] = useState<Question[]>([]);
 	const [isLoadingQuestions, setIsLoadingQuestions] = useState(false);
-	
+	const [error, setError] = useState<string | null>(null);
+	const [isReviewMode, setIsReviewMode] = useState(false);
+
 	// Statistics state
 	const [statistics, setStatistics] = useState({
 		score: 0,
@@ -177,32 +179,55 @@ export default function LogicPage() {
 		const loadQuestions = async () => {
 			setIsLoadingQuestions(true);
 			try {
-				const examType = profile?.exam_type as 'CM' | 'CMS' | 'CS' | undefined;
-				const loadedQuestions = await getQuestionsBySubject('logique', examType);
-				setQuestions(loadedQuestions);
+				const loadedQuestions = await getQuestionsBySubject('logique', profile?.exam_type as 'CM' | 'CMS' | 'CS');
+				setQuestions(loadedQuestions.slice(0, 10)); // Limit to 10 questions
 			} catch (error) {
 				console.error('Error loading questions:', error);
+				setError('Failed to load questions');
 			} finally {
 				setIsLoadingQuestions(false);
 			}
 		};
-
 		loadQuestions();
 	}, [profile?.exam_type]);
+
+	const loadQuestionsForTest = async (testNumber: number) => {
+		setIsLoadingQuestions(true);
+		try {
+			const loadedQuestions = await getQuestionsBySubject('logique', profile?.exam_type as 'CM' | 'CMS' | 'CS', testNumber);
+			setQuestions(loadedQuestions.slice(0, 10)); // Limit to 10 questions
+		} catch (error) {
+			console.error('Error loading questions:', error);
+			setError('Failed to load questions');
+		} finally {
+			setIsLoadingQuestions(false);
+		}
+	};
+
+	// Handle start practice test
+	const handleStart = async (test: TestDetails) => {
+		// Load questions for this specific test to ensure randomization
+		await loadQuestionsForTest(parseInt(test.id.replace('p', '')));
+		setSelectedTest(test);
+		setView('quiz');
+		// Scroll to top when starting test
+		window.scrollTo({ top: 0, behavior: 'smooth' });
+	};
+
+	// Handle review practice test
+	const handleReview = async (test: TestDetails) => {
+		// Load questions for this specific test
+		await loadQuestionsForTest(parseInt(test.id.replace('p', '')));
+		setSelectedTest(test);
+		setIsReviewMode(true);
+		setView('quiz');
+		// Scroll to top when starting review
+		window.scrollTo({ top: 0, behavior: 'smooth' });
+	};
 
     const handleSectionToggle = (section: 'practice' | 'quiz') => {
         setActiveSection(prev => (prev === section ? null : section));
         // Scroll to top when switching sections
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-
-    const handleStart = (test: TestDetails) => {
-        if (activeSection === 'practice') {
-            clearQuizState('Logique');
-        }
-        setSelectedTest(test);
-        setView('summary');
-        // Scroll to top when starting test
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
@@ -238,7 +263,11 @@ export default function LogicPage() {
                 subjectColor="yellow"
                 questions={questions}
                 duration={selectedTest.time * 60}
-                onExit={() => { setView('main'); setActiveSection(null); }}
+                onExit={() => { 
+                    setView('main'); 
+                    setActiveSection(null); 
+                    setIsReviewMode(false);
+                }}
                 onFinish={async (answers, timeSpent) => {
 					const correctAnswers = questions.reduce((count, q) => {
 						// More robust comparison logic
@@ -293,7 +322,8 @@ export default function LogicPage() {
 					setLastAnswers(answers);
 					setView('results');
 				}}
-            />
+				isReviewMode={isReviewMode}
+			/>
         );
     }
 
@@ -346,65 +376,66 @@ export default function LogicPage() {
     }
 
     return (
-        <div className="p-4 lg:p-6 space-y-6 pb-20">
-            <SubjectHeader 
-                subjectName="Logique"
-                icon={BrainCircuit}
-                score={statistics.score}
-                testsTaken={statistics.testsTaken}
-                timeSpent={statistics.timeSpent}
-                gradientFrom="from-orange-500"
-                gradientTo="to-orange-600"
-            />
+        <div className="p-2 sm:p-3 lg:p-6 space-y-2 sm:space-y-3 lg:space-y-6 pb-20">
+			<SubjectHeader 
+				subjectName="Logique"
+				icon={BrainCircuit}
+				score={statistics.score}
+				testsTaken={statistics.testsTaken}
+				timeSpent={statistics.timeSpent}
+				gradientFrom="from-yellow-500"
+				gradientTo="to-yellow-600"
+			/>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <ActionButton icon={Trophy} title="Quiz" color="yellow" active={activeSection === 'quiz'} onClick={() => handleSectionToggle('quiz')} />
-                <ActionButton icon={Target} title="Practice Test" color="yellow" active={activeSection === 'practice'} onClick={() => handleSectionToggle('practice')} />
-            </div>
+			<div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3 lg:gap-4">
+				<ActionButton icon={Trophy} title="Quiz" color="yellow" active={activeSection === 'quiz'} onClick={() => handleSectionToggle('quiz')} />
+				<ActionButton icon={Target} title="Practice Test" color="yellow" active={activeSection === 'practice'} onClick={() => handleSectionToggle('practice')} />
+			</div>
 
-            {activeSection === 'practice' && (
-                <div className="space-y-6">
-                    <div className="bg-white rounded-xl shadow-sm border p-6">
-                        <h2 className="text-xl font-bold mb-4">Practice by Topic</h2>
-                        <div className="flex flex-wrap gap-2 mb-6">
-                            {topics.map(topic => (
-                                <FilterPill key={topic} topic={topic} activeTopic={activeTopic} setActiveTopic={setActiveTopic} color="yellow" />
-                            ))}
-                        </div>
-                        
-                        <div className="space-y-3">
-                            {filteredPracticeTests.map(test => (
-                                <TestListItem 
-                                    key={test.id} 
-                                    test={test} 
-                                    onStart={() => handleStart(test)} 
-                                    color="yellow"
-                                    result={testResults[test.id]}
-                                />
-                            ))}
-                        </div>
-                    </div>
+			{activeSection === 'practice' && (
+				<div className="space-y-2 sm:space-y-3 lg:space-y-6">
+					<div className="bg-white rounded-xl shadow-sm border p-2 sm:p-3 lg:p-6">
+						<h2 className="text-base sm:text-lg lg:text-xl font-bold mb-2 sm:mb-3 lg:mb-4">Practice by Topic</h2>
+						<div className="flex flex-wrap gap-1.5 sm:gap-2 mb-3 sm:mb-4 lg:mb-6">
+							{topics.map(topic => (
+								<FilterPill key={topic} topic={topic} activeTopic={activeTopic} setActiveTopic={setActiveTopic} color="yellow" />
+							))}
+						</div>
+						
+						<div className="space-y-1.5 sm:space-y-2 lg:space-y-3">
+							{filteredPracticeTests.map(test => (
+								<TestListItem 
+									key={test.id} 
+									test={test} 
+									onStart={() => handleStart(test)} 
+									onReview={() => handleReview(test)}
+									color="yellow"
+									result={testResults[test.id]}
+								/>
+							))}
+						</div>
+					</div>
 
-                    <RecommendationBanner recommendation={recommendation} />
-                </div>
-            )}
+					<RecommendationBanner recommendation={recommendation} />
+				</div>
+			)}
 
-            {activeSection === 'quiz' && (
-                <div className="bg-white rounded-xl shadow-sm border p-8 mt-4 text-center">
-                    <Trophy className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
-                    <h2 className="text-2xl font-bold mb-3">Apprenez avec des quiz interactifs</h2>
-                    <p className="text-gray-600 max-w-2xl mx-auto mb-6">
-                        Nos quiz d'apprentissage sont conçus pour vous aider à maîtriser les concepts une question à la fois. Obtenez des commentaires immédiats, retournez les cartes pour voir les explications et apprenez à votre propre rythme.
-                    </p>
-                    <button 
-                        onClick={() => setView('learn')}
-                        className="inline-flex items-center gap-2 px-8 py-3 rounded-lg bg-yellow-500 text-white font-semibold hover:bg-yellow-600 transition-colors"
-                    >
-                        <Play className="w-5 h-5" />
-                        Commencer l'apprentissage
-                    </button>
-                </div>
-            )}
-        </div>
-    );
+			{activeSection === 'quiz' && (
+				<div className="bg-white rounded-xl shadow-sm border p-3 sm:p-4 lg:p-8 mt-4 text-center">
+					<Trophy className="w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 text-yellow-500 mx-auto mb-3 sm:mb-4" />
+					<h2 className="text-lg sm:text-xl lg:text-2xl font-bold mb-2 sm:mb-3">Apprenez avec des quiz interactifs</h2>
+					<p className="text-gray-600 max-w-2xl mx-auto mb-4 sm:mb-6 text-xs sm:text-sm lg:text-base">
+						Nos quiz d'apprentissage sont conçus pour vous aider à maîtriser les concepts une question à la fois. Obtenez des commentaires immédiats, retournez les cartes pour voir les explications et apprenez à votre propre rythme.
+					</p>
+					<button 
+						onClick={() => setView('learn')}
+						className="inline-flex items-center gap-2 px-4 sm:px-6 lg:px-8 py-2 sm:py-3 rounded-lg bg-yellow-500 text-white font-semibold hover:bg-yellow-600 transition-colors text-sm sm:text-base"
+					>
+						<Play className="w-4 h-4 sm:w-5 sm:h-5" />
+						Commencer l'apprentissage
+					</button>
+				</div>
+			)}
+		</div>
+	);
 } 

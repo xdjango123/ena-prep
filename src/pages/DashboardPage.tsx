@@ -75,8 +75,14 @@ export default function DashboardPage() {
     if (!user) return;
 
     try {
-      const averageScore = await TestResultService.getAverageScore(user.id);
-      setOverallProgress(averageScore);
+      // Compute the progression as the mean of per-subject averages (CG, ANG, LOG)
+      const [cg, ang, log] = await Promise.all([
+        TestResultService.getAverageScore(user.id, 'CG', 'practice'),
+        TestResultService.getAverageScore(user.id, 'ANG', 'practice'),
+        TestResultService.getAverageScore(user.id, 'LOG', 'practice')
+      ]);
+      const avg = Math.round((cg + ang + log) / 3);
+      setOverallProgress(avg);
     } catch (error) {
       console.error('Error fetching user progress:', error);
     } finally {
@@ -162,13 +168,13 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="p-4 lg:p-6 max-w-7xl mx-auto pb-20">
+    <div className="min-h-screen bg-gray-50 w-full max-w-full overflow-x-hidden">
+      <div className="p-4 lg:p-6 max-w-7xl mx-auto pb-20 w-full max-w-full overflow-x-hidden">
         {/* Welcome Header - Cleaner Design */}
-        <div className="bg-gradient-to-r from-primary-600 to-primary-700 text-white p-6 lg:p-8 rounded-2xl shadow-lg mb-6 lg:mb-8">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div>
-              <h1 className="text-2xl lg:text-3xl font-bold mb-2 text-white">
+        <div className="bg-gradient-to-r from-primary-600 to-primary-700 text-white p-6 lg:p-8 rounded-2xl shadow-lg mb-6 lg:mb-8 w-full max-w-full overflow-x-hidden">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 w-full max-w-full">
+            <div className="min-w-0 flex-1">
+              <h1 className="text-2xl lg:text-3xl font-bold mb-2 text-white truncate">
                 Bonjour, {userName}! 👋
               </h1>
               <p className="text-primary-100 text-base lg:text-lg">
@@ -177,11 +183,11 @@ export default function DashboardPage() {
             </div>
             
             {/* User Profile Labels - Better positioned */}
-            <div className="flex flex-col items-start lg:items-end gap-3">
+            <div className="flex flex-col items-start lg:items-end gap-3 min-w-0">
               {hasActiveSubscription && subscription && (
                 <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border ${getSubscriptionColor(subscription.plan_name)}`}>
                   {getSubscriptionIcon(subscription.plan_name)}
-                  <span>{getSubscriptionLabel(subscription.plan_name)}</span>
+                  <span className="truncate">{getSubscriptionLabel(subscription.plan_name)}</span>
                 </div>
               )}
             </div>
@@ -199,27 +205,27 @@ export default function DashboardPage() {
         </div>
 
         {/* Main Actions - Cleaner Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 mb-6 lg:mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 mb-6 lg:mb-8 w-full max-w-full overflow-x-hidden">
           {/* Practice Section */}
-          <div className="bg-gradient-to-br from-accent-400 to-accent-500 text-background-900 p-6 lg:p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all cursor-pointer"
+          <div className="bg-gradient-to-br from-accent-400 to-accent-500 text-background-900 p-6 lg:p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all cursor-pointer w-full max-w-full overflow-x-hidden"
                onClick={() => handleNavigation('/dashboard/practice')}>
-            <div className="flex items-center justify-between">
-              <div>
+            <div className="flex items-center justify-between w-full max-w-full">
+              <div className="min-w-0 flex-1">
                 <div className="p-3 bg-white/20 rounded-lg w-fit mb-4">
                   <Sparkles className="w-6 h-6 lg:w-8 lg:h-8" />
                 </div>
                 <h2 className="text-xl lg:text-2xl font-bold mb-2">Practice</h2>
                 <p className="text-background-800 text-sm lg:text-base">Lancer une série de questions</p>
               </div>
-              <ChevronRight className="w-6 h-6 lg:w-8 lg:h-8 opacity-70" />
+              <ChevronRight className="w-6 h-6 lg:w-8 lg:h-8 opacity-70 flex-shrink-0" />
             </div>
           </div>
           
           {/* Subjects Section - Conditional rendering based on subscription */}
           {!hasActiveSubscription ? (
             // No active subscription - show upgrade message
-            <div className="bg-white p-8 rounded-2xl shadow-lg border border-background-200">
-              <div className="text-center">
+            <div className="bg-white p-8 rounded-2xl shadow-lg border border-background-200 w-full max-w-full overflow-x-hidden">
+              <div className="text-center w-full max-w-full">
                 <div className="p-4 bg-background-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                   <Lock className="w-8 h-8 text-background-400" />
                 </div>
@@ -238,10 +244,10 @@ export default function DashboardPage() {
             </div>
           ) : (
             // Has subscription - show subjects
-          <div className="bg-white p-6 lg:p-8 rounded-2xl shadow-lg border border-background-200">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6 gap-4">
+          <div className="bg-white p-6 lg:p-8 rounded-2xl shadow-lg border border-background-200 w-full max-w-full overflow-x-hidden">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6 gap-4 w-full max-w-full">
               <h2 className="text-xl lg:text-2xl font-bold text-background-800">Matières</h2>
-              <div className="text-left lg:text-right">
+              <div className="text-left lg:text-right min-w-0">
                 <div className="text-sm text-background-600 mb-1 flex items-center gap-1">
                   Progression
                   <div className="relative group inline-block ml-1">
@@ -261,20 +267,20 @@ export default function DashboardPage() {
             </div>
             
               {availableCategories.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-full overflow-x-hidden">
               {subjects.map(subject => (
                 <Link 
                   to={subject.path} 
                   key={subject.id} 
-                  className={`p-4 rounded-xl border border-background-200 flex flex-col items-center text-center transition-all hover:shadow-md ${subject.bgColor} ${subject.color}`}
+                  className={`p-4 rounded-xl border border-background-200 flex flex-col items-center text-center transition-all hover:shadow-md ${subject.bgColor} ${subject.color} w-full max-w-full overflow-x-hidden`}
                 >
                   {subject.icon}
-                  <p className="mt-2 font-medium text-sm">{subject.name}</p>
+                  <p className="mt-2 font-medium text-sm truncate">{subject.name}</p>
                 </Link>
               ))}
             </div>
               ) : (
-                <div className="text-center py-8">
+                <div className="text-center py-8 w-full max-w-full">
                   <p className="text-background-500 mb-4">
                     Aucune matière disponible pour votre abonnement actuel.
                   </p>
@@ -291,17 +297,17 @@ export default function DashboardPage() {
         </div>
 
         {/* Secondary Actions - Cleaner Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6 w-full max-w-full overflow-x-hidden">
           <Link to="/dashboard/exams" 
-                className="bg-white p-4 lg:p-6 rounded-xl shadow-md border border-background-200 hover:shadow-lg hover:border-primary-300 transition-all group relative">
+                className="bg-white p-4 lg:p-6 rounded-xl shadow-md border border-background-200 hover:shadow-lg hover:border-primary-300 transition-all group relative w-full max-w-full overflow-x-hidden">
             <div className="absolute top-4 right-4">
               <Lock className="w-5 h-5 text-background-400" />
             </div>
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-primary-100 rounded-lg group-hover:bg-primary-200 transition-colors">
+            <div className="flex items-center gap-4 w-full max-w-full">
+              <div className="p-3 bg-primary-100 rounded-lg group-hover:bg-primary-200 transition-colors flex-shrink-0">
                 <FileText className="w-6 h-6 text-primary-600" />
               </div>
-              <div>
+              <div className="min-w-0 flex-1">
                 <h3 className="font-bold text-background-800">Examens</h3>
                 <p className="text-sm text-background-500">Conditions réelles</p>
               </div>
@@ -309,12 +315,12 @@ export default function DashboardPage() {
           </Link>
           
           <Link to="/dashboard/tutor" 
-                className="bg-white p-4 lg:p-6 rounded-xl shadow-md border border-background-200 hover:shadow-lg hover:border-success-300 transition-all group">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-success-100 rounded-lg group-hover:bg-success-200 transition-colors">
+                className="bg-white p-4 lg:p-6 rounded-xl shadow-md border border-background-200 hover:shadow-lg hover:border-success-300 transition-all group w-full max-w-full overflow-x-hidden">
+            <div className="flex items-center gap-4 w-full max-w-full">
+              <div className="p-3 bg-success-100 rounded-lg group-hover:bg-success-200 transition-colors flex-shrink-0">
                 <Users className="w-6 h-6 text-success-600" />
               </div>
-              <div>
+              <div className="min-w-0 flex-1">
                 <h3 className="font-bold text-background-800">Ask a Tutor</h3>
                 <p className="text-sm text-background-500">Aide d'experts</p>
               </div>
@@ -322,12 +328,12 @@ export default function DashboardPage() {
           </Link>
           
           <Link to="/dashboard/forum" 
-                className="bg-white p-4 lg:p-6 rounded-xl shadow-md border border-background-200 hover:shadow-lg hover:border-accent-300 transition-all group">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-accent-100 rounded-lg group-hover:bg-accent-200 transition-colors">
+                className="bg-white p-4 lg:p-6 rounded-xl shadow-md border border-background-200 hover:shadow-lg hover:border-accent-300 transition-all group w-full max-w-full overflow-x-hidden">
+            <div className="flex items-center gap-4 w-full max-w-full">
+              <div className="p-3 bg-accent-100 rounded-lg group-hover:bg-accent-200 transition-colors flex-shrink-0">
                 <Users className="w-6 h-6 text-accent-600" />
               </div>
-              <div>
+              <div className="min-w-0 flex-1">
                 <h3 className="font-bold text-background-800">Communauté</h3>
                 <p className="text-sm text-background-500">Échanges candidats</p>
               </div>

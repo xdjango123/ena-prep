@@ -190,7 +190,7 @@ const QuickQuizPage: React.FC = () => {
       // Save to test_results table for authenticated users
       await TestResultService.saveTestResult(
         user.id,
-        'Quick',
+        'quick',
         'CG', // Using CG as the main category for quick quiz
         score.percentage
       );
@@ -235,12 +235,34 @@ const QuickQuizPage: React.FC = () => {
   };
 
   const getSubjectIcon = (subject: string) => {
-    switch (subject) {
-      case 'Culture Générale': return '🏛️';
-      case 'Logique': return '🧠';
-      case 'Anglais': return '🇬🇧';
-      default: return '📚';
+    switch (subject.toLowerCase()) {
+      case 'culture générale':
+      case 'culture-generale':
+      case 'cg':
+        return '🌍';
+      case 'anglais':
+      case 'english':
+      case 'ang':
+        return '🇬🇧';
+      case 'logique':
+      case 'logic':
+      case 'log':
+        return '🧠';
+      default:
+        return '📚';
     }
+  };
+
+  // Function to get score comment
+  const getScoreComment = (score: number) => {
+    if (score < 30) return 'Encore un effort';
+    if (score >= 30 && score <= 49) return 'Peut mieux faire';
+    if (score >= 50 && score <= 69) return 'En progrès';
+    if (score >= 70 && score <= 84) return 'Encourageant';
+    if (score >= 85 && score <= 94) return 'Très bien';
+    if (score >= 95 && score <= 99) return 'Excellent';
+    if (score === 100) return 'Parfait';
+    return 'Encore un effort';
   };
 
   if (!examType) {
@@ -544,6 +566,13 @@ const QuickQuizPage: React.FC = () => {
               <div className="bg-blue-50 rounded-lg p-6">
                 <div className="text-3xl font-bold text-blue-600 mb-2">{formatTime(600 - timeLeft)}</div>
                 <div className="text-blue-800">Temps utilisé</div>
+              </div>
+            </div>
+            
+            {/* Score Comment */}
+            <div className="mb-8">
+              <div className="inline-block px-6 py-3 rounded-full bg-primary-100 text-primary-700 font-semibold text-lg">
+                {getScoreComment(score.percentage)}
               </div>
             </div>
             

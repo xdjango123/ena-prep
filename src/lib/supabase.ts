@@ -1,5 +1,16 @@
 import { createClient } from '@supabase/supabase-js'
 
+// Question interface for test data
+export interface Question {
+  id: number
+  type: 'multiple-choice' | 'true-false' | 'fill-blank' | 'matching'
+  question: string
+  options?: string[]
+  correctAnswer: string | number
+  explanation?: string
+  difficulty: 'easy' | 'medium' | 'hard'
+}
+
 const supabaseUrl = 'https://ohngxnhnbwnystzkqzwy.supabase.co'
 const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9obmd4bmhuYndueXN0emtxend5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE4NTc2MzcsImV4cCI6MjA2NzQzMzYzN30.Epn0NnYiDRQh9NM3XRbe5j3YH6fuvQfX-UivRuQ8Sbk'
 
@@ -39,7 +50,7 @@ export interface Visitor {
 export interface TestResult {
   id: string
   user_id: string
-  test_type: 'Quick' | 'Practice' | 'Exam'
+  test_type: 'quick' | 'practice' | 'exam'
   category: 'ANG' | 'CG' | 'LOG'
   test_number: number | null
   score: number
@@ -72,5 +83,12 @@ export interface UserAttempt {
   sub_category: string | null
   test_number: number | null
   score: number | null
+  test_data: {
+    questions: Question[]
+    userAnswers: [number, string | number][]
+    correctAnswers: number
+    totalQuestions: number
+    timeSpent: number
+  } | null
   created_at: string
 } 

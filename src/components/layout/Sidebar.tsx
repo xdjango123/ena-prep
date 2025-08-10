@@ -115,7 +115,7 @@ export const Sidebar: React.FC = () => {
               >
                 <div className="flex items-center gap-3">
                   <BookCopy className="w-5 h-5" />
-                  {isOpen && <span>Matières</span>}
+                  {isOpen && <span>Tests</span>}
                 </div>
                 {isOpen && (isMatiereOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />)}
               </button>
