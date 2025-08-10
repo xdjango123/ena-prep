@@ -1,7 +1,24 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { getQuestionsBySubject, Question } from '../../data/quizQuestions';
+import { getQuestionsBySubject } from '../../data/quizQuestions';
 import { useNavigate } from 'react-router-dom';
 import { Clock, CheckCircle, XCircle } from 'lucide-react';
+
+// Updated Question interface to include passages
+interface Question {
+  id: number;
+  type: 'multiple-choice' | 'true-false' | 'fill-blank' | 'matching';
+  question: string;
+  options?: string[];
+  correctAnswer: string | number;
+  explanation?: string;
+  difficulty: 'easy' | 'medium' | 'hard';
+  passage?: {
+    id: string;
+    title?: string;
+    content: string;
+    category?: string;
+  };
+}
 
 interface ChallengeQuizProps {
     subject: string;
@@ -160,6 +177,27 @@ export const ChallengeQuiz: React.FC<ChallengeQuizProps> = ({ subject, onExit })
                          
                          return (
                             <div key={q.id} className={`p-4 rounded-lg border ${isCorrect ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+                                {/* Passage Section - Show if question has a passage */}
+                                {q.passage && (
+                                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
+                                        <div className="mb-2">
+                                            <h4 className="text-sm font-semibold text-blue-900 mb-1">
+                                                {q.passage.title || 'Texte de référence'}
+                                            </h4>
+                                            {q.passage.category && (
+                                                <span className="inline-block px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded">
+                                                    {q.passage.category}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="prose prose-sm max-w-none">
+                                            <div className="text-blue-800 leading-relaxed whitespace-pre-wrap text-xs">
+                                                {q.passage.content}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                                
                                 <p className="font-semibold">{q.question}</p>
                                 <div className="flex items-center justify-center mt-2">
                                     {isCorrect ? <CheckCircle className="w-5 h-5 text-green-500 mr-2" /> : <XCircle className="w-5 h-5 text-red-500 mr-2" />}
@@ -195,6 +233,27 @@ export const ChallengeQuiz: React.FC<ChallengeQuizProps> = ({ subject, onExit })
             </div>
 
             <div className="bg-white p-8 rounded-xl shadow-lg">
+                {/* Passage Section - Show if question has a passage */}
+                {currentQuestion.passage && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                        <div className="mb-3">
+                            <h3 className="text-base font-semibold text-blue-900 mb-2">
+                                {currentQuestion.passage.title || 'Texte de référence'}
+                            </h3>
+                            {currentQuestion.passage.category && (
+                                <span className="inline-block px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded">
+                                    {currentQuestion.passage.category}
+                                </span>
+                            )}
+                        </div>
+                        <div className="prose prose-sm max-w-none">
+                            <div className="text-blue-800 leading-relaxed whitespace-pre-wrap text-sm">
+                                {currentQuestion.passage.content}
+                            </div>
+                        </div>
+                    </div>
+                )}
+                
                 <h2 className="text-xl font-semibold mb-4">{currentQuestionIndex + 1}. {currentQuestion.question}</h2>
                 <div className="space-y-3">
                     {currentQuestion.options?.map((option: string, index: number) => (

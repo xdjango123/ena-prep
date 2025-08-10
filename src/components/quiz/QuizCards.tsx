@@ -1,7 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { getQuestionsBySubject, Question } from '../../data/quizQuestions';
+import { getQuestionsBySubject } from '../../data/quizQuestions';
 import { ChevronLeft, ChevronRight, X, Repeat, Trophy } from 'lucide-react';
 import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
+
+// Updated Question interface to include passages
+interface Question {
+  id: number;
+  type: 'multiple-choice' | 'true-false' | 'fill-blank' | 'matching';
+  question: string;
+  options?: string[];
+  correctAnswer: string | number;
+  explanation?: string;
+  difficulty: 'easy' | 'medium' | 'hard';
+  passage?: {
+    id: string;
+    title?: string;
+    content: string;
+    category?: string;
+  };
+}
 
 interface QuizCardsProps {
     subject: string;
@@ -182,6 +199,27 @@ const QuestionCard: React.FC<{
                         }
                     }}
                 >
+                    {/* Passage Section - Show if question has a passage */}
+                    {question.passage && (
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                            <div className="mb-3">
+                                <h3 className="text-base font-semibold text-blue-900 mb-2">
+                                    {question.passage.title || 'Texte de référence'}
+                                </h3>
+                                {question.passage.category && (
+                                    <span className="inline-block px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded">
+                                        {question.passage.category}
+                                    </span>
+                                )}
+                            </div>
+                            <div className="prose prose-sm max-w-none">
+                                <div className="text-blue-800 leading-relaxed whitespace-pre-wrap text-sm">
+                                    {question.passage.content}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    
                     <div className="text-center mb-6">
                         <h2 className="text-lg lg:text-xl font-bold text-gray-800 mb-4">{question.question}</h2>
                     </div>
@@ -220,6 +258,27 @@ const QuestionCard: React.FC<{
                     }`}
                     onClick={toggleFlip}
                 >
+                    {/* Passage Section - Show if question has a passage */}
+                    {question.passage && (
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                            <div className="mb-3">
+                                <h3 className="text-base font-semibold text-blue-900 mb-2">
+                                    {question.passage.title || 'Texte de référence'}
+                                </h3>
+                                {question.passage.category && (
+                                    <span className="inline-block px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded">
+                                        {question.passage.category}
+                                    </span>
+                                )}
+                            </div>
+                            <div className="prose prose-sm max-w-none">
+                                <div className="text-blue-800 leading-relaxed whitespace-pre-wrap text-sm">
+                                    {question.passage.content}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    
                     <div className="text-center">
                         <div className={`mb-4 p-4 rounded-lg ${
                             isCorrect ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'

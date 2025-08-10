@@ -9,6 +9,7 @@ import { getQuestionsBySubject, Question } from '../data/quizQuestions';
 import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
 import { TestResultService } from '../services/testResultService';
 import { UserAttemptService } from '../services/userAttemptService';
+import { QuestionService } from '../services/questionService';
 import {
     TestDetails,
     ActionButton,
@@ -186,8 +187,20 @@ export default function LogicPage() {
 		const loadQuestions = async () => {
 			setIsLoadingQuestions(true);
 			try {
-				const loadedQuestions = await getQuestionsBySubject('logique', profile?.exam_type as 'CM' | 'CMS' | 'CS');
-				setQuestions(loadedQuestions.slice(0, 10)); // Limit to 10 questions
+				// Use the passage-aware method to get questions with passages for Logic subject
+				const loadedQuestions = await QuestionService.getRandomQuestionsWithPassages('LOG', 10);
+				// Convert QuestionWithPassage to the format expected by QuizSeries
+				const convertedQuestions = loadedQuestions.map(qwp => ({
+					id: parseInt(qwp.question.id),
+					type: 'multiple-choice' as const,
+					question: qwp.question.question_text,
+					options: [qwp.question.answer1, qwp.question.answer2, qwp.question.answer3, qwp.question.answer4].filter(Boolean),
+					correctAnswer: qwp.question.correct.charCodeAt(0) - 65, // Convert A=0, B=1, C=2, D=3
+					explanation: '', // Database questions don't have explanation field
+					difficulty: qwp.question.difficulty,
+					passage: qwp.passage // Include passage data
+				}));
+				setQuestions(convertedQuestions);
 			} catch (error) {
 				console.error('Error loading questions:', error);
 				setError('Failed to load questions');
@@ -201,8 +214,20 @@ export default function LogicPage() {
 	const loadQuestionsForTest = async (testNumber: number) => {
 		setIsLoadingQuestions(true);
 		try {
-			const loadedQuestions = await getQuestionsBySubject('logique', profile?.exam_type as 'CM' | 'CMS' | 'CS', testNumber);
-			setQuestions(loadedQuestions.slice(0, 10)); // Limit to 10 questions
+			// Use the passage-aware method for practice tests as well
+			const loadedQuestions = await QuestionService.getRandomQuestionsWithPassages('LOG', 10);
+			// Convert QuestionWithPassage to the format expected by QuizSeries
+			const convertedQuestions = loadedQuestions.map(qwp => ({
+				id: parseInt(qwp.question.id),
+				type: 'multiple-choice' as const,
+				question: qwp.question.question_text,
+				options: [qwp.question.answer1, qwp.question.answer2, qwp.question.answer3, qwp.question.answer4].filter(Boolean),
+				correctAnswer: qwp.question.correct.charCodeAt(0) - 65, // Convert A=0, B=1, C=2, D=3
+				explanation: '', // Database questions don't have explanation field
+				difficulty: qwp.question.difficulty,
+				passage: qwp.passage // Include passage data
+			}));
+			setQuestions(convertedQuestions);
 		} catch (error) {
 			console.error('Error loading questions:', error);
 			setError('Failed to load questions');

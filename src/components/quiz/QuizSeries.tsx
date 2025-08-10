@@ -10,6 +10,12 @@ interface Question {
   correctAnswer: string | number;
   explanation?: string;
   difficulty: 'easy' | 'medium' | 'hard';
+  passage?: {
+    id: string;
+    title?: string;
+    content: string;
+    category?: string;
+  };
 }
 
 interface QuizSeriesProps {
@@ -446,6 +452,27 @@ export const QuizSeries: React.FC<QuizSeriesProps> = ({
 
                 return (
                   <div key={question.id} className="border border-gray-200 rounded-lg p-6">
+                    {/* Passage Section - Show if question has a passage */}
+                    {question.passage && (
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                        <div className="mb-3">
+                          <h4 className="text-base font-semibold text-blue-900 mb-2">
+                            {question.passage.title || 'Texte de référence'}
+                          </h4>
+                          {question.passage.category && (
+                            <span className="inline-block px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded">
+                              {question.passage.category}
+                            </span>
+                          )}
+                        </div>
+                        <div className="prose prose-sm max-w-none">
+                          <div className="text-blue-800 leading-relaxed whitespace-pre-wrap text-sm">
+                            {question.passage.content}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
                     <div className="flex items-center gap-3 mb-4">
                       <span className="text-sm font-medium text-gray-600">Question {index + 1}</span>
                       {isCorrect ? (
@@ -619,35 +646,66 @@ export const QuizSeries: React.FC<QuizSeriesProps> = ({
       
       {/* Question Card */}
       <div className="flex-grow flex items-center justify-center">
-        <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-3xl">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">{currentQuestion.question}</h2>
+        <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-4xl">
+          {/* Passage Section - Show if question has a passage */}
+          {currentQuestion.passage && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold text-blue-900 mb-2">
+                  {currentQuestion.passage.title || 'Texte de référence'}
+                </h3>
+                {currentQuestion.passage.category && (
+                  <span className="inline-block px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded">
+                    {currentQuestion.passage.category}
+                  </span>
+                )}
+              </div>
+              <div className="prose prose-sm max-w-none">
+                <div className="text-blue-800 leading-relaxed whitespace-pre-wrap text-sm sm:text-base">
+                  {currentQuestion.passage.content}
+                </div>
+              </div>
+            </div>
+          )}
           
-          <div className="space-y-4">
-            {currentQuestion.type === 'multiple-choice' && currentQuestion.options?.map((option, index) => {
-              const isSelected = selectedAnswer === index;
-              return (
-                <div
-                  key={index}
-                  onClick={() => handleAnswerSelect(index)}
-                  className={`p-4 border rounded-lg cursor-pointer transition-all duration-200 ${isSelected ? `${getColorClasses(subjectColor, '100', 'bg')} ${getColorClasses(subjectColor, '500', 'border')} shadow-md` : 'bg-white border-gray-200 hover:border-gray-300'}`}
-                >
-                  {option}
-                </div>
-              );
-            })}
-            {currentQuestion.type === 'true-false' && ['Vrai', 'Faux'].map((option, index) => {
-              const answerValue = index === 0 ? 'Vrai' : 'Faux';
-              const isSelected = selectedAnswer === answerValue;
-              return (
-                <div
-                  key={option}
-                  onClick={() => handleAnswerSelect(answerValue)}
-                  className={`p-4 border rounded-lg cursor-pointer transition-all duration-200 ${isSelected ? `${getColorClasses(subjectColor, '100', 'bg')} ${getColorClasses(subjectColor, '500', 'border')} shadow-md` : 'bg-white border-gray-200 hover:border-gray-300'}`}
-                >
-                  {option}
-                </div>
-              );
-            })}
+          {/* Question Section */}
+          <div className="bg-white rounded-lg p-6 border border-gray-200">
+            <div className="mb-6">
+              <h4 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">
+                Question
+              </h4>
+              <p className="text-gray-700 text-base sm:text-lg">
+                {currentQuestion.question}
+              </p>
+            </div>
+            
+            <div className="space-y-4">
+              {currentQuestion.type === 'multiple-choice' && currentQuestion.options?.map((option, index) => {
+                const isSelected = selectedAnswer === index;
+                return (
+                  <div
+                    key={index}
+                    onClick={() => handleAnswerSelect(index)}
+                    className={`p-4 border rounded-lg cursor-pointer transition-all duration-200 ${isSelected ? `${getColorClasses(subjectColor, '100', 'bg')} ${getColorClasses(subjectColor, '500', 'border')} shadow-md` : 'bg-white border-gray-200 hover:border-gray-300'}`}
+                  >
+                    {option}
+                  </div>
+                );
+              })}
+              {currentQuestion.type === 'true-false' && ['Vrai', 'Faux'].map((option, index) => {
+                const answerValue = index === 0 ? 'Vrai' : 'Faux';
+                const isSelected = selectedAnswer === answerValue;
+                return (
+                  <div
+                    key={option}
+                    onClick={() => handleAnswerSelect(answerValue)}
+                    className={`p-4 border rounded-lg cursor-pointer transition-all duration-200 ${isSelected ? `${getColorClasses(subjectColor, '100', 'bg')} ${getColorClasses(subjectColor, '500', 'border')} shadow-md` : 'bg-white border-gray-200 hover:border-gray-300'}`}
+                  >
+                    {option}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
