@@ -138,8 +138,7 @@ export const Hero: React.FC = () => {
               variants={staggerItem}
               className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-neutral-950 leading-tight mb-4 xs:mb-6 px-2 xs:px-0"
             >
-              Votre <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-accent-600">Outil de Reference </span><br className="block xs:hidden" />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-accent-600">pour Exceller a l'ENA</span>
+              Votre <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-accent-600">Passeport</span> vers l'<span className="text-transparent bg-clip-text bg-gradient-to-r from-accent-600 to-yellow-600">Excellence</span> ENA
             </motion.h1>
             
             <motion.p 
@@ -151,18 +150,13 @@ export const Hero: React.FC = () => {
             
             <motion.div 
               variants={staggerItem}
-              className="flex flex-col sm:flex-row gap-4 xs:gap-5 justify-center mb-6 xs:mb-8 px-3 xs:px-4 sm:px-0"
+              className="flex justify-center mb-6 xs:mb-8 px-3 xs:px-4 sm:px-0"
             >
-              <Button to="/signup" size="lg" className="hidden md:inline-flex text-lg py-3 xs:py-4 px-6 xs:px-8 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-                Inscription
-              </Button>
-              
               {/* Dropdown container - Mobile optimized */}
               <div className="relative w-full sm:w-auto" ref={dropdownRef}>
                 <Button 
-                  variant="outline" 
                   size="lg" 
-                  className="text-base xs:text-lg py-3 xs:py-4 px-6 xs:px-8 border-2 border-accent-500 text-accent-600 hover:bg-accent-500 hover:text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 w-full sm:w-auto"
+                  className="text-base xs:text-lg py-3 xs:py-4 px-6 xs:px-8 bg-gradient-to-r from-accent-500 to-accent-600 hover:from-accent-600 hover:to-accent-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 w-full sm:w-auto"
                   onClick={() => setShowQuiz(!showQuiz)}
                 >
                   Commencez un quiz rapide

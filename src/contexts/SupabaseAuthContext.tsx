@@ -291,9 +291,28 @@ export const SupabaseAuthProvider: React.FC<SupabaseAuthProviderProps> = ({ chil
 
   const signOut = async () => {
     try {
-      await supabase.auth.signOut();
+      // Clear local state first to ensure immediate UI update
+      setUser(null);
+      setSession(null);
+      setProfile(null);
+      setSubscription(null);
+      
+      // Then attempt Supabase logout
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error('Sign out error:', error);
+        // Revert state if logout failed
+        // Note: We don't revert here as it could cause infinite loops
+        // Instead, we'll let the auth state change listener handle it
+      }
     } catch (error) {
       console.error('Sign out error:', error);
+      // Even if there's an error, clear local state for better UX
+      setUser(null);
+      setSession(null);
+      setProfile(null);
+      setSubscription(null);
     }
   };
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { NavLink, Link } from 'react-router-dom';
+import { NavLink, Link, useNavigate } from 'react-router-dom';
 import { Menu, X, GraduationCap, LogOut, User, Settings, CreditCard, TrendingUp, LayoutDashboard } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Container } from '../ui/Container';
@@ -16,6 +16,7 @@ const navigation = [
 
 export const Header: React.FC = () => {
   const { user, profile, signOut } = useSupabaseAuth();
+  const navigate = useNavigate();
   const isAuthenticated = !!user;
   const userName = profile ? `${profile['First Name']} ${profile['Last Name']}` : user?.email || 'Utilisateur';
   const [isScrolled, setIsScrolled] = useState(false);
@@ -42,8 +43,16 @@ export const Header: React.FC = () => {
   }, [isUserMenuOpen]);
 
   const handleLogout = async () => {
-    await signOut();
-    setIsUserMenuOpen(false);
+    try {
+      await signOut();
+      setIsUserMenuOpen(false);
+      // Redirect to home page after successful logout
+      navigate('/');
+    } catch (error) {
+      console.error('Logout failed:', error);
+      // Even if logout fails, redirect to home for better UX
+      navigate('/');
+    }
   };
 
   return (

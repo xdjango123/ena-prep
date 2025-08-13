@@ -35,8 +35,14 @@ export const Sidebar: React.FC = () => {
   const [isMatiereOpen, setMatiereOpen] = useState(true);
 
   const handleLogout = async () => {
-    await signOut();
-    navigate('/');
+    try {
+      await signOut();
+      navigate('/');
+    } catch (error) {
+      console.error('Logout failed:', error);
+      // Even if logout fails, redirect to home for better UX
+      navigate('/');
+    }
   };
 
   const isLinkActive = (path: string) => {
