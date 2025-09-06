@@ -14,7 +14,8 @@ import {
   LogOut, 
   ChevronDown, 
   ChevronUp,
-  GraduationCap
+  GraduationCap,
+  Settings
 } from 'lucide-react';
 import { useSidebar } from '../../contexts/SidebarContext';
 import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
@@ -28,7 +29,7 @@ interface NavItem {
 }
 
 export const Sidebar: React.FC = () => {
-  const { isOpen, toggle } = useSidebar();
+  const { isOpen, isHovered, toggle } = useSidebar();
   const { user, profile, signOut } = useSupabaseAuth();
   const location = useLocation();
   const navigate = useNavigate();
@@ -45,119 +46,215 @@ export const Sidebar: React.FC = () => {
     }
   };
 
+  const handleProfileClick = () => {
+    navigate('/dashboard/profile');
+  };
+
   const isLinkActive = (path: string) => {
     // Special case for dashboard - only highlight when exactly on dashboard
     if (path === '/dashboard') {
-      return location.pathname === '/dashboard' || location.pathname === '/dashboard/';
+      return location.pathname === '/dashboard';
     }
-    // For all other paths, use startsWith as before
     return location.pathname.startsWith(path);
   };
 
-  const navLinks = [
-    { id: 'dashboard', label: 'Tableau de bord', icon: <LayoutDashboard className="w-5 h-5" />, path: '/dashboard' },
-  ];
-  
-  const matiereLinks = [
-    { id: 'general', label: 'Culture Générale', icon: <Globe className="w-4 h-4" />, path: '/dashboard/subject/general-knowledge' },
-    { id: 'english', label: 'Anglais', icon: <Languages className="w-4 h-4" />, path: '/dashboard/subject/english' },
-    { id: 'logic', label: 'Logique', icon: <BrainCircuit className="w-4 h-4" />, path: '/dashboard/subject/logic' },
+  const navItems: NavItem[] = [
+    {
+      id: 'dashboard',
+      label: 'Tableau de bord',
+      icon: <LayoutDashboard className="w-5 h-5" />,
+      path: '/dashboard'
+    },
+    {
+      id: 'practice',
+      label: 'Pratique',
+      icon: <BookCopy className="w-5 h-5" />,
+      path: '/dashboard/practice'
+    },
+    {
+      id: 'matieres',
+      label: 'Matières',
+      icon: <GraduationCap className="w-5 h-5" />,
+      action: () => setMatiereOpen(!isMatiereOpen)
+    },
+    {
+      id: 'exams',
+      label: 'Examens',
+      icon: <FileText className="w-5 h-5" />,
+      path: '/dashboard/exams'
+    },
+    {
+      id: 'tutor',
+      label: 'Tuteur',
+      icon: <Users className="w-5 h-5" />,
+      path: '/dashboard/tutor'
+    },
+    {
+      id: 'forum',
+      label: 'Forum',
+      icon: <MessageSquare className="w-5 h-5" />,
+      path: '/dashboard/forum'
+    }
   ];
 
-  const communityItems: NavItem[] = [
-    { id: 'forum', label: 'Forum', icon: <MessageSquare className="w-5 h-5" />, path: '/dashboard/forum' },
-    { id: 'ask-tutor', label: 'Ask a Tutor', icon: <Users className="w-5 h-5" />, path: '/dashboard/tutor' },
-    { id: 'ena-guide', label: 'Guide de L\'ENA', icon: <BookCopy className="w-5 h-5" />, path: '/dashboard/ena-guide' },
+  const matiereItems: NavItem[] = [
+    {
+      id: 'general_knowledge',
+      label: 'Culture Générale',
+      icon: <Globe className="w-4 h-4" />,
+      path: '/dashboard/subject/general-knowledge'
+    },
+    {
+      id: 'english',
+      label: 'Anglais',
+      icon: <Languages className="w-4 h-4" />,
+      path: '/dashboard/subject/english'
+    },
+    {
+      id: 'logic',
+      label: 'Logique',
+      icon: <BrainCircuit className="w-4 h-4" />,
+      path: '/dashboard/subject/logic'
+    }
   ];
-  
-  const renderLink = (item: { id: string, label: string, icon: React.ReactNode, path: string }, isSubItem = false) => {
-    const active = isLinkActive(item.path);
-    return (
-      <Link
-        key={item.id}
-        to={item.path}
-        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors mb-1 ${
-          active 
-            ? (isSubItem ? 'bg-blue-50 text-blue-600' : 'bg-blue-100 text-blue-600 font-semibold')
-            : ''
-        } ${!isOpen ? 'justify-center' : ''}`}
-      >
-        {item.icon}
-        {isOpen && <span>{item.label}</span>}
-      </Link>
-    );
-  }
 
-  const userName = profile ? `${profile['First Name']} ${profile['Last Name']}` : user?.email || 'Utilisateur';
+  const sidebarExpanded = isOpen || isHovered;
 
   return (
-    <div className={`h-screen bg-white border-r border-gray-200 flex flex-col transition-all duration-300 z-50 lg:z-20 ${
-      isOpen ? 'w-64' : 'w-20'
-    }`}>
-      {/* Logo and Toggle - Hide toggle on mobile since it's handled by DashboardLayout */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 h-16 shrink-0">
-        {isOpen && (
-          <Link to="/" className="flex items-center gap-2 text-primary-500 font-bold text-lg">
-            <GraduationCap size={24} />
-            <span>PrepaENA</span>
-          </Link>
-        )}
-        <button onClick={toggle} className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 lg:block hidden">
-          <Menu className="w-5 h-5" />
-        </button>
+    <div className="h-full bg-white border-r border-gray-200 flex flex-col">
+      {/* Header */}
+      <div className="p-4 border-b border-gray-200">
+        <div className="flex items-center justify-between">
+          {sidebarExpanded && (
+            <h1 className="text-xl font-bold text-gray-900">PrepaENA</h1>
+          )}
+          <button
+            onClick={toggle}
+            className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
+            aria-label="Toggle sidebar"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+        </div>
       </div>
 
-      {/* Main Navigation */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden p-4">
-        <nav>
-          <ul>
-            {navLinks.map(link => (
-              <li key={link.id}>{renderLink(link)}</li>
-            ))}
-            <li>
+      {/* Navigation */}
+      <nav className="flex-1 p-4 space-y-2">
+        {navItems.map((item) => (
+          <div key={item.id}>
+            {item.action ? (
               <button
-                onClick={() => setMatiereOpen(!isMatiereOpen)}
-                className={`flex items-center justify-between w-full gap-3 px-3 py-2.5 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors mb-1 ${!isOpen ? 'justify-center' : ''}`}
+                onClick={item.action}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                  isLinkActive('/dashboard/subject') && item.id === 'matieres'
+                    ? 'bg-primary-100 text-primary-700'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
               >
-                <div className="flex items-center gap-3">
-                  <BookCopy className="w-5 h-5" />
-                  {isOpen && <span>Tests</span>}
-                </div>
-                {isOpen && (isMatiereOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />)}
+                {item.icon}
+                {sidebarExpanded && (
+                  <>
+                    <span className="font-medium">{item.label}</span>
+                    {item.id === 'matieres' && (
+                      isMatiereOpen ? <ChevronUp className="w-4 h-4 ml-auto" /> : <ChevronDown className="w-4 h-4 ml-auto" />
+                    )}
+                  </>
+                )}
               </button>
-              {isOpen && isMatiereOpen && (
-                <ul className="pl-4 mt-1 space-y-1">
-                  {matiereLinks.map(link => (
-                    <li key={link.id}>{renderLink(link, true)}</li>
-                  ))}
-                </ul>
-              )}
-            </li>
-             <li>
-              {renderLink({ id: 'exams', label: 'Examens', icon: <FileText className="w-5 h-5" />, path: '/dashboard/exams' })}
-            </li>
-          </ul>
+            ) : (
+              <Link
+                to={item.path!}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                  isLinkActive(item.path!)
+                    ? 'bg-primary-100 text-primary-700'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                {item.icon}
+                {sidebarExpanded && <span className="font-medium">{item.label}</span>}
+              </Link>
+            )}
 
-          {isOpen && <h2 className="px-3 mt-6 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Communauté</h2>}
-          <ul>
-            {communityItems.map(item => (
-              <li key={item.id}>{renderLink({ id: item.id, label: item.label, icon: item.icon as React.ReactElement, path: item.path! })}</li>
-            ))}
-          </ul>
-        </nav>
-      </div>
+            {/* Matiere submenu */}
+            {item.id === 'matieres' && isMatiereOpen && sidebarExpanded && (
+              <div className="ml-6 mt-2 space-y-1">
+                {matiereItems.map((matiere) => (
+                  <Link
+                    key={matiere.id}
+                    to={matiere.path!}
+                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                      isLinkActive(matiere.path!)
+                        ? 'bg-primary-50 text-primary-600'
+                        : 'text-gray-600 hover:bg-gray-50'
+                    }`}
+                  >
+                    {matiere.icon}
+                    <span className="text-sm">{matiere.label}</span>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+      </nav>
 
-      {/* User Area */}
-      <div className="p-4 border-t border-gray-200 shrink-0">
-        <Link to="/dashboard/profile" className={`flex items-center p-2 rounded-lg hover:bg-gray-100 ${!isOpen ? 'justify-center' : ''}`}>
-          <img src={`https://ui-avatars.com/api/?name=${userName}&background=random`} alt="User avatar" className="w-8 h-8 rounded-full" />
-          {isOpen && <span className="ml-3 font-semibold text-gray-700 truncate">{userName}</span>}
-        </Link>
-        <button onClick={handleLogout} className={`w-full flex items-center p-2 mt-2 rounded-lg text-red-600 hover:bg-red-50 ${!isOpen ? 'justify-center' : ''}`}>
-          <LogOut className="w-5 h-5" />
-          {isOpen && <span className="ml-3 font-semibold">Se déconnecter</span>}
-        </button>
+      {/* User Profile - Enhanced for Mobile */}
+      <div className="p-4 border-t border-gray-200">
+        {sidebarExpanded ? (
+          <div className="space-y-3">
+            {/* Profile Info - Clickable on Mobile */}
+            <button
+              onClick={handleProfileClick}
+              className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 transition-colors text-left"
+            >
+              <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center text-white text-sm font-medium flex-shrink-0">
+                {profile ? profile['First Name']?.[0] || user?.email?.[0] || 'U' : 'U'}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-gray-900 truncate">
+                  {profile ? profile['First Name'] || 'Utilisateur' : 'Utilisateur'}
+                </p>
+                <p className="text-xs text-gray-500 truncate">
+                  {user?.email}
+                </p>
+              </div>
+              <Settings className="w-4 h-4 text-gray-400" />
+            </button>
+            
+            {/* Logout Button */}
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors text-left"
+              aria-label="Se déconnecter"
+            >
+              <LogOut className="w-4 h-4" />
+              <span className="text-sm font-medium">Se déconnecter</span>
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {/* Collapsed Profile - Clickable */}
+            <button
+              onClick={handleProfileClick}
+              className="w-full flex justify-center p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              aria-label="Ouvrir le profil"
+            >
+              <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                {profile ? profile['First Name']?.[0] || user?.email?.[0] || 'U' : 'U'}
+              </div>
+            </button>
+            
+            {/* Collapsed Logout */}
+            <button
+              onClick={handleLogout}
+              className="w-full flex justify-center p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
+              aria-label="Se déconnecter"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
-}; 
+};

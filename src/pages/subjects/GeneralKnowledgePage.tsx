@@ -38,14 +38,17 @@ const practiceTests = [
     { id: 'p3', name: 'Practice Test 3', questions: 10, time: 15, topic: 'Current Events' },
     { id: 'p4', name: 'Practice Test 4', questions: 10, time: 15, topic: 'History' },
     { id: 'p5', name: 'Practice Test 5', questions: 10, time: 15, topic: 'Geography' },
+    { id: 'p6', name: 'Practice Test 6', questions: 10, time: 15, topic: 'Current Events' },
+    { id: 'p7', name: 'Practice Test 7', questions: 10, time: 15, topic: 'History' },
+    { id: 'p8', name: 'Practice Test 8', questions: 10, time: 15, topic: 'Geography' },
+    { id: 'p9', name: 'Practice Test 9', questions: 10, time: 15, topic: 'Current Events' },
+    { id: 'p10', name: 'Practice Test 10', questions: 10, time: 15, topic: 'History' },
 ];
 
 const topics = ['All', 'History', 'Geography', 'Current Events'];
 
 const quizzes = [
-    { id: 'q1', name: 'Quiz 1', questions: 10, time: 20 },
-    { id: 'q2', name: 'Quiz 2', questions: 10, time: 20 },
-    { id: 'q3', name: 'Quiz 3', questions: 10, time: 20 },
+    { id: 'q1', name: 'Quiz Series', questions: 15, time: 20 },
 ];
 
 const lastTest = { name: 'Practice Test 2', completed: 10, total: 20 };
@@ -71,6 +74,44 @@ export const GeneralKnowledgePage: React.FC = () => {
 		testsTaken: 0,
 		timeSpent: 0
 	});
+
+	// Load user statistics
+	useEffect(() => {
+		const loadUserStatistics = async () => {
+			if (!user?.id) return;
+			
+			try {
+				const attempts = await UserAttemptService.getUserAttemptsByCategory(user.id, 'CG');
+				const practiceAttempts = attempts.filter(attempt => attempt.test_type === 'practice');
+				
+				// Calculate total score, tests taken, and time spent
+				let totalScore = 0;
+				let totalTimeSpent = 0;
+				const testsTaken = practiceAttempts.length;
+				
+				practiceAttempts.forEach(attempt => {
+					if (attempt.score !== null) {
+						totalScore += attempt.score;
+					}
+					if (attempt.test_data?.timeSpent) {
+						totalTimeSpent += attempt.test_data.timeSpent;
+					}
+				});
+				
+				const averageScore = testsTaken > 0 ? Math.round(totalScore / testsTaken) : 0;
+				
+				setStatistics({
+					score: averageScore,
+					testsTaken: testsTaken,
+					timeSpent: Math.round(totalTimeSpent / 60) // Convert to minutes
+				});
+			} catch (error) {
+				console.error('Error loading user statistics:', error);
+			}
+		};
+		
+		loadUserStatistics();
+	}, [user?.id]);
 
 	const pausedTestState = getQuizState('Culture Générale');
 
@@ -207,7 +248,7 @@ export const GeneralKnowledgePage: React.FC = () => {
 			setIsLoadingQuestions(true);
 			try {
 				const loadedQuestions = await getQuestionsBySubject('culture-generale', profile?.exam_type as 'CM' | 'CMS' | 'CS');
-				setQuestions(loadedQuestions.slice(0, 10)); // Limit to 10 questions
+				setQuestions(loadedQuestions.slice(0, 15)); // Limit to 15 questions for quiz
 			} catch (error) {
 				console.error('Error loading questions:', error);
 				setError('Failed to load questions');
@@ -222,7 +263,7 @@ export const GeneralKnowledgePage: React.FC = () => {
 		setIsLoadingQuestions(true);
 		try {
 			const loadedQuestions = await getQuestionsBySubject('culture-generale', profile?.exam_type as 'CM' | 'CMS' | 'CS', testNumber);
-			setQuestions(loadedQuestions.slice(0, 10)); // Limit to 10 questions
+			setQuestions(loadedQuestions.slice(0, 15)); // Limit to 15 questions for quiz
 		} catch (error) {
 			console.error('Error loading questions:', error);
 			setError('Failed to load questions');

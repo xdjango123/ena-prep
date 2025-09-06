@@ -191,13 +191,19 @@ export const Header: React.FC = () => {
       {/* Mobile Navigation */}
       <AnimatePresence>
         {isMobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-            className="md:hidden bg-primary-700 border-t border-primary-500 mt-2 overflow-x-hidden"
-          >
+          <>
+            {/* Overlay to close menu when clicking outside */}
+            <div 
+              className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="md:hidden bg-primary-700 border-t border-primary-500 mt-2 overflow-x-hidden relative z-50"
+            >
             <Container>
               <div className="py-2 space-y-1">
                 {navigation.map((item) => (
@@ -257,7 +263,8 @@ export const Header: React.FC = () => {
                 </div>
               </div>
             </Container>
-          </motion.div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </header>

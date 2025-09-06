@@ -1,0 +1,6 @@
+
+            {/* Debug component - remove in production */}
+            <DatabaseDebug />
+        </div>
+    );
+};

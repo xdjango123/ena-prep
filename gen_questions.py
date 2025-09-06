@@ -127,6 +127,26 @@ Return JSON with schema:
         print("⚠️  Could not parse JSON, returning empty items")
         return {"items": []}
 
+def get_sub_category_for_questions(subject: str, question_text: str) -> str:
+    """Get the correct sub_category for questions table based on subject and content"""
+    if subject == 'CG':
+        # For CG, we need to determine if it's "Aptitude Verbale" or "CG"
+        # This is a simplified approach - you might want to use AI for more accuracy
+        verbale_keywords = ['orthographe', 'grammaire', 'vocabulaire', 'conjugaison', 'pluriel', 'singulier', 'mot', 'phrase']
+        if any(keyword in question_text.lower() for keyword in verbale_keywords):
+            return 'Aptitude Verbale'
+        else:
+            return 'CG'
+    elif subject == 'LOG':
+        # For LOG, determine if it's "Aptitude Numérique" or "Organisation"
+        numerique_keywords = ['calcul', 'nombre', 'chiffre', 'mathématique', 'train', 'vitesse', 'distance', 'temps', 'pourcentage']
+        if any(keyword in question_text.lower() for keyword in numerique_keywords):
+            return 'Aptitude Numérique'
+        else:
+            return 'Organisation'
+    else:  # ANG or other
+        return None
+
 def validate_and_insert(items:List[Dict], created_by=None, model_name="gpt-4o"):
     idx = {'A':0,'B':1,'C':2,'D':3}
     inserted = 0
@@ -160,11 +180,15 @@ def validate_and_insert(items:List[Dict], created_by=None, model_name="gpt-4o"):
             # Continue anyway to avoid blocking the process
 
         # Map difficulty to database format for ai_question_suggestions
+        # Note: We keep Easy/Medium/Hard format here since ai_question_suggestions uses this format
         db_difficulty = {
             'Easy': 'Easy',
             'Medium': 'Medium', 
             'Hard': 'Hard'
         }.get(it["difficulty"], 'Medium')
+        
+        # Get correct sub_category for questions table
+        sub_category = get_sub_category_for_questions(it["subject"], it["question_text"])
         
         payload = {
             "category": it["exam_type"],  # CM/CMS/CS goes in category field
@@ -180,14 +204,16 @@ def validate_and_insert(items:List[Dict], created_by=None, model_name="gpt-4o"):
             "status": "ready",  # Changed from 'draft' to 'ready' as requested
             "created_by": created_by,
             "model_name": model_name,
-            "unique_hash": uh
+            "unique_hash": uh,
+            "ai_generated": True,  # FIXED: Set ai_generated to True
+            "sub_category": sub_category  # FIXED: Set proper sub_category
         }
         
         try:
             result = sb.table("ai_question_suggestions").insert(payload).execute()
             if result.data:
                 inserted += 1
-                print(f"✅ Inserted: {it['question_text'][:50]}...")
+                print(f"✅ Inserted: {it['question_text'][:50]}... (ai_generated: True, sub_category: {sub_category})")
             else:
                 print(f"❌ Failed to insert: {it['question_text'][:50]}...")
         except Exception as e:
@@ -199,23 +225,62 @@ if __name__ == "__main__":
     import argparse
     ap = argparse.ArgumentParser()
     ap.add_argument("--exam", required=True, choices=["CM","CMS","CS"])
-    ap.add_argument("--subject", required=True, choices=["ANG","CG","LOG"])  # Changed from --category
+    ap.add_argument("--subject", required=True, choices=["ANG","CG","LOG","ALL"])  # Added ALL option
     ap.add_argument("--difficulty", required=True, choices=["Easy","Medium","Hard"])
     ap.add_argument("--count", type=int, default=10)
     ap.add_argument("--created_by", help="admin user uuid to stamp")
     args = ap.parse_args()
 
-    examples = fetch_examples(args.exam, args.subject, args.difficulty, k=4)
-    if not examples:
-        print("No examples found; you can still proceed but quality may vary.")
-    else:
-        print(f"Found {len(examples)} example questions for style reference.")
+    # Handle ALL subjects
+    if args.subject == "ALL":
+        subjects = ["ANG", "CG", "LOG"]
+        total_inserted = 0
         
-    out = call_llm(args.exam, args.subject, args.difficulty, examples, args.count)
-    items = out.get("items", [])
-    print(f"LLM returned {len(items)} items.")
+        for subject in subjects:
+            print(f"\n{'='*60}")
+            print(f"Generating questions for {subject} subject...")
+            print(f"{'='*60}")
+            
+            # Calculate questions per subject (distribute evenly)
+            questions_per_subject = args.count // len(subjects)
+            remaining = args.count % len(subjects)
+            
+            # Add remaining questions to first subject
+            current_count = questions_per_subject + (remaining if subject == subjects[0] else 0)
+            
+            examples = fetch_examples(args.exam, subject, args.difficulty, k=4)
+            if not examples:
+                print(f"No examples found for {subject}; you can still proceed but quality may vary.")
+            else:
+                print(f"Found {len(examples)} example questions for {subject} style reference.")
+                
+            out = call_llm(args.exam, subject, args.difficulty, examples, current_count)
+            items = out.get("items", [])
+            print(f"LLM returned {len(items)} items for {subject}.")
 
-    # Insert the generated questions
-    print("Inserting…")
-    n = validate_and_insert(items, created_by=args.created_by)
-    print(f"Inserted {n} suggestions (status=ready).")
+            # Insert the generated questions
+            print(f"Inserting {subject} questions...")
+            n = validate_and_insert(items, created_by=args.created_by)
+            total_inserted += n
+            print(f"Inserted {n} {subject} suggestions (status=ready, ai_generated=True).")
+        
+        print(f"\n{'='*60}")
+        print(f"TOTAL: Inserted {total_inserted} questions across all subjects")
+        print(f"{'='*60}")
+        
+    else:
+        # Single subject processing (original logic)
+        examples = fetch_examples(args.exam, args.subject, args.difficulty, k=4)
+        if not examples:
+            print("No examples found; you can still proceed but quality may vary.")
+        else:
+            print(f"Found {len(examples)} example questions for style reference.")
+            
+        out = call_llm(args.exam, args.subject, args.difficulty, examples, args.count)
+        items = out.get("items", [])
+        print(f"LLM returned {len(items)} items.")
+
+        # Insert the generated questions
+        print("Inserting…")
+        n = validate_and_insert(items, created_by=args.created_by)
+        print(f"Inserted {n} suggestions (status=ready, ai_generated=True).")

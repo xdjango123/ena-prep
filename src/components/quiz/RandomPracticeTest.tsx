@@ -334,38 +334,38 @@ export const RandomPracticeTest: React.FC<RandomPracticeTestProps> = ({ onExit }
     const timeSpent = 15 * 60 - timeRemaining;
 
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col p-4">
-        <div className="max-w-4xl mx-auto w-full">
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <div className="w-full max-w-4xl mx-auto px-2 sm:px-4 py-2 sm:py-4">
           {/* Results Header */}
-          <div className="bg-white rounded-2xl shadow-lg p-8 mb-6">
+          <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8 mb-4 sm:mb-6">
             <div className="text-center">
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">Test Aléatoire Terminé !</h1>
-              <p className="text-gray-600 mb-8">{getSubtitle(score)}</p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">Test Aléatoire Terminé !</h1>
+              <p className="text-gray-600 mb-6 sm:mb-8 text-sm sm:text-base">{getSubtitle(score)}</p>
               
               {/* Score and Stats */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <h3 className="text-3xl font-bold text-blue-600">{score}%</h3>
-                  <p className="text-sm text-gray-500">Score</p>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 mb-6 sm:mb-8">
+                <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
+                  <h3 className="text-2xl sm:text-3xl font-bold text-blue-600">{score}%</h3>
+                  <p className="text-xs sm:text-sm text-gray-500">Score</p>
                 </div>
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <h3 className="text-3xl font-bold">{correctAnswers}/{questions.length}</h3>
-                  <p className="text-sm text-gray-500">Correct</p>
+                <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
+                  <h3 className="text-2xl sm:text-3xl font-bold">{correctAnswers}/{questions.length}</h3>
+                  <p className="text-xs sm:text-sm text-gray-500">Correct</p>
                 </div>
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <h3 className="text-3xl font-bold">{formatTime(timeSpent)}</h3>
-                  <p className="text-sm text-gray-500">Temps</p>
+                <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
+                  <h3 className="text-2xl sm:text-3xl font-bold">{formatTime(timeSpent)}</h3>
+                  <p className="text-xs sm:text-sm text-gray-500">Temps</p>
                 </div>
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <h3 className="text-3xl font-bold">{questions.length}</h3>
-                  <p className="text-sm text-gray-500">Questions</p>
+                <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
+                  <h3 className="text-2xl sm:text-3xl font-bold">{questions.length}</h3>
+                  <p className="text-xs sm:text-sm text-gray-500">Questions</p>
                 </div>
               </div>
 
               {/* Subject Breakdown */}
-              <div className="bg-gray-50 p-4 rounded-lg mb-6">
-                <h3 className="text-lg font-semibold mb-3">Répartition par matière:</h3>
-                <div className="flex justify-center gap-6">
+              <div className="bg-gray-50 p-3 sm:p-4 rounded-lg mb-4 sm:mb-6">
+                <h3 className="text-base sm:text-lg font-semibold mb-2 sm:mb-3">Répartition par matière:</h3>
+                <div className="flex justify-center gap-3 sm:gap-6">
                   {['ANG', 'CG', 'LOG'].map(subject => {
                     const subjectQuestions = questions.filter(q => q.category === subject);
                     const subjectCorrect = subjectQuestions.reduce((count, q) => {
@@ -391,7 +391,7 @@ export const RandomPracticeTest: React.FC<RandomPracticeTestProps> = ({ onExit }
               </div>
 
               {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row justify-center gap-4">
+              <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
                 <button 
                   onClick={() => {
                     setCurrentQuestionIndex(0);
@@ -402,20 +402,146 @@ export const RandomPracticeTest: React.FC<RandomPracticeTestProps> = ({ onExit }
                     setAnsweredQuestions(new Set());
                     setCorrectAnswers(0);
                   }}
-                  className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 rounded-lg bg-blue-500 text-white font-semibold hover:bg-blue-600 transition-colors"
+                  className="flex items-center justify-center gap-2 w-full sm:w-auto px-4 sm:px-6 py-3 rounded-lg bg-blue-500 text-white font-semibold hover:bg-blue-600 transition-colors"
                 >
                   <Repeat className="w-5 h-5" />
                   Nouveau test aléatoire
                 </button>
                 <button 
                   onClick={onExit}
-                  className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 rounded-lg bg-gray-200 text-gray-800 font-semibold hover:bg-gray-300 transition-colors"
+                  className="flex items-center justify-center gap-2 w-full sm:w-auto px-4 sm:px-6 py-3 rounded-lg bg-gray-200 text-gray-800 font-semibold hover:bg-gray-300 transition-colors"
                 >
                   Retour
                 </button>
               </div>
             </div>
           </div>
+
+          {/* Detailed Answers Review */}
+          <div className="bg-white rounded-2xl shadow-lg p-3 sm:p-6 lg:p-8">
+            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-4 sm:mb-6 text-center">Révision des Réponses</h2>
+            <div className="space-y-4 sm:space-y-6">
+              {questions.map((question, index) => {
+                const userAnswer = userAnswers.get(question.id);
+                const isCorrect = (() => {
+                  if (question.type === 'multiple-choice' && typeof question.correctAnswer === 'number') {
+                    return userAnswer === question.correctAnswer;
+                  } else if (question.type === 'true-false') {
+                    return String(userAnswer).toLowerCase() === String(question.correctAnswer).toLowerCase();
+                  }
+                  return userAnswer === question.correctAnswer;
+                })();
+
+                return (
+                  <div key={question.id} className="border border-gray-200 rounded-lg p-3 sm:p-6">
+                    {/* Question Header */}
+                    <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white ${
+                        isCorrect ? 'bg-green-500' : 'bg-red-500'
+                      }`}>
+                        {index + 1}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${
+                          question.category === 'ANG' ? 'bg-green-100 text-green-800' :
+                          question.category === 'CG' ? 'bg-blue-100 text-blue-800' :
+                          'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {question.category}
+                        </span>
+                        <span className="text-sm text-gray-500">
+                          {question.type === 'multiple-choice' ? 'Choix Multiple' : 'Vrai/Faux'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Question Text */}
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">{question.question}</h3>
+
+                    {/* Options and Answers */}
+                    <div className="space-y-2 sm:space-y-3">
+                      {question.type === 'multiple-choice' && question.options?.map((option, optionIndex) => {
+                        const isUserAnswer = userAnswer === optionIndex;
+                        const isCorrectAnswer = question.correctAnswer === optionIndex;
+                        
+                        return (
+                          <div key={optionIndex} className={`p-2 sm:p-3 rounded-lg border-2 ${
+                            isCorrectAnswer 
+                              ? 'bg-green-50 border-green-500 text-green-800' 
+                              : isUserAnswer && !isCorrectAnswer
+                              ? 'bg-red-50 border-red-500 text-red-800'
+                              : 'bg-gray-50 border-gray-200 text-gray-700'
+                          }`}>
+                            <div className="flex items-center gap-2 sm:gap-3">
+                              <span className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold ${
+                                isCorrectAnswer 
+                                  ? 'bg-green-500 text-white' 
+                                  : isUserAnswer && !isCorrectAnswer
+                                  ? 'bg-red-500 text-white'
+                                  : 'bg-gray-300 text-gray-600'
+                              }`}>
+                                {String.fromCharCode(65 + optionIndex)}
+                              </span>
+                              <span className="flex-1">{option}</span>
+                              {isCorrectAnswer && (
+                                <span className="text-green-600 font-semibold">✓ Correct</span>
+                              )}
+                              {isUserAnswer && !isCorrectAnswer && (
+                                <span className="text-red-600 font-semibold">✗ Incorrect</span>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                      
+                      {question.type === 'true-false' && ['Vrai', 'Faux'].map((option, optionIndex) => {
+                        const answerValue = optionIndex === 0 ? 'true' : 'false';
+                        const isUserAnswer = userAnswer === answerValue;
+                        const isCorrectAnswer = question.correctAnswer === answerValue;
+                        
+                        return (
+                          <div key={option} className={`p-2 sm:p-3 rounded-lg border-2 ${
+                            isCorrectAnswer 
+                              ? 'bg-green-50 border-green-500 text-green-800' 
+                              : isUserAnswer && !isCorrectAnswer
+                              ? 'bg-red-50 border-red-500 text-red-800'
+                              : 'bg-gray-50 border-gray-200 text-gray-700'
+                          }`}>
+                            <div className="flex items-center gap-2 sm:gap-3">
+                              <span className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold ${
+                                isCorrectAnswer 
+                                  ? 'bg-green-500 text-white' 
+                                  : isUserAnswer && !isCorrectAnswer
+                                  ? 'bg-red-500 text-white'
+                                  : 'bg-gray-300 text-gray-600'
+                              }`}>
+                                {optionIndex === 0 ? 'V' : 'F'}
+                              </span>
+                              <span className="flex-1">{option}</span>
+                              {isCorrectAnswer && (
+                                <span className="text-green-600 font-semibold">✓ Correct</span>
+                              )}
+                              {isUserAnswer && !isCorrectAnswer && (
+                                <span className="text-red-600 font-semibold">✗ Incorrect</span>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Explanation if available */}
+                    {question.explanation && (
+                      <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <h4 className="font-semibold text-blue-900 mb-2">Explication:</h4>
+                        <p className="text-blue-800 text-sm">{question.explanation}</p>
+                      </div>
+                                         )}
+                   </div>
+                 );
+               })}
+             </div>
+           </div>
         </div>
       </div>
     );
@@ -444,10 +570,10 @@ export const RandomPracticeTest: React.FC<RandomPracticeTestProps> = ({ onExit }
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col p-4">
+    <div className="min-h-screen bg-gray-50 flex flex-col p-2 sm:p-4">
       {/* Header */}
       <header className="sticky top-0 bg-blue-600 shadow-sm z-10">
-        <div className="max-w-4xl mx-auto p-4">
+        <div className="w-full max-w-4xl mx-auto p-2 sm:p-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
                 <div className="p-2 bg-blue-100 rounded-lg">
@@ -477,7 +603,7 @@ export const RandomPracticeTest: React.FC<RandomPracticeTestProps> = ({ onExit }
       </header>
 
       {/* Progress Bar */}
-      <div className="my-4 px-4">
+      <div className="my-2 sm:my-4 px-2 sm:px-4">
         <div className="h-2 bg-gray-200 rounded-full">
           <div 
             className="h-2 rounded-full bg-blue-500 transition-all duration-300"
@@ -487,8 +613,8 @@ export const RandomPracticeTest: React.FC<RandomPracticeTestProps> = ({ onExit }
       </div>
 
       {/* Question Navigation */}
-      <div className="px-4 mb-4">
-        <div className="flex flex-wrap gap-2 justify-center">
+      <div className="px-2 sm:px-4 mb-2 sm:mb-4">
+        <div className="flex flex-wrap gap-1 sm:gap-2 justify-center">
           {questions.map((q, index) => (
             <button
               key={q.id}
@@ -513,9 +639,9 @@ export const RandomPracticeTest: React.FC<RandomPracticeTestProps> = ({ onExit }
       </div>
       
       {/* Question Card */}
-      <div className="flex-grow flex items-center justify-center">
-        <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-3xl">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">{currentQuestion.question}</h2>
+      <div className="flex-grow flex items-center justify-center px-2 sm:px-4">
+        <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8 w-full max-w-3xl">
+          <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">{currentQuestion.question}</h2>
           
           <div className="space-y-4">
             {currentQuestion.type === 'multiple-choice' && currentQuestion.options?.map((option, index) => {
@@ -548,18 +674,18 @@ export const RandomPracticeTest: React.FC<RandomPracticeTestProps> = ({ onExit }
       </div>
       
       {/* Footer */}
-      <footer className="mt-6 flex justify-between items-center px-4">
+      <footer className="mt-4 sm:mt-6 flex flex-col sm:flex-row justify-between items-center gap-3 px-2 sm:px-4 pb-4">
         <button 
           onClick={handlePreviousQuestion}
           disabled={!canGoPrevious}
-          className="flex items-center gap-2 px-6 py-3 rounded-lg bg-white text-gray-700 font-semibold shadow-sm hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg bg-white text-gray-700 font-semibold shadow-sm hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <ChevronLeft className="w-5 h-5" />
           Précédent
         </button>
         <button 
           onClick={currentQuestionIndex === questions.length - 1 ? handleFinishQuiz : handleNextQuestion}
-          className="flex items-center gap-2 px-6 py-3 rounded-lg bg-white text-gray-700 font-semibold shadow-sm hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg bg-white text-gray-700 font-semibold shadow-sm hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {currentQuestionIndex === questions.length - 1 ? 'Terminer' : 'Suivant'}
           <ChevronRight className="w-5 h-5" />

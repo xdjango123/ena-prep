@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase, Profile, Subscription } from '../lib/supabase';
 import { EmailLogService } from '../services/emailLogService';
@@ -14,7 +14,12 @@ interface SupabaseAuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<Profile>) => Promise<{ error: any }>;
+  updateEmail: (newEmail: string) => Promise<{ error: any }>;
+  updatePassword: (newPassword: string) => Promise<{ error: any }>;
+  addExamType: (examType: string) => Promise<{ error: any }>;
+  replaceExamType: (newExamType: string) => Promise<{ error: any }>;
   logUserAttempt: (testType: string, category: string, subCategory?: string, testNumber?: number, score?: number) => Promise<boolean>;
+  resetActivityTimer: () => void;
 }
 
 const SupabaseAuthContext = createContext<SupabaseAuthContextType | undefined>(undefined);
@@ -37,6 +42,52 @@ export const SupabaseAuthProvider: React.FC<SupabaseAuthProviderProps> = ({ chil
   const [profile, setProfile] = useState<Profile | null>(null);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Auto-logout functionality
+  const activityTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const INACTIVITY_TIMEOUT = 10 * 60 * 1000; // 10 minutes in milliseconds
+
+  // Reset activity timer
+  const resetActivityTimer = () => {
+    if (activityTimerRef.current) {
+      clearTimeout(activityTimerRef.current);
+    }
+    
+    if (user) {
+      activityTimerRef.current = setTimeout(() => {
+        console.log('Auto-logout: User inactive for 10 minutes');
+        signOut();
+      }, INACTIVITY_TIMEOUT);
+    }
+  };
+
+  // Track user activity to reset timer
+  useEffect(() => {
+    if (!user) return;
+
+    const handleActivity = () => {
+      resetActivityTimer();
+    };
+
+    // Add event listeners for user activity
+    const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+    events.forEach(event => {
+      document.addEventListener(event, handleActivity, true);
+    });
+
+    // Initial timer setup
+    resetActivityTimer();
+
+    // Cleanup
+    return () => {
+      events.forEach(event => {
+        document.removeEventListener(event, handleActivity, true);
+      });
+      if (activityTimerRef.current) {
+        clearTimeout(activityTimerRef.current);
+      }
+    };
+  }, [user]);
 
   useEffect(() => {
     // Get initial session
@@ -169,6 +220,10 @@ export const SupabaseAuthProvider: React.FC<SupabaseAuthProviderProps> = ({ chil
         .single();
 
       if (!existingProfile) {
+        // Calculate expiration date (6 months from now)
+        const expirationDate = new Date();
+        expirationDate.setMonth(expirationDate.getMonth() + 6);
+
         // Create profile using the collected data
         const { error: profileError } = await supabase
           .from('profiles')
@@ -178,6 +233,7 @@ export const SupabaseAuthProvider: React.FC<SupabaseAuthProviderProps> = ({ chil
             'Last Name': lastName,
             exam_type: examType,
             email: user.email,
+            expiration_date: expirationDate.toISOString(),
             is_owner: false,
           });
 
@@ -282,6 +338,11 @@ export const SupabaseAuthProvider: React.FC<SupabaseAuthProviderProps> = ({ chil
         password,
       });
 
+      if (!error) {
+        // Reset activity timer on successful sign in
+        resetActivityTimer();
+      }
+
       return { error };
     } catch (error) {
       console.error('Sign in error:', error);
@@ -291,6 +352,12 @@ export const SupabaseAuthProvider: React.FC<SupabaseAuthProviderProps> = ({ chil
 
   const signOut = async () => {
     try {
+      // Clear activity timer
+      if (activityTimerRef.current) {
+        clearTimeout(activityTimerRef.current);
+        activityTimerRef.current = null;
+      }
+
       // Clear local state first to ensure immediate UI update
       setUser(null);
       setSession(null);
@@ -302,9 +369,6 @@ export const SupabaseAuthProvider: React.FC<SupabaseAuthProviderProps> = ({ chil
       
       if (error) {
         console.error('Sign out error:', error);
-        // Revert state if logout failed
-        // Note: We don't revert here as it could cause infinite loops
-        // Instead, we'll let the auth state change listener handle it
       }
     } catch (error) {
       console.error('Sign out error:', error);
@@ -332,6 +396,130 @@ export const SupabaseAuthProvider: React.FC<SupabaseAuthProviderProps> = ({ chil
       return { error };
     } catch (error) {
       console.error('Update profile error:', error);
+      return { error };
+    }
+  };
+
+  const updateEmail = async (newEmail: string) => {
+    if (!user) return { error: new Error('No user logged in') };
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        email: newEmail
+      });
+
+      if (!error) {
+        // Update profile email as well
+        await updateProfile({ email: newEmail });
+      }
+
+      return { error };
+    } catch (error) {
+      console.error('Update email error:', error);
+      return { error };
+    }
+  };
+
+  const updatePassword = async (newPassword: string) => {
+    if (!user) return { error: new Error('No user logged in') };
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+
+      return { error };
+    } catch (error) {
+      console.error('Update password error:', error);
+      return { error };
+    }
+  };
+
+  const addExamType = async (examType: string) => {
+    if (!user) return { error: new Error('No user logged in') };
+
+    try {
+      // Check if user already has this exam type
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('exam_type')
+        .eq('id', user.id)
+        .single();
+
+      if (existingProfile?.exam_type === examType) {
+        return { error: new Error('Vous avez déjà ce type d\'examen') };
+      }
+
+      // Update the profile with the new exam type
+      const { error } = await updateProfile({ exam_type: examType as any });
+
+      if (!error) {
+        // Also update the subscription plan name
+        const planMap = {
+          'CM': 'Prépa CM',
+          'CMS': 'Prépa CMS',
+          'CS': 'Prépa CS'
+        };
+        
+        const newPlanName = planMap[examType as keyof typeof planMap];
+        if (newPlanName) {
+          // Update subscription
+          const { error: subError } = await supabase
+            .from('subscriptions')
+            .update({ plan_name: newPlanName })
+            .eq('user_id', user.id)
+            .eq('is_active', true);
+
+          if (subError) {
+            console.error('Error updating subscription:', subError);
+          } else {
+            await fetchSubscription();
+          }
+        }
+      }
+
+      return { error };
+    } catch (error) {
+      console.error('Add exam type error:', error);
+      return { error };
+    }
+  };
+
+  const replaceExamType = async (newExamType: string) => {
+    if (!user) return { error: new Error('No user logged in') };
+
+    try {
+      // Update the profile with the new exam type
+      const { error } = await updateProfile({ exam_type: newExamType as any });
+
+      if (!error) {
+        // Also update the subscription plan name
+        const planMap = {
+          'CM': 'Prépa CM',
+          'CMS': 'Prépa CMS',
+          'CS': 'Prépa CS'
+        };
+        
+        const newPlanName = planMap[newExamType as keyof typeof planMap];
+        if (newPlanName) {
+          // Update subscription
+          const { error: subError } = await supabase
+            .from('subscriptions')
+            .update({ plan_name: newPlanName })
+            .eq('user_id', user.id)
+            .eq('is_active', true);
+
+          if (subError) {
+            console.error('Error updating subscription:', subError);
+          } else {
+            await fetchSubscription();
+          }
+        }
+      }
+
+      return { error };
+    } catch (error) {
+      console.error('Replace exam type error:', error);
       return { error };
     }
   };
@@ -370,7 +558,12 @@ export const SupabaseAuthProvider: React.FC<SupabaseAuthProviderProps> = ({ chil
     signIn,
     signOut,
     updateProfile,
+    updateEmail,
+    updatePassword,
+    addExamType,
+    replaceExamType,
     logUserAttempt,
+    resetActivityTimer,
   };
 
   return (
@@ -378,4 +571,4 @@ export const SupabaseAuthProvider: React.FC<SupabaseAuthProviderProps> = ({ chil
       {children}
     </SupabaseAuthContext.Provider>
   );
-}; 
+};

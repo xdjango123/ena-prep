@@ -36,14 +36,18 @@ const practiceTests = [
     { id: 'p2', name: 'Practice Test 2', questions: 10, time: 15, topic: 'Inductive Reasoning' },
     { id: 'p3', name: 'Practice Test 3', questions: 10, time: 15, topic: 'Abstract Reasoning' },
     { id: 'p4', name: 'Practice Test 4', questions: 10, time: 15, topic: 'Deductive Reasoning' },
+    { id: 'p5', name: 'Practice Test 5', questions: 10, time: 15, topic: 'Inductive Reasoning' },
+    { id: 'p6', name: 'Practice Test 6', questions: 10, time: 15, topic: 'Abstract Reasoning' },
+    { id: 'p7', name: 'Practice Test 7', questions: 10, time: 15, topic: 'Deductive Reasoning' },
+    { id: 'p8', name: 'Practice Test 8', questions: 10, time: 15, topic: 'Inductive Reasoning' },
+    { id: 'p9', name: 'Practice Test 9', questions: 10, time: 15, topic: 'Abstract Reasoning' },
+    { id: 'p10', name: 'Practice Test 10', questions: 10, time: 15, topic: 'Deductive Reasoning' },
 ];
 
 const topics = ['All', 'Deductive Reasoning', 'Inductive Reasoning', 'Abstract Reasoning'];
 
 const quizzes = [
-    { id: 'q1', name: 'Quiz 1', questions: 10, time: 20 },
-    { id: 'q2', name: 'Quiz 2', questions: 10, time: 20 },
-    { id: 'q3', name: 'Quiz 3', questions: 10, time: 20 },
+    { id: 'q1', name: 'Quiz Series', questions: 15, time: 20 },
 ];
 
 const lastTest = { name: 'Practice Test 1', completed: 5, total: 20 };
@@ -188,9 +192,9 @@ export default function LogicPage() {
 			setIsLoadingQuestions(true);
 			try {
 				// Use the passage-aware method to get questions with passages for Logic subject
-				const loadedQuestions = await QuestionService.getRandomQuestionsWithPassages('LOG', 10);
+				const loadedQuestions = await QuestionService.getQuestionsWithPassages('LOG', 10);
 				// Convert QuestionWithPassage to the format expected by QuizSeries
-				const convertedQuestions = loadedQuestions.map(qwp => ({
+				const convertedQuestions = loadedQuestions.map((qwp: any) => ({
 					id: parseInt(qwp.question.id),
 					type: 'multiple-choice' as const,
 					question: qwp.question.question_text,
@@ -215,9 +219,9 @@ export default function LogicPage() {
 		setIsLoadingQuestions(true);
 		try {
 			// Use the passage-aware method for practice tests as well
-			const loadedQuestions = await QuestionService.getRandomQuestionsWithPassages('LOG', 10);
+			const loadedQuestions = await QuestionService.getQuestionsWithPassages('LOG', 10);
 			// Convert QuestionWithPassage to the format expected by QuizSeries
-			const convertedQuestions = loadedQuestions.map(qwp => ({
+			const convertedQuestions = loadedQuestions.map((qwp: any) => ({
 				id: parseInt(qwp.question.id),
 				type: 'multiple-choice' as const,
 				question: qwp.question.question_text,

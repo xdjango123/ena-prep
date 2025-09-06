@@ -36,14 +36,17 @@ const practiceTests = [
     { id: 'p3', name: 'Practice Test 3', questions: 10, time: 15, topic: 'Reading' },
     { id: 'p4', name: 'Practice Test 4', questions: 10, time: 15, topic: 'Grammar' },
     { id: 'p5', name: 'Practice Test 5', questions: 10, time: 15, topic: 'Vocabulary' },
+    { id: 'p6', name: 'Practice Test 6', questions: 10, time: 15, topic: 'Reading' },
+    { id: 'p7', name: 'Practice Test 7', questions: 10, time: 15, topic: 'Grammar' },
+    { id: 'p8', name: 'Practice Test 8', questions: 10, time: 15, topic: 'Vocabulary' },
+    { id: 'p9', name: 'Practice Test 9', questions: 10, time: 15, topic: 'Reading' },
+    { id: 'p10', name: 'Practice Test 10', questions: 10, time: 15, topic: 'Grammar' },
 ];
 
 const topics = ['All', 'Grammar', 'Vocabulary', 'Reading'];
 
 const quizzes = [
-    { id: 'q1', name: 'Quiz 1', questions: 10, time: 20 },
-    { id: 'q2', name: 'Quiz 2', questions: 10, time: 20 },
-    { id: 'q3', name: 'Quiz 3', questions: 10, time: 20 },
+    { id: 'q1', name: 'Quiz Series', questions: 15, time: 20 },
 ];
 
 const lastTest = { name: 'Practice Test 2', completed: 15, total: 20 };

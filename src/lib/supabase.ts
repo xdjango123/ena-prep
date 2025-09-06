@@ -25,6 +25,7 @@ export interface Profile {
   email: string | null
   avatar_url: string | null
   created_at: string | null
+  expiration_date: string | null
   is_owner: boolean | null
 }
 
@@ -91,4 +92,4 @@ export interface UserAttempt {
     timeSpent: number
   } | null
   created_at: string
-} 
+}

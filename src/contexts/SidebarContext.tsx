@@ -2,9 +2,11 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 interface SidebarContextType {
   isOpen: boolean;
+  isHovered: boolean;
   toggle: () => void;
   close: () => void;
   open: () => void;
+  setHovered: (hovered: boolean) => void;
 }
 
 const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
@@ -22,18 +24,22 @@ interface SidebarProviderProps {
 }
 
 export const SidebarProvider: React.FC<SidebarProviderProps> = ({ children }) => {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false); // Start collapsed for clean look
+  const [isHovered, setIsHovered] = useState(false);
 
   const toggle = () => setIsOpen(!isOpen);
   const close = () => setIsOpen(false);
   const open = () => setIsOpen(true);
+  const setHovered = (hovered: boolean) => setIsHovered(hovered);
 
   const value: SidebarContextType = {
     isOpen,
+    isHovered,
     toggle,
     close,
     open,
+    setHovered,
   };
 
   return <SidebarContext.Provider value={value}>{children}</SidebarContext.Provider>;
-}; 
+};

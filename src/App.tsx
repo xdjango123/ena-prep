@@ -10,6 +10,7 @@ import EnglishSubjectPage from './pages/EnglishSubjectPage';
 import LogicPage from './pages/LogicPage';
 import { ExamPage } from './pages/exams/ExamPage';
 import { DashboardLayout } from './components/layout/DashboardLayout';
+import { ExamLayout } from './components/layout/ExamLayout';
 import { PublicLayout } from './components/layout/PublicLayout';
 import HomePage from './pages/HomePage';
 import SubjectsPage from './pages/SubjectsPage';
@@ -24,6 +25,8 @@ import EnaGuidePage from './pages/EnaGuidePage';
 import QuickQuizPage from './pages/QuickQuizPage';
 import ScrollToTop from './components/ScrollToTop';
 import { RandomPracticeTest } from './components/quiz/RandomPracticeTest';
+import { ExamInterface } from './components/quiz/ExamInterface';
+import { SecureExamInterface } from './components/quiz/SecureExamInterface';
 
 // A placeholder for pages that are not yet implemented
 const PlaceholderPage: React.FC<{ title: string }> = ({ title }) => (
@@ -32,7 +35,6 @@ const PlaceholderPage: React.FC<{ title: string }> = ({ title }) => (
     <p>This page is under construction.</p>
   </div>
 );
-
 
 function App() {
   return (
@@ -50,7 +52,7 @@ function App() {
               <Route path="/faq" element={<PublicLayout><FAQPage /></PublicLayout>} />
               <Route path="/quick-quiz" element={<PublicLayout><QuickQuizPage /></PublicLayout>} />
 
-              <Route path="/dashboard" element={<DashboardLayout><Outlet /></DashboardLayout>}>
+              <Route path="/dashboard" element={<ExamLayout><Outlet /></ExamLayout>}>
                 <Route index element={<DashboardPage />} />
                 <Route path="practice" element={<PracticePage />} />
                 <Route path="random-practice" element={<RandomPracticeTest onExit={() => window.history.back()} />} />
@@ -60,8 +62,10 @@ function App() {
                 <Route path="subject/english" element={<EnglishSubjectPage />} />
                 <Route path="subject/logic" element={<LogicPage />} />
                 
-                {/* Exam Page */}
+                {/* Exam Pages */}
                 <Route path="exams" element={<ExamPage />} />
+                <Route path="exam/:examId" element={<ExamInterface onExit={() => window.history.back()} />} />
+                <Route path="secure-exam/:examId" element={<SecureExamInterface onExit={() => window.history.back()} />} />
 
                 {/* Community & Support Pages */}
                 <Route path="forum" element={<ForumPage />} />
