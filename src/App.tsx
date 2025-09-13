@@ -9,6 +9,7 @@ import { GeneralKnowledgePage } from './pages/subjects/GeneralKnowledgePage';
 import EnglishSubjectPage from './pages/EnglishSubjectPage';
 import LogicPage from './pages/LogicPage';
 import { ExamPage } from './pages/exams/ExamPage';
+import { ExamReviewPage } from './pages/exams/ExamReviewPage';
 import { DashboardLayout } from './components/layout/DashboardLayout';
 import { ExamLayout } from './components/layout/ExamLayout';
 import { PublicLayout } from './components/layout/PublicLayout';
@@ -66,6 +67,7 @@ function App() {
                 <Route path="exams" element={<ExamPage />} />
                 <Route path="exam/:examId" element={<ExamInterface onExit={() => window.history.back()} />} />
                 <Route path="secure-exam/:examId" element={<SecureExamInterface onExit={() => window.history.back()} />} />
+                <Route path="exam-review/:examId" element={<ExamReviewPage />} />
 
                 {/* Community & Support Pages */}
                 <Route path="forum" element={<ForumPage />} />

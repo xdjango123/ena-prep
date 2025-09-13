@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { X, Clock, CheckCircle, XCircle, Home, Trophy, Brain, ChevronLeft, ChevronRight, AlertTriangle, Shield, Menu, Flag, Save, CheckSquare, Eye } from 'lucide-react';
 import { QuestionService } from '../../services/questionService';
+import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
 
 interface Question {
   id: string;
@@ -20,6 +21,7 @@ interface SecureExamInterfaceProps {
 }
 
 export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit }) => {
+  const { profile } = useSupabaseAuth();
   const { examId } = useParams<{ examId: string }>();
   const navigate = useNavigate();
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -138,14 +140,16 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
         
         for (const subject of subjects) {
           try {
-            const subjectQuestions = await QuestionService.getQuestionsByCategory(subject, undefined, 20);
+            // Get user's exam type, default to CS if not available
+            const userExamType = profile?.exam_type || 'CS';
             
-            if (subjectQuestions.length === 0) {
-              const fallbackQuestions = await QuestionService.getExamQuestionsFallback(subject, 'CS', 20);
-              if (fallbackQuestions.length > 0) {
-                subjectQuestions.push(...fallbackQuestions);
-              }
-            }
+            // Use the new getExamQuestions method with 80% hard difficulty
+            const subjectQuestions = await QuestionService.getExamQuestions(
+              subject, 
+              examId || '1', 
+              userExamType as 'CM' | 'CMS' | 'CS', 
+              20
+            );
             
             const convertedQuestions = subjectQuestions.map((dbQ) => {
               let type: 'multiple-choice' | 'true-false' = 'multiple-choice';
@@ -623,7 +627,7 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
                   })}
                 </div>
               )}
-
+              </div>
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
                 <button 

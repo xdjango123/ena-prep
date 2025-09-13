@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Clock, CheckCircle, XCircle, Home, Trophy, Brain, ChevronLeft, ChevronRight } from 'lucide-react';
 import { QuestionService } from '../../services/questionService';
+import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
 
 interface Question {
   id: string;
@@ -13,6 +14,7 @@ interface Question {
   difficulty: string;
   category: 'ANG' | 'CG' | 'LOG';
   exam_type?: string;
+  is3Option?: boolean; // Flag to indicate this is a 3-option question
 }
 
 interface ExamInterfaceProps {
@@ -20,6 +22,7 @@ interface ExamInterfaceProps {
 }
 
 export const ExamInterface: React.FC<ExamInterfaceProps> = ({ onExit }) => {
+  const { profile } = useSupabaseAuth();
   const navigate = useNavigate();
   const { examId } = useParams();
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -46,29 +49,48 @@ export const ExamInterface: React.FC<ExamInterfaceProps> = ({ onExit }) => {
         
         for (const subject of subjects) {
           try {
-            const subjectQuestions = await QuestionService.getRandomQuestionsFromPool(
+            // Get user's exam type, default to CS if not available
+            const userExamType = profile?.exam_type || 'CS';
+            
+            // Use the new pre-generated exam blanc questions method
+            const subjectQuestions = await QuestionService.getExamBlancQuestionsFromPreGenerated(
               subject, 
-              'examen_blanc', 
-              'CS', // Default to CS for now
-              parseInt(examId || '1'),
+              examId || '1', 
+              userExamType as 'CM' | 'CMS' | 'CS', 
               20
             );
             
+            // Convert database questions to the expected format
             // Convert database questions to the expected format
             const convertedQuestions = subjectQuestions.map((dbQ, index) => {
               let type: 'multiple-choice' | 'true-false' = 'multiple-choice';
               let options: string[] | undefined = undefined;
               let correctAnswer: number | string = 0;
               
-              if (dbQ.answer1 && dbQ.answer2 && dbQ.answer3 && dbQ.answer4) {
-                type = 'multiple-choice';
-                options = [dbQ.answer1, dbQ.answer2, dbQ.answer3, dbQ.answer4];
-                
-                // Convert letter to index
-                correctAnswer = dbQ.correct === 'A' ? 0 :
-                                dbQ.correct === 'B' ? 1 :
-                                dbQ.correct === 'C' ? 2 :
-                                dbQ.correct === 'D' ? 3 : 0;
+              // Check if this is a 3-option question (exam blanc)
+              if (dbQ.is3Option) {
+                // 3-option format for exam blanc
+                if (dbQ.answer1 && dbQ.answer2 && dbQ.answer3) {
+                  type = 'multiple-choice';
+                  options = [dbQ.answer1, dbQ.answer2, dbQ.answer3];
+                  
+                  // Convert letter to index (A=0, B=1, C=2)
+                  correctAnswer = dbQ.correct === 'A' ? 0 :
+                                  dbQ.correct === 'B' ? 1 :
+                                  dbQ.correct === 'C' ? 2 : 0;
+                }
+              } else {
+                // 4-option format for other question types
+                if (dbQ.answer1 && dbQ.answer2 && dbQ.answer3 && dbQ.answer4) {
+                  type = 'multiple-choice';
+                  options = [dbQ.answer1, dbQ.answer2, dbQ.answer3, dbQ.answer4];
+                  
+                  // Convert letter to index (A=0, B=1, C=2, D=3)
+                  correctAnswer = dbQ.correct === 'A' ? 0 :
+                                  dbQ.correct === 'B' ? 1 :
+                                  dbQ.correct === 'C' ? 2 :
+                                  dbQ.correct === 'D' ? 3 : 0;
+                }
               }
               
               return {
@@ -80,10 +102,10 @@ export const ExamInterface: React.FC<ExamInterfaceProps> = ({ onExit }) => {
                 explanation: (dbQ as any).explanation || `La réponse correcte est ${options?.[correctAnswer as number] || correctAnswer}.`,
                 difficulty: dbQ.difficulty || 'medium',
                 category: dbQ.category,
-                exam_type: dbQ.exam_type
+                exam_type: dbQ.exam_type,
+                is3Option: dbQ.is3Option || false
               };
-            });
-            
+            });            
             allQuestions.push(...convertedQuestions);
           } catch (error) {
             console.error(`Error loading questions for ${subject}:`, error);

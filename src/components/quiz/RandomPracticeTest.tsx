@@ -40,6 +40,9 @@ export const RandomPracticeTest: React.FC<RandomPracticeTestProps> = ({ onExit }
   useEffect(() => {
     const loadRandomQuestions = async () => {
       setIsLoading(true);
+      setError(null);
+      console.log('🔄 RandomPracticeTest: Starting to load random questions...');
+      
       try {
         const allQuestions: Question[] = [];
         
@@ -48,7 +51,9 @@ export const RandomPracticeTest: React.FC<RandomPracticeTestProps> = ({ onExit }
         
         for (const subject of subjects) {
           try {
+            console.log(`📚 Loading questions for ${subject}...`);
             const subjectQuestions = await QuestionService.getRandomQuestions(subject, 5, undefined, testNumber);
+            console.log(`✅ Loaded ${subjectQuestions.length} questions for ${subject}`);
             
             // Convert database questions to the expected format
             const convertedQuestions = subjectQuestions.map((dbQ, index) => {
@@ -107,7 +112,7 @@ export const RandomPracticeTest: React.FC<RandomPracticeTestProps> = ({ onExit }
             
             allQuestions.push(...convertedQuestions);
           } catch (error) {
-            console.error(`Error loading questions for ${subject}:`, error);
+            console.error(`❌ Error loading questions for ${subject}:`, error);
             // Continue with other subjects
           }
         }
@@ -116,15 +121,15 @@ export const RandomPracticeTest: React.FC<RandomPracticeTestProps> = ({ onExit }
         const shuffledQuestions = allQuestions.sort(() => Math.random() - 0.5);
         
         if (shuffledQuestions.length === 0) {
-          throw new Error('No questions could be loaded from any subject');
+          throw new Error('Aucune question n\'a pu être chargée depuis la base de données. Veuillez vérifier votre connexion et réessayer.');
         }
         
         setQuestions(shuffledQuestions);
-        console.log(`✅ Loaded ${shuffledQuestions.length} random questions from all subjects`);
+        console.log(`✅ RandomPracticeTest: Successfully loaded ${shuffledQuestions.length} random questions from all subjects`);
         
       } catch (error) {
-        console.error('Error loading random questions:', error);
-        setError('Failed to load questions. Please try again.');
+        console.error('❌ RandomPracticeTest: Error loading random questions:', error);
+        setError(error instanceof Error ? error.message : 'Erreur lors du chargement des questions. Veuillez réessayer.');
       } finally {
         setIsLoading(false);
       }
@@ -305,14 +310,23 @@ export const RandomPracticeTest: React.FC<RandomPracticeTestProps> = ({ onExit }
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="text-red-600 text-xl mb-4">Erreur: {error}</div>
-          <button 
-            onClick={onExit} 
-            className="px-6 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600"
-          >
-            Retour au menu principal
-          </button>
+        <div className="text-center max-w-md mx-auto p-6">
+          <div className="text-red-600 text-xl mb-4">⚠️ Erreur</div>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <div className="space-y-3">
+            <button 
+              onClick={() => window.location.reload()} 
+              className="w-full px-6 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600"
+            >
+              Réessayer
+            </button>
+            <button 
+              onClick={onExit} 
+              className="w-full px-6 py-2 rounded-lg bg-gray-500 text-white hover:bg-gray-600"
+            >
+              Retour au menu principal
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -536,12 +550,12 @@ export const RandomPracticeTest: React.FC<RandomPracticeTestProps> = ({ onExit }
                         <h4 className="font-semibold text-blue-900 mb-2">Explication:</h4>
                         <p className="text-blue-800 text-sm">{question.explanation}</p>
                       </div>
-                                         )}
-                   </div>
-                 );
-               })}
-             </div>
-           </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -693,4 +707,4 @@ export const RandomPracticeTest: React.FC<RandomPracticeTestProps> = ({ onExit }
       </footer>
     </div>
   );
-}; 
+};

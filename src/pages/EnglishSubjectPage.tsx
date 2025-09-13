@@ -31,16 +31,16 @@ const clearQuizState = (subject: string) => {
 }
 
 const practiceTests = [
-    { id: 'p1', name: 'Practice Test 1', questions: 10, time: 15, topic: 'Grammar' },
-    { id: 'p2', name: 'Practice Test 2', questions: 10, time: 15, topic: 'Vocabulary' },
-    { id: 'p3', name: 'Practice Test 3', questions: 10, time: 15, topic: 'Reading' },
-    { id: 'p4', name: 'Practice Test 4', questions: 10, time: 15, topic: 'Grammar' },
-    { id: 'p5', name: 'Practice Test 5', questions: 10, time: 15, topic: 'Vocabulary' },
-    { id: 'p6', name: 'Practice Test 6', questions: 10, time: 15, topic: 'Reading' },
-    { id: 'p7', name: 'Practice Test 7', questions: 10, time: 15, topic: 'Grammar' },
-    { id: 'p8', name: 'Practice Test 8', questions: 10, time: 15, topic: 'Vocabulary' },
-    { id: 'p9', name: 'Practice Test 9', questions: 10, time: 15, topic: 'Reading' },
-    { id: 'p10', name: 'Practice Test 10', questions: 10, time: 15, topic: 'Grammar' },
+    { id: 'p1', name: 'Test Pratique 1', questions: 10, time: 15, topic: 'Grammar' },
+    { id: 'p2', name: 'Test Pratique 2', questions: 10, time: 15, topic: 'Vocabulary' },
+    { id: 'p3', name: 'Test Pratique 3', questions: 10, time: 15, topic: 'Reading' },
+    { id: 'p4', name: 'Test Pratique 4', questions: 10, time: 15, topic: 'Grammar' },
+    { id: 'p5', name: 'Test Pratique 5', questions: 10, time: 15, topic: 'Vocabulary' },
+    { id: 'p6', name: 'Test Pratique 6', questions: 10, time: 15, topic: 'Reading' },
+    { id: 'p7', name: 'Test Pratique 7', questions: 10, time: 15, topic: 'Grammar' },
+    { id: 'p8', name: 'Test Pratique 8', questions: 10, time: 15, topic: 'Vocabulary' },
+    { id: 'p9', name: 'Test Pratique 9', questions: 10, time: 15, topic: 'Reading' },
+    { id: 'p10', name: 'Test Pratique 10', questions: 10, time: 15, topic: 'Grammar' },
 ];
 
 const topics = ['All', 'Grammar', 'Vocabulary', 'Reading'];
@@ -49,7 +49,7 @@ const quizzes = [
     { id: 'q1', name: 'Quiz Series', questions: 15, time: 20 },
 ];
 
-const lastTest = { name: 'Practice Test 2', completed: 15, total: 20 };
+const lastTest = { name: 'Test Pratique 2', completed: 15, total: 20 };
 const recommendation = "You've mastered Vocabulary! Next, focus on Reading Comprehension.";
 
 export default function EnglishSubjectPage() {
@@ -199,7 +199,7 @@ export default function EnglishSubjectPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Handle review practice test
+  // Handle review test pratique
   const handleReview = async (test: TestDetails) => {
     try {
       if (!user?.id) return;
@@ -408,7 +408,7 @@ export default function EnglishSubjectPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3 lg:gap-4">
         <ActionButton icon={Trophy} title="Quiz" color="green" active={activeSection === 'quiz'} onClick={() => handleSectionToggle('quiz')} />
-        <ActionButton icon={Target} title="Practice Test" color="green" active={activeSection === 'practice'} onClick={() => handleSectionToggle('practice')} />
+        <ActionButton icon={Target} title="Test Pratique" color="green" active={activeSection === 'practice'} onClick={() => handleSectionToggle('practice')} />
       </div>
 
       {activeSection === 'practice' && (

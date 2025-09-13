@@ -32,16 +32,16 @@ const clearQuizState = (subject: string) => {
 }
 
 const practiceTests = [
-    { id: 'p1', name: 'Practice Test 1', questions: 10, time: 15, topic: 'Deductive Reasoning' },
-    { id: 'p2', name: 'Practice Test 2', questions: 10, time: 15, topic: 'Inductive Reasoning' },
-    { id: 'p3', name: 'Practice Test 3', questions: 10, time: 15, topic: 'Abstract Reasoning' },
-    { id: 'p4', name: 'Practice Test 4', questions: 10, time: 15, topic: 'Deductive Reasoning' },
-    { id: 'p5', name: 'Practice Test 5', questions: 10, time: 15, topic: 'Inductive Reasoning' },
-    { id: 'p6', name: 'Practice Test 6', questions: 10, time: 15, topic: 'Abstract Reasoning' },
-    { id: 'p7', name: 'Practice Test 7', questions: 10, time: 15, topic: 'Deductive Reasoning' },
-    { id: 'p8', name: 'Practice Test 8', questions: 10, time: 15, topic: 'Inductive Reasoning' },
-    { id: 'p9', name: 'Practice Test 9', questions: 10, time: 15, topic: 'Abstract Reasoning' },
-    { id: 'p10', name: 'Practice Test 10', questions: 10, time: 15, topic: 'Deductive Reasoning' },
+    { id: 'p1', name: 'Test Pratique 1', questions: 10, time: 15, topic: 'Deductive Reasoning' },
+    { id: 'p2', name: 'Test Pratique 2', questions: 10, time: 15, topic: 'Inductive Reasoning' },
+    { id: 'p3', name: 'Test Pratique 3', questions: 10, time: 15, topic: 'Abstract Reasoning' },
+    { id: 'p4', name: 'Test Pratique 4', questions: 10, time: 15, topic: 'Deductive Reasoning' },
+    { id: 'p5', name: 'Test Pratique 5', questions: 10, time: 15, topic: 'Inductive Reasoning' },
+    { id: 'p6', name: 'Test Pratique 6', questions: 10, time: 15, topic: 'Abstract Reasoning' },
+    { id: 'p7', name: 'Test Pratique 7', questions: 10, time: 15, topic: 'Deductive Reasoning' },
+    { id: 'p8', name: 'Test Pratique 8', questions: 10, time: 15, topic: 'Inductive Reasoning' },
+    { id: 'p9', name: 'Test Pratique 9', questions: 10, time: 15, topic: 'Abstract Reasoning' },
+    { id: 'p10', name: 'Test Pratique 10', questions: 10, time: 15, topic: 'Deductive Reasoning' },
 ];
 
 const topics = ['All', 'Deductive Reasoning', 'Inductive Reasoning', 'Abstract Reasoning'];
@@ -50,7 +50,7 @@ const quizzes = [
     { id: 'q1', name: 'Quiz Series', questions: 15, time: 20 },
 ];
 
-const lastTest = { name: 'Practice Test 1', completed: 5, total: 20 };
+const lastTest = { name: 'Test Pratique 1', completed: 5, total: 20 };
 const recommendation = "Your logical reasoning is improving! Keep it up.";
 
 export default function LogicPage() {
@@ -190,24 +190,25 @@ export default function LogicPage() {
 	useEffect(() => {
 		const loadQuestions = async () => {
 			setIsLoadingQuestions(true);
+			setError(null);
 			try {
-				// Use the passage-aware method to get questions with passages for Logic subject
-				const loadedQuestions = await QuestionService.getQuestionsWithPassages('LOG', 10);
-				// Convert QuestionWithPassage to the format expected by QuizSeries
-				const convertedQuestions = loadedQuestions.map((qwp: any) => ({
-					id: parseInt(qwp.question.id),
-					type: 'multiple-choice' as const,
-					question: qwp.question.question_text,
-					options: [qwp.question.answer1, qwp.question.answer2, qwp.question.answer3, qwp.question.answer4].filter(Boolean),
-					correctAnswer: qwp.question.correct.charCodeAt(0) - 65, // Convert A=0, B=1, C=2, D=3
-					explanation: '', // Database questions don't have explanation field
-					difficulty: qwp.question.difficulty,
-					passage: qwp.passage // Include passage data
-				}));
-				setQuestions(convertedQuestions);
+				console.log('LogicPage: Starting to load questions...');
+				console.log('LogicPage: Profile:', profile);
+				console.log('LogicPage: Exam type:', profile?.exam_type);
+				
+				const loadedQuestions = await getQuestionsBySubject('logique', profile?.exam_type as 'CM' | 'CMS' | 'CS');
+				console.log('LogicPage: Questions loaded:', loadedQuestions.length);
+				
+				if (loadedQuestions.length === 0) {
+					console.warn('LogicPage: No questions returned from getQuestionsBySubject');
+					setError('Aucune question disponible pour cette matière.');
+					return;
+				}
+				
+				setQuestions(loadedQuestions);
 			} catch (error) {
-				console.error('Error loading questions:', error);
-				setError('Failed to load questions');
+				console.error('LogicPage: Error loading questions:', error);
+				setError('Erreur lors du chargement des questions.');
 			} finally {
 				setIsLoadingQuestions(false);
 			}
@@ -217,30 +218,32 @@ export default function LogicPage() {
 
 	const loadQuestionsForTest = async (testNumber: number) => {
 		setIsLoadingQuestions(true);
+		setError(null);
 		try {
-			// Use the passage-aware method for practice tests as well
-			const loadedQuestions = await QuestionService.getQuestionsWithPassages('LOG', 10);
-			// Convert QuestionWithPassage to the format expected by QuizSeries
-			const convertedQuestions = loadedQuestions.map((qwp: any) => ({
-				id: parseInt(qwp.question.id),
-				type: 'multiple-choice' as const,
-				question: qwp.question.question_text,
-				options: [qwp.question.answer1, qwp.question.answer2, qwp.question.answer3, qwp.question.answer4].filter(Boolean),
-				correctAnswer: qwp.question.correct.charCodeAt(0) - 65, // Convert A=0, B=1, C=2, D=3
-				explanation: '', // Database questions don't have explanation field
-				difficulty: qwp.question.difficulty,
-				passage: qwp.passage // Include passage data
-			}));
-			setQuestions(convertedQuestions);
+			console.log(`LogicPage: Loading questions for test pratique ${testNumber}...`);
+			console.log('LogicPage: Profile:', profile);
+			console.log('LogicPage: Exam type:', profile?.exam_type);
+			
+			// Use the same method as other pages for consistency
+			const loadedQuestions = await getQuestionsBySubject('logique', profile?.exam_type as 'CM' | 'CMS' | 'CS', testNumber);
+			console.log(`LogicPage: Test pratique ${testNumber} questions loaded:`, loadedQuestions.length);
+			
+			if (loadedQuestions.length === 0) {
+				console.warn(`LogicPage: No questions returned for test pratique ${testNumber}`);
+				setError('Aucune question disponible pour ce test.');
+				return;
+			}
+			
+			setQuestions(loadedQuestions);
 		} catch (error) {
-			console.error('Error loading questions:', error);
-			setError('Failed to load questions');
+			console.error('LogicPage: Error loading test pratique questions:', error);
+			setError('Erreur lors du chargement des questions du test.');
 		} finally {
 			setIsLoadingQuestions(false);
 		}
 	};
 
-	// Handle start practice test
+	// Handle start test pratique
 	const handleStart = async (test: TestDetails) => {
 		// Load questions for this specific test to ensure randomization
 		await loadQuestionsForTest(parseInt(test.id.replace('p', '')));
@@ -250,7 +253,7 @@ export default function LogicPage() {
 		window.scrollTo({ top: 0, behavior: 'smooth' });
 	};
 
-	// Handle review practice test
+	// Handle review test pratique
 	const handleReview = async (test: TestDetails) => {
 		try {
 			if (!user?.id) {
@@ -468,7 +471,7 @@ export default function LogicPage() {
 
 			<div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3 lg:gap-4">
 				<ActionButton icon={Trophy} title="Quiz" color="yellow" active={activeSection === 'quiz'} onClick={() => handleSectionToggle('quiz')} />
-				<ActionButton icon={Target} title="Practice Test" color="yellow" active={activeSection === 'practice'} onClick={() => handleSectionToggle('practice')} />
+				<ActionButton icon={Target} title="Test Pratique" color="yellow" active={activeSection === 'practice'} onClick={() => handleSectionToggle('practice')} />
 			</div>
 
 			{activeSection === 'practice' && (
@@ -506,6 +509,11 @@ export default function LogicPage() {
 					<p className="text-gray-600 max-w-2xl mx-auto mb-4 sm:mb-6 text-xs sm:text-sm lg:text-base">
 						Nos quiz d'apprentissage sont conçus pour vous aider à maîtriser les concepts une question à la fois. Obtenez des commentaires immédiats, retournez les cartes pour voir les explications et apprenez à votre propre rythme.
 					</p>
+					<div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4 sm:mb-6">
+						<p className="text-yellow-700 text-xs sm:text-sm font-medium">
+							📅 <strong>Quiz hebdomadaire :</strong> Les questions changent chaque semaine pour vous offrir une variété constante de contenu d'apprentissage.
+						</p>
+					</div>
 					<button 
 						onClick={() => setView('learn')}
 						className="inline-flex items-center gap-2 px-4 sm:px-6 lg:px-8 py-2 sm:py-3 rounded-lg bg-yellow-500 text-white font-semibold hover:bg-yellow-600 transition-colors text-sm sm:text-base"

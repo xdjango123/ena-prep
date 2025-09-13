@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { X, Clock, CheckCircle, XCircle, Home, Trophy, Brain, ChevronLeft, ChevronRight, AlertTriangle, Shield, Menu, Flag, Save, CheckSquare, Eye } from 'lucide-react';
 import { QuestionService } from '../../services/questionService';
+import { ExamResultService } from '../../services/examResultService';
+import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
 
 interface Question {
   id: string;
@@ -13,6 +15,7 @@ interface Question {
   difficulty: string;
   category: 'ANG' | 'CG' | 'LOG';
   exam_type?: string;
+  is3Option?: boolean; // Flag to indicate this is a 3-option question
 }
 
 interface SecureExamInterfaceProps {
@@ -20,6 +23,7 @@ interface SecureExamInterfaceProps {
 }
 
 export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit }) => {
+  const { user, profile } = useSupabaseAuth();
   const { examId } = useParams<{ examId: string }>();
   const navigate = useNavigate();
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -39,7 +43,7 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
   const [showMobileDrawer, setShowMobileDrawer] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'info' | 'warning' } | null>(null);
   const [showReview, setShowReview] = useState(false);
-  
+  const [warningDismissed, setWarningDismissed] = useState(false);  
   const examStartTime = useRef<Date>(new Date());
   const autoSaveInterval = useRef<NodeJS.Timeout | null>(null);
   const toastTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -56,6 +60,7 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
     const handleVisibilityChange = () => {
       if (document.hidden) {
         setTabSwitchCount(prev => prev + 1);
+        setWarningDismissed(false); // Reset warning dismissed state on new tab switch
         if (tabSwitchCount >= 2) {
           handleFinishExam();
         }
@@ -138,31 +143,65 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
         
         for (const subject of subjects) {
           try {
-            const subjectQuestions = await QuestionService.getQuestionsByCategory(subject, undefined, 20);
+            // Get user's exam type, default to CS if not available
+            const userExamType = profile?.exam_type || 'CS';
             
-            if (subjectQuestions.length === 0) {
-              const fallbackQuestions = await QuestionService.getExamQuestionsFallback(subject, 'CS', 20);
-              if (fallbackQuestions.length > 0) {
-                subjectQuestions.push(...fallbackQuestions);
-              }
-            }
+            // Use the new pre-generated exam blanc questions method
+            const subjectQuestions = await QuestionService.getExamBlancQuestionsFromPreGenerated(
+              subject, 
+              examId || '1', 
+              userExamType as 'CM' | 'CMS' | 'CS', 
+              20
+            );
             
-            const convertedQuestions = subjectQuestions.map((dbQ) => {
+            console.log(`🔍 Converting ${subjectQuestions.length} questions for ${subject}`);
+            
+            const convertedQuestions = subjectQuestions.map((dbQ, index) => {
+              console.log(`🔍 Question ${index + 1}:`, {
+                id: dbQ.id,
+                question_text: dbQ.question_text,
+                answer1: dbQ.answer1,
+                answer2: dbQ.answer2,
+                answer3: dbQ.answer3,
+                correct: dbQ.correct,
+                is3Option: dbQ.is3Option
+              });
+              
               let type: 'multiple-choice' | 'true-false' = 'multiple-choice';
               let options: string[] | undefined = undefined;
               let correctAnswer: number | string = 0;
               
-              if (dbQ.answer1 && dbQ.answer2 && dbQ.answer3 && dbQ.answer4) {
-                type = 'multiple-choice';
-                options = [dbQ.answer1, dbQ.answer2, dbQ.answer3, dbQ.answer4];
-                correctAnswer = dbQ.correct === 'A' ? 0 : dbQ.correct === 'B' ? 1 : dbQ.correct === 'C' ? 2 : dbQ.correct === 'D' ? 3 : 0;
-              } else if (dbQ.answer1 && dbQ.answer2 && !dbQ.answer3 && !dbQ.answer4) {
-                type = 'true-false';
-                options = [dbQ.answer1, dbQ.answer2];
-                correctAnswer = dbQ.correct?.toLowerCase() === 'true' ? 'true' : 'false';
+              // Check if this is a 3-option question (exam blanc)
+              if (dbQ.is3Option) {
+                // 3-option format for exam blanc
+                if (dbQ.answer1 && dbQ.answer2 && dbQ.answer3) {
+                  type = 'multiple-choice';
+                  options = [dbQ.answer1, dbQ.answer2, dbQ.answer3];
+                  
+                  // Convert letter to index (A=0, B=1, C=2)
+                  correctAnswer = dbQ.correct === 'A' ? 0 :
+                                  dbQ.correct === 'B' ? 1 :
+                                  dbQ.correct === 'C' ? 2 : 0;
+                }
+              } else {
+                // 4-option format for other question types
+                if (dbQ.answer1 && dbQ.answer2 && dbQ.answer3 && dbQ.answer4) {
+                  type = 'multiple-choice';
+                  options = [dbQ.answer1, dbQ.answer2, dbQ.answer3, dbQ.answer4];
+                  
+                  // Convert letter to index (A=0, B=1, C=2, D=3)
+                  correctAnswer = dbQ.correct === 'A' ? 0 :
+                                  dbQ.correct === 'B' ? 1 :
+                                  dbQ.correct === 'C' ? 2 :
+                                  dbQ.correct === 'D' ? 3 : 0;
+                } else if (dbQ.answer1 && dbQ.answer2 && !dbQ.answer3 && !dbQ.answer4) {
+                  type = 'true-false';
+                  options = [dbQ.answer1, dbQ.answer2];
+                  correctAnswer = dbQ.correct?.toLowerCase() === 'true' ? 'true' : 'false';
+                }
               }
               
-              return {
+              const convertedQuestion = {
                 id: dbQ.id,
                 type,
                 question: dbQ.question_text,
@@ -171,10 +210,20 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
                 explanation: (dbQ as any).explanation || `La réponse correcte est ${options?.[correctAnswer as number] || correctAnswer}.`,
                 difficulty: dbQ.difficulty || 'medium',
                 category: dbQ.category,
-                exam_type: dbQ.exam_type
+                exam_type: dbQ.exam_type,
+                is3Option: dbQ.is3Option || false
               };
-            });
-            
+              
+              console.log(`✅ Converted question ${index + 1}:`, {
+                id: convertedQuestion.id,
+                question: convertedQuestion.question,
+                options: convertedQuestion.options,
+                correctAnswer: convertedQuestion.correctAnswer,
+                is3Option: convertedQuestion.is3Option
+              });
+              
+              return convertedQuestion;
+            });            
             allQuestions.push(...convertedQuestions);
           } catch (error) {
             console.error(`Error loading questions for ${subject}:`, error);
@@ -243,13 +292,20 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
 
   const handleAnswerSelect = (answer: string | number) => {
     if (!questions[currentQuestionIndex]) return;
+    console.log('🎯 Answer selected:', answer, 'for question:', questions[currentQuestionIndex].id);
     setSelectedAnswer(answer);
     
-    setUserAnswers(prev => new Map(prev).set(questions[currentQuestionIndex].id, answer));
+    setUserAnswers(prev => {
+      const newMap = new Map(prev).set(questions[currentQuestionIndex].id, answer);
+      console.log('📝 User answers updated:', Array.from(newMap.entries()));
+      return newMap;
+    });
     
     const isCorrect = (() => {
       if (questions[currentQuestionIndex].type === 'multiple-choice' && typeof questions[currentQuestionIndex].correctAnswer === 'number') {
-        return answer === questions[currentQuestionIndex].correctAnswer;
+        // Convert letter answer back to number for comparison
+        const answerIndex = typeof answer === 'string' && answer.length === 1 ? answer.charCodeAt(0) - 65 : answer;
+        return answerIndex === questions[currentQuestionIndex].correctAnswer;
       } else if (questions[currentQuestionIndex].type === 'true-false') {
         return String(answer).toLowerCase() === String(questions[currentQuestionIndex].correctAnswer).toLowerCase();
       }
@@ -280,11 +336,17 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
   };
 
   const handleNextQuestion = () => {
+    // Save current answer before moving
+    if (selectedAnswer) {
+      setUserAnswers(prev => new Map(prev).set(questions[currentQuestionIndex].id, selectedAnswer));
+    }
+    
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
       setSelectedAnswer(null);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
+      console.log('🏁 Reached last question, finishing exam...');
       handleFinishExam();
     }
   };
@@ -297,10 +359,85 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
     }
   };
 
-  const handleFinishExam = () => {
+  const handleFinishExam = async () => {
+    console.log('🎯 handleFinishExam called');
     setIsCompleted(true);
     if (autoSaveInterval.current) {
       clearInterval(autoSaveInterval.current);
+    }
+
+    // Save exam result to database
+    if (user) {
+      console.log('💾 Saving exam result to database...');
+      const correctAnswers = questions.reduce((count, q) => {
+        const userAnswer = userAnswers.get(q.id);
+        console.log(`🔍 Question ${q.id}: userAnswer=${userAnswer}, correctAnswer=${q.correctAnswer}`);
+        
+        // Convert letter answer to number for comparison with correctAnswer
+        if (typeof userAnswer === 'string' && userAnswer.length === 1 && typeof q.correctAnswer === 'number') {
+          const answerIndex = userAnswer.charCodeAt(0) - 65;
+          const isCorrect = answerIndex === q.correctAnswer;
+          console.log(`  Converted ${userAnswer} to ${answerIndex}, correct: ${isCorrect}`);
+          return isCorrect ? count + 1 : count;
+        }
+        const isCorrect = userAnswer === q.correctAnswer;
+        console.log(`  Direct comparison: ${userAnswer} === ${q.correctAnswer}, correct: ${isCorrect}`);
+        return isCorrect ? count + 1 : count;
+      }, 0);
+      
+      const overallScore = Math.round((correctAnswers / questions.length) * 100);
+      console.log(`📊 Calculated score: ${overallScore}% (${correctAnswers}/${questions.length} correct)`);
+      console.log(`📊 User answers collected: ${userAnswers.size}/${questions.length}`);
+      console.log(`📊 User answers:`, Array.from(userAnswers.entries()).slice(0, 5)); // Show first 5 answers
+      
+      // Calculate subject scores
+      const subjectScores = { ANG: 0, CG: 0, LOG: 0 };
+      const subjectTotals = { ANG: 0, CG: 0, LOG: 0 };
+      
+      questions.forEach(q => {
+        const userAnswer = userAnswers.get(q.id);
+        // Convert letter answer to number for comparison with correctAnswer
+        let isCorrect = false;
+        if (typeof userAnswer === 'string' && userAnswer.length === 1 && typeof q.correctAnswer === 'number') {
+          const answerIndex = userAnswer.charCodeAt(0) - 65;
+          isCorrect = answerIndex === q.correctAnswer;
+        } else {
+          isCorrect = userAnswer === q.correctAnswer;
+        }
+        
+        if (q.category === 'ANG' || q.category === 'CG' || q.category === 'LOG') {
+          subjectTotals[q.category]++;
+          if (isCorrect) {
+            subjectScores[q.category]++;
+          }
+        }
+      });
+      
+      // Convert to percentages
+      const subjectPercentages = {
+        ANG: subjectTotals.ANG > 0 ? Math.round((subjectScores.ANG / subjectTotals.ANG) * 100) : 0,
+        CG: subjectTotals.CG > 0 ? Math.round((subjectScores.CG / subjectTotals.CG) * 100) : 0,
+        LOG: subjectTotals.LOG > 0 ? Math.round((subjectScores.LOG / subjectTotals.LOG) * 100) : 0
+      };
+      
+      // Get user's exam type from profile or default to CS
+      const userExamType = profile?.exam_type || 'CS';
+      console.log(`💾 Saving to database: user=${user.id}, examType=${userExamType}, examNumber=${examId}, score=${overallScore}`);
+      
+      try {
+        const saveResult = await ExamResultService.saveExamResult(
+          user.id,
+          userExamType as 'CM' | 'CMS' | 'CS',
+          parseInt(examId || '1'),
+          overallScore,
+          subjectPercentages,
+          userAnswers
+        );
+        
+        console.log(`💾 Save result: ${saveResult ? 'SUCCESS' : 'FAILED'}`);
+      } catch (error) {
+        console.error('❌ Error in handleFinishExam:', error);
+      }
     }
   };
 
@@ -366,6 +503,11 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
       const subjectCorrect = subjectQuestions.reduce((count, q) => {
         const userAnswer = userAnswers.get(q.id);
         if (q.type === 'multiple-choice' && typeof q.correctAnswer === 'number') {
+          // Convert letter answer to number for comparison
+          if (typeof userAnswer === 'string' && userAnswer.length === 1) {
+            const answerIndex = userAnswer.charCodeAt(0) - 65;
+            return answerIndex === q.correctAnswer ? count + 1 : count;
+          }
           return userAnswer === q.correctAnswer ? count + 1 : count;
         } else if (q.type === 'true-false') {
           return String(userAnswer).toLowerCase() === String(q.correctAnswer).toLowerCase() ? count + 1 : count;
@@ -414,7 +556,16 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
     // Calculate results
     const correctAnswers = questions.reduce((count, q) => {
       const userAnswer = userAnswers.get(q.id);
+      console.log(`🔍 Completion screen - Question ${q.id}: userAnswer=${userAnswer}, correctAnswer=${q.correctAnswer}`);
+      
       if (q.type === 'multiple-choice' && typeof q.correctAnswer === 'number') {
+        // Convert letter answer to number for comparison
+        if (typeof userAnswer === 'string' && userAnswer.length === 1) {
+          const answerIndex = userAnswer.charCodeAt(0) - 65;
+          const isCorrect = answerIndex === q.correctAnswer;
+          console.log(`  Converted ${userAnswer} to ${answerIndex}, correct: ${isCorrect}`);
+          return isCorrect ? count + 1 : count;
+        }
         return userAnswer === q.correctAnswer ? count + 1 : count;
       } else if (q.type === 'true-false') {
         return String(userAnswer).toLowerCase() === String(q.correctAnswer).toLowerCase() ? count + 1 : count;
@@ -669,13 +820,21 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
   return (
     <div className="h-screen bg-gray-50">
       {/* Security Warning */}
-      {tabSwitchCount > 0 && (
-        <div className="absolute top-0 left-0 right-0 bg-red-600 text-white p-3 text-center z-50">
-          <AlertTriangle className="w-5 h-5 inline mr-2" />
-          Attention: Changement d'onglet détecté ({tabSwitchCount}/2). L'examen se terminera automatiquement après 2 changements.
+      {tabSwitchCount > 0 && !warningDismissed && (
+        <div className="absolute top-0 left-0 right-0 bg-red-600 text-white p-3 text-center z-50 flex items-center justify-between">
+          <div className="flex items-center">
+            <AlertTriangle className="w-5 h-5 inline mr-2" />
+            Attention: Changement d'onglet détecté ({tabSwitchCount}/2). L'examen se terminera automatiquement après 2 changements.
+          </div>
+          <button
+            onClick={() => setWarningDismissed(true)}
+            className="ml-4 p-1 hover:bg-red-700 rounded transition-colors"
+            aria-label="Fermer l'avertissement"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
       )}
-
       {/* Single Blue Header - No White Bar */}
       <div className="bg-blue-600 shadow-sm">
         <div className="px-4 sm:px-6 py-4">
@@ -725,7 +884,10 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
               
               {/* Terminer Button - Replaces X */}
               <button 
-                onClick={handleFinishExam}
+                onClick={() => {
+                  console.log('🔘 Terminer button clicked');
+                  handleFinishExam();
+                }}
                 className="flex items-center gap-1 px-3 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors text-sm font-medium"
                 title="Terminer l'examen"
               >
@@ -876,11 +1038,11 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
               
               <div className="space-y-3">
                 {currentQuestion.type === 'multiple-choice' && currentQuestion.options?.map((option, index) => {
-                  const isSelected = selectedAnswer === index;
+                  const isSelected = selectedAnswer === String.fromCharCode(65 + index);
                   return (
                     <div
                       key={index}
-                      onClick={() => handleAnswerSelect(index)}
+                      onClick={() => handleAnswerSelect(String.fromCharCode(65 + index))}
                       className={`answer ${isSelected ? 'answer--selected' : ''}`}
                       tabIndex={0}
                     >

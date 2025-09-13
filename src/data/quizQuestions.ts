@@ -49,51 +49,51 @@ export const generalKnowledgeQuestions: Question[] = [
     type: 'true-false',
     question: "L'Union européenne compte actuellement 28 pays membres.",
     correctAnswer: 'false',
-    explanation: "Depuis le Brexit, l'UE compte 27 pays membres.",
+    explanation: "L'Union européenne compte actuellement 27 pays membres après le Brexit.",
     difficulty: 'easy'
   },
   {
     id: 6,
     type: 'multiple-choice',
-    question: "Quel fleuve traverse Paris ?",
-    options: ['La Loire', 'Le Rhône', 'La Seine', 'La Garonne'],
-    correctAnswer: 2,
-    explanation: "La Seine traverse Paris d'est en ouest.",
+    question: "Quel est le plus grand océan du monde ?",
+    options: ['Atlantique', 'Pacifique', 'Indien', 'Arctique'],
+    correctAnswer: 1,
+    explanation: "L'océan Pacifique est le plus grand océan du monde.",
     difficulty: 'easy'
   },
   {
     id: 7,
     type: 'multiple-choice',
-    question: "En quelle année a eu lieu la chute du mur de Berlin ?",
-    options: ['1987', '1989', '1991', '1993'],
-    correctAnswer: 1,
-    explanation: "Le mur de Berlin est tombé le 9 novembre 1989.",
-    difficulty: 'medium'
+    question: "Qui a peint 'La Joconde' ?",
+    options: ['Michel-Ange', 'Raphaël', 'Léonard de Vinci', 'Botticelli'],
+    correctAnswer: 2,
+    explanation: "Léonard de Vinci a peint 'La Joconde' entre 1503 et 1519.",
+    difficulty: 'easy'
   },
   {
     id: 8,
     type: 'true-false',
-    question: "Le Japon est composé de plus de 6000 îles.",
-    correctAnswer: 'true',
-    explanation: "Le Japon compte environ 6 852 îles.",
-    difficulty: 'hard'
+    question: "Le Nil est le plus long fleuve du monde.",
+    correctAnswer: 'false',
+    explanation: "L'Amazone est le plus long fleuve du monde avec 6 400 km.",
+    difficulty: 'medium'
   },
   {
     id: 9,
     type: 'multiple-choice',
-    question: "Qui a peint 'La Joconde' ?",
-    options: ['Michel-Ange', 'Léonard de Vinci', 'Raphaël', 'Donatello'],
-    correctAnswer: 1,
-    explanation: "Léonard de Vinci a peint La Joconde entre 1503 et 1519.",
-    difficulty: 'easy'
+    question: "Quel est le symbole chimique de l'or ?",
+    options: ['Au', 'Ag', 'Or', 'Go'],
+    correctAnswer: 0,
+    explanation: "Le symbole chimique de l'or est Au (du latin 'aurum').",
+    difficulty: 'medium'
   },
   {
     id: 10,
     type: 'multiple-choice',
-    question: "Quelle est la devise de la République française ?",
-    options: ['Liberté, Égalité, Fraternité', 'Honneur et Patrie', 'Dieu et mon Droit', 'Un pour tous, tous pour un'],
-    correctAnswer: 0,
-    explanation: "Cette devise date de la Révolution française.",
+    question: "Qui a écrit '1984' ?",
+    options: ['Aldous Huxley', 'George Orwell', 'Ray Bradbury', 'H.G. Wells'],
+    correctAnswer: 1,
+    explanation: "George Orwell a publié '1984' en 1949.",
     difficulty: 'easy'
   }
 ];
@@ -102,45 +102,45 @@ export const englishQuestions: Question[] = [
   {
     id: 1,
     type: 'multiple-choice',
-    question: "What is the capital of England?",
-    options: ['Manchester', 'Liverpool', 'London', 'Birmingham'],
-    correctAnswer: 2,
-    explanation: "London is the capital and largest city of England.",
+    question: "What is the past tense of 'go'?",
+    options: ['goed', 'went', 'gone', 'going'],
+    correctAnswer: 1,
+    explanation: "The past tense of 'go' is 'went'.",
     difficulty: 'easy'
   },
   {
     id: 2,
     type: 'true-false',
-    question: "The United States has 50 states.",
+    question: "The word 'beautiful' is an adjective.",
     correctAnswer: 'true',
-    explanation: "The United States has 50 states, including Alaska and Hawaii.",
+    explanation: "'Beautiful' is an adjective that describes a noun.",
     difficulty: 'easy'
   },
   {
     id: 3,
     type: 'multiple-choice',
-    question: "Which of these is a programming language?",
-    options: ['HTML', 'CSS', 'JavaScript', 'All of the above'],
+    question: "Which word is a synonym for 'happy'?",
+    options: ['sad', 'angry', 'joyful', 'tired'],
     correctAnswer: 2,
-    explanation: "JavaScript is a programming language, while HTML and CSS are markup languages.",
-    difficulty: 'medium'
+    explanation: "'Joyful' is a synonym for 'happy'.",
+    difficulty: 'easy'
   },
   {
     id: 4,
     type: 'multiple-choice',
-    question: "What is the largest planet in our solar system?",
-    options: ['Earth', 'Mars', 'Jupiter', 'Saturn'],
-    correctAnswer: 2,
-    explanation: "Jupiter is the largest planet in our solar system.",
+    question: "What is the plural of 'child'?",
+    options: ['childs', 'children', 'childes', 'child'],
+    correctAnswer: 1,
+    explanation: "The plural of 'child' is 'children'.",
     difficulty: 'easy'
   },
   {
     id: 5,
     type: 'true-false',
-    question: "The Great Wall of China is visible from space with the naked eye.",
-    correctAnswer: 'false',
-    explanation: "This is a common myth. The Great Wall is not visible from space with the naked eye.",
-    difficulty: 'medium'
+    question: "The word 'quickly' is an adverb.",
+    correctAnswer: 'true',
+    explanation: "'Quickly' is an adverb that modifies a verb.",
+    difficulty: 'easy'
   }
 ];
 
@@ -148,48 +148,50 @@ export const logicQuestions: Question[] = [
   {
     id: 1,
     type: 'multiple-choice',
-    question: "If all roses are flowers and some flowers are red, can we conclude that some roses are red?",
-    options: ['Yes, always', 'No, never', 'Sometimes', 'Not necessarily'],
-    correctAnswer: 3,
-    explanation: "We cannot make this conclusion based on the given premises.",
-    difficulty: 'medium'
-  },
-  {
-    id: 2,
-    type: 'true-false',
-    question: "A square is always a rectangle.",
-    correctAnswer: 'true',
-    explanation: "A square is a special type of rectangle where all sides are equal.",
+    question: "Si tous les chats sont des animaux et que Minou est un chat, alors Minou est un animal.",
+    options: ['Vrai', 'Faux', 'Indéterminé', 'Impossible à dire'],
+    correctAnswer: 0,
+    explanation: "C'est un syllogisme valide : si A=B et B=C, alors A=C.",
     difficulty: 'easy'
   },
   {
-    id: 3,
+    id: 2,
     type: 'multiple-choice',
-    question: "What comes next in the sequence: 2, 4, 8, 16, ...?",
-    options: ['20', '24', '32', '30'],
-    correctAnswer: 2,
-    explanation: "Each number is multiplied by 2 to get the next number.",
+    question: "Quel est le nombre manquant dans la série : 2, 4, 8, 16, ?",
+    options: ['24', '32', '20', '28'],
+    correctAnswer: 1,
+    explanation: "La série suit le pattern : chaque nombre est le double du précédent (2×2=4, 4×2=8, 8×2=16, 16×2=32).",
+    difficulty: 'medium'
+  },
+  {
+    id: 3,
+    type: 'true-false',
+    question: "Si A > B et B > C, alors A > C.",
+    correctAnswer: 'true',
+    explanation: "C'est la propriété de transitivité : si A > B et B > C, alors A > C.",
     difficulty: 'easy'
   },
   {
     id: 4,
     type: 'multiple-choice',
-    question: "If it rains, the ground gets wet. The ground is wet. Therefore, it rained.",
-    options: ['Valid argument', 'Invalid argument', 'Cannot determine'],
-    correctAnswer: 1,
-    explanation: "This is a logical fallacy. The ground could be wet for other reasons.",
-    difficulty: 'medium'
+    question: "Dans une classe de 30 élèves, 18 aiment les maths et 12 aiment l'histoire. Si 8 aiment les deux, combien n'aiment ni les maths ni l'histoire ?",
+    options: ['2', '4', '6', '8'],
+    correctAnswer: 3,
+    explanation: "Avec le principe d'inclusion-exclusion : 30 - (18 + 12 - 8) = 30 - 22 = 8.",
+    difficulty: 'hard'
   },
   {
     id: 5,
-    type: 'true-false',
-    question: "All triangles have three sides.",
-    correctAnswer: 'true',
-    explanation: "By definition, a triangle is a polygon with exactly three sides.",
-    difficulty: 'easy'
+    type: 'multiple-choice',
+    question: "Si P implique Q et que Q est faux, que peut-on dire de P ?",
+    options: ['P est vrai', 'P est faux', 'P peut être vrai ou faux', 'On ne peut rien dire'],
+    correctAnswer: 1,
+    explanation: "Si Q est faux et que P implique Q, alors P doit être faux (modus tollens).",
+    difficulty: 'hard'
   }
 ];
 
+// Import the QuestionService
 import { QuestionService } from '../services/questionService';
 
 export const getQuestionsBySubject = async (subject: string, examType?: 'CM' | 'CMS' | 'CS', testNumber?: number): Promise<Question[]> => {
@@ -214,15 +216,17 @@ export const getQuestionsBySubject = async (subject: string, examType?: 'CM' | '
     if (testNumber !== undefined) {
       console.log(`🎯 PRACTICE TEST MODE: Loading questions for ${category}, test #${testNumber}`);
       console.log(`   → This will ensure different questions from other practice tests`);
+      console.log(`   → Exam type: ${examType || 'ALL'}`);
     } else {
       console.log(`📅 DAILY QUIZ MODE: Loading questions for ${category}`);
       console.log(`   → Questions will change daily, same questions throughout the day`);
+      console.log(`   → Exam type: ${examType || 'ALL'}`);
     }
     
     // Get questions from database with proper seeding
-    // - For practice tests: pass testNumber to ensure different questions per test
-    // - For daily quizzes: don't pass testNumber so it uses daily date seeding
-    const dbQuestions = await QuestionService.getRandomQuestions(category, 10, examType, testNumber);
+    // - For practice tests: pass testNumber and examType to ensure different questions per test
+    // - For daily quizzes: don't pass testNumber so it uses daily date seeding, but still filter by examType
+    const dbQuestions = await QuestionService.getRandomQuestions(category, 10, undefined, testNumber, examType);
     
     if (!dbQuestions || dbQuestions.length === 0) {
       console.warn(`⚠️ No questions returned for ${category}`);
@@ -243,70 +247,55 @@ export const getQuestionsBySubject = async (subject: string, examType?: 'CM' | '
       let options: string[] | undefined = undefined;
       let correctAnswer: number | string = 0;
       
-      if (
-        dbQ.answer1 && dbQ.answer2 && dbQ.answer3 && dbQ.answer4
-      ) {
+      // Check if we have 4 valid answers (multiple choice)
+      const allAnswers = [dbQ.answer1, dbQ.answer2, dbQ.answer3, dbQ.answer4];
+      const validAnswers = allAnswers.filter(answer => answer && answer !== 'null' && answer !== null);
+      
+      if (validAnswers.length >= 4) {
         type = 'multiple-choice';
-        options = [dbQ.answer1, dbQ.answer2, dbQ.answer3, dbQ.answer4];
+        options = validAnswers;
         
-        // All correct answers should now be in letter format (A, B, C, D)
+        // Convert letter to index
         correctAnswer = dbQ.correct === 'A' ? 0 :
                         dbQ.correct === 'B' ? 1 :
                         dbQ.correct === 'C' ? 2 :
                         dbQ.correct === 'D' ? 3 : 0;
-      } else if (
-        dbQ.answer1 && dbQ.answer2 && !dbQ.answer3 && !dbQ.answer4
-      ) {
+      } else if (validAnswers.length === 2) {
         type = 'true-false';
-        options = [dbQ.answer1, dbQ.answer2];
+        options = validAnswers;
         correctAnswer = dbQ.correct?.toLowerCase() === 'true' ? 'true' : 'false';
       } else {
-        // Handle cases where some answers might be null or "null" string
-        const allOptions = [dbQ.answer1, dbQ.answer2, dbQ.answer3, dbQ.answer4];
-        const validOptions = allOptions.filter(option => option && option !== 'null' && option !== null);
-        
+        // Fallback: use available answers as multiple choice
         type = 'multiple-choice';
-        options = validOptions;
+        options = validAnswers;
         
         // Find the correct answer by matching the original letter position
         let correctIndex = 0;
-        if (dbQ.correct === 'A' && allOptions[0] && allOptions[0] !== 'null') {
-          correctIndex = validOptions.indexOf(allOptions[0]);
-        } else if (dbQ.correct === 'B' && allOptions[1] && allOptions[1] !== 'null') {
-          correctIndex = validOptions.indexOf(allOptions[1]);
-        } else if (dbQ.correct === 'C' && allOptions[2] && allOptions[2] !== 'null') {
-          correctIndex = validOptions.indexOf(allOptions[2]);
-        } else if (dbQ.correct === 'D' && allOptions[3] && allOptions[3] !== 'null') {
-          correctIndex = validOptions.indexOf(allOptions[3]);
+        if (dbQ.correct === 'A' && allAnswers[0] && allAnswers[0] !== 'null') {
+          correctIndex = validAnswers.indexOf(allAnswers[0]);
+        } else if (dbQ.correct === 'B' && allAnswers[1] && allAnswers[1] !== 'null') {
+          correctIndex = validAnswers.indexOf(allAnswers[1]);
+        } else if (dbQ.correct === 'C' && allAnswers[2] && allAnswers[2] !== 'null') {
+          correctIndex = validAnswers.indexOf(allAnswers[2]);
+        } else if (dbQ.correct === 'D' && allAnswers[3] && allAnswers[3] !== 'null') {
+          correctIndex = validAnswers.indexOf(allAnswers[3]);
         }
         
         correctAnswer = correctIndex >= 0 ? correctIndex : 0;
       }
       
       return {
-        id: index + 1,
+        id: parseInt(dbQ.id.replace(/-/g, '').substring(0, 8), 16) || index + 1, // Convert UUID to number
         type,
         question: dbQ.question_text,
         options,
         correctAnswer,
-        explanation: (() => {
-          // Get the correct answer text for the explanation
-          let correctAnswerText = '';
-          if (type === 'multiple-choice' && typeof correctAnswer === 'number') {
-            correctAnswerText = options?.[correctAnswer] || '';
-          } else if (type === 'true-false') {
-            correctAnswerText = String(correctAnswer);
-          } else {
-            correctAnswerText = String(correctAnswer);
-          }
-          return `La réponse correcte est ${correctAnswerText}. Cette question teste votre compréhension du sujet.`;
-        })(),
+        explanation: (dbQ as any).explanation || `La réponse correcte est ${options?.[correctAnswer as number] || correctAnswer}.`,
         difficulty: dbQ.difficulty || 'medium'
       };
     });
   } catch (error) {
-    console.error('Error fetching questions from database:', error);
-    // Don't fallback to hardcoded questions - throw error to identify the issue
-    throw new Error(`Failed to fetch questions for ${subject} with exam type ${examType}: ${error}`);
+    console.error('❌ Error in getQuestionsBySubject:', error);
+    return [];
   }
-}; 
+};

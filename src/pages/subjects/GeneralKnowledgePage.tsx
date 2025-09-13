@@ -33,16 +33,16 @@ const clearQuizState = (subject: string) => {
 }
 
 const practiceTests = [
-    { id: 'p1', name: 'Practice Test 1', questions: 10, time: 15, topic: 'History' },
-    { id: 'p2', name: 'Practice Test 2', questions: 10, time: 15, topic: 'Geography' },
-    { id: 'p3', name: 'Practice Test 3', questions: 10, time: 15, topic: 'Current Events' },
-    { id: 'p4', name: 'Practice Test 4', questions: 10, time: 15, topic: 'History' },
-    { id: 'p5', name: 'Practice Test 5', questions: 10, time: 15, topic: 'Geography' },
-    { id: 'p6', name: 'Practice Test 6', questions: 10, time: 15, topic: 'Current Events' },
-    { id: 'p7', name: 'Practice Test 7', questions: 10, time: 15, topic: 'History' },
-    { id: 'p8', name: 'Practice Test 8', questions: 10, time: 15, topic: 'Geography' },
-    { id: 'p9', name: 'Practice Test 9', questions: 10, time: 15, topic: 'Current Events' },
-    { id: 'p10', name: 'Practice Test 10', questions: 10, time: 15, topic: 'History' },
+    { id: 'p1', name: 'Test Pratique 1', questions: 10, time: 15, topic: 'History' },
+    { id: 'p2', name: 'Test Pratique 2', questions: 10, time: 15, topic: 'Geography' },
+    { id: 'p3', name: 'Test Pratique 3', questions: 10, time: 15, topic: 'Current Events' },
+    { id: 'p4', name: 'Test Pratique 4', questions: 10, time: 15, topic: 'History' },
+    { id: 'p5', name: 'Test Pratique 5', questions: 10, time: 15, topic: 'Geography' },
+    { id: 'p6', name: 'Test Pratique 6', questions: 10, time: 15, topic: 'Current Events' },
+    { id: 'p7', name: 'Test Pratique 7', questions: 10, time: 15, topic: 'History' },
+    { id: 'p8', name: 'Test Pratique 8', questions: 10, time: 15, topic: 'Geography' },
+    { id: 'p9', name: 'Test Pratique 9', questions: 10, time: 15, topic: 'Current Events' },
+    { id: 'p10', name: 'Test Pratique 10', questions: 10, time: 15, topic: 'History' },
 ];
 
 const topics = ['All', 'History', 'Geography', 'Current Events'];
@@ -51,7 +51,7 @@ const quizzes = [
     { id: 'q1', name: 'Quiz Series', questions: 15, time: 20 },
 ];
 
-const lastTest = { name: 'Practice Test 2', completed: 10, total: 20 };
+const lastTest = { name: 'Test Pratique 2', completed: 10, total: 20 };
 const recommendation = "You're doing great in History! Try focusing on Current Events next.";
 
 export const GeneralKnowledgePage: React.FC = () => {
@@ -158,7 +158,7 @@ export const GeneralKnowledgePage: React.FC = () => {
 			if (!user?.id) return;
 			
 			try {
-				// Build allowed practice test numbers from the local definition
+				// Build allowed test pratique numbers from the local definition
 				const allowedNumbers = practiceTests.map(t => parseInt(t.id.replace('p', '')));
 				// Get average score for CG category from test_results table, filtered by allowed tests
 				const score = await TestResultService.getAverageScoreForTestNumbers(
@@ -305,7 +305,7 @@ export const GeneralKnowledgePage: React.FC = () => {
 		window.scrollTo({ top: 0, behavior: 'smooth' });
 	};
 
-	// Handle start practice test
+	// Handle start test pratique
 	const handleStart = async (test: TestDetails) => {
 		// Load questions for this specific test to ensure randomization
 		await loadQuestionsForTest(parseInt(test.id.replace('p', '')));
@@ -315,7 +315,7 @@ export const GeneralKnowledgePage: React.FC = () => {
 		window.scrollTo({ top: 0, behavior: 'smooth' });
 	};
 
-	// Handle review practice test
+	// Handle review test pratique
 	const handleReview = async (test: TestDetails) => {
 		try {
 			if (!user?.id) {
@@ -568,7 +568,7 @@ export const GeneralKnowledgePage: React.FC = () => {
 
 			<div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3 lg:gap-4">
 				<ActionButton icon={Trophy} title="Quiz" color="blue" active={activeSection === 'quiz'} onClick={() => handleSectionToggle('quiz')} />
-				<ActionButton icon={Target} title="Practice Test" color="blue" active={activeSection === 'practice'} onClick={() => handleSectionToggle('practice')} />
+				<ActionButton icon={Target} title="Test Pratique" color="blue" active={activeSection === 'practice'} onClick={() => handleSectionToggle('practice')} />
 			</div>
 
 
@@ -608,6 +608,11 @@ export const GeneralKnowledgePage: React.FC = () => {
 					<p className="text-gray-600 max-w-2xl mx-auto mb-4 sm:mb-6 text-xs sm:text-sm lg:text-base">
 						Nos quiz d'apprentissage sont conçus pour vous aider à maîtriser les concepts une question à la fois. Obtenez des commentaires immédiats, retournez les cartes pour voir les explications et apprenez à votre propre rythme.
 					</p>
+					<div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4 sm:mb-6">
+						<p className="text-blue-700 text-xs sm:text-sm font-medium">
+							📅 <strong>Quiz hebdomadaire :</strong> Les questions changent chaque semaine pour vous offrir une variété constante de contenu d'apprentissage.
+						</p>
+					</div>
 					<button 
 						onClick={() => setView('learn')}
 						className="inline-flex items-center gap-2 px-4 sm:px-6 lg:px-8 py-2 sm:py-3 rounded-lg bg-blue-500 text-white font-semibold hover:bg-blue-600 transition-colors text-sm sm:text-base"

@@ -45,7 +45,7 @@ const SignupPage: React.FC = () => {
   // Function to translate Supabase error messages to French
   const translateError = (errorMessage: string): string => {
     const errorTranslations: { [key: string]: string } = {
-      'Invalid email or password': 'Mot de passe incorrect',
+      'Invalid email or password': 'Incorrect Email ou Mot de passe',
       'Email not confirmed': 'Email non confirmé',
       'Too many requests': 'Trop de tentatives. Veuillez réessayer plus tard',
       'User not found': 'Utilisateur non trouvé',
@@ -233,15 +233,15 @@ const SignupPage: React.FC = () => {
             </div>
             
             <div>
-              <Label htmlFor="examType">Type d'examen</Label>
+              <Label htmlFor="examType">Type de Concour</Label>
               <select 
                 id="examType" 
                 {...register('examType')} 
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
               >
-                <option value="CM">CM - Concours de Maître de Conférences</option>
-                <option value="CMS">CMS - Concours de Maître de Conférences Spécialisé</option>
-                <option value="CS">CS - Concours de Chargé de Service</option>
+                <option value="CM">CM - Cour Moyen</option>
+                <option value="CMS">CMS - Cour Moyen Superieur</option>
+                <option value="CS">CS - Cour Superieur</option>
               </select>
               {errors.examType && (
                 <p className="mt-1 text-sm text-red-600">{errors.examType.message}</p>

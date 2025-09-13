@@ -40,7 +40,7 @@ export const PreExamRules: React.FC<PreExamRulesProps> = ({
             <h1 className="text-3xl font-bold text-gray-900">Règles de l'Examen</h1>
           </div>
           <h2 className="text-xl text-gray-600 mb-2">{examTitle}</h2>
-          <div className="flex items-center justify-center gap-6 text-sm text-gray-500">
+          <div className="flex items-center justify-center gap-6 text-sm text-gray-500 mb-3">
             <div className="flex items-center gap-2">
               <Clock className="w-4 h-4" />
               <span>{formatDuration(examDuration)}</span>
@@ -48,6 +48,9 @@ export const PreExamRules: React.FC<PreExamRulesProps> = ({
             <div className="flex items-center gap-2">
               <span>{questionCount} questions</span>
             </div>
+          </div>
+          <div className="text-sm text-gray-600 bg-gray-100 rounded-lg px-4 py-2">
+            <strong>Notation:</strong> -1 pour mauvaise réponse, 0 pour pas de réponse, +1 pour bonne réponse
           </div>
         </div>
 
@@ -64,7 +67,7 @@ export const PreExamRules: React.FC<PreExamRulesProps> = ({
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle className="w-5 h-5 text-blue-600" />
-              <span>20 questions de Culture Générale</span>
+              <span>20 questions de CG</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle className="w-5 h-5 text-blue-600" />
@@ -73,9 +76,8 @@ export const PreExamRules: React.FC<PreExamRulesProps> = ({
           </div>
         </div>
 
-        {/* Rules Section - Shortened */}
-        <div className="space-y-6 mb-8">
-          {/* Security Rules */}
+        {/* Security Rules Only */}
+        <div className="mb-8">
           <div className="bg-red-50 border border-red-200 rounded-lg p-6">
             <div className="flex items-center gap-3 mb-4">
               <AlertTriangle className="w-6 h-6 text-red-600" />
@@ -93,28 +95,6 @@ export const PreExamRules: React.FC<PreExamRulesProps> = ({
               <li className="flex items-start gap-3">
                 <CheckCircle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
                 <span>Surveillance automatique activée</span>
-              </li>
-            </ul>
-          </div>
-
-          {/* Exam Rules */}
-          <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <Mouse className="w-6 h-6 text-green-600" />
-              <h3 className="text-lg font-semibold text-green-800">Règles de l'Examen</h3>
-            </div>
-            <ul className="space-y-2 text-green-700">
-              <li className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                <span>Durée: {formatDuration(examDuration)} - soumission automatique</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                <span>Navigation libre entre les questions</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                <span>Sauvegarde automatique des réponses</span>
               </li>
             </ul>
           </div>

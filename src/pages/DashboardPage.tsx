@@ -268,7 +268,7 @@ export default function DashboardPage() {
             </div>
           ) : (
             // Has subscription - show subjects with enhanced design
-          <div className="bg-white p-6 lg:p-8 rounded-2xl shadow-xl border border-gray-200 w-full max-w-full overflow-x-hidden relative">
+          <div className="bg-white p-6 lg:p-8 rounded-2xl shadow-xl border border-gray-200 w-full max-w-full relative overflow-visible">
             {/* Background Pattern */}
             <div className="absolute top-0 right-0 w-16 h-16 bg-primary-50 rounded-full -translate-y-8 translate-x-8"></div>
             
@@ -279,8 +279,11 @@ export default function DashboardPage() {
                   Progression
                   <div className="relative group inline-block ml-1">
                     <Info className="w-4 h-4 text-gray-400 cursor-pointer group-hover:text-primary-500 transition-colors" />
-                    <div className="absolute left-1/2 -translate-x-1/2 mt-2 w-64 bg-white text-gray-700 text-xs rounded-lg shadow-lg p-3 z-10 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200">
-                      Votre progression est basée sur la moyenne de vos scores aux tests de pratique dans chaque matière.
+                    <div className="fixed top-24 left-1/2 -translate-x-1/2 w-80 bg-white text-gray-700 text-sm rounded-lg shadow-2xl p-4 z-[99999] opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 border border-gray-200">
+                      <div className="text-center">
+                        <div className="font-semibold text-gray-800 mb-2">Progression</div>
+                        <div className="text-gray-600">Votre progression est basée sur la moyenne de vos scores aux tests de pratique dans chaque matière.</div>
+                      </div>
                     </div>
                   </div>
                 </div>

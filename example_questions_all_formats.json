@@ -1,0 +1,116 @@
+{
+  "CM": {
+    "CG": [
+      {
+        "question_text": "Le Louvre est situé à ....",
+        "answer1": "Paris",
+        "answer2": "Londres",
+        "answer3": "Berlin",
+        "correct": "A",
+        "explanation": "Le Louvre est un musée emblématique situé à Paris, célèbre pour ses œuvres d'art comme la Mona Lisa."
+      },
+      {
+        "question_text": "La capitale de la France est ....",
+        "answer1": "Marseille",
+        "answer2": "Lyon",
+        "answer3": "Paris",
+        "correct": "C",
+        "explanation": "Paris est la capitale de la France, connue pour son histoire, sa culture et ses monuments célèbres."
+      }
+    ]
+  },
+  "CMS": {
+    "ANG": [
+      {
+        "question_text": "Choose the correct form of the verb: She usually ____ to the gym after work.",
+        "answer1": "go",
+        "answer2": "goes",
+        "answer3": "gone",
+        "correct": "B",
+        "explanation": "La forme correcte est 'goes' car le sujet 'She' est au singulier et le verbe doit être conjugué à la troisième personne."
+      },
+      {
+        "question_text": "Which word best completes the sentence? The movie was so ____ that I fell asleep.",
+        "answer1": "bored",
+        "answer2": "boring",
+        "answer3": "bore",
+        "correct": "B",
+        "explanation": "Le mot correct est 'boring' car il décrit le film comme étant ennuyeux, tandis que 'bored' décrit l'état de la personne."
+      }
+    ],
+    "LOG": [
+      {
+        "question_text": "Si A est un nombre pair et B est un nombre impair, quelle est la somme de A et B ?",
+        "answer1": "Pair",
+        "answer2": "Impair",
+        "answer3": "Nul",
+        "correct": "B",
+        "explanation": "La somme d'un nombre pair et d'un nombre impair est toujours un nombre impair."
+      },
+      {
+        "question_text": "Si 3x + 5 = 20, que vaut x ?",
+        "answer1": "5",
+        "answer2": "10",
+        "answer3": "15",
+        "correct": "A",
+        "explanation": "Pour résoudre l'équation, on soustrait 5 de chaque côté pour obtenir 3x = 15. Ensuite, on divise par 3, ce qui donne x = 5."
+      }
+    ]
+  },
+  "CS": {
+    "ANG": [
+      {
+        "question_text": "Which sentence uses the subjunctive mood correctly?",
+        "answer1": "I suggest that he go to the meeting.",
+        "answer2": "He suggests that she goes to the concert.",
+        "answer3": "She suggested that they went home.",
+        "correct": "A",
+        "explanation": "La réponse A utilise correctement le mode subjonctif en anglais, où 'go' est la forme correcte après 'suggest that'. Les autres options utilisent des formes incorrectes."
+      },
+      {
+        "question_text": "Identify the sentence with an appropriate use of an advanced vocabulary word.",
+        "answer1": "His decision was unequivocal and final.",
+        "answer2": "The weather is very important.",
+        "answer3": "She ran quickly to the store.",
+        "correct": "A",
+        "explanation": "La réponse A utilise le mot 'unequivocal', qui signifie clair et sans ambiguïté, démontrant un vocabulaire avancé, tandis que les autres réponses sont simples."
+      }
+    ],
+    "CG": [
+      {
+        "question_text": "Quel philosophe a écrit 'Le contrat social'?",
+        "answer1": "Jean-Jacques Rousseau",
+        "answer2": "Voltaire",
+        "answer3": "René Descartes",
+        "correct": "A",
+        "explanation": "Jean-Jacques Rousseau est l'auteur de 'Le contrat social', une œuvre fondatrice de la pensée politique moderne, où il évoque l'idée de la souveraineté populaire."
+      },
+      {
+        "question_text": "Quel est le principal thème de 'Les Misérables' de Victor Hugo?",
+        "answer1": "La quête de rédemption",
+        "answer2": "La guerre",
+        "answer3": "L'amour impossible",
+        "correct": "A",
+        "explanation": "'Les Misérables' aborde principalement la quête de rédemption à travers le personnage de Jean Valjean, qui cherche à échapper à son passé et à faire le bien dans une société injuste."
+      }
+    ],
+    "LOG": [
+      {
+        "question_text": "Si A implique B et B implique C, que peut-on conclure ?",
+        "answer1": "A implique C",
+        "answer2": "B implique A",
+        "answer3": "C implique A",
+        "correct": "A",
+        "explanation": "D'après le principe de transitivité en logique, si A implique B et B implique C, alors A implique C."
+      },
+      {
+        "question_text": "Quel est le résultat de la négation de (P et Q) ?",
+        "answer1": "Non P ou non Q",
+        "answer2": "Non P et non Q",
+        "answer3": "P ou Q",
+        "correct": "A",
+        "explanation": "La loi de De Morgan stipule que la négation de (P et Q) est équivalente à (non P ou non Q)."
+      }
+    ]
+  }
+}
