@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
 import { useSidebar } from '../contexts/SidebarContext';
 import { TestResultService } from '../services/testResultService';
+import { useSubscriptionStatus } from '../hooks/useSubscriptionStatus';
 import { 
   BookOpen, 
   BrainCircuit, 
@@ -63,12 +64,24 @@ const subjects: Subject[] = [
 ];
 
 export default function DashboardPage() {
-  const { user, profile, subscription } = useSupabaseAuth();
+  const { user, profile, subscription, selectedExamType, refreshSubscriptionData, userSubscriptions } = useSupabaseAuth();
   const { close } = useSidebar();
   const navigate = useNavigate();
   const [overallProgress, setOverallProgress] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [hasInitialized, setHasInitialized] = useState(false);
+  
+  // Use subscription status hook
+  const {
+    hasActiveSubscription,
+    isSubscriptionExpired,
+    canAccessFeature,
+    getSubscriptionStatus,
+    getPlanName,
+    getEndDate,
+    getDaysUntilExpiry,
+    isExpiringSoon
+  } = useSubscriptionStatus();
 
   useEffect(() => {
     if (user) {
@@ -81,7 +94,9 @@ export default function DashboardPage() {
     }
     // Scroll to top when component mounts
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [user, close, hasInitialized]);
+  }, [user, close, hasInitialized, selectedExamType]);
+
+
 
   const fetchUserProgress = async () => {
     if (!user) return;
@@ -89,9 +104,9 @@ export default function DashboardPage() {
     try {
       // Compute the progression as the mean of per-subject averages (CG, ANG, LOG)
       const [cg, ang, log] = await Promise.all([
-        TestResultService.getAverageScore(user.id, 'CG', 'practice'),
-        TestResultService.getAverageScore(user.id, 'ANG', 'practice'),
-        TestResultService.getAverageScore(user.id, 'LOG', 'practice')
+        TestResultService.getAverageScore(user.id, 'CG', 'practice', selectedExamType || undefined),
+        TestResultService.getAverageScore(user.id, 'ANG', 'practice', selectedExamType || undefined),
+        TestResultService.getAverageScore(user.id, 'LOG', 'practice', selectedExamType || undefined)
       ]);
       const avg = Math.round((cg + ang + log) / 3);
       setOverallProgress(avg);
@@ -137,6 +152,11 @@ export default function DashboardPage() {
     }
   };
 
+
+  // Handle subscription upgrade
+  const handleUpgrade = () => {
+    navigate('/dashboard/profile');
+  };
   const getSubscriptionIcon = (planName: string) => {
     switch (planName) {
       case 'Prépa CM': return <Crown size={16} />;
@@ -146,27 +166,27 @@ export default function DashboardPage() {
     }
   };
 
-  // Get available categories based on subscription
+  // Get available categories based on selected exam type
   const getAvailableCategories = () => {
-    if (!subscription) return [];
+    if (!selectedExamType) return [];
     
-    switch (subscription.plan_name) {
-      case 'Prépa CM':
+    switch (selectedExamType) {
+      case 'CM':
         return ['CM'];
-      case 'Prépa CMS':
+      case 'CMS':
         return ['CMS'];
-      case 'Prépa CS':
+      case 'CS':
         return ['CS'];
       default:
         return [];
     }
   };
 
-  // Check if user has active subscription
-  const hasActiveSubscription = subscription && subscription.is_active;
+  // Check if user has active subscription (now using hook)
+  // const hasActiveSubscription = subscription && subscription.is_active; // Replaced by hook
 
   const availableCategories = getAvailableCategories();
-  const userName = profile ? profile['First Name'] : user?.email || 'Utilisateur';
+  const userName = profile ? profile.first_name : user?.email || 'Utilisateur';
 
   if (isLoading) {
     return (
@@ -180,7 +200,46 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 w-full max-w-full overflow-x-hidden">
+    <div className="min-h-screen bg-gray-50 w-full max-w-full overflow-x-hidden relative">
+      {/* Locked State Overlay */}
+      {!hasActiveSubscription && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 text-center">
+            <div className="p-4 bg-red-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+              <Lock className="w-8 h-8 text-red-600" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">Abonnement Expiré</h2>
+            <p className="text-gray-600 mb-6">
+              Votre abonnement a expiré. Pour continuer à accéder à tous les contenus et fonctionnalités de PrepaENA, veuillez renouveler votre abonnement.
+            </p>
+            <div className="space-y-3">
+              <button
+                onClick={handleUpgrade}
+                className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2"
+              >
+                <Crown className="w-5 h-5" />
+                <span>Renouveler mon abonnement</span>
+              </button>
+              <button
+                onClick={async () => {
+                  await refreshSubscriptionData();
+                  window.location.reload();
+                }}
+                className="w-full bg-green-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center justify-center space-x-2"
+              >
+                <Sparkles className="w-5 h-5" />
+                <span>Actualiser mes données</span>
+              </button>
+              <button
+                onClick={() => navigate('/dashboard/profile')}
+                className="w-full bg-gray-100 text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-200 transition-colors"
+              >
+                Gérer mon profil
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="p-4 lg:p-6 max-w-7xl mx-auto pb-20 w-full max-w-full overflow-x-hidden">
         {/* Welcome Header - Enhanced Design */}
         <div className="bg-gradient-to-r from-primary-600 via-primary-700 to-primary-800 text-white p-6 lg:p-8 rounded-2xl shadow-xl mb-6 lg:mb-8 w-full max-w-full overflow-x-hidden relative overflow-hidden">
@@ -202,10 +261,10 @@ export default function DashboardPage() {
             
             {/* User Profile Labels - Better positioned */}
             <div className="flex flex-col items-start lg:items-end gap-3 min-w-0">
-              {hasActiveSubscription && subscription && (
-                <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border ${getSubscriptionColor(subscription.plan_name)}`}>
-                  {getSubscriptionIcon(subscription.plan_name)}
-                  <span className="truncate">{getSubscriptionLabel(subscription.plan_name)}</span>
+              {selectedExamType && (
+                <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border ${getSubscriptionColor(`Prépa ${selectedExamType}`)}`}>
+                  {getSubscriptionIcon(`Prépa ${selectedExamType}`)}
+                  <span className="truncate">{getSubscriptionLabel(`Prépa ${selectedExamType}`)}</span>
                 </div>
               )}
             </div>
@@ -246,28 +305,6 @@ export default function DashboardPage() {
           </div>
           
           {/* Subjects Section - Enhanced Design */}
-          {!hasActiveSubscription ? (
-            // No active subscription - show upgrade message
-            <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-200 w-full max-w-full overflow-x-hidden relative">
-              <div className="text-center w-full max-w-full">
-                <div className="p-4 bg-gray-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                  <Lock className="w-8 h-8 text-gray-400" />
-                </div>
-                <h2 className="text-xl font-bold text-gray-800 mb-3">Accès Gratuit</h2>
-                <p className="text-gray-600 mb-6">
-                  Passez à un abonnement premium ou intégral pour accéder aux matières spécialisées et examens blancs.
-                </p>
-                <Link 
-                  to="/tarification"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors"
-                >
-                  <Crown className="w-5 h-5" />
-                  Voir les abonnements
-                </Link>
-              </div>
-            </div>
-          ) : (
-            // Has subscription - show subjects with enhanced design
           <div className="bg-white p-6 lg:p-8 rounded-2xl shadow-xl border border-gray-200 w-full max-w-full relative overflow-visible">
             {/* Background Pattern */}
             <div className="absolute top-0 right-0 w-16 h-16 bg-primary-50 rounded-full -translate-y-8 translate-x-8"></div>
@@ -296,7 +333,7 @@ export default function DashboardPage() {
                    style={{ width: `${overallProgress}%` }}></div>
             </div>
             
-              {availableCategories.length > 0 ? (
+            {availableCategories.length > 0 ? (
             <div className="relative z-10 grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-full overflow-x-hidden">
               {subjects.map(subject => (
                 <Link 
@@ -311,22 +348,22 @@ export default function DashboardPage() {
                 </Link>
               ))}
             </div>
-              ) : (
-                <div className="relative z-10 text-center py-8 w-full max-w-full">
-                  <p className="text-gray-500 mb-4">
-                    Aucune matière disponible pour votre abonnement actuel.
-                  </p>
-                  <Link 
-                    to="/dashboard/profile"
-                    className="text-primary-600 hover:text-primary-700 underline"
-                  >
-                    Gérer mon profil
-                  </Link>
-                </div>
-              )}
+            ) : (
+              <div className="relative z-10 text-center py-8 w-full max-w-full">
+                <p className="text-gray-500 mb-4">
+                  Aucune matière disponible pour votre abonnement actuel.
+                </p>
+                <Link 
+                  to="/dashboard/profile"
+                  className="text-primary-600 hover:text-primary-700 underline"
+                >
+                  Gérer mon profil
+                </Link>
+              </div>
+            )}
           </div>
-          )}
         </div>
+
 
         {/* Secondary Actions - Enhanced Layout */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6 w-full max-w-full overflow-x-hidden">

@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Award, Clock, Hash, CheckCircle, Repeat, Eye, XCircle, ArrowLeft } from 'lucide-react';
-import { Link } from 'react-router-dom';
 
 interface Question {
   id: number;
@@ -12,32 +11,30 @@ interface Question {
   difficulty: 'easy' | 'medium' | 'hard';
 }
 
-interface QuizResultProps {
+interface QuizSeriesResultProps {
   score: number;
   totalQuestions: number;
   correctAnswers: number;
   timeSpent: number; // in seconds
   onRedo: () => void;
-  onReview: () => void;
   onExit: () => void;
   subjectColor: string;
-  questions?: Question[];
-  userAnswers?: Map<number, string | number>;
+  questions: Question[];
+  userAnswers: Map<number, string | number>;
 }
 
-export const QuizResult: React.FC<QuizResultProps> = ({
+export const QuizSeriesResult: React.FC<QuizSeriesResultProps> = ({
   score,
   totalQuestions,
   correctAnswers,
   timeSpent,
   onRedo,
-  onReview,
   onExit,
   subjectColor,
   questions,
   userAnswers
 }) => {
-  const [showDetailedCorrections, setShowDetailedCorrections] = useState(true);
+  const [showDetailedCorrections, setShowDetailedCorrections] = React.useState(true);
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -121,13 +118,6 @@ export const QuizResult: React.FC<QuizResultProps> = ({
     return variantData[type] || variantData['bg'];
   };
 
-  const getOptionText = (question: Question, answer: string | number) => {
-    if (question.type === 'multiple-choice' && question.options) {
-      return question.options[answer as number];
-    }
-    return answer.toString();
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 p-4">
       <div className="max-w-4xl mx-auto">
@@ -135,7 +125,7 @@ export const QuizResult: React.FC<QuizResultProps> = ({
         <div className="bg-white rounded-2xl shadow-lg p-8 mb-6">
           <div className="text-center">
             <Award className={`w-16 h-16 ${getColorClasses(subjectColor, '500', 'text')} mx-auto mb-4`} />
-            <h2 className="text-3xl font-bold mb-2">Test Terminé !</h2>
+            <h2 className="text-3xl font-bold mb-2">Quiz Terminé !</h2>
             <p className="text-gray-600 mb-8">{getSubtitle(score)}</p>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
@@ -163,17 +153,15 @@ export const QuizResult: React.FC<QuizResultProps> = ({
                 className={`flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 rounded-lg ${getColorClasses(subjectColor, '500', 'bg')} text-white font-semibold hover:${getColorClasses(subjectColor, '600', 'bg')} transition-colors`}
               >
                 <Repeat className="w-5 h-5" />
-                Refaire le test
+                Refaire le quiz
               </button>
-              {questions && userAnswers && (
-                <button 
-                  onClick={() => setShowDetailedCorrections(!showDetailedCorrections)}
-                  className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 rounded-lg bg-gray-200 text-gray-800 font-semibold hover:bg-gray-300 transition-colors"
-                >
-                  <Eye className="w-5 h-5" />
-                  {showDetailedCorrections ? 'Masquer' : 'Voir'} les corrections
-                </button>
-              )}
+              <button 
+                onClick={() => setShowDetailedCorrections(!showDetailedCorrections)}
+                className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 rounded-lg bg-gray-200 text-gray-800 font-semibold hover:bg-gray-300 transition-colors"
+              >
+                <Eye className="w-5 h-5" />
+                {showDetailedCorrections ? 'Masquer' : 'Voir'} les corrections
+              </button>
             </div>
             <div className="mt-6">
                 <button onClick={onExit} className="text-sm text-gray-500 hover:underline">
@@ -183,11 +171,11 @@ export const QuizResult: React.FC<QuizResultProps> = ({
           </div>
         </div>
 
-        {/* Detailed Corrections */}
-        {showDetailedCorrections && questions && userAnswers && (
+        {/* Simplified Corrections */}
+        {showDetailedCorrections && (
           <div className="bg-white rounded-2xl shadow-lg p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Corrections Détaillées</h2>
-            <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Corrections</h2>
+            <div className="space-y-4">
               {questions.map((question, index) => {
                 const userAnswer = userAnswers.get(question.id);
                 const isCorrect = (() => {
@@ -207,8 +195,13 @@ export const QuizResult: React.FC<QuizResultProps> = ({
                 };
 
                 return (
-                  <div key={question.id} className="border border-gray-200 rounded-lg p-6">
-                    <div className="flex items-center gap-3 mb-4">
+                  <div key={question.id} className="border border-gray-200 rounded-lg p-4">
+                    <div className="flex items-center gap-3 mb-3">
+                      <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                        isCorrect ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+                      }`}>
+                        {index + 1}
+                      </span>
                       <span className="text-sm font-medium text-gray-600">Question {index + 1}</span>
                       {isCorrect ? (
                         <CheckCircle className="w-5 h-5 text-green-500" />
@@ -217,90 +210,7 @@ export const QuizResult: React.FC<QuizResultProps> = ({
                       )}
                     </div>
                     
-                    <h3 className="font-semibold text-gray-900 mb-4">{question.question}</h3>
-                    
-                    {question.type === 'multiple-choice' && question.options && (
-                      <div className="space-y-2 mb-4">
-                        {question.options.map((option, optionIndex) => {
-                          const isSelected = userAnswer === optionIndex;
-                          const isCorrectOption = optionIndex === question.correctAnswer;
-                          
-                          return (
-                            <div
-                              key={optionIndex}
-                              className={`flex items-center gap-3 p-3 rounded-lg ${
-                                isCorrectOption
-                                  ? 'bg-green-50 border border-green-200'
-                                  : isSelected && !isCorrectOption
-                                  ? 'bg-red-50 border border-red-200'
-                                  : 'bg-gray-50'
-                              }`}
-                            >
-                              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium ${
-                                isCorrectOption
-                                  ? 'bg-green-500 text-white'
-                                  : isSelected && !isCorrectOption
-                                  ? 'bg-red-500 text-white'
-                                  : 'bg-gray-300 text-gray-700'
-                              }`}>
-                                {String.fromCharCode(65 + optionIndex)}
-                              </div>
-                              <span className={isCorrectOption ? 'font-medium' : ''}>
-                                {option}
-                              </span>
-                              {isCorrectOption && (
-                                <CheckCircle className="w-4 h-4 text-green-500 ml-auto" />
-                              )}
-                              {isSelected && !isCorrectOption && (
-                                <XCircle className="w-4 h-4 text-red-500 ml-auto" />
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                    
-                    {question.type === 'true-false' && (
-                      <div className="space-y-2 mb-4">
-                        {['Vrai', 'Faux'].map((option, optionIndex) => {
-                          const answerValue = optionIndex === 0 ? 'Vrai' : 'Faux';
-                          const isSelected = userAnswer === answerValue;
-                          const isCorrectOption = String(question.correctAnswer).toLowerCase() === answerValue.toLowerCase();
-                          
-                          return (
-                            <div
-                              key={option}
-                              className={`flex items-center gap-3 p-3 rounded-lg ${
-                                isCorrectOption
-                                  ? 'bg-green-50 border border-green-200'
-                                  : isSelected && !isCorrectOption
-                                  ? 'bg-red-50 border border-red-200'
-                                  : 'bg-gray-50'
-                              }`}
-                            >
-                              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium ${
-                                isCorrectOption
-                                  ? 'bg-green-500 text-white'
-                                  : isSelected && !isCorrectOption
-                                  ? 'bg-red-500 text-white'
-                                  : 'bg-gray-300 text-gray-700'
-                              }`}>
-                                {String.fromCharCode(65 + optionIndex)}
-                              </div>
-                              <span className={isCorrectOption ? 'font-medium' : ''}>
-                                {option}
-                              </span>
-                              {isCorrectOption && (
-                                <CheckCircle className="w-4 h-4 text-green-500 ml-auto" />
-                              )}
-                              {isSelected && !isCorrectOption && (
-                                <XCircle className="w-4 h-4 text-red-500 ml-auto" />
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
+                    <h3 className="font-semibold text-gray-900 mb-3 text-sm">{question.question}</h3>
                     
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                       <p className="text-blue-800 text-sm">
@@ -321,4 +231,4 @@ export const QuizResult: React.FC<QuizResultProps> = ({
       </div>
     </div>
   );
-}; 
+};

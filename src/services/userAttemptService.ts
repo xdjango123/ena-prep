@@ -10,7 +10,7 @@ export class UserAttemptService {
     score?: number,
     testData?: {
       questions: any[]
-      userAnswers: [number, string | number][]
+      userAnswers: [string | number, string | number][]
       correctAnswers: number
       totalQuestions: number
       timeSpent: number
@@ -83,15 +83,23 @@ export class UserAttemptService {
 
   static async getUserAttemptsByCategory(
     userId: string,
-    category: string
+    category: string,
+    examType?: 'CM' | 'CMS' | 'CS'
   ): Promise<UserAttempt[]> {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('user_attempts')
         .select('*')
         .eq('user_id', userId)
         .eq('category', category)
         .order('created_at', { ascending: false });
+
+      // Filter by exam_type in test_data if provided
+      if (examType) {
+        query = query.contains('test_data', { exam_type: examType });
+      }
+
+      const { data, error } = await query;
 
       if (error) {
         console.error('Error fetching user attempts by category:', error);
@@ -140,7 +148,7 @@ export class UserAttemptService {
     testNumber: number
   ): Promise<{
     questions: any[]
-    userAnswers: Map<number, string | number>
+    userAnswers: Map<string | number, string | number>
     score: number
     correctAnswers: number
     totalQuestions: number
@@ -170,7 +178,7 @@ export class UserAttemptService {
       }
 
       const { test_data } = attempt;
-      const userAnswers = new Map<number, string | number>(test_data.userAnswers as [number, string | number][]);
+      const userAnswers = new Map<string | number, string | number>(test_data.userAnswers as [string | number, string | number][]);
 
       return {
         questions: test_data.questions,
@@ -189,15 +197,23 @@ export class UserAttemptService {
   static async getAverageScore(
     userId: string,
     category: string,
-    testType: string = 'practice'
+    testType: string = 'practice',
+    examType?: 'CM' | 'CMS' | 'CS'
   ): Promise<number> {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('user_attempts')
         .select('score')
         .eq('user_id', userId)
         .eq('category', category)
-        .eq('test_type', testType)
+        .eq('test_type', testType);
+
+      // Filter by exam_type in test_data if provided
+      if (examType) {
+        query = query.contains('test_data', { exam_type: examType });
+      }
+
+      const { data, error } = await query
         .not('score', 'is', null);
 
       if (error) {

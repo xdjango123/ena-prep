@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Clock, CheckCircle, XCircle, Home, Trophy, Brain, ChevronLeft, ChevronRight, Repeat } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { QuestionService } from '../../services/questionService';
+import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
 
 interface Question {
   id: string;
@@ -21,6 +22,7 @@ interface RandomPracticeTestProps {
 
 export const RandomPracticeTest: React.FC<RandomPracticeTestProps> = ({ onExit }) => {
   const navigate = useNavigate();
+  const { selectedExamType } = useSupabaseAuth();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | number | null>(null);
@@ -42,6 +44,7 @@ export const RandomPracticeTest: React.FC<RandomPracticeTestProps> = ({ onExit }
       setIsLoading(true);
       setError(null);
       console.log('🔄 RandomPracticeTest: Starting to load random questions...');
+      console.log('🔄 RandomPracticeTest: Selected exam type:', selectedExamType);
       
       try {
         const allQuestions: Question[] = [];
@@ -51,9 +54,9 @@ export const RandomPracticeTest: React.FC<RandomPracticeTestProps> = ({ onExit }
         
         for (const subject of subjects) {
           try {
-            console.log(`📚 Loading questions for ${subject}...`);
-            const subjectQuestions = await QuestionService.getRandomQuestions(subject, 5, undefined, testNumber);
-            console.log(`✅ Loaded ${subjectQuestions.length} questions for ${subject}`);
+            console.log(`📚 Loading questions for ${subject} with exam type: ${selectedExamType || 'default'}`);
+            const subjectQuestions = await QuestionService.getRandomQuestions(subject, 5, undefined, testNumber, selectedExamType || undefined);
+            console.log(`✅ Loaded ${subjectQuestions.length} questions for ${subject} (exam_type: ${selectedExamType})`);
             
             // Convert database questions to the expected format
             const convertedQuestions = subjectQuestions.map((dbQ, index) => {
@@ -136,7 +139,7 @@ export const RandomPracticeTest: React.FC<RandomPracticeTestProps> = ({ onExit }
     };
 
     loadRandomQuestions();
-  }, []);
+  }, [selectedExamType]);
 
   // Timer
   useEffect(() => {

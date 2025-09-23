@@ -6,7 +6,8 @@ export class TestResultService {
     testType: 'quick' | 'practice' | 'exam',
     category: 'ANG' | 'CG' | 'LOG',
     score: number,
-    testNumber?: number
+    testNumber?: number,
+    examType?: 'CM' | 'CMS' | 'CS'
   ): Promise<boolean> {
     try {
       console.log('Saving test result:', { userId, testType, category, testNumber, score });
@@ -49,6 +50,7 @@ export class TestResultService {
           category: category,
           test_number: testNumber || null,
           score: score,
+          exam_type: examType || null, // Include exam_type for all test types
         })
         .select();
 
@@ -85,14 +87,24 @@ export class TestResultService {
     }
   }
 
-  static async getTestResultsByCategory(userId: string, category: 'ANG' | 'CG' | 'LOG'): Promise<TestResult[]> {
+  static async getTestResultsByCategory(userId: string, category: 'ANG' | 'CG' | 'LOG', testType?: 'quick' | 'practice' | 'exam', examType?: 'CM' | 'CMS' | 'CS'): Promise<TestResult[]> {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('test_results')
         .select('*')
         .eq('user_id', userId)
         .eq('category', category)
         .order('created_at', { ascending: false });
+
+      if (testType) {
+        query = query.eq('test_type', testType);
+      }
+
+      if (examType) {
+        query = query.eq('exam_type', examType);
+      }
+
+      const { data, error } = await query;
 
       if (error) {
         console.error('Error fetching test results by category:', error);
@@ -106,7 +118,7 @@ export class TestResultService {
     }
   }
 
-  static async getAverageScore(userId: string, category?: 'ANG' | 'CG' | 'LOG', testType?: 'quick' | 'practice' | 'exam'): Promise<number> {
+  static async getAverageScore(userId: string, category?: 'ANG' | 'CG' | 'LOG', testType?: 'quick' | 'practice' | 'exam', examType?: 'CM' | 'CMS' | 'CS'): Promise<number> {
     try {
       let query = supabase
         .from('test_results')
@@ -121,6 +133,10 @@ export class TestResultService {
 
       if (testType) {
         query = query.eq('test_type', testType);
+      }
+
+      if (examType) {
+        query = query.eq('exam_type', examType);
       }
 
       const { data, error } = await query;
@@ -173,10 +189,11 @@ export class TestResultService {
     userId: string,
     category: 'ANG' | 'CG' | 'LOG',
     testType: 'quick' | 'practice' | 'exam',
-    allowedTestNumbers: number[]
+    allowedTestNumbers: number[],
+    examType?: 'CM' | 'CMS' | 'CS'
   ): Promise<number> {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('test_results')
         .select('*')
         .eq('user_id', userId)
@@ -184,6 +201,12 @@ export class TestResultService {
         .eq('test_type', testType)
         .in('test_number', allowedTestNumbers)
         .order('created_at', { ascending: false });
+
+      if (examType) {
+        query = query.eq('exam_type', examType);
+      }
+
+      const { data, error } = await query;
 
       if (error) {
         console.error('Error fetching filtered results for average:', error);

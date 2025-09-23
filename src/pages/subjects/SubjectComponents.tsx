@@ -50,14 +50,12 @@ export const TestListItem: React.FC<{test: TestDetails, onStart: (test: TestDeta
                             {onReview && (
                                 <button onClick={() => onReview(test)} className={`flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 lg:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold rounded-lg text-white transition-all w-full sm:w-auto ${c.redo}`}>
                                     <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
-                                    <span className="hidden sm:inline">Revoir</span>
-                                    <span className="sm:hidden">Review</span>
+                                    <span>Revoir</span>
                                 </button>
                             )}
                             <button onClick={() => onStart(test)} className={`flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 lg:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold rounded-lg text-white transition-all w-full sm:w-auto ${c.redo}`}>
                                 <Repeat className="w-3 h-3 sm:w-4 sm:h-4" />
-                                <span className="hidden sm:inline">Refaire</span>
-                                <span className="sm:hidden">Redo</span>
+                                <span>Refaire</span>
                             </button>
                         </div>
                     </div>

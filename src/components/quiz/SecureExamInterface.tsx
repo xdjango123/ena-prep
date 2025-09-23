@@ -425,13 +425,19 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
       console.log(`💾 Saving to database: user=${user.id}, examType=${userExamType}, examNumber=${examId}, score=${overallScore}`);
       
       try {
+        // Convert userAnswers to Map<string, string> for the service
+        const userAnswersString = new Map<string, string>();
+        userAnswers.forEach((value, key) => {
+          userAnswersString.set(key, String(value));
+        });
+        
         const saveResult = await ExamResultService.saveExamResult(
           user.id,
           userExamType as 'CM' | 'CMS' | 'CS',
           parseInt(examId || '1'),
           overallScore,
           subjectPercentages,
-          userAnswers
+          userAnswersString
         );
         
         console.log(`💾 Save result: ${saveResult ? 'SUCCESS' : 'FAILED'}`);
@@ -667,7 +673,11 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
                     const userAnswer = userAnswers.get(question.id);
                     const isCorrect = (() => {
                       if (question.type === 'multiple-choice' && typeof question.correctAnswer === 'number') {
-                        return userAnswer === question.correctAnswer;
+                        // Convert user answer to number if it's a letter (A=0, B=1, C=2)
+                        const userAnswerIndex = typeof userAnswer === 'string' && userAnswer.length === 1 
+                          ? userAnswer.charCodeAt(0) - 65 
+                          : userAnswer;
+                        return userAnswerIndex === question.correctAnswer;
                       } else if (question.type === 'true-false') {
                         return String(userAnswer).toLowerCase() === String(question.correctAnswer).toLowerCase();
                       }
@@ -675,7 +685,14 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
                     })();
 
                     return (
-                      <div key={question.id} className="answer-review-question">
+                      <div key={question.id} className="answer-review-question relative">
+                        {/* X Icon for incorrect or unanswered questions */}
+                        {(!userAnswer || !isCorrect) && (
+                          <div className="absolute top-4 right-4">
+                            <XCircle className="w-6 h-6 text-red-500" />
+                          </div>
+                        )}
+                        
                         {/* Question Header */}
                         <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
                           <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white ${
@@ -700,10 +717,14 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
                         {/* Question Text */}
                         <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">{question.question}</h3>
 
-                        {/* Options and Answers - Fixed Layout */}
+                        {/* Options and Answers - Use original working CSS classes */}
                         <div className="answer-review-options">
                           {question.type === 'multiple-choice' && question.options?.map((option, optionIndex) => {
-                            const isUserAnswer = userAnswer === optionIndex;
+                            // Convert user answer to number if it's a letter (A=0, B=1, C=2)
+                            const userAnswerIndex = typeof userAnswer === 'string' && userAnswer.length === 1 
+                              ? userAnswer.charCodeAt(0) - 65 
+                              : userAnswer;
+                            const isUserAnswer = userAnswerIndex === optionIndex;
                             const isCorrectAnswer = question.correctAnswer === optionIndex;
                             
                             let optionClass = 'answer-review-option ';
@@ -762,10 +783,26 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
                           })}
                         </div>
 
+                        {/* User Answer Summary - Clean Layout */}
+                        <div className="answer-summary">
+                          <div className="text-sm">
+                            <span className="text-gray-600">Votre réponse:</span>
+                            <span className={`ml-2 font-medium ${isCorrect ? 'text-green-600' : 'text-red-600'}`}>
+                              {userAnswer ? 
+                                (question.type === 'multiple-choice' ? 
+                                  String.fromCharCode(65 + (typeof userAnswer === 'string' && userAnswer.length === 1 ? userAnswer.charCodeAt(0) - 65 : Number(userAnswer))) + ': ' + question.options?.[typeof userAnswer === 'string' && userAnswer.length === 1 ? userAnswer.charCodeAt(0) - 65 : Number(userAnswer)] :
+                                  userAnswer
+                                ) : 
+                                'Pas de réponse'
+                              }
+                            </span>
+                          </div>
+                        </div>
+
                         {/* Explanation if available */}
                         {question.explanation && (
-                          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                            <h4 className="font-semibold text-blue-900 mb-2">Explication:</h4>
+                          <div className="bg-blue-50 rounded-lg p-4">
+                            <h4 className="font-medium text-blue-900 mb-2">Explication:</h4>
                             <p className="text-blue-800 text-sm">{question.explanation}</p>
                           </div>
                         )}

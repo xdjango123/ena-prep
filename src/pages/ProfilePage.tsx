@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { useNavigate } from 'react-router-dom';
 import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
 import { Container } from '../components/ui/Container';
 import { Button } from '../components/ui/Button';
@@ -9,6 +10,7 @@ import { Input } from '../components/ui/Input';
 import { PasswordInput } from '../components/ui/PasswordInput';
 import { Label } from '../components/ui/Label';
 import PlanSelectionModal from '../components/modals/PlanSelectionModal';
+import WelcomeBackModal from '../components/modals/WelcomeBackModal';
 import { motion } from 'framer-motion';
 import { 
   User, 
@@ -26,7 +28,8 @@ import {
   CheckCircle,
   Eye,
   EyeOff,
-  Clock
+  Clock,
+  Plus
 } from 'lucide-react';
 
 // Validation schemas
@@ -51,7 +54,8 @@ type EmailFormValues = z.infer<typeof emailSchema>;
 type PasswordFormValues = z.infer<typeof passwordSchema>;
 
 const ProfilePage: React.FC = () => {
-  const { user, profile, subscription, updateProfile, updateEmail, updatePassword } = useSupabaseAuth();
+  const navigate = useNavigate();
+  const { user, profile, subscription, userSubscriptions, selectedExamType, isSubscriptionActive, subscriptionExpired, updateProfile, updateEmail, updatePassword, setSelectedExamType, cancelSubscription } = useSupabaseAuth();
   const [activeTab, setActiveTab] = useState<'profile' | 'billing'>('profile');
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -68,11 +72,25 @@ const ProfilePage: React.FC = () => {
   // Plan selection modal
   const [showPlanModal, setShowPlanModal] = useState(false);
   
-  const userName = profile ? `${profile['First Name']} ${profile['Last Name']}` : user?.email || 'Utilisateur';
+  // Welcome back modal
+  const [showWelcomeBackModal, setShowWelcomeBackModal] = useState(false);
+  const [renewedPlans, setRenewedPlans] = useState<string[]>([]);
+  
+  // Plan switching
+  const [isSwitchingPlan, setIsSwitchingPlan] = useState(false);
+  const [planSwitchMessage, setPlanSwitchMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const [planAddedMessage, setPlanAddedMessage] = useState<string | null>(null);
+  
+  // Plan cancellation
+  const [isCancellingPlan, setIsCancellingPlan] = useState(false);
+  const [planToCancel, setPlanToCancel] = useState<string | null>(null);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  
+  const userName = profile ? `${profile.first_name} ${profile.last_name}` : user?.email || 'Utilisateur';
   
   const [editForm, setEditForm] = useState({
-    firstName: profile?.['First Name'] || '',
-    lastName: profile?.['Last Name'] || '',
+    firstName: profile?.first_name || '',
+    lastName: profile?.last_name || '',
     email: user?.email || '',
     phone: '',
     address: '',
@@ -94,14 +112,72 @@ const ProfilePage: React.FC = () => {
     resolver: zodResolver(passwordSchema)
   });
 
+  const handlePlansAdded = (planNames: string[]) => {
+    setPlanAddedMessage(`${planNames.join(', ')} ajouté(s) avec succès!`);
+    // Clear message after 5 seconds
+    setTimeout(() => setPlanAddedMessage(null), 5000);
+  };
+
+  const handleAccountRenewed = (planNames: string[]) => {
+    setRenewedPlans(planNames);
+    setShowWelcomeBackModal(true);
+  };
+
+  const handleWelcomeBackClose = () => {
+    setShowWelcomeBackModal(false);
+    navigate('/dashboard');
+  };
+
+  const handleSwitchPlan = async (examType: 'CM' | 'CMS' | 'CS') => {
+    setIsSwitchingPlan(true);
+    setPlanSwitchMessage(null);
+    
+    try {
+      const { error } = await setSelectedExamType(examType);
+      if (error) {
+        setPlanSwitchMessage({ type: 'error', text: error.message });
+      } else {
+        setPlanSwitchMessage({ type: 'success', text: 'Plan changé avec succès!' });
+        // Clear message after 3 seconds
+        setTimeout(() => setPlanSwitchMessage(null), 3000);
+      }
+    } catch (error) {
+      setPlanSwitchMessage({ type: 'error', text: 'Erreur lors du changement de plan' });
+    } finally {
+      setIsSwitchingPlan(false);
+    }
+  };
+
+  const handleCancelPlan = async (examType: 'CM' | 'CMS' | 'CS') => {
+    setIsCancellingPlan(true);
+    setPlanSwitchMessage(null);
+    
+    try {
+      const { error } = await cancelSubscription(examType);
+      if (error) {
+        setPlanSwitchMessage({ type: 'error', text: error.message });
+      } else {
+        setPlanSwitchMessage({ type: 'success', text: 'Plan annulé avec succès!' });
+        // Clear message after 3 seconds
+        setTimeout(() => setPlanSwitchMessage(null), 3000);
+      }
+    } catch (error) {
+      setPlanSwitchMessage({ type: 'error', text: 'Erreur lors de l\'annulation du plan' });
+    } finally {
+      setIsCancellingPlan(false);
+      setShowCancelConfirm(false);
+      setPlanToCancel(null);
+    }
+  };
+
   const handleSaveProfile = async () => {
     setIsSaving(true);
     setSaveMessage(null);
 
     try {
       const { error } = await updateProfile({
-        'First Name': editForm.firstName,
-        'Last Name': editForm.lastName
+        first_name: editForm.firstName,
+        last_name: editForm.lastName
       });
 
       if (error) {
@@ -198,8 +274,8 @@ const ProfilePage: React.FC = () => {
                 onClick={() => {
                   setIsEditing(false);
                   setEditForm({
-                    firstName: profile?.['First Name'] || '',
-                    lastName: profile?.['Last Name'] || '',
+                    firstName: profile?.first_name || '',
+                    lastName: profile?.last_name || '',
                     email: user?.email || '',
                     phone: '',
                     address: '',
@@ -243,7 +319,7 @@ const ProfilePage: React.FC = () => {
               />
             ) : (
               <div className="mt-1 p-3 bg-gray-50 rounded-lg text-gray-900">
-                {profile?.['First Name'] || 'Non renseigné'}
+                {profile?.first_name || 'Non renseigné'}
               </div>
             )}
           </div>
@@ -259,7 +335,7 @@ const ProfilePage: React.FC = () => {
               />
             ) : (
               <div className="mt-1 p-3 bg-gray-50 rounded-lg text-gray-900">
-                {profile?.['Last Name'] || 'Non renseigné'}
+                {profile?.last_name || 'Non renseigné'}
               </div>
             )}
           </div>
@@ -280,12 +356,6 @@ const ProfilePage: React.FC = () => {
             </div>
           </div>
 
-          <div className="md:col-span-2">
-            <Label>Type d'examen</Label>
-            <div className="mt-1 p-3 bg-gray-50 rounded-lg text-gray-900">
-              {profile?.exam_type ? `Concours ${profile.exam_type}` : 'Non renseigné'}
-            </div>
-          </div>
         </div>
       </div>
 
@@ -314,56 +384,167 @@ const ProfilePage: React.FC = () => {
   const renderBillingTab = () => (
     <div className="space-y-6">
       <div className="bg-white rounded-xl shadow-md p-6">
-        <h3 className="text-xl font-semibold text-gray-800 mb-6">Abonnement actuel</h3>
+        <h3 className="text-xl font-semibold text-gray-800 mb-6">Concours</h3>
         
-        {subscription ? (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-              <div>
-                <h4 className="font-medium text-gray-900">Plan actuel</h4>
-                <p className="text-sm text-gray-600">{subscription.plan_name}</p>
-              </div>
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                isAccountExpired(subscription.end_date)
-                  ? 'bg-red-100 text-red-800'
-                  : 'bg-green-100 text-green-800'
-              }`}>
-                {isAccountExpired(subscription.end_date) ? 'Expiré' : 'Actif'}
-              </span>
+        <div className="space-y-4">
+          {planAddedMessage && (
+            <div className="p-3 rounded-lg text-sm bg-green-50 text-green-700 border border-green-200">
+              {planAddedMessage}
             </div>
-            
-            {subscription.end_date && (
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Calendar className="w-4 h-4" />
-                <span>
-                  {isAccountExpired(subscription.end_date) 
-                    ? `Expiré le ${new Date(subscription.end_date).toLocaleDateString('fr-FR')}`
-                    : `Expire le ${new Date(subscription.end_date).toLocaleDateString('fr-FR')}`
+          )}
+          
+          {planSwitchMessage && (
+            <div className={`p-3 rounded-lg text-sm ${
+              planSwitchMessage.type === 'success' 
+                ? 'bg-green-50 text-green-700 border border-green-200' 
+                : 'bg-red-50 text-red-700 border border-red-200'
+            }`}>
+              {planSwitchMessage.text}
+            </div>
+          )}
+          
+          {userSubscriptions.length > 0 ? (
+            <div className="space-y-3">
+              {userSubscriptions
+                .filter(sub => sub.is_active)
+                .reduce((unique, subscription) => {
+                  // Deduplicate by plan_name to prevent showing duplicate plans
+                  const existing = unique.find(sub => sub.plan_name === subscription.plan_name);
+                  
+                  if (!existing) {
+                    unique.push(subscription);
                   }
-                </span>
-              </div>
-            )}
+                  
+                  return unique;
+                }, [] as typeof userSubscriptions)
+                .map((subscription) => {
+                  const examType = subscription.plan_name.includes('CMS') ? 'CMS' : 
+                                  subscription.plan_name.includes('CS') ? 'CS' : 
+                                  subscription.plan_name.includes('CM') ? 'CM' : 'CM';
+                  const isSelected = selectedExamType === examType;
+                  const isExpired = isAccountExpired(subscription.end_date);
+                  
+                  return (
+                    <div
+                      key={subscription.id}
+                      className={`p-4 rounded-lg border-2 transition-all ${
+                        isSelected
+                          ? 'border-primary-500 bg-primary-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-3 h-3 rounded-full ${
+                            isSelected ? 'bg-primary-500' : 'bg-gray-300'
+                          }`} />
+                          <div>
+                            <p className="font-medium text-gray-900">{subscription.plan_name}</p>
+                            <p className="text-sm text-gray-600">Concours {examType}</p>
+                            {subscription.end_date && (
+                              <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
+                                <Calendar className="w-3 h-3" />
+                                <span>
+                                  {isExpired 
+                                    ? `Expiré le ${new Date(subscription.end_date).toLocaleDateString('fr-FR')}`
+                                    : `Expire le ${new Date(subscription.end_date).toLocaleDateString('fr-FR')}`
+                                  }
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                            isExpired
+                              ? 'bg-red-100 text-red-800'
+                              : isSelected
+                              ? 'bg-primary-100 text-primary-700'
+                              : 'bg-green-100 text-green-800'
+                          }`}>
+                            {isExpired ? 'Expiré' : isSelected ? 'Actuel' : 'Actif'}
+                          </span>
+                          {!isExpired && !isSelected && (
+                            <button
+                              onClick={() => handleSwitchPlan(examType as 'CM' | 'CMS' | 'CS')}
+                              disabled={isSwitchingPlan}
+                              className="px-4 py-2 rounded-lg text-sm font-medium transition-colors bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {isSwitchingPlan ? 'Changement...' : 'Activer'}
+                            </button>
+                          )}
+                          {(() => {
+                            // Only show cancel button if user has more than 1 active concour
+                            const activeConcours = userSubscriptions.filter(sub => sub.is_active).length;
+                            if (activeConcours > 1 && !isExpired) {
+                              return (
+                                <button
+                                  onClick={() => {
+                                    setPlanToCancel(examType);
+                                    setShowCancelConfirm(true);
+                                  }}
+                                  disabled={isCancellingPlan}
+                                  className="px-3 py-1 rounded-lg text-sm font-medium transition-colors bg-red-100 text-red-700 hover:bg-red-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                  Annuler
+                                </button>
+                              );
+                            }
+                            return null;
+                          })()}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+          ) : (
+            <div className="p-3 bg-gray-50 rounded-lg text-gray-500 text-center">
+              Aucun concours disponible
+            </div>
+          )}
+          
+          {(() => {
+            // Check if user has all 3 exam types
+            const userExamTypes = userSubscriptions
+              .filter(sub => sub.is_active)
+              .map(sub => {
+                if (sub.plan_name.includes('CM')) return 'CM';
+                if (sub.plan_name.includes('CMS')) return 'CMS';
+                if (sub.plan_name.includes('CS')) return 'CS';
+                return null;
+              })
+              .filter((examType, index, arr) => examType && arr.indexOf(examType) === index);
+
+            const hasAllExamTypes = userExamTypes.length >= 3;
             
-            <button
-              onClick={() => setShowPlanModal(true)}
-              className="w-full sm:w-auto px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
-            >
-              Choisir un plan
-            </button>
-          </div>
-        ) : (
-          <div className="text-center py-8">
-            <Award className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h4 className="text-lg font-medium text-gray-900 mb-2">Aucun abonnement actif</h4>
-            <p className="text-gray-600 mb-6">Choisissez un plan pour commencer votre préparation</p>
-            <button
-              onClick={() => setShowPlanModal(true)}
-              className="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
-            >
-              Choisir un plan
-            </button>
-          </div>
-        )}
+            // Only show add button if user doesn't have all exam types or if account is expired
+            if (!hasAllExamTypes || subscriptionExpired) {
+              return (
+                <button
+                  onClick={() => setShowPlanModal(true)}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-primary-400 hover:text-primary-600 transition-colors"
+                >
+                  <Plus className="w-5 h-5" />
+                  Ajouter un concour
+                </button>
+              );
+            }
+            
+            return (
+              <div className="text-center py-4">
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <div className="text-green-800 font-medium mb-1">
+                    🎉 Félicitations !
+                  </div>
+                  <div className="text-green-700 text-sm">
+                    Vous avez accès à tous les concours disponibles
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+        </div>
       </div>
     </div>
   );
@@ -532,8 +713,51 @@ const ProfilePage: React.FC = () => {
       <PlanSelectionModal
         isOpen={showPlanModal}
         onClose={() => setShowPlanModal(false)}
-        currentExamType={profile?.exam_type || undefined}
+        currentExamTypes={profile?.plan_name ? [profile.plan_name] : []}
+        userSubscriptions={userSubscriptions}
+        onPlansAdded={handlePlansAdded}
+        onAccountRenewed={handleAccountRenewed}
+        isAccountExpired={subscriptionExpired}
       />
+
+      {/* Welcome Back Modal */}
+      <WelcomeBackModal
+        isOpen={showWelcomeBackModal}
+        onClose={handleWelcomeBackClose}
+        planNames={renewedPlans}
+        userName={userName}
+      />
+
+      {/* Cancellation Confirmation Modal */}
+      {showCancelConfirm && planToCancel && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Confirmer l'annulation</h3>
+            <p className="text-gray-600 mb-6">
+              Êtes-vous sûr de vouloir annuler l'accès au concour {planToCancel} ? 
+              Cette action est irréversible et vous perdrez immédiatement l'accès au contenu de ce concour.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowCancelConfirm(false);
+                  setPlanToCancel(null);
+                }}
+                className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={() => handleCancelPlan(planToCancel as 'CM' | 'CMS' | 'CS')}
+                disabled={isCancellingPlan}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
+              >
+                {isCancellingPlan ? 'Annulation...' : 'Confirmer'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

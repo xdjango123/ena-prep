@@ -14,7 +14,6 @@ import {
   ActionButton,
   TestListItem,
   FilterPill,
-  RecommendationBanner
 } from './subjects/SubjectComponents';
 import { SubjectHeader } from '../components/SubjectHeader';
 
@@ -50,10 +49,9 @@ const quizzes = [
 ];
 
 const lastTest = { name: 'Test Pratique 2', completed: 15, total: 20 };
-const recommendation = "You've mastered Vocabulary! Next, focus on Reading Comprehension.";
 
 export default function EnglishSubjectPage() {
-  const { profile, user } = useSupabaseAuth();
+	const { profile, user, selectedExamType } = useSupabaseAuth();
   const [view, setView] = useState<'main' | 'summary' | 'quiz' | 'review' | 'learn' | 'results'>('main');
   const [activeSection, setActiveSection] = useState<'practice' | 'quiz' | null>('quiz');
   const [selectedTest, setSelectedTest] = useState<TestDetails | null>(null);
@@ -72,32 +70,51 @@ export default function EnglishSubjectPage() {
     testsTaken: 0,
     timeSpent: 0
   });
+  const [isLoadingStatistics, setIsLoadingStatistics] = useState(false);
 
   // Load test results from database
   useEffect(() => {
     const loadTestResults = async () => {
       if (!user?.id) return;
+      
       try {
-        const attempts = await UserAttemptService.getUserAttemptsByCategory(user.id, 'ANG');
+        // Build allowed test pratique numbers from the local definition
         const allowedNumbers = practiceTests.map(t => parseInt(t.id.replace('p', '')));
-        const practiceAttempts = attempts.filter(a => a.test_type === 'practice' && a.test_number !== null && allowedNumbers.includes(a.test_number as number));
+        
+        // Get test results from test_results table (consistent with other pages)
+        const attempts = await TestResultService.getTestResultsByCategory(user.id, 'ANG', 'practice', selectedExamType || 'CM'); // Practice tests now include exam_type
+        const filteredAttempts = attempts.filter(attempt => 
+          attempt.test_number && 
+          allowedNumbers.includes(attempt.test_number)
+        );
+        
         const results: Record<string, { score: number; timeSpent: number }> = {};
         const latestScores = new Map<number, number>();
-        practiceAttempts.forEach(a => {
-          if (a.test_number && a.score !== null && !latestScores.has(a.test_number)) {
-            latestScores.set(a.test_number, a.score);
+        
+        // Get the latest score for each test number (data is already ordered by created_at desc)
+        filteredAttempts.forEach(attempt => {
+          if (attempt.test_number && attempt.score !== null && !latestScores.has(attempt.test_number)) {
+            latestScores.set(attempt.test_number, attempt.score);
           }
         });
+        
+        // Create results object with latest scores
         latestScores.forEach((score, testNumber) => {
-          results[`p${testNumber}`] = { score, timeSpent: 15 };
+          const testId = `p${testNumber}`;
+          results[testId] = {
+            score: score,
+            timeSpent: 15 // Assuming 15 minutes per test
+          };
         });
+        
         setTestResults(results);
       } catch (error) {
         console.error('Error loading test results:', error);
       }
     };
+
     loadTestResults();
-  }, [user?.id]);
+  }, [user?.id, selectedExamType]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -113,45 +130,98 @@ export default function EnglishSubjectPage() {
   useEffect(() => {
     const fetchStatistics = async () => {
       if (!user?.id) return;
+      
+      setIsLoadingStatistics(true);
       try {
         const allowedNumbers = practiceTests.map(t => parseInt(t.id.replace('p', '')));
-        const score = await TestResultService.getAverageScoreForTestNumbers(user.id, 'ANG', 'practice', allowedNumbers);
-        const attempts = await UserAttemptService.getUserAttemptsByCategory(user.id, 'ANG');
-        const practiceAttempts = attempts.filter(a => a.test_type === 'practice' && a.test_number !== null && allowedNumbers.includes(a.test_number as number));
-        const testsTaken = new Set(practiceAttempts.map(a => a.test_number as number)).size;
-        const timeSpent = Math.round(testsTaken * 15 / 60);
-        setStatistics({ score, testsTaken, timeSpent });
+        
+        // Get average score for ANG category from test_results table, filtered by allowed tests
+        const score = await TestResultService.getAverageScoreForTestNumbers(
+          user.id,
+          'ANG',
+          'practice',
+          allowedNumbers,
+          selectedExamType || 'CM' // Practice tests now include exam_type
+        );
+        
+        // Get test count for ANG category from test_results table
+        const attempts = await TestResultService.getTestResultsByCategory(user.id, 'ANG', 'practice', selectedExamType || 'CM'); // Practice tests now include exam_type
+        const filteredAttempts = attempts.filter(attempt => 
+          attempt.test_number && 
+          allowedNumbers.includes(attempt.test_number)
+        );
+        const uniqueTests = new Set(filteredAttempts.map(a => a.test_number));
+        const testsTaken = uniqueTests.size;
+        
+        // Calculate time spent (assuming 15 minutes per test for now)
+        const timeSpent = Math.round(testsTaken * 15 / 60); // Convert to hours
+        
+        setStatistics({
+          score,
+          testsTaken,
+          timeSpent
+        });
       } catch (error) {
         console.error('Error fetching statistics:', error);
+      } finally {
+        setIsLoadingStatistics(false);
       }
     };
     fetchStatistics();
-  }, [user?.id]);
+  }, [user?.id, selectedExamType]);
 
-  // Function to refresh statistics
+  // Function to refresh statistics (same logic as fetchStatistics)
   const refreshStatistics = async () => {
     if (!user?.id) return;
+    
+    setIsLoadingStatistics(true);
     try {
       const allowedNumbers = practiceTests.map(t => parseInt(t.id.replace('p', '')));
-      const score = await TestResultService.getAverageScoreForTestNumbers(user.id, 'ANG', 'practice', allowedNumbers);
-      const attempts = await UserAttemptService.getUserAttemptsByCategory(user.id, 'ANG');
-      const practiceAttempts = attempts.filter(a => a.test_type === 'practice' && a.test_number !== null && allowedNumbers.includes(a.test_number as number));
-      const testsTaken = new Set(practiceAttempts.map(a => a.test_number as number)).size;
-      const timeSpent = Math.round(testsTaken * 15 / 60);
-      setStatistics({ score, testsTaken, timeSpent });
+      
+      // Get average score for ANG category from test_results table, filtered by allowed tests
+      const score = await TestResultService.getAverageScoreForTestNumbers(
+        user.id,
+        'ANG',
+        'practice',
+        allowedNumbers,
+        selectedExamType || undefined
+      );
+      
+      // Get test count for ANG category from test_results table
+      const attempts = await TestResultService.getTestResultsByCategory(user.id, 'ANG', 'practice', selectedExamType || undefined);
+      const filteredAttempts = attempts.filter(attempt => 
+        attempt.test_number && 
+        allowedNumbers.includes(attempt.test_number)
+      );
+      const uniqueTests = new Set(filteredAttempts.map(a => a.test_number));
+      const testsTaken = uniqueTests.size;
+      
+      // Calculate time spent (assuming 15 minutes per test for now)
+      const timeSpent = Math.round(testsTaken * 15 / 60); // Convert to hours
+      
+      setStatistics({
+        score,
+        testsTaken,
+        timeSpent
+      });
+      
+      // Also refresh individual test results - get latest score for each allowed test
       const results: Record<string, { score: number; timeSpent: number }> = {};
       const latestScores = new Map<number, number>();
-      practiceAttempts.forEach(a => {
-        if (a.test_number && a.score !== null && !latestScores.has(a.test_number)) {
-          latestScores.set(a.test_number, a.score);
+      filteredAttempts.forEach(attempt => {
+        if (attempt.test_number && attempt.score !== null && !latestScores.has(attempt.test_number)) {
+          latestScores.set(attempt.test_number, attempt.score);
         }
       });
       latestScores.forEach((score, testNumber) => {
-        results[`p${testNumber}`] = { score, timeSpent: 15 };
+        const testId = `p${testNumber}`;
+        results[testId] = { score, timeSpent: 15 };
       });
       setTestResults(results);
     } catch (error) {
       console.error('Error refreshing statistics:', error);
+    } finally {
+      setIsLoadingStatistics(false);
     }
   };
 
@@ -160,7 +230,7 @@ export default function EnglishSubjectPage() {
     const loadQuestions = async () => {
       setIsLoadingQuestions(true);
       try {
-        const loadedQuestions = await getQuestionsBySubject('english', profile?.exam_type as 'CM' | 'CMS' | 'CS');
+        const loadedQuestions = await getQuestionsBySubject('english', selectedExamType || 'CM');
         setQuestions(loadedQuestions.slice(0, 10));
       } catch (error) {
         console.error('Error loading questions:', error);
@@ -170,12 +240,12 @@ export default function EnglishSubjectPage() {
       }
     };
     loadQuestions();
-  }, [profile?.exam_type]);
+  }, [selectedExamType]);
 
   const loadQuestionsForTest = async (testNumber: number) => {
     setIsLoadingQuestions(true);
     try {
-      const loadedQuestions = await getQuestionsBySubject('english', profile?.exam_type as 'CM' | 'CMS' | 'CS', testNumber);
+      const loadedQuestions = await getQuestionsBySubject('english', selectedExamType || 'CM', testNumber);
       setQuestions(loadedQuestions.slice(0, 10));
     } catch (error) {
       console.error('Error loading questions:', error);
@@ -303,7 +373,8 @@ export default function EnglishSubjectPage() {
                 'practice',
                 'ANG',
                 score,
-                parseInt(selectedTest.id.replace('p', ''))
+                parseInt(selectedTest.id.replace('p', '')),
+                selectedExamType || 'CM' // Include exam_type for practice tests
               );
               const testData = {
                 questions: questions,
@@ -399,9 +470,9 @@ export default function EnglishSubjectPage() {
       <SubjectHeader 
         subjectName="Anglais"
         icon={Languages}
-        score={statistics.score}
-        testsTaken={statistics.testsTaken}
-        timeSpent={statistics.timeSpent}
+        score={isLoadingStatistics ? 0 : statistics.score}
+        testsTaken={isLoadingStatistics ? 0 : statistics.testsTaken}
+        timeSpent={isLoadingStatistics ? 0 : statistics.timeSpent}
         gradientFrom="from-green-500"
         gradientTo="to-green-600"
       />
@@ -435,7 +506,6 @@ export default function EnglishSubjectPage() {
             </div>
           </div>
 
-          <RecommendationBanner recommendation={recommendation} />
         </div>
       )}
 

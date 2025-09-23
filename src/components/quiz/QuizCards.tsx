@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getQuestionsBySubject } from '../../data/quizQuestions';
 import { ChevronLeft, ChevronRight, X, Repeat, Trophy } from 'lucide-react';
 import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
+import { QuizSeriesResult } from './QuizSeriesResult';
 
 // Updated Question interface to include passages
 interface Question {
@@ -38,6 +39,7 @@ const QuestionCard: React.FC<{
     const [selectedOption, setSelectedOption] = useState<string|number|null>(null);
     // Use userAnswer to determine if question has been answered
     const hasAnswered = userAnswer !== null;
+    const hasSelectedAnswer = selectedOption !== null;
 
     // Debug logging removed for cleaner code
 
@@ -60,7 +62,14 @@ const QuestionCard: React.FC<{
 
     const handleOptionClick = (option: string | number) => {
         setSelectedOption(option);
-        onAnswer(option);
+        // Don't automatically call onAnswer - wait for submit button
+    };
+
+    const handleSubmit = () => {
+        if (selectedOption !== null) {
+            onAnswer(selectedOption);
+            toggleFlip(); // Automatically flip after submit
+        }
     };
 
     const getDisplayCorrectAnswer = () => {
@@ -81,7 +90,7 @@ const QuestionCard: React.FC<{
 
     if (isFlipped) {
         return (
-            <div className="w-full h-full bg-white rounded-xl shadow-lg p-6 cursor-pointer" onClick={toggleFlip}>
+            <div className="w-full h-full bg-white rounded-xl shadow-lg p-6">
                 <div className="h-full flex flex-col justify-between">
                     <div>
                         <div className="flex items-center justify-between mb-4">
@@ -200,9 +209,9 @@ const QuestionCard: React.FC<{
                                 <p className="text-gray-600 text-sm lg:text-base">{question.explanation}</p>
                             </div>
                             
-                            {/* Click anywhere on the back of the card to flip back; CTA removed per UX */}
+                            {/* Card is locked after submission - no flip back allowed */}
                             <p className="text-sm text-gray-500 mt-4">
-                                Cliquez n'importe où sur la carte pour revenir
+                                Réponse soumise - Continuez avec les autres questions
                             </p>
                         </div>
                     </div>
@@ -212,7 +221,7 @@ const QuestionCard: React.FC<{
     }
 
     return (
-        <div className="w-full h-full bg-white rounded-xl shadow-lg p-6 cursor-pointer" onClick={toggleFlip}>
+        <div className="w-full h-full bg-white rounded-xl shadow-lg p-6">
             <div className="h-full flex flex-col justify-between">
                 <div>
                     <div className="flex items-center justify-between mb-4">
@@ -245,9 +254,15 @@ const QuestionCard: React.FC<{
                                 key={index}
                                 onClick={(e) => {
                                     e.stopPropagation();
+                                    if (!hasAnswered) {
                                     handleOptionClick(index);
+                                    }
                                 }}
-                                className={`p-3 rounded-lg border-2 cursor-pointer transition-colors ${
+                                className={`p-3 rounded-lg border-2 transition-colors ${
+                                    hasAnswered 
+                                        ? 'cursor-not-allowed opacity-60'
+                                        : 'cursor-pointer'
+                                } ${
                                     selectedOption === index || userAnswer === index
                                         ? colors.activeOption
                                         : 'bg-gray-50 border-gray-200 hover:border-gray-300'
@@ -269,9 +284,15 @@ const QuestionCard: React.FC<{
                                     key={option}
                                     onClick={(e) => {
                                         e.stopPropagation();
+                                        if (!hasAnswered) {
                                         handleOptionClick(answerValue);
+                                        }
                                     }}
-                                    className={`p-3 rounded-lg border-2 cursor-pointer transition-colors ${
+                                    className={`p-3 rounded-lg border-2 transition-colors ${
+                                        hasAnswered 
+                                            ? 'cursor-not-allowed opacity-60'
+                                            : 'cursor-pointer'
+                                    } ${
                                         selectedOption === answerValue || userAnswer === answerValue
                                             ? colors.activeOption
                                             : 'bg-gray-50 border-gray-200 hover:border-gray-300'
@@ -290,9 +311,18 @@ const QuestionCard: React.FC<{
                 </div>
                 
                 <div className="mt-6 text-center">
+                    {hasSelectedAnswer && !hasAnswered ? (
+                        <button
+                            onClick={handleSubmit}
+                            className={`w-full px-6 py-3 rounded-lg text-white font-semibold transition-colors ${colors.button}`}
+                        >
+                            Soumettre
+                        </button>
+                    ) : (
                     <p className="text-sm text-gray-500">
-                        Cliquez sur une réponse puis sur la carte pour voir la correction
+                            Cliquez sur une réponse puis sur Soumettre pour voir la correction
                     </p>
+                    )}
                 </div>
             </div>
         </div>
@@ -308,6 +338,7 @@ export const QuizCards: React.FC<QuizCardsProps> = ({ subject, subjectColor, onE
     const [userAnswers, setUserAnswers] = useState<Map<number, string | number>>(new Map());
     const [answeredQuestions, setAnsweredQuestions] = useState<Set<number>>(new Set());
     const [isCompleted, setIsCompleted] = useState(false);
+    const [startTime, setStartTime] = useState<number>(Date.now());
 
     const { profile } = useSupabaseAuth();
 
@@ -332,7 +363,7 @@ export const QuizCards: React.FC<QuizCardsProps> = ({ subject, subjectColor, onE
                     subjectLower = subject.toLowerCase().replace(' ', '-');
                 }
                 
-                const examType = profile?.exam_type as 'CM' | 'CMS' | 'CS' | undefined;
+                const examType = profile?.plan_name as 'CM' | 'CMS' | 'CS' | undefined;
                 console.log('🎯 QuizCards: Mapped subject:', subjectLower);
                 console.log('🎯 QuizCards: Exam type:', examType);
                 
@@ -359,7 +390,7 @@ export const QuizCards: React.FC<QuizCardsProps> = ({ subject, subjectColor, onE
             }
         };
         fetchQuestions();
-    }, [subject, profile?.exam_type]);
+    }, [subject, profile?.plan_name]);
 
     const colorClasses = {
         blue: {
@@ -414,6 +445,7 @@ export const QuizCards: React.FC<QuizCardsProps> = ({ subject, subjectColor, onE
         setUserAnswers(new Map());
         setAnsweredQuestions(new Set());
         setIsCompleted(false);
+        setStartTime(Date.now());
     };
 
     const currentQuestion = questions[currentQuestionIndex];
@@ -483,40 +515,20 @@ export const QuizCards: React.FC<QuizCardsProps> = ({ subject, subjectColor, onE
         }, 0);
         
         const score = Math.round((correctAnswers / questions.length) * 100);
+        const timeSpent = Math.floor((Date.now() - startTime) / 1000);
 
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="bg-white rounded-xl shadow-lg p-8 max-w-md w-full mx-4">
-                    <div className="text-center">
-                        <Trophy className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
-                        <h2 className="text-2xl font-bold text-gray-900 mb-2">Quiz Terminé !</h2>
-                        <p className="text-gray-600 mb-6">Voici vos résultats</p>
-                        
-                        <div className="bg-gray-50 rounded-lg p-4 mb-6">
-                            <div className="text-3xl font-bold text-blue-600 mb-2">{score}%</div>
-                            <div className="text-gray-600">
-                                {correctAnswers} sur {questions.length} questions correctes
-                            </div>
-                        </div>
-                        
-                        <div className="space-y-3">
-                            <button
-                                onClick={resetQuiz}
-                                className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                            >
-                                <Repeat className="w-4 h-4" />
-                                Recommencer
-                            </button>
-                            <button
-                                onClick={onExit}
-                                className="w-full px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
-                            >
-                                Retour au menu
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <QuizSeriesResult
+                score={score}
+                totalQuestions={questions.length}
+                correctAnswers={correctAnswers}
+                timeSpent={timeSpent}
+                onRedo={resetQuiz}
+                onExit={onExit}
+                subjectColor={subjectColor}
+                questions={questions}
+                userAnswers={userAnswers}
+            />
         );
     }
 
@@ -555,7 +567,19 @@ export const QuizCards: React.FC<QuizCardsProps> = ({ subject, subjectColor, onE
 
             {/* Main Content */}
             <div className="max-w-4xl mx-auto px-4 py-8">
-                <div className="mb-8">
+                {/* Mobile Layout: Overlay Navigation */}
+                <div className="relative mb-8">
+                    {/* Previous Button - Overlay Left */}
+                    <button
+                        onClick={prevQuestion}
+                        disabled={currentQuestionIndex === 0}
+                        className="absolute left-1 top-1/2 transform -translate-y-1/2 z-10 flex sm:hidden items-center justify-center w-8 h-8 rounded-full text-gray-600 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors bg-white shadow-md border"
+                    >
+                        <ChevronLeft className="w-4 h-4" />
+                    </button>
+
+                    {/* Question Card - Full Width */}
+                    <div className="w-full">
                     <QuestionCard
                         question={currentQuestion}
                         isFlipped={flippedCards.has(currentQuestion.id)}
@@ -566,8 +590,88 @@ export const QuizCards: React.FC<QuizCardsProps> = ({ subject, subjectColor, onE
                     />
                 </div>
 
-                {/* Navigation */}
-                <div className="flex items-center justify-between">
+                    {/* Next/Terminer Button - Overlay Right */}
+                    <div className="absolute right-1 top-1/2 transform -translate-y-1/2 z-10 flex sm:hidden">
+                        {currentQuestionIndex === questions.length - 1 ? (
+                            <button
+                                onClick={() => setIsCompleted(true)}
+                                className="flex items-center justify-center w-8 h-8 rounded-full text-white font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 shadow-md"
+                                style={{
+                                    backgroundColor: subjectColor === 'blue' ? '#3b82f6' : 
+                                                   subjectColor === 'green' ? '#10b981' : 
+                                                   subjectColor === 'yellow' ? '#eab308' : '#3b82f6',
+                                    border: 'none',
+                                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                                    opacity: 1,
+                                    zIndex: 10
+                                }}
+                                onMouseEnter={(e) => {
+                                    const currentBg = e.currentTarget.style.backgroundColor;
+                                    if (currentBg === 'rgb(59, 130, 246)') e.currentTarget.style.backgroundColor = '#2563eb';
+                                    else if (currentBg === 'rgb(16, 185, 129)') e.currentTarget.style.backgroundColor = '#059669';
+                                    else if (currentBg === 'rgb(234, 179, 8)') e.currentTarget.style.backgroundColor = '#d97706';
+                                }}
+                                onMouseLeave={(e) => {
+                                    const originalBg = subjectColor === 'blue' ? '#3b82f6' : 
+                                                     subjectColor === 'green' ? '#10b981' : 
+                                                     subjectColor === 'yellow' ? '#eab308' : '#3b82f6';
+                                    e.currentTarget.style.backgroundColor = originalBg;
+                                }}
+                            >
+                                <Trophy className="w-5 h-5" />
+                            </button>
+                        ) : (
+                            <button
+                                onClick={nextQuestion}
+                                className="flex items-center justify-center w-8 h-8 rounded-full text-gray-600 hover:text-gray-800 transition-colors bg-white shadow-md border"
+                            >
+                                <ChevronRight className="w-4 h-4" />
+                            </button>
+                        )}
+                    </div>
+                </div>
+
+                {/* Pagination and Navigation Container */}
+                <div className="flex flex-col lg:block">
+                    {/* Pagination - Always visible */}
+                    <div className="flex justify-center mb-6 px-4">
+                        <div className="flex items-center gap-1 overflow-x-auto max-w-full">
+                            {questions.map((question, index) => {
+                                const userAnswer = userAnswers.get(question.id);
+                                const isAnswered = userAnswer !== null && userAnswer !== undefined;
+                                const isCorrect = (() => {
+                                    if (!isAnswered) return false;
+                                    if (question.type === 'multiple-choice' && typeof question.correctAnswer === 'number') {
+                                        return userAnswer === question.correctAnswer;
+                                    } else if (question.type === 'true-false') {
+                                        return String(userAnswer).toLowerCase() === String(question.correctAnswer).toLowerCase();
+                                    }
+                                    return userAnswer === question.correctAnswer;
+                                })();
+                                
+                                return (
+                                    <button
+                                        key={index}
+                                        onClick={() => setCurrentQuestionIndex(index)}
+                                        className={`w-7 h-7 rounded-full text-xs font-medium transition-colors flex-shrink-0 ${
+                                            index === currentQuestionIndex
+                                                ? colors.activePagination
+                                                : isAnswered
+                                                    ? isCorrect
+                                                        ? 'bg-green-500 text-white'
+                                                        : 'bg-red-500 text-white'
+                                                    : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                                        }`}
+                                    >
+                                        {index + 1}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    {/* Desktop Navigation - Bottom (Text buttons only) */}
+                    <div className="hidden sm:flex items-center justify-between">
                     <button
                         onClick={prevQuestion}
                         disabled={currentQuestionIndex === 0}
@@ -577,30 +681,47 @@ export const QuizCards: React.FC<QuizCardsProps> = ({ subject, subjectColor, onE
                         Précédent
                     </button>
 
-                    <div className="flex items-center gap-2">
-                        {questions.map((_, index) => (
-                            <button
-                                key={index}
-                                onClick={() => setCurrentQuestionIndex(index)}
-                                className={`w-8 h-8 rounded-full text-sm font-medium transition-colors ${
-                                    index === currentQuestionIndex
-                                        ? colors.activePagination
-                                        : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-                                }`}
-                            >
-                                {index + 1}
-                            </button>
-                        ))}
-                    </div>
+                        <div className="flex-1"></div>
 
+                        {currentQuestionIndex === questions.length - 1 ? (
+                            <button
+                                onClick={() => setIsCompleted(true)}
+                                className="flex items-center gap-2 px-6 py-2 rounded-lg text-white font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 shadow-lg"
+                                style={{
+                                    backgroundColor: subjectColor === 'blue' ? '#3b82f6' : 
+                                                   subjectColor === 'green' ? '#10b981' : 
+                                                   subjectColor === 'yellow' ? '#eab308' : '#3b82f6',
+                                    border: 'none',
+                                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                                    opacity: 1,
+                                    zIndex: 10
+                                }}
+                                onMouseEnter={(e) => {
+                                    const currentBg = e.currentTarget.style.backgroundColor;
+                                    if (currentBg === 'rgb(59, 130, 246)') e.currentTarget.style.backgroundColor = '#2563eb';
+                                    else if (currentBg === 'rgb(16, 185, 129)') e.currentTarget.style.backgroundColor = '#059669';
+                                    else if (currentBg === 'rgb(234, 179, 8)') e.currentTarget.style.backgroundColor = '#d97706';
+                                }}
+                                onMouseLeave={(e) => {
+                                    const originalBg = subjectColor === 'blue' ? '#3b82f6' : 
+                                                     subjectColor === 'green' ? '#10b981' : 
+                                                     subjectColor === 'yellow' ? '#eab308' : '#3b82f6';
+                                    e.currentTarget.style.backgroundColor = originalBg;
+                                }}
+                            >
+                                Terminer
+                                <Trophy className="w-4 h-4" />
+                            </button>
+                        ) : (
                     <button
                         onClick={nextQuestion}
-                        disabled={currentQuestionIndex === questions.length - 1}
-                        className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
                     >
                         Suivant
                         <ChevronRight className="w-4 h-4" />
                     </button>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

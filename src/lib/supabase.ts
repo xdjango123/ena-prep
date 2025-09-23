@@ -19,9 +19,9 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 // Database types
 export interface Profile {
   id: string
-  'First Name': string
-  'Last Name': string
-  exam_type: 'CM' | 'CMS' | 'CS' | 'ALL' | null
+  first_name: string
+  last_name: string
+  plan_name: 'CM' | 'CMS' | 'CS' | 'ALL' | null // Updated to use plan_name instead of exam_type
   email: string | null
   avatar_url: string | null
   created_at: string | null
@@ -91,5 +91,24 @@ export interface UserAttempt {
     totalQuestions: number
     timeSpent: number
   } | null
+  created_at: string
+}
+
+export interface UserPlan {
+  id: string
+  user_id: string
+  plan_name: 'Prépa CM' | 'Prépa CMS' | 'Prépa CS'
+  exam_type: 'CM' | 'CMS' | 'CS'
+  is_active: boolean
+  start_date: string
+  end_date: string
+  created_at: string
+}
+
+export interface UserExamType {
+  id: string
+  user_id: string
+  exam_type: 'CM' | 'CMS' | 'CS'
+  is_active: boolean
   created_at: string
 }

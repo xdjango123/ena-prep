@@ -18,7 +18,7 @@ export const Header: React.FC = () => {
   const { user, profile, signOut } = useSupabaseAuth();
   const navigate = useNavigate();
   const isAuthenticated = !!user;
-  const userName = profile ? `${profile['First Name']} ${profile['Last Name']}` : user?.email || 'Utilisateur';
+  const userName = profile ? `${profile.first_name} ${profile.last_name}` : user?.email || 'Utilisateur';
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);

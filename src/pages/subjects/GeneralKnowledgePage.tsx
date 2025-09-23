@@ -14,7 +14,6 @@ import {
 	ActionButton,
 	TestListItem,
 	FilterPill,
-	RecommendationBanner
 } from './SubjectComponents';
 import { SubjectHeader } from '../../components/SubjectHeader';
 
@@ -52,10 +51,9 @@ const quizzes = [
 ];
 
 const lastTest = { name: 'Test Pratique 2', completed: 10, total: 20 };
-const recommendation = "You're doing great in History! Try focusing on Current Events next.";
 
 export const GeneralKnowledgePage: React.FC = () => {
-	const { profile, user } = useSupabaseAuth();
+	const { profile, user, selectedExamType } = useSupabaseAuth();
 	const [view, setView] = useState<ViewType>('main');
 	const [activeSection, setActiveSection] = useState<'quiz' | 'practice' | null>('quiz');
 	const [selectedTest, setSelectedTest] = useState<TestDetails | null>(null);
@@ -74,44 +72,9 @@ export const GeneralKnowledgePage: React.FC = () => {
 		testsTaken: 0,
 		timeSpent: 0
 	});
+	const [isLoadingStatistics, setIsLoadingStatistics] = useState(false);
 
-	// Load user statistics
-	useEffect(() => {
-		const loadUserStatistics = async () => {
-			if (!user?.id) return;
-			
-			try {
-				const attempts = await UserAttemptService.getUserAttemptsByCategory(user.id, 'CG');
-				const practiceAttempts = attempts.filter(attempt => attempt.test_type === 'practice');
-				
-				// Calculate total score, tests taken, and time spent
-				let totalScore = 0;
-				let totalTimeSpent = 0;
-				const testsTaken = practiceAttempts.length;
-				
-				practiceAttempts.forEach(attempt => {
-					if (attempt.score !== null) {
-						totalScore += attempt.score;
-					}
-					if (attempt.test_data?.timeSpent) {
-						totalTimeSpent += attempt.test_data.timeSpent;
-					}
-				});
-				
-				const averageScore = testsTaken > 0 ? Math.round(totalScore / testsTaken) : 0;
-				
-				setStatistics({
-					score: averageScore,
-					testsTaken: testsTaken,
-					timeSpent: Math.round(totalTimeSpent / 60) // Convert to minutes
-				});
-			} catch (error) {
-				console.error('Error loading user statistics:', error);
-			}
-		};
-		
-		loadUserStatistics();
-	}, [user?.id]);
+	// Load user statistics - REMOVED (using fetchStatistics instead to avoid race conditions)
 
 	const pausedTestState = getQuizState('Culture Générale');
 
@@ -121,14 +84,21 @@ export const GeneralKnowledgePage: React.FC = () => {
 			if (!user?.id) return;
 			
 			try {
-				const attempts = await UserAttemptService.getUserAttemptsByCategory(user.id, 'CG');
-				const practiceAttempts = attempts.filter(attempt => attempt.test_type === 'practice');
+				// Build allowed test pratique numbers from the local definition
+				const allowedNumbers = practiceTests.map(t => parseInt(t.id.replace('p', '')));
+				
+				// Get test results from test_results table
+				const attempts = await TestResultService.getTestResultsByCategory(user.id, 'CG', 'practice', selectedExamType || 'CM'); // Practice tests now include exam_type
+				const filteredAttempts = attempts.filter(attempt => 
+					attempt.test_number && 
+					allowedNumbers.includes(attempt.test_number)
+				);
 				
 				const results: Record<string, { score: number; timeSpent: number }> = {};
 				const latestScores = new Map<number, number>();
 				
 				// Get the latest score for each test number (data is already ordered by created_at desc)
-				practiceAttempts.forEach(attempt => {
+				filteredAttempts.forEach(attempt => {
 					if (attempt.test_number && attempt.score !== null && !latestScores.has(attempt.test_number)) {
 						latestScores.set(attempt.test_number, attempt.score);
 					}
@@ -150,29 +120,34 @@ export const GeneralKnowledgePage: React.FC = () => {
 		};
 
 		loadTestResults();
-	}, [user?.id]);
+	}, [user?.id, selectedExamType]);
 
 	// Fetch statistics from database
 	useEffect(() => {
 		const fetchStatistics = async () => {
 			if (!user?.id) return;
 			
+			setIsLoadingStatistics(true);
 			try {
 				// Build allowed test pratique numbers from the local definition
 				const allowedNumbers = practiceTests.map(t => parseInt(t.id.replace('p', '')));
+				
 				// Get average score for CG category from test_results table, filtered by allowed tests
 				const score = await TestResultService.getAverageScoreForTestNumbers(
 					user.id,
 					'CG',
 					'practice',
-					allowedNumbers
+					allowedNumbers,
+					selectedExamType || 'CM' // Practice tests now include exam_type
 				);
 				
-				// Get test count for CG category from user_attempts table
-				const attempts = await UserAttemptService.getUserAttemptsByCategory(user.id, 'CG');
-				// Count unique tests taken (not total attempts) and within allowed numbers
-				const practiceAttempts = attempts.filter(a => a.test_type === 'practice' && a.test_number !== null && allowedNumbers.includes(a.test_number as number));
-				const uniqueTests = new Set(practiceAttempts.map(a => a.test_number as number));
+				// Get test count for CG category from test_results table
+				const attempts = await TestResultService.getTestResultsByCategory(user.id, 'CG', 'practice', selectedExamType || 'CM'); // Practice tests now include exam_type
+				const filteredAttempts = attempts.filter(attempt => 
+					attempt.test_number && 
+					allowedNumbers.includes(attempt.test_number)
+				);
+				const uniqueTests = new Set(filteredAttempts.map(a => a.test_number));
 				const testsTaken = uniqueTests.size;
 				
 				// Calculate time spent (assuming 15 minutes per test for now)
@@ -185,33 +160,41 @@ export const GeneralKnowledgePage: React.FC = () => {
 				});
 			} catch (error) {
 				console.error('Error fetching statistics:', error);
+			} finally {
+				setIsLoadingStatistics(false);
 			}
 		};
 
 		fetchStatistics();
-	}, [user?.id]);
+	}, [user?.id, selectedExamType]);
 
-	// Function to refresh statistics
+	// Function to refresh statistics (same logic as loadUserStatistics)
 	const refreshStatistics = async () => {
 		if (!user?.id) return;
 		
+		setIsLoadingStatistics(true);
 		try {
 			console.log('Refreshing statistics for user:', user.id);
 			const allowedNumbers = practiceTests.map(t => parseInt(t.id.replace('p', '')));
-			// Get average score filtered by allowed numbers
+			
+			// Get average score for CG category from test_results table, filtered by allowed tests
 			const score = await TestResultService.getAverageScoreForTestNumbers(
 				user.id,
 				'CG',
 				'practice',
-				allowedNumbers
+				allowedNumbers,
+				selectedExamType || undefined
 			);
 			console.log('Average score:', score);
 			
-			// Get test count within allowed numbers
-			const attempts = await UserAttemptService.getUserAttemptsByCategory(user.id, 'CG');
+			// Get test count for CG category from test_results table
+			const attempts = await TestResultService.getTestResultsByCategory(user.id, 'CG', 'practice', selectedExamType || undefined);
 			console.log('All attempts:', attempts);
-			const practiceAttempts = attempts.filter(a => a.test_type === 'practice' && a.test_number !== null && allowedNumbers.includes(a.test_number as number));
-			const uniqueTests = new Set(practiceAttempts.map(a => a.test_number as number));
+			const filteredAttempts = attempts.filter(attempt => 
+				attempt.test_number && 
+				allowedNumbers.includes(attempt.test_number)
+			);
+			const uniqueTests = new Set(filteredAttempts.map(a => a.test_number));
 			const testsTaken = uniqueTests.size;
 			console.log('Tests taken:', testsTaken);
 			
@@ -227,7 +210,7 @@ export const GeneralKnowledgePage: React.FC = () => {
 			// Also refresh individual test results - get latest score for each allowed test
 			const results: Record<string, { score: number; timeSpent: number }> = {};
 			const latestScores = new Map<number, number>();
-			practiceAttempts.forEach(attempt => {
+			filteredAttempts.forEach(attempt => {
 				if (attempt.test_number && attempt.score !== null && !latestScores.has(attempt.test_number)) {
 					latestScores.set(attempt.test_number, attempt.score);
 				}
@@ -239,6 +222,8 @@ export const GeneralKnowledgePage: React.FC = () => {
 			setTestResults(results);
 		} catch (error) {
 			console.error('Error refreshing statistics:', error);
+		} finally {
+			setIsLoadingStatistics(false);
 		}
 	};
 
@@ -247,7 +232,7 @@ export const GeneralKnowledgePage: React.FC = () => {
 		const loadQuestions = async () => {
 			setIsLoadingQuestions(true);
 			try {
-				const loadedQuestions = await getQuestionsBySubject('culture-generale', profile?.exam_type as 'CM' | 'CMS' | 'CS');
+				const loadedQuestions = await getQuestionsBySubject('culture-generale', selectedExamType || 'CM');
 				setQuestions(loadedQuestions.slice(0, 15)); // Limit to 15 questions for quiz
 			} catch (error) {
 				console.error('Error loading questions:', error);
@@ -257,12 +242,12 @@ export const GeneralKnowledgePage: React.FC = () => {
 			}
 		};
 		loadQuestions();
-	}, [profile?.exam_type]);
+	}, [selectedExamType]);
 
 	const loadQuestionsForTest = async (testNumber: number) => {
 		setIsLoadingQuestions(true);
 		try {
-			const loadedQuestions = await getQuestionsBySubject('culture-generale', profile?.exam_type as 'CM' | 'CMS' | 'CS', testNumber);
+			const loadedQuestions = await getQuestionsBySubject('culture-generale', selectedExamType || 'CM', testNumber);
 			setQuestions(loadedQuestions.slice(0, 15)); // Limit to 15 questions for quiz
 		} catch (error) {
 			console.error('Error loading questions:', error);
@@ -454,7 +439,8 @@ export const GeneralKnowledgePage: React.FC = () => {
 								'practice',
 								'CG',
 								score,
-								parseInt(selectedTest.id.replace('p', '')) // Extract test number from id
+								parseInt(selectedTest.id.replace('p', '')), // Extract test number from id
+								selectedExamType || 'CM' // Include exam_type for practice tests
 							);
 							
 							// Save detailed test data to user_attempts table (for review functionality)
@@ -559,9 +545,9 @@ export const GeneralKnowledgePage: React.FC = () => {
 			<SubjectHeader 
 				subjectName="Culture Générale"
 				icon={Globe}
-				score={statistics.score}
-				testsTaken={statistics.testsTaken}
-				timeSpent={statistics.timeSpent}
+				score={isLoadingStatistics ? 0 : statistics.score}
+				testsTaken={isLoadingStatistics ? 0 : statistics.testsTaken}
+				timeSpent={isLoadingStatistics ? 0 : statistics.timeSpent}
 				gradientFrom="from-blue-500"
 				gradientTo="to-blue-600"
 			/>
@@ -597,7 +583,6 @@ export const GeneralKnowledgePage: React.FC = () => {
 						</div>
 					</div>
 
-					<RecommendationBanner recommendation={recommendation} />
 				</div>
 			)}
 

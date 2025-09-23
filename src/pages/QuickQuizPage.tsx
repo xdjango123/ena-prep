@@ -33,7 +33,7 @@ interface Question {
 }
 
 const QuickQuizPage: React.FC = () => {
-  const { user, logUserAttempt } = useSupabaseAuth();
+  const { user, logUserAttempt, selectedExamType } = useSupabaseAuth();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [examType, setExamType] = useState(searchParams.get('type') || '');
@@ -63,7 +63,7 @@ const QuickQuizPage: React.FC = () => {
     if (examType && quizState === 'intro') {
       loadQuestions();
     }
-  }, [examType]);
+  }, [examType, selectedExamType]);
 
   useEffect(() => {
     if (quizStarted && timeLeft > 0 && quizState === 'inProgress') {
@@ -80,12 +80,15 @@ const QuickQuizPage: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      console.log('Loading questions for exam type:', examType);
+      // Use selectedExamType if available, otherwise fall back to examType from URL
+      const effectiveExamType = selectedExamType || examType;
+      console.log('Loading questions for exam type:', effectiveExamType);
+      console.log('Selected exam type from context:', selectedExamType);
       
       // Fetch questions for each subject based on exam type
-      const cgQuestions = await getQuestionsBySubject('culture-generale', examType as 'CM' | 'CMS' | 'CS');
-      const logicQuestions = await getQuestionsBySubject('logique', examType as 'CM' | 'CMS' | 'CS');
-      const englishQuestions = await getQuestionsBySubject('english', examType as 'CM' | 'CMS' | 'CS');
+      const cgQuestions = await getQuestionsBySubject('culture-generale', effectiveExamType as 'CM' | 'CMS' | 'CS');
+      const logicQuestions = await getQuestionsBySubject('logique', effectiveExamType as 'CM' | 'CMS' | 'CS');
+      const englishQuestions = await getQuestionsBySubject('english', effectiveExamType as 'CM' | 'CMS' | 'CS');
 
       console.log('Questions loaded:', {
         cg: cgQuestions.length,
@@ -192,7 +195,9 @@ const QuickQuizPage: React.FC = () => {
         user.id,
         'quick',
         'CG', // Using CG as the main category for quick quiz
-        score.percentage
+        score.percentage,
+        undefined, // No test number for quick quiz
+        selectedExamType || 'CM' // Include exam_type for quick quiz
       );
 
       // Log user attempt

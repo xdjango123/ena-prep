@@ -83,9 +83,10 @@ export class ExamResultService {
           const { UserAttemptService } = await import('./userAttemptService');
           
           // Convert Map to array format expected by UserAttemptService
-          const userAnswersArray: [number, string | number][] = [];
+          // Keep questionId as string to match the question.id format in the review page
+          const userAnswersArray: [string, string | number][] = [];
           userAnswers.forEach((answer, questionId) => {
-            userAnswersArray.push([parseInt(questionId), answer]);
+            userAnswersArray.push([questionId, answer]);
           });
           
           console.log('💾 Saving user answers:', userAnswersArray.length, 'answers');
@@ -319,15 +320,19 @@ export class ExamResultService {
               letterAnswer = answer.toString();
             }
             
+            // Store with the questionId as string (this should match the question.id in the review page)
+            // questionId is already a string, so no need to convert
             userAnswersMap.set(questionId.toString(), letterAnswer);
           } else {
             console.log(`  Skipping invalid answer: questionId=${questionId}, answer=${answer}`);
           }
         });
         console.log('📊 Final user answers map:', userAnswersMap.size, 'answers');
+        console.log('📊 Sample answers:', Array.from(userAnswersMap.entries()).slice(0, 3));
         return userAnswersMap;
       }
 
+      console.log('❌ No exam attempt found or no user answers available');
       return new Map();
 
     } catch (error) {

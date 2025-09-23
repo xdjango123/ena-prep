@@ -17,14 +17,14 @@ interface Exam {
 
 export const ExamPage: React.FC = () => {
   const navigate = useNavigate();
-  const { user, profile } = useSupabaseAuth();
+  const { user, profile, selectedExamType } = useSupabaseAuth();
   const [selectedExam, setSelectedExam] = useState<Exam | null>(null);
   const [showRules, setShowRules] = useState(false);
   const [examResults, setExamResults] = useState<Map<string, ExamResult>>(new Map());
   const [loading, setLoading] = useState(true);
 
-  // Get user's exam type to filter available exams
-  const userExamType = profile?.exam_type || 'CS';
+  // Get user's exam type to filter available exams - prioritize selectedExamType
+  const userExamType = selectedExamType || profile?.plan_name || 'CM';
 
   // Load exam results
   const loadExamResults = async () => {

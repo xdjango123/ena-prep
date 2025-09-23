@@ -24,6 +24,7 @@ import TutorPage from './pages/TutorPage';
 import ProfilePage from './pages/ProfilePage';
 import EnaGuidePage from './pages/EnaGuidePage';
 import QuickQuizPage from './pages/QuickQuizPage';
+import TestSubscriptionPage from './pages/TestSubscriptionPage';
 import ScrollToTop from './components/ScrollToTop';
 import { RandomPracticeTest } from './components/quiz/RandomPracticeTest';
 import { ExamInterface } from './components/quiz/ExamInterface';
@@ -76,6 +77,7 @@ function App() {
                 
                 {/* User Pages */}
                 <Route path="profile" element={<ProfilePage />} />
+                <Route path="test-subscription" element={<TestSubscriptionPage />} />
 
                 {/* Placeholder routes */}
                 <Route path="billing" element={<PlaceholderPage title="Abonnement" />} />

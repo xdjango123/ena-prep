@@ -15,7 +15,6 @@ import {
     ActionButton,
     TestListItem,
     FilterPill,
-    RecommendationBanner
 } from './subjects/SubjectComponents';
 import { SubjectHeader } from '../components/SubjectHeader';
 
@@ -51,10 +50,9 @@ const quizzes = [
 ];
 
 const lastTest = { name: 'Test Pratique 1', completed: 5, total: 20 };
-const recommendation = "Your logical reasoning is improving! Keep it up.";
 
 export default function LogicPage() {
-	const { profile, user } = useSupabaseAuth();
+	const { profile, user, selectedExamType } = useSupabaseAuth();
 	const [view, setView] = useState<'main' | 'summary' | 'quiz' | 'review' | 'learn' | 'results'>('main');
 	const [activeSection, setActiveSection] = useState<'practice' | 'quiz' | null>('quiz');
 	const [selectedTest, setSelectedTest] = useState<TestDetails | null>(null);
@@ -73,6 +71,7 @@ export default function LogicPage() {
 		testsTaken: 0,
 		timeSpent: 0
 	});
+	const [isLoadingStatistics, setIsLoadingStatistics] = useState(false);
 
     const pausedTestState = getQuizState('Logique');
 
@@ -82,18 +81,33 @@ export default function LogicPage() {
             if (!user?.id) return;
             
             try {
-                const attempts = await UserAttemptService.getUserAttemptsByCategory(user.id, 'LOG');
-                			const practiceAttempts = attempts.filter(attempt => attempt.test_type === 'practice');
+                // Build allowed test pratique numbers from the local definition
+                const allowedNumbers = practiceTests.map(t => parseInt(t.id.replace('p', '')));
+                
+                // Get test results from test_results table (consistent with other pages)
+                const attempts = await TestResultService.getTestResultsByCategory(user.id, 'LOG', 'practice', selectedExamType || 'CM'); // Practice tests now include exam_type
+                const filteredAttempts = attempts.filter(attempt => 
+                    attempt.test_number && 
+                    allowedNumbers.includes(attempt.test_number)
+                );
                 
                 const results: Record<string, { score: number; timeSpent: number }> = {};
-                practiceAttempts.forEach(attempt => {
-                    if (attempt.test_number && attempt.score !== null) {
-                        const testId = `p${attempt.test_number}`;
-                        results[testId] = {
-                            score: attempt.score,
-                            timeSpent: 15 // Assuming 15 minutes per test
-                        };
+                const latestScores = new Map<number, number>();
+                
+                // Get the latest score for each test number (data is already ordered by created_at desc)
+                filteredAttempts.forEach(attempt => {
+                    if (attempt.test_number && attempt.score !== null && !latestScores.has(attempt.test_number)) {
+                        latestScores.set(attempt.test_number, attempt.score);
                     }
+                });
+                
+                // Create results object with latest scores
+                latestScores.forEach((score, testNumber) => {
+                    const testId = `p${testNumber}`;
+                    results[testId] = {
+                        score: score,
+                        timeSpent: 15 // Assuming 15 minutes per test
+                    };
                 });
                 
                 setTestResults(results);
@@ -102,8 +116,8 @@ export default function LogicPage() {
             }
         };
 
-        loadTestResults();
-    }, [user?.id]);
+		loadTestResults();
+	}, [user?.id, selectedExamType]);
 
     // Scroll to top when component mounts
     useEffect(() => {
@@ -115,13 +129,28 @@ export default function LogicPage() {
 		const fetchStatistics = async () => {
 			if (!user?.id) return;
 			
+			setIsLoadingStatistics(true);
 			try {
-				// Get average score for LOG category from user_attempts table
-				const score = await UserAttemptService.getAverageScore(user.id, 'LOG', 'practice');
+				// Build allowed test pratique numbers from the local definition
+				const allowedNumbers = practiceTests.map(t => parseInt(t.id.replace('p', '')));
 				
-				// Get test count for LOG category from user_attempts table
-				const attempts = await UserAttemptService.getUserAttemptsByCategory(user.id, 'LOG');
-				const testsTaken = attempts.filter(attempt => attempt.test_type === 'practice').length;
+				// Get average score for LOG category from test_results table, filtered by allowed tests
+				const score = await TestResultService.getAverageScoreForTestNumbers(
+					user.id,
+					'LOG',
+					'practice',
+					allowedNumbers,
+					selectedExamType || 'CM' // Practice tests now include exam_type
+				);
+				
+				// Get test count for LOG category from test_results table
+				const attempts = await TestResultService.getTestResultsByCategory(user.id, 'LOG', 'practice', selectedExamType || undefined);
+				const filteredAttempts = attempts.filter(attempt => 
+					attempt.test_number && 
+					allowedNumbers.includes(attempt.test_number)
+				);
+				const uniqueTests = new Set(filteredAttempts.map(a => a.test_number));
+				const testsTaken = uniqueTests.size;
 				
 				// Calculate time spent (assuming 15 minutes per test for now)
 				const timeSpent = Math.round(testsTaken * 15 / 60); // Convert to hours
@@ -133,11 +162,13 @@ export default function LogicPage() {
 				});
 			} catch (error) {
 				console.error('Error fetching statistics:', error);
+			} finally {
+				setIsLoadingStatistics(false);
 			}
 		};
 
 		fetchStatistics();
-	}, [user?.id]);
+	}, [user?.id, selectedExamType]);
 
 	// Refresh statistics when returning to main view
 	useEffect(() => {
@@ -146,17 +177,32 @@ export default function LogicPage() {
 		}
 	}, [view, user?.id]);
 
-	// Function to refresh statistics
+	// Function to refresh statistics (same logic as fetchStatistics)
 	const refreshStatistics = async () => {
 		if (!user?.id) return;
 		
+		setIsLoadingStatistics(true);
 		try {
-			// Get average score for LOG category from user_attempts table
-			const score = await UserAttemptService.getAverageScore(user.id, 'LOG', 'practice');
+			// Build allowed test pratique numbers from the local definition
+			const allowedNumbers = practiceTests.map(t => parseInt(t.id.replace('p', '')));
 			
-			// Get test count for LOG category from user_attempts table
-			const attempts = await UserAttemptService.getUserAttemptsByCategory(user.id, 'LOG');
-			const testsTaken = attempts.filter(attempt => attempt.test_type === 'practice').length;
+			// Get average score for LOG category from test_results table, filtered by allowed tests
+			const score = await TestResultService.getAverageScoreForTestNumbers(
+				user.id,
+				'LOG',
+				'practice',
+				allowedNumbers,
+				selectedExamType || undefined
+			);
+			
+			// Get test count for LOG category from test_results table
+			const attempts = await TestResultService.getTestResultsByCategory(user.id, 'LOG', 'practice', selectedExamType || undefined);
+			const filteredAttempts = attempts.filter(attempt => 
+				attempt.test_number && 
+				allowedNumbers.includes(attempt.test_number)
+			);
+			const uniqueTests = new Set(filteredAttempts.map(a => a.test_number));
+			const testsTaken = uniqueTests.size;
 			
 			// Calculate time spent (assuming 15 minutes per test for now)
 			const timeSpent = Math.round(testsTaken * 15 / 60); // Convert to hours
@@ -168,9 +214,8 @@ export default function LogicPage() {
 			});
 
 			// Also refresh individual test results
-			const practiceAttempts = attempts.filter(attempt => attempt.test_type === 'practice');
 			const results: Record<string, { score: number; timeSpent: number }> = {};
-			practiceAttempts.forEach(attempt => {
+			filteredAttempts.forEach(attempt => {
 				if (attempt.test_number && attempt.score !== null) {
 					const testId = `p${attempt.test_number}`;
 					results[testId] = {
@@ -183,6 +228,8 @@ export default function LogicPage() {
 			setTestResults(results);
 		} catch (error) {
 			console.error('Error refreshing statistics:', error);
+		} finally {
+			setIsLoadingStatistics(false);
 		}
 	};
 
@@ -194,9 +241,9 @@ export default function LogicPage() {
 			try {
 				console.log('LogicPage: Starting to load questions...');
 				console.log('LogicPage: Profile:', profile);
-				console.log('LogicPage: Exam type:', profile?.exam_type);
+				console.log('LogicPage: Exam type:', profile?.plan_name);
 				
-				const loadedQuestions = await getQuestionsBySubject('logique', profile?.exam_type as 'CM' | 'CMS' | 'CS');
+				const loadedQuestions = await getQuestionsBySubject('logique', selectedExamType || 'CM');
 				console.log('LogicPage: Questions loaded:', loadedQuestions.length);
 				
 				if (loadedQuestions.length === 0) {
@@ -214,7 +261,7 @@ export default function LogicPage() {
 			}
 		};
 		loadQuestions();
-	}, [profile?.exam_type]);
+	}, [selectedExamType]);
 
 	const loadQuestionsForTest = async (testNumber: number) => {
 		setIsLoadingQuestions(true);
@@ -222,10 +269,10 @@ export default function LogicPage() {
 		try {
 			console.log(`LogicPage: Loading questions for test pratique ${testNumber}...`);
 			console.log('LogicPage: Profile:', profile);
-			console.log('LogicPage: Exam type:', profile?.exam_type);
+			console.log('LogicPage: Exam type:', profile?.plan_name);
 			
 			// Use the same method as other pages for consistency
-			const loadedQuestions = await getQuestionsBySubject('logique', profile?.exam_type as 'CM' | 'CMS' | 'CS', testNumber);
+			const loadedQuestions = await getQuestionsBySubject('logique', selectedExamType || 'CM', testNumber);
 			console.log(`LogicPage: Test pratique ${testNumber} questions loaded:`, loadedQuestions.length);
 			
 			if (loadedQuestions.length === 0) {
@@ -270,7 +317,12 @@ export default function LogicPage() {
 				// Use the actual test data from the database
 				console.log('Loading actual test data for review:', testData);
 				setQuestions(testData.questions);
-				setLastAnswers(testData.userAnswers);
+				// Convert string keys to numbers for compatibility with components
+				const convertedAnswers = new Map<number, string | number>();
+				testData.userAnswers.forEach((value, key) => {
+					convertedAnswers.set(Number(key), value);
+				});
+				setLastAnswers(convertedAnswers);
 				setLastResult({
 					score: testData.score,
 					correctAnswers: testData.correctAnswers,
@@ -375,7 +427,8 @@ export default function LogicPage() {
 								'practice',
 								'LOG',
 								score,
-								parseInt(selectedTest.id.replace('p', '')) // Extract test number from id
+								parseInt(selectedTest.id.replace('p', '')), // Extract test number from id
+								selectedExamType || 'CM' // Include exam_type for practice tests
 							);
 							
 							await UserAttemptService.saveUserAttempt(
@@ -462,9 +515,9 @@ export default function LogicPage() {
 			<SubjectHeader 
 				subjectName="Logique"
 				icon={BrainCircuit}
-				score={statistics.score}
-				testsTaken={statistics.testsTaken}
-				timeSpent={statistics.timeSpent}
+				score={isLoadingStatistics ? 0 : statistics.score}
+				testsTaken={isLoadingStatistics ? 0 : statistics.testsTaken}
+				timeSpent={isLoadingStatistics ? 0 : statistics.timeSpent}
 				gradientFrom="from-yellow-500"
 				gradientTo="to-yellow-600"
 			/>
@@ -498,7 +551,6 @@ export default function LogicPage() {
 						</div>
 					</div>
 
-					<RecommendationBanner recommendation={recommendation} />
 				</div>
 			)}
 

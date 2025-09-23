@@ -16,8 +16,7 @@ const signupSchema = z.object({
   email: z.string().email({ message: "L'email n'est pas valide" }),
   password: z.string().min(8, { message: "Le mot de passe doit contenir au moins 8 caractères" }),
   confirmPassword: z.string().min(1, { message: "La confirmation du mot de passe est requise" }),
-  examType: z.enum(['CM', 'CMS', 'CS'], { message: "Veuillez sélectionner un type d'examen" }),
-  planName: z.string().min(1, { message: "Veuillez sélectionner un plan" }),
+  examTypes: z.array(z.enum(['CM', 'CMS', 'CS'])).min(1, { message: "Veuillez sélectionner au moins un type d'examen" }),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Les mots de passe ne correspondent pas",
   path: ["confirmPassword"],
@@ -32,15 +31,14 @@ const SignupPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   
-  const { register, handleSubmit, formState: { errors }, watch } = useForm<SignupFormValues>({
+  const { register, handleSubmit, formState: { errors }, watch, setValue } = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
-      examType: 'CM',
-      planName: 'Prépa CM'
+      examTypes: ['CM']
     }
   });
 
-  const watchedExamType = watch('examType');
+  const watchedExamTypes = watch('examTypes');
 
   // Function to translate Supabase error messages to French
   const translateError = (errorMessage: string): string => {
@@ -78,41 +76,28 @@ const SignupPage: React.FC = () => {
     return 'Une erreur est survenue lors de l\'inscription.';
   };
 
-  // Update plan name when exam type changes
-  React.useEffect(() => {
-    const planMap = {
-      'CM': 'Prépa CM',
-      'CMS': 'Prépa CMS',
-      'CS': 'Prépa CS'
-    };
-    
-    // This will be handled by the form validation, but we can set it for display
-  }, [watchedExamType]);
 
   const onSubmit = async (data: SignupFormValues) => {
     setIsSubmitting(true);
     setError('');
     
     try {
-      // Ensure plan name matches exam type
+      // Generate plan names based on exam types
       const planMap = {
         'CM': 'Prépa CM',
         'CMS': 'Prépa CMS',
         'CS': 'Prépa CS'
       };
       
-      const finalData = {
-        ...data,
-        planName: planMap[data.examType]
-      };
+      const planNames = data.examTypes.map(examType => planMap[examType as keyof typeof planMap]);
 
       const { error } = await signUp(
-        finalData.email,
-        finalData.password,
-        finalData.firstName,
-        finalData.lastName,
-        finalData.examType,
-        finalData.planName
+        data.email,
+        data.password,
+        data.firstName,
+        data.lastName,
+        data.examTypes,
+        planNames
       );
       
       if (error) {
@@ -233,18 +218,38 @@ const SignupPage: React.FC = () => {
             </div>
             
             <div>
-              <Label htmlFor="examType">Type de Concour</Label>
-              <select 
-                id="examType" 
-                {...register('examType')} 
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-              >
-                <option value="CM">CM - Cour Moyen</option>
-                <option value="CMS">CMS - Cour Moyen Superieur</option>
-                <option value="CS">CS - Cour Superieur</option>
-              </select>
-              {errors.examType && (
-                <p className="mt-1 text-sm text-red-600">{errors.examType.message}</p>
+              <Label>Types de Concours</Label>
+              <p className="text-sm text-gray-600 mb-3">Sélectionnez un ou plusieurs types de concours</p>
+              <div className="space-y-3">
+                {[
+                  { value: 'CM', label: 'CM - Cour Moyen', description: 'Concours de niveau moyen' },
+                  { value: 'CMS', label: 'CMS - Cour Moyen Supérieur', description: 'Concours de niveau moyen supérieur' },
+                  { value: 'CS', label: 'CS - Cour Supérieur', description: 'Concours de niveau supérieur' }
+                ].map((examType) => (
+                  <label key={examType.value} className="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      value={examType.value}
+                      checked={watchedExamTypes.includes(examType.value as 'CM' | 'CMS' | 'CS')}
+                      onChange={(e) => {
+                        const value = examType.value as 'CM' | 'CMS' | 'CS';
+                        if (e.target.checked) {
+                          setValue('examTypes', [...watchedExamTypes, value]);
+                        } else {
+                          setValue('examTypes', watchedExamTypes.filter(type => type !== value));
+                        }
+                      }}
+                      className="mt-1 h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                    />
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-gray-900">{examType.label}</div>
+                      <div className="text-sm text-gray-500">{examType.description}</div>
+                    </div>
+                  </label>
+                ))}
+              </div>
+              {errors.examTypes && (
+                <p className="mt-1 text-sm text-red-600">{errors.examTypes.message}</p>
               )}
             </div>
 

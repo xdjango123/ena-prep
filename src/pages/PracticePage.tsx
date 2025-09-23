@@ -1,7 +1,8 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { BookOpen, Calculator, Globe, Languages, ChevronRight, Sparkles, BrainCircuit, ArrowLeft, Target } from 'lucide-react';
+import { BookOpen, Calculator, Globe, Languages, ChevronRight, Sparkles, BrainCircuit, ArrowLeft, Target, Lock, Crown } from 'lucide-react';
 import { Container } from '../components/ui/Container';
+import { useSubscriptionStatus } from '../hooks/useSubscriptionStatus';
 
 const subjects = [
   { name: 'Culture Générale', icon: <Globe className="w-6 h-6 text-blue-500" />, path: '/dashboard/subject/general-knowledge' },
@@ -11,14 +12,49 @@ const subjects = [
 
 export default function PracticePage() {
   const navigate = useNavigate();
+  const { hasActiveSubscription, getPlanName, getEndDate } = useSubscriptionStatus();
 
   const handleStartRandomTest = () => {
     // Navigate to the random practice test within dashboard
     navigate('/dashboard/random-practice');
   };
 
+  const handleUpgrade = () => {
+    navigate('/dashboard/profile');
+  };
+
   return (
-    <div className="bg-gray-50 min-h-screen flex flex-col">
+    <div className="bg-gray-50 min-h-screen flex flex-col relative">
+      {/* Locked State Overlay */}
+      {!hasActiveSubscription && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 text-center">
+            <div className="p-4 bg-red-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+              <Lock className="w-8 h-8 text-red-600" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">Abonnement Expiré</h2>
+            <p className="text-gray-600 mb-6">
+              Votre abonnement a expiré. Pour continuer à accéder à tous les contenus et fonctionnalités de PrepaENA, veuillez renouveler votre abonnement.
+            </p>
+            <div className="space-y-3">
+              <button
+                onClick={handleUpgrade}
+                className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2"
+              >
+                <Crown className="w-5 h-5" />
+                <span>Renouveler mon abonnement</span>
+              </button>
+              <button
+                onClick={() => navigate('/dashboard/profile')}
+                className="w-full bg-gray-100 text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-200 transition-colors"
+              >
+                Gérer mon profil
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto w-full">
         {/* Clean Header - Enhanced Design */}
         <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 sm:p-8 lg:p-10 mb-6 sm:mb-8">
