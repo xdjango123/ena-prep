@@ -96,10 +96,9 @@ export const SubscriptionRequired: React.FC<SubscriptionRequiredProps> = ({
           {onUpgrade && (
             <button
               onClick={onUpgrade}
-              className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2"
+              className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 text-white py-3 px-4 rounded-lg font-medium hover:from-yellow-600 hover:to-yellow-700 transition-all duration-200 shadow-md"
             >
-              <Crown className="w-5 h-5" />
-              <span>Renouveler mon abonnement</span>
+              Renouveler mon abonnement
             </button>
           )}
           

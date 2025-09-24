@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { BookOpen, Calculator, Globe, Languages, ChevronRight, Sparkles, BrainCircuit, ArrowLeft, Target, Lock, Crown } from 'lucide-react';
 import { Container } from '../components/ui/Container';
 import { useSubscriptionStatus } from '../hooks/useSubscriptionStatus';
+import { useRenewalFlow } from '../hooks/useRenewalFlow';
+import RenewalModal from '../components/modals/RenewalModal';
 
 const subjects = [
   { name: 'Culture Générale', icon: <Globe className="w-6 h-6 text-blue-500" />, path: '/dashboard/subject/general-knowledge' },
@@ -13,6 +15,15 @@ const subjects = [
 export default function PracticePage() {
   const navigate = useNavigate();
   const { hasActiveSubscription, getPlanName, getEndDate } = useSubscriptionStatus();
+  
+  // Import renewal flow hook
+  const { 
+    isRenewalModalOpen, 
+    renewalState, 
+    openRenewalModal, 
+    closeRenewalModal, 
+    handleBackToHome 
+  } = useRenewalFlow();
 
   const handleStartRandomTest = () => {
     // Navigate to the random practice test within dashboard
@@ -20,7 +31,7 @@ export default function PracticePage() {
   };
 
   const handleUpgrade = () => {
-    navigate('/dashboard/profile');
+    openRenewalModal('practice_renewal');
   };
 
   return (
@@ -39,16 +50,15 @@ export default function PracticePage() {
             <div className="space-y-3">
               <button
                 onClick={handleUpgrade}
-                className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2"
+                className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 text-white py-3 px-4 rounded-lg font-medium hover:from-yellow-600 hover:to-yellow-700 transition-all duration-200 shadow-md"
               >
-                <Crown className="w-5 h-5" />
-                <span>Renouveler mon abonnement</span>
+                Renouveler mon abonnement
               </button>
               <button
-                onClick={() => navigate('/dashboard/profile')}
+                onClick={handleBackToHome}
                 className="w-full bg-gray-100 text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-200 transition-colors"
               >
-                Gérer mon profil
+                Retour à l'accueil
               </button>
             </div>
           </div>
@@ -187,6 +197,15 @@ export default function PracticePage() {
           </div>
         </div>
       </div>
+      
+      {/* Renewal Modal */}
+      <RenewalModal
+        isOpen={isRenewalModalOpen}
+        onClose={closeRenewalModal}
+        currentPlan={renewalState?.currentPlan}
+        returnTo={renewalState?.returnTo}
+        intent={renewalState?.intent}
+      />
     </div>
   );
 }

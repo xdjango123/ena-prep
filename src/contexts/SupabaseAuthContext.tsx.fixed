@@ -61,7 +61,6 @@ export const SupabaseAuthProvider: React.FC<SupabaseAuthProviderProps> = ({ chil
   const activityTimerRef = useRef<NodeJS.Timeout | null>(null);
   const INACTIVITY_TIMEOUT = 10 * 60 * 1000; // 10 minutes in milliseconds
 
-
   // Helper function to check if subscription is active and not expired
   const checkSubscriptionStatus = (subscription: Subscription | null): { isActive: boolean; isExpired: boolean } => {
     if (!subscription) {
@@ -86,6 +85,7 @@ export const SupabaseAuthProvider: React.FC<SupabaseAuthProviderProps> = ({ chil
 
     return { isActive: true, isExpired: false };
   };
+
   // Reset activity timer
   const resetActivityTimer = () => {
     if (activityTimerRef.current) {
@@ -269,15 +269,11 @@ export const SupabaseAuthProvider: React.FC<SupabaseAuthProviderProps> = ({ chil
           const activeSubscriptions = data.filter(sub => sub.is_active);
           if (activeSubscriptions.length > 0) {
             const firstSubscription = activeSubscriptions[0];
-            const examType = firstSubscription.plan_name.includes('CM') ? 'CM' : 
-                            firstSubscription.plan_name.includes('CMS') ? 'CMS' : 
-                            firstSubscription.plan_name.includes('CS') ? 'CS' : 'CM';
+            const examType = extractExamTypeFromPlanName(firstSubscription.plan_name);
             
-            console.log(`🔄 Auto-selecting first available exam type: ${examType} (selectedExamType was null)`);
+            console.log(`🔄 Auto-selecting first available exam type: ${examType}`);
             setSelectedExamTypeState(examType as 'CM' | 'CMS' | 'CS');
           }
-        } else {
-          console.log(`ℹ️ fetchUserSubscriptions: selectedExamType already set to ${selectedExamType}, not auto-selecting`);
         }
       }
     } catch (error) {
@@ -286,47 +282,31 @@ export const SupabaseAuthProvider: React.FC<SupabaseAuthProviderProps> = ({ chil
     }
   };
 
+  // Helper function to extract exam type from plan name
+  const extractExamTypeFromPlanName = (planName: string): 'CM' | 'CMS' | 'CS' => {
+    if (planName.includes('CMS')) return 'CMS';
+    if (planName.includes('CS')) return 'CS';
+    if (planName.includes('CM')) return 'CM';
+    return 'CM'; // Default fallback
+  };
+
+  // SIMPLIFIED: Create user profile if needed
   const createUserProfileIfNeeded = async () => {
     if (!user || profileCreated) return;
 
     try {
       console.log('🔍 Checking if profile and subscriptions need to be created...');
-      // Get user data from localStorage (backup)
-      const pendingUserData = localStorage.getItem('pendingUserData');
-      let userData = null;
       
-      if (pendingUserData) {
-        try {
-          userData = JSON.parse(pendingUserData);
-          localStorage.removeItem('pendingUserData'); // Clean up
-        } catch (e) {
-          console.error('Error parsing pending user data:', e);
-        }
-      }
-
       // Get user data from Supabase user metadata (primary source)
       const userMetadata = user.user_metadata;
       
-      // Use metadata from Supabase, fallback to localStorage, then defaults
-      const firstName = userMetadata?.first_name || userData?.firstName || 'User';
-      const lastName = userMetadata?.last_name || userData?.lastName || '';
-      const examTypes = userMetadata?.exam_types || userData?.examTypes || ['CM'];
-      const planNames = userMetadata?.plan_names || userData?.planNames || ['Prépa CM'];
+      // Use metadata from Supabase, fallback to defaults
+      const firstName = userMetadata?.first_name || 'User';
+      const lastName = userMetadata?.last_name || '';
+      const examTypes = userMetadata?.exam_types || ['CM'];
+      const planNames = userMetadata?.plan_names || ['Prépa CM'];
       
-      // Ensure plan names match exam types (use "Prépa" not "Préparation")
-      const expectedPlanNames = examTypes.map((examType: string) => 
-        examType === 'CM' ? 'Prépa CM' : 
-        examType === 'CMS' ? 'Prépa CMS' : 
-        examType === 'CS' ? 'Prépa CS' : 'Prépa CM'
-      );
-      
-      // Use the first exam type as the primary one for backward compatibility
-      const primaryExamType = examTypes[0] || 'CM';
-      const primaryPlanName = expectedPlanNames[0] || 'Prépa CM';
-
       console.log('Creating profile with data:', { firstName, lastName, examTypes, planNames });
-      console.log('User metadata:', userMetadata);
-      console.log('LocalStorage data:', userData);
 
       // Check if profile exists
       const { data: existingProfile } = await supabase
@@ -337,20 +317,16 @@ export const SupabaseAuthProvider: React.FC<SupabaseAuthProviderProps> = ({ chil
 
       if (!existingProfile) {
         console.log('📝 Profile does not exist, creating...');
-        // Calculate expiration date (6 months from now)
-        const expirationDate = new Date();
-        expirationDate.setMonth(expirationDate.getMonth() + 6);
-
-        // Create profile using the collected data
+        
+        // Create profile
         const { error: profileError } = await supabase
           .from('profiles')
           .insert({
             id: user.id,
             first_name: firstName,
             last_name: lastName,
-            plan_name: primaryExamType, // Use plan_name instead of exam_type
+            plan_name: examTypes[0] || 'CM',
             email: user.email,
-            expiration_date: expirationDate.toISOString(),
             is_owner: false,
           });
 
@@ -360,8 +336,6 @@ export const SupabaseAuthProvider: React.FC<SupabaseAuthProviderProps> = ({ chil
           console.log('Profile created successfully');
           await fetchProfile();
         }
-        
-        // Exam types will be handled through subscriptions
       } else {
         console.log('✅ Profile already exists, skipping creation');
       }
@@ -374,6 +348,7 @@ export const SupabaseAuthProvider: React.FC<SupabaseAuthProviderProps> = ({ chil
 
       if (!existingSubscriptions || existingSubscriptions.length === 0) {
         console.log('📝 No subscriptions exist, creating...');
+        
         // Create subscriptions for all plans
         const startDate = new Date();
         const endDate = new Date();
@@ -382,8 +357,7 @@ export const SupabaseAuthProvider: React.FC<SupabaseAuthProviderProps> = ({ chil
         console.log('Creating subscriptions for plans:', planNames);
         
         // Create subscriptions for each plan
-        for (let i = 0; i < planNames.length; i++) {
-          const planName = planNames[i];
+        for (const planName of planNames) {
           const { error: subscriptionError } = await supabase
             .from('subscriptions')
             .insert({
@@ -445,17 +419,6 @@ export const SupabaseAuthProvider: React.FC<SupabaseAuthProviderProps> = ({ chil
       }
 
       console.log('Auth signup successful, user ID:', data.user?.id);
-
-      // Store the user data in localStorage as backup for profile creation
-      if (data.user) {
-        localStorage.setItem('pendingUserData', JSON.stringify({
-          firstName,
-          lastName,
-          examTypes,
-          planNames
-        }));
-      }
-
       console.log('Signup process completed successfully');
       return { error: null };
     } catch (error) {
@@ -570,140 +533,45 @@ export const SupabaseAuthProvider: React.FC<SupabaseAuthProviderProps> = ({ chil
     }
   };
 
-
-  const replaceExamType = async (newExamType: string) => {
+  // SIMPLIFIED: Set selected exam type
+  const setSelectedExamType = async (examType: 'CM' | 'CMS' | 'CS') => {
     if (!user) return { error: new Error('No user logged in') };
 
     try {
-      // Deactivate all current plans
-      const { error: deactivateError } = await supabase
-        .from('subscriptions')
-        .update({ is_active: false })
-        .eq('user_id', user.id)
-        .eq('is_active', true);
-
-      if (deactivateError) {
-        console.error('Error deactivating plans:', deactivateError);
-      }
-
-      // Create new plan
-      const planMap = {
-        'CM': 'Prépa CM',
-        'CMS': 'Prépa CMS',
-        'CS': 'Prépa CS'
-      };
+      console.log(`🔄 Switching to exam type: ${examType}`);
       
-      const planName = planMap[newExamType as keyof typeof planMap];
-      if (!planName) {
-        return { error: new Error('Type d\'examen invalide') };
-      }
-
-      const startDate = new Date();
-      const endDate = new Date();
-      endDate.setDate(endDate.getDate() + 30);
-
-      const { error } = await supabase
-        .from('subscriptions')
-        .insert({
-          user_id: user.id,
-          plan_name: planName,
-          exam_type: newExamType,
-          is_active: true,
-          start_date: startDate.toISOString(),
-          end_date: endDate.toISOString(),
-        });
-
-      if (!error) {
-        // Update profile with new plan name
-        await updateProfile({ 
-          plan_name: newExamType as any
-        });
-        await fetchUserSubscriptions();
-      }
-
-      return { error };
-    } catch (error) {
-      console.error('Replace exam type error:', error);
-      return { error };
-    }
-  };
-
-  const switchPlan = async (planId: string) => {
-    if (!user) return { error: new Error('No user logged in') };
-
-    try {
-      // Find the subscription to switch to
-      const subscription = userSubscriptions.find(sub => sub.id === planId);
-      if (!subscription) {
-        return { error: new Error('Plan non trouvé') };
-      }
-
-      // Extract exam type from plan name
-      const examType = subscription.plan_name.includes('CM') ? 'CM' : 
-                      subscription.plan_name.includes('CMS') ? 'CMS' : 
-                      subscription.plan_name.includes('CS') ? 'CS' : 'CM';
-
-      // Update profile with selected plan
-      const { error } = await updateProfile({ 
-        plan_name: examType as any
-      });
-
-      if (!error) {
-        setSelectedExamTypeState(examType as 'CM' | 'CMS' | 'CS');
-        await fetchUserSubscriptions();
-      }
-
-      return { error };
-    } catch (error) {
-      console.error('Switch plan error:', error);
-      return { error };
-    }
-  };
-
-  const logUserAttempt = async (
-    testType: string,
-    category: string,
-    subCategory?: string,
-    testNumber?: number,
-    score?: number
-  ) => {
-    if (!user) return false;
-
-    try {
-      return await UserAttemptService.saveUserAttempt(
-        user.id,
-        testType,
-        category,
-        subCategory,
-        testNumber,
-        score
+      // Check if user has an active subscription for this exam type
+      const targetPlanName = examType === 'CM' ? 'Prépa CM' : 
+                            examType === 'CMS' ? 'Prépa CMS' : 
+                            examType === 'CS' ? 'Prépa CS' : 'Prépa CM';
+      
+      const existingSubscription = userSubscriptions.find(sub => 
+        sub.plan_name === targetPlanName && sub.is_active
       );
+      
+      if (!existingSubscription) {
+        console.error(`❌ No active subscription found for ${examType} (${targetPlanName})`);
+        return { error: new Error(`No active subscription found for ${examType}`) };
+      }
+      
+      console.log(`✅ Found active subscription for ${examType}:`, existingSubscription.id);
+      
+      // Update the local state immediately
+      setSelectedExamTypeState(examType);
+      
+      // Update the profile with the new plan name (for tracking)
+      await updateProfile({ plan_name: examType });
+      
+      console.log(`✅ Switched to exam type: ${examType}`);
+      
+      return { error: null };
     } catch (error) {
-      console.error('Error logging user attempt:', error);
-      return false;
+      console.error('Set selected exam type error:', error);
+      return { error };
     }
   };
 
-  // Get available exam types from user's subscriptions
-  const getAvailableExamTypes = (): ('CM' | 'CMS' | 'CS')[] => {
-    const examTypes: ('CM' | 'CMS' | 'CS')[] = [];
-    
-    userSubscriptions.forEach(sub => {
-      if (sub.is_active) {
-        const examType = (sub.plan_name.includes('CM') ? 'CM' : 
-                        sub.plan_name.includes('CMS') ? 'CMS' : 
-                        sub.plan_name.includes('CS') ? 'CS' : null) as 'CM' | 'CMS' | 'CS' | null;
-        
-        if (examType && !examTypes.includes(examType)) {
-          examTypes.push(examType);
-        }
-      }
-    });
-    
-    return examTypes;
-  };
-
-  // Add exam type to user (creates subscription)
+  // SIMPLIFIED: Add exam type
   const addExamType = async (examType: string) => {
     if (!user) return { error: new Error('No user logged in') };
 
@@ -712,7 +580,7 @@ export const SupabaseAuthProvider: React.FC<SupabaseAuthProviderProps> = ({ chil
                       examType === 'CMS' ? 'Prépa CMS' : 
                       examType === 'CS' ? 'Prépa CS' : 'Prépa CM';
 
-      // Check if user already has this exam type (check ALL subscriptions, not just active ones)
+      // Check if user already has this exam type
       const { data: existingSubscriptions } = await supabase
         .from('subscriptions')
         .select('*')
@@ -726,7 +594,7 @@ export const SupabaseAuthProvider: React.FC<SupabaseAuthProviderProps> = ({ chil
           return { error: new Error('Vous avez déjà ce type d\'examen') };
         }
         
-        // If there are inactive subscriptions, reactivate the most recent one instead of creating a new one
+        // Reactivate the most recent inactive subscription
         const mostRecentSubscription = existingSubscriptions.sort((a, b) => 
           new Date(b.start_date).getTime() - new Date(a.start_date).getTime()
         )[0];
@@ -752,7 +620,7 @@ export const SupabaseAuthProvider: React.FC<SupabaseAuthProviderProps> = ({ chil
         return { error: updateError };
       }
 
-      // Create new subscription only if none exists
+      // Create new subscription
       const startDate = new Date();
       const endDate = new Date();
       endDate.setMonth(endDate.getMonth() + 6); // 6 months from now
@@ -779,7 +647,7 @@ export const SupabaseAuthProvider: React.FC<SupabaseAuthProviderProps> = ({ chil
     }
   };
 
-  // Remove exam type from user (deactivates subscription)
+  // SIMPLIFIED: Remove exam type
   const removeExamType = async (examType: string) => {
     if (!user) return { error: new Error('No user logged in') };
 
@@ -817,197 +685,146 @@ export const SupabaseAuthProvider: React.FC<SupabaseAuthProviderProps> = ({ chil
     }
   };
 
-  // Cancel subscription (alias for removeExamType for clarity)
+  // Cancel subscription (alias for removeExamType)
   const cancelSubscription = async (examType: string) => {
     return await removeExamType(examType);
   };
 
-  // Set selected exam type - IMPROVED IMPLEMENTATION
-  const setSelectedExamType = async (examType: 'CM' | 'CMS' | 'CS') => {
+  // Get available exam types from user's subscriptions
+  const getAvailableExamTypes = (): ('CM' | 'CMS' | 'CS')[] => {
+    const examTypes: ('CM' | 'CMS' | 'CS')[] = [];
+    
+    userSubscriptions.forEach(sub => {
+      if (sub.is_active) {
+        const examType = extractExamTypeFromPlanName(sub.plan_name);
+        if (!examTypes.includes(examType)) {
+          examTypes.push(examType);
+        }
+      }
+    });
+    
+    return examTypes;
+  };
+
+  const logUserAttempt = async (
+    testType: string,
+    category: string,
+    subCategory?: string,
+    testNumber?: number,
+    score?: number
+  ) => {
+    if (!user) return false;
+
+    try {
+      return await UserAttemptService.saveUserAttempt(
+        user.id,
+        testType,
+        category,
+        subCategory,
+        testNumber,
+        score
+      );
+    } catch (error) {
+      console.error('Error logging user attempt:', error);
+      return false;
+    }
+  };
+
+  // SIMPLIFIED: Renew account with plans
+  const renewAccountWithPlans = async (examTypes: string[], planNames: string[]) => {
     if (!user) return { error: new Error('No user logged in') };
 
     try {
-      console.log(`🔄 Switching to exam type: ${examType}`);
-      
-      // 1. Check if user has an active subscription for this exam type
-      const targetPlanName = examType === 'CM' ? 'Prépa CM' : 
-                            examType === 'CMS' ? 'Prépa CMS' : 
-                            examType === 'CS' ? 'Prépa CS' : 'Prépa CM';
-      
-      const existingSubscription = userSubscriptions.find(sub => 
-        sub.plan_name === targetPlanName && sub.is_active
-      );
-      
-      if (!existingSubscription) {
-        console.error(`❌ No active subscription found for ${examType} (${targetPlanName})`);
-        return { error: new Error(`No active subscription found for ${examType}`) };
-      }
-      
-      console.log(`✅ Found active subscription for ${examType}:`, existingSubscription.id);
-      
-      // 2. Update the local state immediately
-      setSelectedExamTypeState(examType);
-      
-      // 3. Update the profile with the new plan name (for tracking)
-      await updateProfile({ plan_name: examType });
-      
-      console.log(`✅ Switched to exam type: ${examType}`);
-      
-      // 4. Refresh data to ensure consistency
-      await fetchUserSubscriptions();
-
-      return { error: null };
-    } catch (error) {
-      console.error('Set selected exam type error:', error);
-      return { error };
-    }
-  };
-
-  // Extend subscription end date for renewal
-  const extendSubscriptionEndDate = async (userId: string, months: number = 6) => {
-    try {
-      // First, get all expired subscriptions for this user
-      const { data: expiredSubs } = await supabase
-        .from('subscriptions')
-        .select('*')
-        .eq('user_id', userId)
-        .eq('is_active', false);
-
-      if (expiredSubs && expiredSubs.length > 0) {
-        // Extend each expired subscription
-        for (const sub of expiredSubs) {
-          const newEndDate = new Date();
-          newEndDate.setMonth(newEndDate.getMonth() + months);
-          
-          await supabase
-            .from('subscriptions')
-            .update({
-              end_date: newEndDate.toISOString(),
-              is_active: true
-            })
-            .eq('id', sub.id);
-        }
-      }
-
-      return { error: null };
-    } catch (error) {
-      console.error('Error extending subscription:', error);
-      return { error };
-    }
-  };
-
-  // Create subscriptions for renewal
-  const createSubscriptionsForRenewal = async (userId: string, planNames: string[]) => {
-    try {
-      // Check which plans already exist
-      const { data: existingSubs } = await supabase
-        .from('subscriptions')
-        .select('plan_name')
-        .eq('user_id', userId);
-
-      const existingPlanNames = existingSubs?.map(sub => sub.plan_name) || [];
-      const newPlanNames = planNames.filter(planName => !existingPlanNames.includes(planName));
-
-      if (newPlanNames.length === 0) {
-        console.log('All plans already exist, skipping creation');
-        return { error: null };
-      }
-
+      // Create subscriptions for all plans
       const startDate = new Date();
       const endDate = new Date();
       endDate.setMonth(endDate.getMonth() + 6); // 6 months from now
 
-      const subscriptions = newPlanNames.map(planName => ({
-        user_id: userId,
+      const subscriptions = planNames.map(planName => ({
+        user_id: user.id,
         plan_name: planName,
         start_date: startDate.toISOString(),
         end_date: endDate.toISOString(),
         is_active: true,
       }));
 
-      console.log(`Creating ${subscriptions.length} new subscriptions:`, newPlanNames);
+      console.log(`Creating ${subscriptions.length} subscriptions:`, planNames);
 
       const { error } = await supabase
         .from('subscriptions')
         .insert(subscriptions);
 
+      if (!error) {
+        // Set selected exam type
+        if (examTypes.length > 0) {
+          setSelectedExamTypeState(examTypes[0] as 'CM' | 'CMS' | 'CS');
+        }
+
+        // Refresh data
+        await fetchSubscription();
+        await fetchUserSubscriptions();
+      }
+
       return { error };
     } catch (error) {
-      console.error('Error creating renewal subscriptions:', error);
+      console.error('Error renewing account:', error);
       return { error };
     }
   };
 
-  // Main account renewal function
-  const renewAccountWithPlans = async (examTypes: string[], planNames: string[]) => {
+  // SIMPLIFIED: Replace exam type
+  const replaceExamType = async (newExamType: string) => {
     if (!user) return { error: new Error('No user logged in') };
 
     try {
-      console.log('Renewing account with plans:', planNames);
-      
-      // 1. Get all existing subscriptions for this user
-      const { data: existingSubscriptions } = await supabase
+      // Deactivate all current plans
+      const { error: deactivateError } = await supabase
         .from('subscriptions')
-        .select('*')
-        .eq('user_id', user.id);
+        .update({ is_active: false })
+        .eq('user_id', user.id)
+        .eq('is_active', true);
 
-      if (existingSubscriptions && existingSubscriptions.length > 0) {
-        // 2a. Deactivate ALL existing subscriptions first
-        await supabase
-          .from('subscriptions')
-          .update({ is_active: false })
-          .eq('user_id', user.id);
-
-        // 2b. Activate only the selected plans
-        for (const planName of planNames) {
-          const existingSub = existingSubscriptions.find(sub => sub.plan_name === planName);
-          
-          if (existingSub) {
-            // Extend existing subscription
-            const newEndDate = new Date();
-            newEndDate.setMonth(newEndDate.getMonth() + 6);
-            
-            await supabase
-              .from('subscriptions')
-              .update({
-                end_date: newEndDate.toISOString(),
-                is_active: true
-              })
-              .eq('id', existingSub.id);
-          } else {
-            // Create new subscription for this plan
-            await createSubscriptionsForRenewal(user.id, [planName]);
-          }
-        }
-      } else {
-        // 2c. Create all subscriptions if none exist
-        await createSubscriptionsForRenewal(user.id, planNames);
+      if (deactivateError) {
+        console.error('Error deactivating plans:', deactivateError);
       }
 
-      // 3. Set selected exam type intelligently
-      if (examTypes.length > 0) {
-        // If user has multiple exam types, prefer the highest level (CS > CMS > CM)
-        let selectedType: 'CM' | 'CMS' | 'CS';
-        if (examTypes.includes('CS')) {
-          selectedType = 'CS';
-        } else if (examTypes.includes('CMS')) {
-          selectedType = 'CMS';
-        } else {
-          selectedType = 'CM';
-        }
-        console.log('🔄 Renewal: Setting selectedExamType from', selectedExamType, 'to', selectedType, 'based on examTypes:', examTypes);
-        setSelectedExamTypeState(selectedType);
-        console.log('✅ Renewal: selectedExamType set to:', selectedType);
+      // Create new plan
+      const planMap = {
+        'CM': 'Prépa CM',
+        'CMS': 'Prépa CMS',
+        'CS': 'Prépa CS'
+      };
+      
+      const planName = planMap[newExamType as keyof typeof planMap];
+      if (!planName) {
+        return { error: new Error('Type d\'examen invalide') };
       }
 
-      // 4. Refresh data
-      await fetchSubscription();
-      await fetchUserSubscriptions();
+      const startDate = new Date();
+      const endDate = new Date();
+      endDate.setDate(endDate.getDate() + 30);
 
-      console.log('Account renewed successfully with plans:', planNames);
-      return { error: null };
+      const { error } = await supabase
+        .from('subscriptions')
+        .insert({
+          user_id: user.id,
+          plan_name: planName,
+          is_active: true,
+          start_date: startDate.toISOString(),
+          end_date: endDate.toISOString(),
+        });
+
+      if (!error) {
+        // Update profile with new plan name
+        await updateProfile({ 
+          plan_name: newExamType as any
+        });
+        await fetchUserSubscriptions();
+      }
+
+      return { error };
     } catch (error) {
-      console.error('Error renewing account:', error);
+      console.error('Replace exam type error:', error);
       return { error };
     }
   };

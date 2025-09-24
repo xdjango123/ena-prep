@@ -4,6 +4,8 @@ import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
 import { useSidebar } from '../contexts/SidebarContext';
 import { TestResultService } from '../services/testResultService';
 import { useSubscriptionStatus } from '../hooks/useSubscriptionStatus';
+import { useRenewalFlow } from '../hooks/useRenewalFlow';
+import RenewalModal from '../components/modals/RenewalModal';
 import { 
   BookOpen, 
   BrainCircuit, 
@@ -70,6 +72,16 @@ export default function DashboardPage() {
   const [overallProgress, setOverallProgress] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [hasInitialized, setHasInitialized] = useState(false);
+  
+  // Import renewal flow hook
+  const { 
+    isRenewalModalOpen, 
+    renewalState, 
+    openRenewalModal, 
+    closeRenewalModal, 
+    handleRenewalComplete, 
+    handleBackToHome 
+  } = useRenewalFlow();
   
   // Use subscription status hook
   const {
@@ -153,9 +165,9 @@ export default function DashboardPage() {
   };
 
 
-  // Handle subscription upgrade
+  // Handle subscription upgrade - open renewal modal instead of going to profile
   const handleUpgrade = () => {
-    navigate('/dashboard/profile');
+    openRenewalModal('dashboard_renewal');
   };
   const getSubscriptionIcon = (planName: string) => {
     switch (planName) {
@@ -215,26 +227,15 @@ export default function DashboardPage() {
             <div className="space-y-3">
               <button
                 onClick={handleUpgrade}
-                className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2"
+                className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 text-white py-3 px-4 rounded-lg font-medium hover:from-yellow-600 hover:to-yellow-700 transition-all duration-200 shadow-md"
               >
-                <Crown className="w-5 h-5" />
-                <span>Renouveler mon abonnement</span>
+                Renouveler mon abonnement
               </button>
               <button
-                onClick={async () => {
-                  await refreshSubscriptionData();
-                  window.location.reload();
-                }}
-                className="w-full bg-green-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center justify-center space-x-2"
-              >
-                <Sparkles className="w-5 h-5" />
-                <span>Actualiser mes données</span>
-              </button>
-              <button
-                onClick={() => navigate('/dashboard/profile')}
+                onClick={handleBackToHome}
                 className="w-full bg-gray-100 text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-200 transition-colors"
               >
-                Gérer mon profil
+                Retour à l'accueil
               </button>
             </div>
           </div>
@@ -410,6 +411,15 @@ export default function DashboardPage() {
           </Link>
         </div>
       </div>
+      
+      {/* Renewal Modal */}
+      <RenewalModal
+        isOpen={isRenewalModalOpen}
+        onClose={closeRenewalModal}
+        currentPlan={renewalState?.currentPlan}
+        returnTo={renewalState?.returnTo}
+        intent={renewalState?.intent}
+      />
     </div>
   );
 }

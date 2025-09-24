@@ -232,3 +232,4 @@ export const QuizSeriesResult: React.FC<QuizSeriesResultProps> = ({
     </div>
   );
 };
+
