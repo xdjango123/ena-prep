@@ -23,7 +23,7 @@ interface SecureExamInterfaceProps {
 }
 
 export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit }) => {
-  const { user, profile } = useSupabaseAuth();
+  const { user, profile, selectedExamType } = useSupabaseAuth();
   const { examId } = useParams<{ examId: string }>();
   const navigate = useNavigate();
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -143,8 +143,8 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
         
         for (const subject of subjects) {
           try {
-            // Get user's exam type, default to CS if not available
-            const userExamType = profile?.exam_type || 'CS';
+            // Get user's exam type, use same logic as ExamPage for consistency
+            const userExamType = selectedExamType || profile?.plan_name || 'CM';
             
             // Use the new pre-generated exam blanc questions method
             const subjectQuestions = await QuestionService.getExamBlancQuestionsFromPreGenerated(
@@ -420,8 +420,8 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
         LOG: subjectTotals.LOG > 0 ? Math.round((subjectScores.LOG / subjectTotals.LOG) * 100) : 0
       };
       
-      // Get user's exam type from profile or default to CS
-      const userExamType = profile?.exam_type || 'CS';
+      // Get user's exam type, use same logic as ExamPage for consistency
+      const userExamType = selectedExamType || profile?.plan_name || 'CM';
       console.log(`💾 Saving to database: user=${user.id}, examType=${userExamType}, examNumber=${examId}, score=${overallScore}`);
       
       try {

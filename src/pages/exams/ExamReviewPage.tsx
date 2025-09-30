@@ -21,14 +21,14 @@ interface Question {
 export const ExamReviewPage: React.FC = () => {
   const { examId } = useParams<{ examId: string }>();
   const navigate = useNavigate();
-  const { user, profile } = useSupabaseAuth();
+  const { user, profile, selectedExamType } = useSupabaseAuth();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [userAnswers, setUserAnswers] = useState<Map<string, string>>(new Map());
   const [loading, setLoading] = useState(true);
   const [examResult, setExamResult] = useState<any>(null);
 
-  // Get user's exam type
-  const userExamType = profile?.exam_type || 'CS';
+  // Get user's exam type, use same logic as ExamPage for consistency
+  const userExamType = selectedExamType || profile?.plan_name || 'CM';
 
   useEffect(() => {
     const loadExamData = async () => {
