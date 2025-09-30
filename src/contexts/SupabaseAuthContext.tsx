@@ -269,9 +269,14 @@ export const SupabaseAuthProvider: React.FC<SupabaseAuthProviderProps> = ({ chil
           const activeSubscriptions = data.filter(sub => sub.is_active);
           if (activeSubscriptions.length > 0) {
             const firstSubscription = activeSubscriptions[0];
-            const examType = firstSubscription.plan_name.includes('CM') ? 'CM' : 
-                            firstSubscription.plan_name.includes('CMS') ? 'CMS' : 
-                            firstSubscription.plan_name.includes('CS') ? 'CS' : 'CM';
+            const examType = firstSubscription.plan_name.includes('CMS') ? 'CMS' : 
+                            firstSubscription.plan_name.includes('CS') ? 'CS' : 
+                            firstSubscription.plan_name.includes('CM') ? 'CM' : null;
+            
+            if (!examType) {
+              console.error('❌ Could not determine exam type from plan name:', firstSubscription.plan_name);
+              return; // ✅ Don't set selectedExamType if we can't determine it
+            }
             
             console.log(`🔄 Auto-selecting first available exam type: ${examType} (selectedExamType was null)`);
             setSelectedExamTypeState(examType as 'CM' | 'CMS' | 'CS');
@@ -310,8 +315,20 @@ export const SupabaseAuthProvider: React.FC<SupabaseAuthProviderProps> = ({ chil
       // Use metadata from Supabase, fallback to localStorage, then defaults
       const firstName = userMetadata?.first_name || userData?.firstName || 'User';
       const lastName = userMetadata?.last_name || userData?.lastName || '';
-      const examTypes = userMetadata?.exam_types || userData?.examTypes || ['CM'];
-      const planNames = userMetadata?.plan_names || userData?.planNames || ['Prépa CM'];
+      const examTypes = userMetadata?.exam_types || userData?.examTypes;
+      const planNames = userMetadata?.plan_names || userData?.planNames;
+      
+      // ✅ Validate that we have exam types and plan names
+      if (!examTypes || examTypes.length === 0) {
+        console.error('❌ No exam types found in metadata or localStorage');
+        throw new Error('No exam types selected during signup');
+      }
+      if (!planNames || planNames.length === 0) {
+        console.error('❌ No plan names found in metadata or localStorage');
+        throw new Error('No plan names found during signup');
+      }
+      
+      console.log('✅ Found exam types:', examTypes, 'and plan names:', planNames);
       
       // Ensure plan names match exam types (use "Prépa" not "Préparation")
       const expectedPlanNames = examTypes.map((examType: string) => 
@@ -321,8 +338,8 @@ export const SupabaseAuthProvider: React.FC<SupabaseAuthProviderProps> = ({ chil
       );
       
       // Use the first exam type as the primary one for backward compatibility
-      const primaryExamType = examTypes[0] || 'CM';
-      const primaryPlanName = expectedPlanNames[0] || 'Prépa CM';
+      const primaryExamType = examTypes[0]; // ✅ No fallback - should be validated above
+      const primaryPlanName = expectedPlanNames[0]; // ✅ No fallback - should be validated above
 
       console.log('Creating profile with data:', { firstName, lastName, examTypes, planNames });
       console.log('User metadata:', userMetadata);
@@ -410,7 +427,10 @@ export const SupabaseAuthProvider: React.FC<SupabaseAuthProviderProps> = ({ chil
         setProfileCreated(true);
       }
     } catch (error) {
-      console.error('Error in createUserProfileIfNeeded:', error);
+      console.error('❌ Error in createUserProfileIfNeeded:', error);
+      // ✅ Don't set profileCreated to true if there was an error
+      // This will allow the function to retry on next login
+      setProfileCreated(false);
     }
   };
 

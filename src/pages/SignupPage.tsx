@@ -34,7 +34,7 @@ const SignupPage: React.FC = () => {
   const { register, handleSubmit, formState: { errors }, watch, setValue } = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
-      examTypes: ['CM']
+      examTypes: [] // ✅ No default - user must explicitly select
     }
   });
 
@@ -82,6 +82,15 @@ const SignupPage: React.FC = () => {
     setError('');
     
     try {
+      // ✅ Validate that user has selected at least one exam type
+      if (!data.examTypes || data.examTypes.length === 0) {
+        setError('Veuillez sélectionner au moins un type d\'examen');
+        setIsSubmitting(false);
+        return;
+      }
+      
+      console.log('✅ User selected exam types:', data.examTypes);
+      
       // Generate plan names based on exam types
       const planMap = {
         'CM': 'Prépa CM',
@@ -90,6 +99,7 @@ const SignupPage: React.FC = () => {
       };
       
       const planNames = data.examTypes.map(examType => planMap[examType as keyof typeof planMap]);
+      console.log('✅ Generated plan names:', planNames);
 
       const { error } = await signUp(
         data.email,
