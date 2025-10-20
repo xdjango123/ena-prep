@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
 import { useSidebar } from '../contexts/SidebarContext';
 import { TestResultService } from '../services/testResultService';
 import { useSubscriptionStatus } from '../hooks/useSubscriptionStatus';
 import { useRenewalFlow } from '../hooks/useRenewalFlow';
 import RenewalModal from '../components/modals/RenewalModal';
+import { supabase } from '../lib/supabase';
 import { 
   BookOpen, 
   BrainCircuit, 
@@ -69,9 +70,11 @@ export default function DashboardPage() {
   const { user, profile, subscription, selectedExamType, refreshSubscriptionData, userSubscriptions } = useSupabaseAuth();
   const { close } = useSidebar();
   const navigate = useNavigate();
+  const location = useLocation();
   const [overallProgress, setOverallProgress] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [hasInitialized, setHasInitialized] = useState(false);
+  
   
   // Import renewal flow hook
   const { 

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Clock, CheckCircle, XCircle, Home, Trophy, Brain, ChevronLeft, ChevronRight } from 'lucide-react';
 import { QuestionService } from '../../services/questionService';
+import { formatExponents } from '../../utils/mathFormatting';
 import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
 
 interface Question {
@@ -53,7 +54,7 @@ export const ExamInterface: React.FC<ExamInterfaceProps> = ({ onExit }) => {
             const userExamType = profile?.exam_type || 'CS';
             
             // Use the new pre-generated exam blanc questions method
-            const subjectQuestions = await QuestionService.getExamBlancQuestionsFromPreGenerated(
+            const subjectQuestions = await QuestionService.getExamBlancQuestions(
               subject, 
               examId || '1', 
               userExamType as 'CM' | 'CMS' | 'CS', 
@@ -93,13 +94,18 @@ export const ExamInterface: React.FC<ExamInterfaceProps> = ({ onExit }) => {
                 }
               }
               
+              const formattedOptions = options?.map(option => formatExponents(option));
+
               return {
                 id: dbQ.id,
                 type,
-                question: dbQ.question_text,
-                options,
+                question: formatExponents(dbQ.question_text),
+                options: formattedOptions,
                 correctAnswer,
-                explanation: (dbQ as any).explanation || `La réponse correcte est ${options?.[correctAnswer as number] || correctAnswer}.`,
+                explanation: formatExponents(
+                  (dbQ as any).explanation ||
+                    `La réponse correcte est ${formattedOptions?.[correctAnswer as number] || correctAnswer}.`
+                ),
                 difficulty: dbQ.difficulty || 'medium',
                 category: dbQ.category,
                 exam_type: dbQ.exam_type,

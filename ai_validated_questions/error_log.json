@@ -1,0 +1,1080 @@
+[
+  {
+    "timestamp": "2025-10-15T02:37:07.264681",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_21",
+    "error": "Claude API error: Error code: 500 - {'type': 'error', 'error': {'type': 'api_error', 'message': 'Internal server error'}, 'request_id': None}",
+    "question_text": "Traduisez : Had she known the truth, she would have acted differently."
+  },
+  {
+    "timestamp": "2025-10-15T02:57:14.785681",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_9",
+    "error": "Claude API error: Error code: 529 - {'type': 'error', 'error': {'type': 'overloaded_error', 'message': 'Overloaded'}, 'request_id': None}",
+    "question_text": "La capitale de la Finlande est :"
+  },
+  {
+    "timestamp": "2025-10-15T03:04:06.433004",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_6",
+    "error": "Claude API error: Error code: 529 - {'type': 'error', 'error': {'type': 'overloaded_error', 'message': 'Overloaded'}, 'request_id': None}",
+    "question_text": "Quelle équipe NBA détient le plus de titres de champion ?"
+  },
+  {
+    "timestamp": "2025-10-15T03:04:31.220400",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_47",
+    "error": "Claude API error: Error code: 529 - {'type': 'error', 'error': {'type': 'overloaded_error', 'message': 'Overloaded'}, 'request_id': None}",
+    "question_text": "Troisième devient deuxième Qui arrive premier ?"
+  },
+  {
+    "timestamp": "2025-10-15T03:05:00.950340",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_27",
+    "error": "Claude API error: Error code: 529 - {'type': 'error', 'error': {'type': 'overloaded_error', 'message': 'Overloaded'}, 'request_id': None}",
+    "question_text": "Correct: “Please ____ the wet floor.”"
+  },
+  {
+    "timestamp": "2025-10-15T04:01:06.033597",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_50",
+    "error": "Claude API error: Error code: 529 - {'type': 'error', 'error': {'type': 'overloaded_error', 'message': 'Overloaded'}, 'request_id': None}",
+    "question_text": "🔺 × 4 → ◼️ ; ◼️ ÷ 2 → 🔷 ; 🔺 → ?"
+  },
+  {
+    "timestamp": "2025-10-15T04:01:57.411864",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_51",
+    "error": "Claude API error: Error code: 529 - {'type': 'error', 'error': {'type': 'overloaded_error', 'message': 'Overloaded'}, 'request_id': None}",
+    "question_text": "(3/7)x = 21 ; x = ?"
+  },
+  {
+    "timestamp": "2025-10-15T04:02:18.135815",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_45",
+    "error": "Claude API error: Error code: 529 - {'type': 'error', 'error': {'type': 'overloaded_error', 'message': 'Overloaded'}, 'request_id': None}",
+    "question_text": "🔴 + ⚫ + 🔵 = 30 ; ⚫ = 8 ; 🔵 = 12 ; 🔴 = ?"
+  },
+  {
+    "timestamp": "2025-10-15T04:02:57.659115",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_7",
+    "error": "Claude API error: Error code: 529 - {'type': 'error', 'error': {'type': 'overloaded_error', 'message': 'Overloaded'}, 'request_id': None}",
+    "question_text": "Phrasal verb : To get along with someone signifie :"
+  },
+  {
+    "timestamp": "2025-10-15T04:54:23.416468",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_10",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "10- Fill in: It’s high time you………..your homework."
+  },
+  {
+    "timestamp": "2025-10-15T04:54:25.271170",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_60",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "20- Si x/2 + x/4 = 18, quelle est la valeur de x ?"
+  },
+  {
+    "timestamp": "2025-10-15T04:54:27.061018",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_28",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "8- Quel pays est le plus peuplé du monde ?"
+  },
+  {
+    "timestamp": "2025-10-15T04:54:28.794120",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_55",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "15- Un collier coûte 3 fois un bracelet. Si la somme est 400 €, prix du bracelet ?"
+  },
+  {
+    "timestamp": "2025-10-15T04:54:30.565924",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_36",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "16- Laquelle de ces guerres est la plus ancienne ?"
+  },
+  {
+    "timestamp": "2025-10-15T04:54:32.517130",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_15",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "15- Identify the correct sentence:"
+  },
+  {
+    "timestamp": "2025-10-15T04:54:34.463903",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_45",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "5- Complétez la série : 1, 2, 6, 24, 120, ?"
+  },
+  {
+    "timestamp": "2025-10-15T04:54:36.230219",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_2",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "2- If I………..known about the meeting, I would have attended."
+  },
+  {
+    "timestamp": "2025-10-15T04:54:38.172601",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_40",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "20- Qui a peint “La Nuit étoilée” ?"
+  },
+  {
+    "timestamp": "2025-10-15T04:54:39.904714",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_50",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "10- Si le carré de x est 144, quelle est la valeur de x ?"
+  },
+  {
+    "timestamp": "2025-10-15T04:54:41.676940",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_47",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "7- Une corde de 20 m est coupée en 4 parties en progression arithmétique, le plus petit morceau mesu"
+  },
+  {
+    "timestamp": "2025-10-15T04:54:43.452414",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_31",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "11- Antonyme de “Abondant” :"
+  },
+  {
+    "timestamp": "2025-10-15T04:54:45.264289",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_19",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "19- Choose correct: I wish it………..raining now."
+  },
+  {
+    "timestamp": "2025-10-15T04:54:47.207863",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_6",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "6- Fill in: I wish I………..able to travel more often."
+  },
+  {
+    "timestamp": "2025-10-15T04:54:49.113865",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_48",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "8- Complétez la série : 1, 1, 2, 6, 24, ?"
+  },
+  {
+    "timestamp": "2025-10-15T04:54:51.015407",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_41",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "1- Complétez la suite : 2, 6, 12, 20, 30, ?"
+  },
+  {
+    "timestamp": "2025-10-15T04:54:52.874435",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_21",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "1- Qui a écrit “1984” ?"
+  },
+  {
+    "timestamp": "2025-10-15T04:54:54.725811",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_8",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "8- Complete: We were………..to finish the project on time."
+  },
+  {
+    "timestamp": "2025-10-15T04:54:56.697584",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_44",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "4- Un rectangle a un périmètre de 48 cm et une longueur de 14 cm. Quelle est sa largeur ?"
+  },
+  {
+    "timestamp": "2025-10-15T04:54:58.716064",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_54",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "14- Complétez : 5, 11, 23, 47, ?"
+  },
+  {
+    "timestamp": "2025-10-15T04:55:00.562512",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_16",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "16- Fill in: It’s important to………..a balanced diet."
+  },
+  {
+    "timestamp": "2025-10-15T04:55:02.321561",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_4",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "4- Which is correct?"
+  },
+  {
+    "timestamp": "2025-10-15T04:55:04.055521",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_3",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "3- Complete: She insisted that he………..on time."
+  },
+  {
+    "timestamp": "2025-10-15T04:55:05.833066",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_56",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "16- Complétez la suite : 2, 4, 12, 48, ?"
+  },
+  {
+    "timestamp": "2025-10-15T04:55:07.684379",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_10",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "10- She is committed………..improving her skills."
+  },
+  {
+    "timestamp": "2025-10-15T04:55:09.591638",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_15",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "15- I wish it………..raining yesterday."
+  },
+  {
+    "timestamp": "2025-10-15T04:55:11.550822",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_50",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "10- Si x² = 144, quelle est la valeur de x ?"
+  },
+  {
+    "timestamp": "2025-10-15T04:55:13.449774",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_39",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "19- Que signifie l’expression “Avoir plusieurs cordes à son arc” ?"
+  },
+  {
+    "timestamp": "2025-10-15T04:55:15.354777",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_36",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "16- Qui a peint La Persistance de la mémoire ?"
+  },
+  {
+    "timestamp": "2025-10-15T04:55:17.263089",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_21",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "1- Amadou Hampâté Bâ est surtout connu pour ?"
+  },
+  {
+    "timestamp": "2025-10-15T04:55:19.108286",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_35",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "15- Laquelle de ces guerres est la plus récente ?"
+  },
+  {
+    "timestamp": "2025-10-15T04:55:21.021620",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_13",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "13- He behaves………..than expected."
+  },
+  {
+    "timestamp": "2025-10-15T04:55:22.800400",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_45",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "5- Complétez : 1, 2, 6, 24, 120, ?"
+  },
+  {
+    "timestamp": "2025-10-15T04:55:24.571893",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_48",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "8- Complétez : 1, 1, 2, 6, 24, ?"
+  },
+  {
+    "timestamp": "2025-10-15T04:55:26.470160",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_52",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "12- Un train roule à 90 km/h et traverse un tunnel de 1,8 km. Temps pour le tunnel (en h) ?"
+  },
+  {
+    "timestamp": "2025-10-15T04:55:28.190118",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_54",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "14- Suite : 5, 11, 23, 47, ?"
+  },
+  {
+    "timestamp": "2025-10-15T04:55:30.196220",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_27",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "7- Que signifie l’expression “Mettre la charrue avant les bœufs” ?"
+  },
+  {
+    "timestamp": "2025-10-15T04:55:32.084737",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_56",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "16- Suite : 2, 4, 12, 48, ?"
+  },
+  {
+    "timestamp": "2025-10-15T04:55:34.104463",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_19",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "19- He wishes he………..to the meeting last week."
+  },
+  {
+    "timestamp": "2025-10-15T04:55:35.881118",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_3",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "3- Hardly he had arrived when it started raining. Which is correct?"
+  },
+  {
+    "timestamp": "2025-10-15T04:55:37.616179",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_9",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "9- He suggested that I………..a doctor."
+  },
+  {
+    "timestamp": "2025-10-15T04:55:39.523573",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_22",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "2- Quelle est la capitale de l’Australie ?"
+  },
+  {
+    "timestamp": "2025-10-15T04:55:41.457992",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_28",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "8- Lequel de ces pays est membre de l’ONU ?"
+  },
+  {
+    "timestamp": "2025-10-15T04:55:43.274676",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_43",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "3- Trouvez le nombre manquant : 7, 14, 28, ?"
+  },
+  {
+    "timestamp": "2025-10-15T04:55:45.266070",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_38",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "18- Qui a écrit Candide ?"
+  },
+  {
+    "timestamp": "2025-10-15T04:55:47.015820",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_31",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "11- Complétez le proverbe : “Qui ne risque………..”"
+  },
+  {
+    "timestamp": "2025-10-15T04:55:49.044086",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_30",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "10- Qui a écrit Roméo et Juliette ?"
+  },
+  {
+    "timestamp": "2025-10-15T04:55:50.793892",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_20",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "20- Synonym of “scrutinize”:"
+  },
+  {
+    "timestamp": "2025-10-15T04:55:52.610902",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_46",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "6- Qui est le plus petit ? A > B > C, D < C."
+  },
+  {
+    "timestamp": "2025-10-15T04:55:54.578193",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_12",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "12- Which word is closest in meaning to “resilient”?"
+  },
+  {
+    "timestamp": "2025-10-15T04:55:56.492841",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_53",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "13- Nouvelle question - Résolvez l’énigme : La somme de trois nombres consécutifs est 72. Quel est l"
+  },
+  {
+    "timestamp": "2025-10-15T04:55:58.245837",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_23",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "3- Complétez le proverbe : “Petit à petit………..”"
+  },
+  {
+    "timestamp": "2025-10-15T04:56:00.022533",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_6",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "6- She insisted that we………..more careful."
+  },
+  {
+    "timestamp": "2025-10-15T04:56:02.018295",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_41",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "1- Complétez la suite : 2, 6, 12, 20, 30, ?"
+  },
+  {
+    "timestamp": "2025-10-15T04:56:03.805343",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_27",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "7- Quel pays utilise la roupie comme monnaie ?"
+  },
+  {
+    "timestamp": "2025-10-15T04:56:05.777713",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_29",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "9- Quelle est la capitale du Qatar ?"
+  },
+  {
+    "timestamp": "2025-10-15T04:56:07.581266",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_43",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "3- Trouvez le nombre manquant : 4, 7, 11, 16, ?"
+  },
+  {
+    "timestamp": "2025-10-15T04:56:09.542258",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_23",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "3- Lequel de ces pays est un archipel ?"
+  },
+  {
+    "timestamp": "2025-10-15T04:56:11.315063",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_38",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "18- Qui est le fondateur de la psychanalyse ?"
+  },
+  {
+    "timestamp": "2025-10-15T04:56:13.074495",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_20",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "20- Identify the error: “Few of the informations are reliable.”"
+  },
+  {
+    "timestamp": "2025-10-15T04:56:14.873449",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_41",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "1- Complétez : 5, 10, 20, 40, ?"
+  },
+  {
+    "timestamp": "2025-10-15T04:56:16.732961",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_42",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "2- Si 6 ouvriers construisent 6 maisons en 6 jours, combien de temps pour 12 ouvriers pour 12 maison"
+  },
+  {
+    "timestamp": "2025-10-15T04:56:18.595138",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_11",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "11- Fill in: “She prefers………..alone in the library.”"
+  },
+  {
+    "timestamp": "2025-10-15T04:56:20.581322",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_9",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "9- Identify the error: “Neither of them have completed the task.”"
+  },
+  {
+    "timestamp": "2025-10-15T04:56:22.525606",
+    "type": "GPT-5_ERROR",
+    "question_id": "unknown_54",
+    "error": "GPT-5 API error: Connection error.",
+    "question_text": "14- Suite : 2, 5, 11, 23, ?"
+  },
+  {
+    "timestamp": "2025-10-15T07:49:38.385371",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_40",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8w5MrFPxduNYPQq9cMo'}",
+    "question_text": "Langue la plus parlée dans le monde :"
+  },
+  {
+    "timestamp": "2025-10-15T07:49:41.039123",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_44",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8w5ZFbiWFTDSFBXkYSJ'}",
+    "question_text": "Compléter : 1, 4, 9, 16, ?"
+  },
+  {
+    "timestamp": "2025-10-15T07:49:47.075816",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_29",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8w614sdff6UmQcMe73Q'}",
+    "question_text": "Nombre de continents :"
+  },
+  {
+    "timestamp": "2025-10-15T07:49:51.900886",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_46",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8w6Mi6VocnHx9ws1ZdA'}",
+    "question_text": "15 % de 200 = ?"
+  },
+  {
+    "timestamp": "2025-10-15T07:49:55.082734",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_28",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8w6aUJJqgJr4ACZZ2HJ'}",
+    "question_text": "Le plus grand organe du corps humain :"
+  },
+  {
+    "timestamp": "2025-10-15T07:49:59.366983",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_57",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8w6udUh1hEBS3Jb2TxF'}",
+    "question_text": "Résoudre : 7 × (2 + 3) - 5 = ?"
+  },
+  {
+    "timestamp": "2025-10-15T07:50:03.458668",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_36",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8w7D4xo9x8V1ntS5PLT'}",
+    "question_text": "Nombre de pays membres de l’ONU (2025) :"
+  },
+  {
+    "timestamp": "2025-10-15T07:50:06.743220",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_26",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8w7T9JQNzqyeELpM6ox'}",
+    "question_text": "L’hymne national français :"
+  },
+  {
+    "timestamp": "2025-10-15T07:50:11.928840",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_10",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8w7qM3472iBXo6zvjQ9'}",
+    "question_text": "Choose the best replacement: “The movie was utterly boring.”"
+  },
+  {
+    "timestamp": "2025-10-15T07:50:15.955411",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_33",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8w88XtpEm1LaPNUpk48'}",
+    "question_text": "Inventeur de l’imprimerie :"
+  },
+  {
+    "timestamp": "2025-10-15T07:50:18.661672",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_60",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8w8KwjVEE2Us1eQqoen'}",
+    "question_text": "Si demain est jeudi, quel jour était-il avant-hier ?"
+  },
+  {
+    "timestamp": "2025-10-15T07:50:24.113380",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_27",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8w8jRccWD1ivbSH1h8K'}",
+    "question_text": "Le plus petit pays du monde :"
+  },
+  {
+    "timestamp": "2025-10-15T07:50:29.472197",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_8",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8w98GJ5nwjb5hD5mRNA'}",
+    "question_text": "“Neither of the answers ___ correct.”"
+  },
+  {
+    "timestamp": "2025-10-15T07:50:34.661538",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_24",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8w9WXFta6rcp5wGhxuc'}",
+    "question_text": "Le plus grand désert du monde :"
+  },
+  {
+    "timestamp": "2025-10-15T08:00:45.340697",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_20",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8wvXT4zmFjXTbbtZGCP'}",
+    "question_text": "“To cut corners” means:"
+  },
+  {
+    "timestamp": "2025-10-15T08:00:51.241217",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_15",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8wvxdPcEMKRp7AWHxjM'}",
+    "question_text": "“By the time we arrived, the show ___.”"
+  },
+  {
+    "timestamp": "2025-10-15T08:00:55.256778",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_45",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8wwFrEp1cGZ5QZGpfWA'}",
+    "question_text": "Le double du triple de 4 :"
+  },
+  {
+    "timestamp": "2025-10-15T08:00:59.352478",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_22",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8wwZKDXixbmC29oFxjs'}",
+    "question_text": "Symbole chimique du sodium :"
+  },
+  {
+    "timestamp": "2025-10-15T08:01:06.451939",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_5",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8wx5ganLnMagq2p6wSo'}",
+    "question_text": "“She was accused ___ cheating.”"
+  },
+  {
+    "timestamp": "2025-10-15T08:01:11.712610",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_6",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8wxUCuuxB7mxwfrRWrL'}",
+    "question_text": "Correct order: “Never / such / I / heard / a / thing.”"
+  },
+  {
+    "timestamp": "2025-10-15T08:01:18.327599",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_21",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8wxxUX4KUCGchR3ozHA'}",
+    "question_text": "Capitale du Canada :"
+  },
+  {
+    "timestamp": "2025-10-15T08:01:25.783914",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_58",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8wyWKw6aYLcdk3x6aAh'}",
+    "question_text": "20. La majeure partie de l’azote de l’atmosphère se trouve dans quelle couche ?"
+  },
+  {
+    "timestamp": "2025-10-15T08:01:29.331537",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_15",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8wymWzXd6ra8g1giXRe'}",
+    "question_text": "15. Give the feminine form of: Bull"
+  },
+  {
+    "timestamp": "2025-10-15T08:01:33.624209",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_23",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8wz5vGk4X4zLYFVLT6y'}",
+    "question_text": "Suite numérique : 3 - 9 - 27 - 81 - ?"
+  },
+  {
+    "timestamp": "2025-10-15T08:01:40.460683",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_57",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8wzb5DYjweJp7WqdTnZ'}",
+    "question_text": "19. La formule chimique du dioxygène est :"
+  },
+  {
+    "timestamp": "2025-10-15T08:01:44.339246",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_48",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8wzscswELhQUTBzkMr9'}",
+    "question_text": "10. Parmi ces mots, lequel n’a pas de rapport avec les autres ?"
+  },
+  {
+    "timestamp": "2025-10-15T08:01:47.284666",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_44",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8x16CfbaQtFrpmDusGs'}",
+    "question_text": "6. Parmi ces mots, quelle est la bonne orthographe ?"
+  },
+  {
+    "timestamp": "2025-10-15T08:01:52.270615",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_20",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8x1TdGShwfeBbKnHGPZ'}",
+    "question_text": "20. Find the comparative form of: Beautiful"
+  },
+  {
+    "timestamp": "2025-10-15T08:01:58.241981",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_3",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8x1u9BbNkZfmUZzPnFW'}",
+    "question_text": "3. The office staff ……… agree with the new policy."
+  },
+  {
+    "timestamp": "2025-10-15T08:02:08.349268",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_37",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8x2eMDkXLZMabZzPa6M'}",
+    "question_text": "Sens du mot \"péremptoire\""
+  },
+  {
+    "timestamp": "2025-10-15T08:02:11.669934",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_41",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8x2tPpA45145RvvifiN'}",
+    "question_text": "3. Quel est le synonyme de \"procrastination\" ?"
+  },
+  {
+    "timestamp": "2025-10-15T08:02:15.174560",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_17",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8x39WAFUzSYxd6ZkTZo'}",
+    "question_text": "17. Give the feminine form of: Lion"
+  },
+  {
+    "timestamp": "2025-10-15T08:02:18.348691",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_46",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8x3P7U59JMyZ3HBbC5n'}",
+    "question_text": "8. Quel est le pluriel correct : « Les chou-fleurs et les radis étaient frais »"
+  },
+  {
+    "timestamp": "2025-10-15T08:02:22.781791",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_35",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8x3i11woxYY87bMZfpV'}",
+    "question_text": "Quelle phrase contient une faute ?"
+  },
+  {
+    "timestamp": "2025-10-15T08:02:26.661479",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_42",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8x3zYRv1iwJwgR1K1yc'}",
+    "question_text": "4. L’axe est au cylindre ce que le rayon est au :"
+  },
+  {
+    "timestamp": "2025-10-15T08:02:31.155633",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_32",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8x4KjqaNrXvS3RbJySP'}",
+    "question_text": "Synonyme de “concomitant”"
+  },
+  {
+    "timestamp": "2025-10-15T08:02:34.185416",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_49",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8x4YjBuV4oYRehfEqVb'}",
+    "question_text": "11. En quelle année fut créée l’UNESCO ?"
+  },
+  {
+    "timestamp": "2025-10-15T08:02:37.684351",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_24",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8x4oFZ5rGyzFDzf4G8S'}",
+    "question_text": "Une machine double un nombre puis ajoute 4. Quel nombre faut-il entrer pour obtenir 50 à la sortie ?"
+  },
+  {
+    "timestamp": "2025-10-15T08:02:40.984634",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_22",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8x53pA5rFZLpFh2V7hv'}",
+    "question_text": "Si X est le double de Y, et que Y est 3 de moins que Z, quel est X en fonction de Z ?"
+  },
+  {
+    "timestamp": "2025-10-15T08:02:44.831031",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_18",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8x5Kk7WifMicnvtBDo3'}",
+    "question_text": "18. Give the feminine form of: Rooster"
+  },
+  {
+    "timestamp": "2025-10-15T08:02:53.048722",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_36",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8x5w4syhryFuZqmZdH8'}",
+    "question_text": "Complétez : Il est grand temps que tu ____ tes responsabilités."
+  },
+  {
+    "timestamp": "2025-10-15T08:02:56.170692",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_33",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8x6Ahg6Xca4uDv1RTQt'}",
+    "question_text": "Trouver l’erreur logique :"
+  },
+  {
+    "timestamp": "2025-10-15T08:03:01.631269",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_45",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8x6ZqDZ8ApEJQ1T8Qf8'}",
+    "question_text": "7. Quel est le pluriel correct : « Les trompe-l’œil ont été admirés dans le musée »"
+  },
+  {
+    "timestamp": "2025-10-15T08:03:08.738598",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_5",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8x75rVoMnzieu7w11FW'}",
+    "question_text": "5. ……… clever of him not to argue with her?"
+  },
+  {
+    "timestamp": "2025-10-15T08:03:14.168842",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_9",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8x7VeEQioX3vUMJHmGF'}",
+    "question_text": "9. ……… beautiful this painting is!"
+  },
+  {
+    "timestamp": "2025-10-15T08:03:21.163775",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_56",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8x81XppyYNy2DZ9ZYu2'}",
+    "question_text": "18. Quel réalisateur a dirigé la série Dark ?"
+  },
+  {
+    "timestamp": "2025-10-15T08:03:26.371998",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_19",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8x8PpX2hMoE8jzCwt8v'}",
+    "question_text": "19. Give the feminine form of: Tiger"
+  },
+  {
+    "timestamp": "2025-10-15T08:03:29.671277",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_43",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8x8dtr8eXxyymNY3HNb'}",
+    "question_text": "5. Qui fut le premier secrétaire général de l’ONU ?"
+  },
+  {
+    "timestamp": "2025-10-15T08:03:34.597049",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_28",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8x911MBdYcWW4Khdrrz'}",
+    "question_text": "Dans une file, Paul est 5e à partir du début et 7e à partir de la fin. Combien de personnes dans la "
+  },
+  {
+    "timestamp": "2025-10-15T08:03:39.974110",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_50",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8x9PwF4pvsgccLpg6Ew'}",
+    "question_text": "12. Quel est le nom actuel du président de la Commission européenne ?"
+  },
+  {
+    "timestamp": "2025-10-15T08:03:45.251677",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_16",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8x9nSL7j3xhjbCd4J5B'}",
+    "question_text": "Q16. Which sentence is correct?"
+  },
+  {
+    "timestamp": "2025-10-15T08:03:50.863215",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_31",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8xACTTBRotvbA3g7kPC'}",
+    "question_text": "Q11. Quel pays est le plus peuplé du continent africain ?"
+  },
+  {
+    "timestamp": "2025-10-15T08:13:58.631478",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_39",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8xvzyttMYYF3tHU7eEF'}",
+    "question_text": "Q19. Lequel de ces pays n’est pas membre permanent du Conseil de sécurité de l’ONU ?"
+  },
+  {
+    "timestamp": "2025-10-15T08:14:01.748852",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_10",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8xwEDP19prLp4oR5SgL'}",
+    "question_text": "Q10. Which sentence contains an idiomatic expression?"
+  },
+  {
+    "timestamp": "2025-10-15T08:14:05.418514",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_45",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8xwVwRxjLy9qhD4XhmP'}",
+    "question_text": "Q5. Si tous les chiens aboient et que Rex est un chien, que peut-on dire de Rex ?"
+  },
+  {
+    "timestamp": "2025-10-15T08:14:09.014303",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_54",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8xwmChjiAN66KJ348es'}",
+    "question_text": "Q14. Lequel de ces nombres complète la série : 1, 4, 9, 16, ?"
+  },
+  {
+    "timestamp": "2025-10-15T08:14:13.265894",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_12",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8xx5XmhoadC6w2jfMJw'}",
+    "question_text": "Q12. Choose the correct synonym of \"blunt\" in a professional context:"
+  },
+  {
+    "timestamp": "2025-10-15T08:14:17.468352",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_38",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8xxPXVkDsphvHxAijmY'}",
+    "question_text": "Q18. Quel est le principal fleuve du Nigéria ?"
+  },
+  {
+    "timestamp": "2025-10-15T08:14:22.363916",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_32",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8xxkLdid2xv8NVpGbNo'}",
+    "question_text": "Q12. Lequel de ces termes désigne une politique économique restrictive ?"
+  },
+  {
+    "timestamp": "2025-10-15T08:14:26.390875",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_56",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8xy3egr7oJQ1qeeeR24'}",
+    "question_text": "Q16. Trouvez le nombre manquant : 8, 12, 18, 27, ?"
+  },
+  {
+    "timestamp": "2025-10-15T08:14:29.965872",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_15",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8xyJpW1dTAscc9RSmVH'}",
+    "question_text": "Q15. \"Hardly __________ when the phone rang.\""
+  },
+  {
+    "timestamp": "2025-10-15T08:14:33.368575",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_57",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8xyZTpAqnvQ4jRR71Gm'}",
+    "question_text": "Q17. Si hier était jeudi, quel jour sera dans 100 jours ?"
+  },
+  {
+    "timestamp": "2025-10-15T08:14:37.460353",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_46",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8xyppJ8bPd4DXcFZ5xr'}",
+    "question_text": "Q6. Une horloge indique 15h. Quel angle y a-t-il entre les aiguilles ?"
+  },
+  {
+    "timestamp": "2025-10-15T08:14:43.636557",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_53",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8xzKNGZB7EboiuSRpTn'}",
+    "question_text": "Q13. Une entreprise augmente le salaire de 10% puis le réduit de 10%. Quel est le pourcentage de var"
+  },
+  {
+    "timestamp": "2025-10-15T08:14:49.025171",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_26",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8xziCht6fXSJY18Aw8T'}",
+    "question_text": "Q6. Lequel de ces éléments est un gaz noble ?"
+  },
+  {
+    "timestamp": "2025-10-15T08:14:52.750744",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_7",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8xzz8uN9vW4QLRMYd6u'}",
+    "question_text": "Q7. Correct phrasal verb: \"We must __________ the new regulations.\""
+  },
+  {
+    "timestamp": "2025-10-15T08:14:57.015507",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_24",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8y1JZBVmiQiPmMGWn2E'}",
+    "question_text": "Q4. Quelle est la principale ressource exportée par le Mali ?"
+  },
+  {
+    "timestamp": "2025-10-15T08:15:01.606201",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_11",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8y1eCP7BNf4utSXCzS6'}",
+    "question_text": "Q11. \"Despite __________ young, he managed a large team.\""
+  },
+  {
+    "timestamp": "2025-10-15T08:15:08.136885",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_60",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8y287uAAWZW2itScxJS'}",
+    "question_text": "Q20. Trois personnes ont des âges tels que la somme est 90 ans. Si le plus âgé a 2 fois l’âge du plu"
+  },
+  {
+    "timestamp": "2025-10-15T08:15:10.562617",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_49",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8y2JU1KAAnQKPfN21C8'}",
+    "question_text": "Q9. Lequel de ces nombres n’a pas de facteur premier commun avec 12 ?"
+  },
+  {
+    "timestamp": "2025-10-15T08:15:13.080571",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_42",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8y2VHdAZmHkvNxB6Yv2'}",
+    "question_text": "Q2. Série : 3, 8, 15, 24, ?"
+  },
+  {
+    "timestamp": "2025-10-15T08:15:17.821998",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_35",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8y2qQ6rHE6PAkHEwWqa'}",
+    "question_text": "Q15. Laquelle de ces organisations est spécialisée dans la santé publique ?"
+  },
+  {
+    "timestamp": "2025-10-15T08:15:23.406014",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_30",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8y3FM1NFQZNfWZtdEaj'}",
+    "question_text": "Q10. Quel est l’organe principal de l’ONU chargé du maintien de la paix ?"
+  },
+  {
+    "timestamp": "2025-10-15T08:15:29.256644",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_2",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8y3gN9uSrWkPBaV18VW'}",
+    "question_text": "Q2. Which sentence is grammatically correct?"
+  },
+  {
+    "timestamp": "2025-10-15T08:15:32.437364",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_8",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8y3v1ShpZJFScabUBUW'}",
+    "question_text": "Q8. \"He speaks English fluently / fluent / fluency.\" Which one fits?"
+  },
+  {
+    "timestamp": "2025-10-15T08:15:36.023042",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_50",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8y4BMBFfzSxxTjZTkWq'}",
+    "question_text": "Q10. Si Paul est deux fois plus âgé que Marie et que la somme de leurs âges est 36, quel âge a Marie"
+  },
+  {
+    "timestamp": "2025-10-15T08:15:39.543555",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_21",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8y4SR3PHZeH3yrgXWrx'}",
+    "question_text": "Q1. Quel est l’intrus parmi ces termes ?"
+  },
+  {
+    "timestamp": "2025-10-15T08:15:42.884020",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_55",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8y4geoPyjWbRjyc5ziF'}",
+    "question_text": "Q15. Une voiture parcourt 120 km à 60 km/h et revient à 40 km/h. Quelle est sa vitesse moyenne ?"
+  },
+  {
+    "timestamp": "2025-10-15T08:15:46.096548",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_17",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8y4vJLeCxKiVvvnudDr'}",
+    "question_text": "Q17. Choose the correct form: \"If I were you, I __________ reconsider the offer.\""
+  },
+  {
+    "timestamp": "2025-10-15T08:15:49.329588",
+    "type": "CLAUDE_ERROR",
+    "question_id": "unknown_25",
+    "error": "Claude API error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CU8y5AGxpqmCFRq2LKPNH'}",
+    "question_text": "Q5. Quel pays a organisé la Coupe du Monde de football 2018 ?"
+  }
+]

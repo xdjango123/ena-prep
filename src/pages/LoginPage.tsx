@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -32,6 +32,28 @@ const LoginPage: React.FC = () => {
       navigate('/dashboard');
     }
   }, [user, isLoading, navigate]);
+
+  // Handle error messages from URL parameters (e.g., from password reset failures)
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const errorParam = params.get('error');
+    
+    if (errorParam) {
+      const errorMessages: { [key: string]: string } = {
+        'invalid_reset_link': 'Le lien de réinitialisation est invalide ou a expiré.',
+        'reset_failed': 'La réinitialisation du mot de passe a échoué. Veuillez réessayer.',
+        'invalid_credentials': 'Mot de passe incorrect'
+      };
+      
+      setError(errorMessages[errorParam] || 'Une erreur est survenue.');
+      
+      // Clear the error parameter from URL
+      const newParams = new URLSearchParams(location.search);
+      newParams.delete('error');
+      const newUrl = newParams.toString() ? `?${newParams.toString()}` : location.pathname;
+      navigate(newUrl, { replace: true });
+    }
+  }, [location.search, navigate]);
 
   // Function to translate Supabase error messages to French
   const translateError = (errorMessage: string): string => {

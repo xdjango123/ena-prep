@@ -136,18 +136,11 @@ export const Header: React.FC = () => {
                       Mon Profil
                     </Link>
                     <Link
-                      to="/dashboard/billing"
+                      to="/dashboard/profile?tab=billing"
                       className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     >
                       <CreditCard className="w-4 h-4 mr-2 flex-shrink-0" />
                       Abonnement
-                    </Link>
-                    <Link
-                      to="/dashboard/analytics"
-                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      <TrendingUp className="w-4 h-4 mr-2 flex-shrink-0" />
-                      Analytics
                     </Link>
                     <div className="border-t border-gray-100 my-1"></div>
                     <button

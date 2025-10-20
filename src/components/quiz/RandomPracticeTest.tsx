@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Clock, CheckCircle, XCircle, Home, Trophy, Brain, ChevronLeft, ChevronRight, Repeat } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { QuestionService } from '../../services/questionService';
+import { formatExponents } from '../../utils/mathFormatting';
 import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
 
 interface Question {
@@ -47,6 +48,11 @@ export const RandomPracticeTest: React.FC<RandomPracticeTestProps> = ({ onExit }
       console.log('🔄 RandomPracticeTest: Selected exam type:', selectedExamType);
       
       try {
+        const effectiveExamType = (selectedExamType ?? undefined) as
+          | 'CM'
+          | 'CMS'
+          | 'CS'
+          | undefined;
         const allQuestions: Question[] = [];
         
         // Get 5 questions from each subject
@@ -55,7 +61,14 @@ export const RandomPracticeTest: React.FC<RandomPracticeTestProps> = ({ onExit }
         for (const subject of subjects) {
           try {
             console.log(`📚 Loading questions for ${subject} with exam type: ${selectedExamType || 'default'}`);
-            const subjectQuestions = await QuestionService.getRandomQuestions(subject, 5, undefined, testNumber, selectedExamType || undefined);
+            const subjectQuestions = await QuestionService.getRandomQuestions(
+              subject,
+              5,
+              undefined,
+              testNumber,
+              effectiveExamType,
+              ['practice_test', 'quiz_series']
+            );
             console.log(`✅ Loaded ${subjectQuestions.length} questions for ${subject} (exam_type: ${selectedExamType})`);
             
             // Convert database questions to the expected format
@@ -100,13 +113,18 @@ export const RandomPracticeTest: React.FC<RandomPracticeTestProps> = ({ onExit }
                 correctAnswer = correctIndex >= 0 ? correctIndex : 0;
               }
               
+              const formattedOptions = options?.map(option => formatExponents(option));
+
               return {
                 id: dbQ.id,
                 type,
-                question: dbQ.question_text,
-                options,
+                question: formatExponents(dbQ.question_text),
+                options: formattedOptions,
                 correctAnswer,
-                explanation: (dbQ as any).explanation || `La réponse correcte est ${options?.[correctAnswer as number] || correctAnswer}.`,
+                explanation: formatExponents(
+                  (dbQ as any).explanation ||
+                    `La réponse correcte est ${formattedOptions?.[correctAnswer as number] || correctAnswer}.`
+                ),
                 difficulty: dbQ.difficulty || 'medium',
                 category: dbQ.category,
                 exam_type: dbQ.exam_type

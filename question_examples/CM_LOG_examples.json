@@ -1,0 +1,128 @@
+{
+  "exam_type": "CM",
+  "subject": "LOG",
+  "questions": [
+    {
+      "n": 41,
+      "question": "Soit BOUCHE - 245382 ; CAGIBI - 317323 ; COUDE - 34542. À quoi correspond FADE ?",
+      "options": ["6142", "1246", "5382"],
+      "answer": "1246"
+    },
+    {
+      "n": 42,
+      "question": "Complétez cette analogie : 49 est à QN ce que 68 est à .....",
+      "options": ["VS", "SH", "TX"],
+      "answer": "TX"
+    },
+    {
+      "n": 43,
+      "question": "Continuez cette suite : Vaisselle F9, Imager S6, Ignobles T8, Ciel .....",
+      "options": ["L7", "S9", "M4"],
+      "answer": "M4"
+    },
+    {
+      "n": 44,
+      "question": "Si ÉCONOMIE égale 22.24.12.13.12.14.18.22, à quoi correspond 8.12.18.9 ?",
+      "options": ["SOIR", "ROIS", "TOIT"],
+      "answer": "ROIS"
+    },
+    {
+      "n": 45,
+      "question": "À quoi correspond le mot BANDE si FRONT - 00400, SANTÉ - 01002, FUGUES - 050520 et VALET - 01020 ?",
+      "options": ["01002", "02021", "G0102"],
+      "answer": "02021"
+    },
+    {
+      "n": 46,
+      "question": "Quelle proposition continue cette série ? France 36, Hollande 64, Chine 25, Inde 16",
+      "options": ["Suisse 49", "Espagne 49", "Turquie 14"],
+      "answer": "Espagne 49"
+    },
+    {
+      "n": 47,
+      "question": "Un directeur découvre des graffitis sur le mur de son oncle. Il interroge les élèves : Karine (6e) dit : « c’est un garçon » ; Paul (6e) dit : « c’est un 5e » ; Valérie (5e) dit : « ce n’est pas moi » ; Félix (5e) dit : « c’est une fille ». Un seul élève a menti. Lequel ?",
+      "options": ["Valérie", "Paul", "Félix"],
+      "answer": "Paul"
+    },
+    {
+      "n": 48,
+      "question": "Par quel chiffre faut-il remplacer le point d’interrogation ?",
+      "options": ["1", "2", "3"],
+      "answer": "2"
+    },
+    {
+      "n": 49,
+      "question": "Quelle forme complète cette série ?",
+      "options": ["a", "b", "c"],
+      "answer": "c"
+    },
+    {
+      "n": 50,
+      "question": "Quel nombre doit-on logiquement placer sous la quatrième figure ?",
+      "options": ["24", "21", "18"],
+      "answer": "21"
+    },
+    {
+      "n": 51,
+      "question": "Quel mot continue cette série : un - six - onze - ...",
+      "options": ["quinze", "trois", "deux"],
+      "answer": "quinze"
+    },
+    {
+      "n": 52,
+      "question": "Quelle lettre continue cette suite : A H N S W ...",
+      "options": ["Z", "L", "E"],
+      "answer": "Z"
+    },
+    {
+      "n": 53,
+      "question": "Complétez cette figure.",
+      "options": ["O", "U", "E"],
+      "answer": "E"
+    },
+    {
+      "n": 54,
+      "question": "Quel mot manque-t-il à ce proverbe ? « Quand chat n’est pas là, les souris ... dansent. »",
+      "options": ["est", "pas", "les"],
+      "answer": "les"
+    },
+    {
+      "n": 55,
+      "question": "Trouvez l’intrus : TOT - LITS - ICI - SEMES",
+      "options": ["SEMES", "LITS", "TOT"],
+      "answer": "SEMES"
+    },
+    {
+      "n": 56,
+      "question": "Tous les cadeaux sont des poupées. Or toutes les poupées sont en chiffon. Que peut-on déduire ?",
+      "options": ["Vrai", "Faux", "Impossible"],
+      "answer": "Faux"
+    },
+    {
+      "n": 57,
+      "question": "Continuez cette analogie : cuisine est à four, ce que ..... est à écuyer.",
+      "options": ["forêt", "mur", "écurie"],
+      "answer": "écurie"
+    },
+    {
+      "n": 58,
+      "question": "Trouvez l’intrus : Tomber 51, Voter 60, Chanter 63, Caller 45",
+      "options": ["Voter 60", "Tomber 51", "Caller 45"],
+      "answer": "Caller 45"
+    },
+    {
+      "n": 59,
+      "question": "Sur une photo, on peut voir, de gauche à droite, Léa, Hugo, André, Salomé. Qui se trouve après Salomé ?",
+      "options": ["Marc", "Audrey", "Charles"],
+      "answer": "Audrey"
+    },
+    {
+      "n": 60,
+      "question": "Quel est le rang de Manu si Anne est arrivée 5e, Théo 15e et Thomas 1er ?",
+      "options": ["2e", "3e", "5e"],
+      "answer": "3e"
+    }
+  ]
+}
+
+

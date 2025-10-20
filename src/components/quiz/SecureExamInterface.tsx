@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { X, Clock, CheckCircle, XCircle, Home, Trophy, Brain, ChevronLeft, ChevronRight, AlertTriangle, Shield, Menu, Flag, Save, CheckSquare, Eye } from 'lucide-react';
 import { QuestionService } from '../../services/questionService';
+import { formatExponents } from '../../utils/mathFormatting';
 import { ExamResultService } from '../../services/examResultService';
 import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
 
@@ -147,7 +148,7 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
             const userExamType = selectedExamType || profile?.plan_name || 'CM';
             
             // Use the new pre-generated exam blanc questions method
-            const subjectQuestions = await QuestionService.getExamBlancQuestionsFromPreGenerated(
+            const subjectQuestions = await QuestionService.getExamBlancQuestions(
               subject, 
               examId || '1', 
               userExamType as 'CM' | 'CMS' | 'CS', 
@@ -201,13 +202,18 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
                 }
               }
               
+              const formattedOptions = options?.map(option => formatExponents(option));
+
               const convertedQuestion = {
                 id: dbQ.id,
                 type,
-                question: dbQ.question_text,
-                options,
+                question: formatExponents(dbQ.question_text),
+                options: formattedOptions,
                 correctAnswer,
-                explanation: (dbQ as any).explanation || `La réponse correcte est ${options?.[correctAnswer as number] || correctAnswer}.`,
+                explanation: formatExponents(
+                  (dbQ as any).explanation ||
+                    `La réponse correcte est ${formattedOptions?.[correctAnswer as number] || correctAnswer}.`
+                ),
                 difficulty: dbQ.difficulty || 'medium',
                 category: dbQ.category,
                 exam_type: dbQ.exam_type,
@@ -584,7 +590,7 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
     const subjectScores = getSubjectScores();
 
     return (
-      <div className="h-screen bg-gray-900 flex flex-col results-page">
+      <div className="h-screen bg-gray-900 flex flex-col results-page overflow-x-hidden">
         {/* Clean header without sidebar */}
         <header className="bg-blue-600 shadow-sm flex-shrink-0">
           <div className="px-4 sm:px-6 py-4">
@@ -620,9 +626,9 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
         </header>
 
         {/* Main Content - Full width results */}
-        <div className="flex-1 overflow-y-auto bg-gray-50">
+        <div className="flex-1 overflow-y-auto bg-gray-50 overflow-x-hidden">
           <div className="h-full p-4 sm:p-6">
-            <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 h-full">
+            <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
               <div className="text-center mb-8">
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Trophy className="w-8 h-8 text-green-600" />
@@ -636,13 +642,19 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
                 <div className="text-lg text-gray-600">Score Global</div>
               </div>
               
-              {/* Subject Scores - Fixed Layout */}
-              <div className="subject-score-grid mb-8">
+              {/* Subject Scores */}
+              <div className="subject-score-list max-w-2xl w-full mx-auto mb-8 text-center space-y-2">
                 {subjectScores.map(({ subject, correct, total, score: subjectScore }) => (
-                  <div key={subject} className="subject-score-box">
-                    <div className="score-percentage">{subjectScore}%</div>
-                    <div className="subject-name">{subject}</div>
-                    <div className="score-fraction">{correct}/{total}</div>
+                  <div key={subject} className="subject-score-item text-sm sm:text-base text-gray-600">
+                    <span className="score-percentage text-base sm:text-lg font-semibold text-blue-600">
+                      {subjectScore}%
+                    </span>
+                    <span className="mx-1 text-gray-300">•</span>
+                    <span className="subject-name font-medium text-gray-800">{subject}</span>
+                    <span className="mx-1 text-gray-300">•</span>
+                    <span className="score-fraction text-gray-500 text-xs sm:text-sm">
+                      {correct}/{total}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -667,7 +679,7 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
               {/* Review Section - Fixed Layout */}
               <div className="mt-8 pt-6 border-t border-gray-200">
                 {showReview && (
-                <div className="answer-review-container animate-in slide-in-from-top-4 duration-300 mt-8">
+                <div className="answer-review-container animate-in slide-in-from-top-4 duration-300 mt-8 space-y-6 w-full max-w-3xl mx-auto">
                   <h3 className="text-lg font-semibold text-gray-900 text-center mb-6">Révision des Réponses</h3>
                   {questions.map((question, index) => {
                     const userAnswer = userAnswers.get(question.id);
@@ -685,7 +697,7 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
                     })();
 
                     return (
-                      <div key={question.id} className="answer-review-question relative">
+                      <div key={question.id} className="answer-review-question relative border border-gray-200 rounded-xl p-4 sm:p-6 bg-white shadow-sm">
                         {/* X Icon for incorrect or unanswered questions */}
                         {(!userAnswer || !isCorrect) && (
                           <div className="absolute top-4 right-4">
@@ -718,7 +730,7 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
                         <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">{question.question}</h3>
 
                         {/* Options and Answers - Use original working CSS classes */}
-                        <div className="answer-review-options">
+                        <div className="answer-review-options flex flex-col gap-3">
                           {question.type === 'multiple-choice' && question.options?.map((option, optionIndex) => {
                             // Convert user answer to number if it's a letter (A=0, B=1, C=2)
                             const userAnswerIndex = typeof userAnswer === 'string' && userAnswer.length === 1 
@@ -727,7 +739,7 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
                             const isUserAnswer = userAnswerIndex === optionIndex;
                             const isCorrectAnswer = question.correctAnswer === optionIndex;
                             
-                            let optionClass = 'answer-review-option ';
+                            let optionClass = 'answer-review-option flex items-start gap-3 rounded-lg border-2 p-3 transition-colors ';
                             if (isCorrectAnswer) {
                               optionClass += 'correct';
                             } else if (isUserAnswer && !isCorrectAnswer) {
@@ -738,15 +750,15 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
                             
                             return (
                               <div key={optionIndex} className={optionClass}>
-                                <div className="answer-review-option-prefix">
+                                <div className="answer-review-option-prefix w-7 h-7 rounded-full flex items-center justify-center font-semibold text-sm">
                                   {String.fromCharCode(65 + optionIndex)}
                                 </div>
-                                <div className="answer-review-option-text">{option}</div>
+                                <div className="answer-review-option-text flex-1 text-sm leading-5">{option}</div>
                                 {isCorrectAnswer && (
-                                  <div className="answer-review-status text-green-600 font-semibold">✓ Correct</div>
+                                  <div className="answer-review-status text-green-600 font-semibold text-sm">✓ Correct</div>
                                 )}
                                 {isUserAnswer && !isCorrectAnswer && (
-                                  <div className="answer-review-status text-red-600 font-semibold">✗ Incorrect</div>
+                                  <div className="answer-review-status text-red-600 font-semibold text-sm">✗ Incorrect</div>
                                 )}
                               </div>
                             );
@@ -757,7 +769,7 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
                             const isUserAnswer = userAnswer === answerValue;
                             const isCorrectAnswer = question.correctAnswer === answerValue;
                             
-                            let optionClass = 'answer-review-option ';
+                            let optionClass = 'answer-review-option flex items-start gap-3 rounded-lg border-2 p-3 transition-colors ';
                             if (isCorrectAnswer) {
                               optionClass += 'correct';
                             } else if (isUserAnswer && !isCorrectAnswer) {
@@ -768,15 +780,15 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
                             
                             return (
                               <div key={option} className={optionClass}>
-                                <div className="answer-review-option-prefix">
+                                <div className="answer-review-option-prefix w-7 h-7 rounded-full flex items-center justify-center font-semibold text-sm">
                                   {optionIndex === 0 ? 'V' : 'F'}
                                 </div>
-                                <div className="answer-review-option-text">{option}</div>
+                                <div className="answer-review-option-text flex-1 text-sm leading-5">{option}</div>
                                 {isCorrectAnswer && (
-                                  <div className="answer-review-status text-green-600 font-semibold">✓ Correct</div>
+                                  <div className="answer-review-status text-green-600 font-semibold text-sm">✓ Correct</div>
                                 )}
                                 {isUserAnswer && !isCorrectAnswer && (
-                                  <div className="answer-review-status text-red-600 font-semibold">✗ Incorrect</div>
+                                  <div className="answer-review-status text-red-600 font-semibold text-sm">✗ Incorrect</div>
                                 )}
                               </div>
                             );
@@ -784,7 +796,7 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
                         </div>
 
                         {/* User Answer Summary - Clean Layout */}
-                        <div className="answer-summary">
+                        <div className="answer-summary bg-slate-50 border border-slate-200 rounded-lg p-3 mt-4">
                           <div className="text-sm">
                             <span className="text-gray-600">Votre réponse:</span>
                             <span className={`ml-2 font-medium ${isCorrect ? 'text-green-600' : 'text-red-600'}`}>

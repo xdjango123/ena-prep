@@ -33,17 +33,17 @@ export const StatsSection: React.FC = () => {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-8"
+          className="grid grid-cols-2 md:grid-cols-4 gap-8 items-stretch"
         >
           {stats.map((stat, index) => (
             <motion.div 
               key={index}
               variants={staggerItem}
-              className="text-center"
+              className="flex"
             >
-              <div className="inline-block p-1 bg-gradient-to-br from-primary-400 to-primary-600 rounded-xl">
-                <div className="bg-neutral-950 rounded-lg p-6 flex flex-col justify-center items-center h-48">
-                  <p className="text-4xl md:text-5xl font-bold text-primary-500">{stat.value}</p>
+              <div className="flex w-full rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 p-[1px]">
+                <div className="flex w-full flex-col items-center justify-center rounded-lg bg-neutral-950 p-6 min-h-[12rem]">
+                  <p className="text-4xl md:text-5xl font-bold text-primary-500 tabular-nums">{stat.value}</p>
                   <p className="text-neutral-400 mt-2">{stat.label}</p>
                 </div>
               </div>

@@ -1,0 +1,54 @@
+{
+  "exam_type": "CMS",
+  "subject": "ANG",
+  "questions": [
+    {
+      "n": 1,
+      "question": "Akissi Wari vit au troisième étage.",
+      "options": ["under tree floor", "on the third floor", "into three floor"],
+      "answer": "on the third floor"
+    },
+    {
+      "n": 2,
+      "question": "Petit Moadou a dû conduire sous la neige.",
+      "options": ["in the snow", "under the snow", "on the snow"],
+      "answer": "in the snow"
+    },
+    {
+      "n": 3,
+      "question": "L’apatam de Zéguibéroua était en feu.",
+      "options": ["with fire", "at fire", "on fire"],
+      "answer": "on fire"
+    },
+    {
+      "n": 4,
+      "question": "Yapi Bagnon est arrivé en train.",
+      "options": ["on train", "by train", "with train"],
+      "answer": "by train"
+    },
+    {
+      "n": 5,
+      "question": "Zamblé Bi Late n’a pas pu dormir dans l’avion.",
+      "options": ["on the lane", "under the lane", "over the lane"],
+      "answer": "on the lane"
+    },
+    {
+      "n": 6,
+      "question": "A bad excuse is better than ............",
+      "options": ["none", "no", "nothing"],
+      "answer": "none"
+    },
+    {
+      "n": 7,
+      "question": "There’s ........ so deaf as those who will not hear.",
+      "options": ["no", "noting", "none"],
+      "answer": "none"
+    },
+    {
+      "n": 8,
+      "question": "There is ........ new under the sun.",
+      "options": ["nothing", "none"],
+      "answer": "nothing"
+    }
+  ]
+}

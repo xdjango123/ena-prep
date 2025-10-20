@@ -1,7 +1,10 @@
 /**
  * Service for managing Examens Blancs
- * Handles loading and serving pre-generated exam configurations
+ * Now pulls data directly from Supabase database with test_type = 'examen_blanc'
  */
+
+import { supabase } from '../lib/supabase';
+import { formatExponents } from '../utils/mathFormatting';
 
 export interface ExamenBlancQuestion {
   id: string;
@@ -38,7 +41,7 @@ class ExamenBlancService {
   private loadPromise: Promise<ExamenBlancData> | null = null;
 
   /**
-   * Load examens blancs data from JSON file
+   * Load examens blancs data from database
    */
   private async loadExamensData(): Promise<ExamenBlancData> {
     if (this.examensData) {
@@ -49,24 +52,134 @@ class ExamenBlancService {
       return this.loadPromise;
     }
 
-    this.loadPromise = this.fetchExamensData();
+    this.loadPromise = this.fetchExamensDataFromDB();
     this.examensData = await this.loadPromise;
     return this.examensData;
   }
 
-  private async fetchExamensData(): Promise<ExamenBlancData> {
+  private async fetchExamensDataFromDB(): Promise<ExamenBlancData> {
     try {
-      // In production, this would be served from your backend
-      // For now, we'll use the generated JSON file
-      const response = await fetch('/examens_blancs_20250912_163313.json');
-      if (!response.ok) {
-        throw new Error(`Failed to load examens data: ${response.statusText}`);
+      console.log('🔄 ExamenBlancService: Loading exam blanc data from database...');
+      
+      // Get all exam blanc questions from database
+      const { data: questions, error } = await supabase
+        .from('questions')
+        .select('*')
+        .eq('test_type', 'examen_blanc')
+        .order('exam_type', { ascending: true })
+        .order('category', { ascending: true });
+
+      if (error) {
+        console.error('Error loading exam blanc questions from database:', error);
+        throw error;
       }
-      return await response.json();
+
+      if (!questions || questions.length === 0) {
+        console.warn('⚠️ No exam blanc questions found in database');
+        return {
+          generated_at: new Date().toISOString(),
+          exam_types: {}
+        };
+      }
+
+      console.log(`✅ Loaded ${questions.length} exam blanc questions from database`);
+
+      // Group questions by exam type and create exam structures
+      const examTypes: { [key: string]: ExamenBlanc[] } = {};
+      
+      // Generate 10 exams for each exam type (CM, CMS, CS)
+      const examTypesList: ('CM' | 'CMS' | 'CS')[] = ['CM', 'CMS', 'CS'];
+      
+      for (const examType of examTypesList) {
+        const typeQuestions = questions.filter(q => q.exam_type === examType);
+        
+        if (typeQuestions.length === 0) {
+          console.warn(`⚠️ No questions found for exam type: ${examType}`);
+          examTypes[examType] = [];
+          continue;
+        }
+
+        const exams: ExamenBlanc[] = [];
+        
+        // Create 10 exams for this exam type
+        for (let examNumber = 1; examNumber <= 10; examNumber++) {
+          const examQuestions: ExamenBlancQuestion[] = [];
+          
+          // Get 20 questions per subject (ANG, CG, LOG)
+          const subjects: ('ANG' | 'CG' | 'LOG')[] = ['ANG', 'CG', 'LOG'];
+          
+          for (const subject of subjects) {
+            const subjectQuestions = typeQuestions.filter(q => q.category === subject);
+            
+            if (subjectQuestions.length >= 20) {
+              // Use seeded randomization to ensure each exam gets different questions
+              const seed = examNumber * 1000 + subject.charCodeAt(0) * 100 + examType.charCodeAt(0);
+              const shuffled = this.seededShuffle([...subjectQuestions], seed);
+              const selectedQuestions = shuffled.slice(0, 20);
+              
+              // Convert to ExamenBlancQuestion format
+              const convertedQuestions = selectedQuestions.map((q, index) => ({
+                id: q.id,
+                question_text: q.question_text,
+                answer1: q.answer1,
+                answer2: q.answer2,
+                answer3: q.answer3,
+                correct: q.correct,
+                explanation: q.explanation || '',
+                category: q.category as 'ANG' | 'CG' | 'LOG',
+                difficulty: q.difficulty as 'EASY' | 'MED' | 'HARD',
+                question_order: index + 1,
+                subject_order: subjects.indexOf(subject) + 1
+              }));
+              
+              examQuestions.push(...convertedQuestions);
+            }
+          }
+          
+          if (examQuestions.length > 0) {
+            exams.push({
+              id: `${examType}-${examNumber}`,
+              exam_number: examNumber,
+              exam_type: examType,
+              total_questions: examQuestions.length,
+              questions_per_subject: 20,
+              questions: examQuestions
+            });
+          }
+        }
+        
+        examTypes[examType] = exams;
+        console.log(`✅ Generated ${exams.length} exams for ${examType}`);
+      }
+
+      const result = {
+        generated_at: new Date().toISOString(),
+        exam_types: examTypes
+      };
+
+      console.log('✅ ExamenBlancService: Successfully loaded exam blanc data from database');
+      return result;
+      
     } catch (error) {
-      console.error('Error loading examens blancs data:', error);
+      console.error('Error loading examens blancs data from database:', error);
       throw error;
     }
+  }
+
+  /**
+   * Seeded shuffle function for deterministic randomization
+   */
+  private seededShuffle<T>(array: T[], seed: number): T[] {
+    const shuffled = [...array];
+    let currentSeed = seed;
+    
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      currentSeed = (currentSeed * 9301 + 49297) % 233280;
+      const j = Math.floor((currentSeed / 233280) * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    
+    return shuffled;
   }
 
   /**
@@ -148,49 +261,16 @@ class ExamenBlancService {
    * Format question text for display (handles exponents in LOG questions)
    */
   formatQuestionText(question: ExamenBlancQuestion): string {
-    if (question.category !== 'LOG') {
-      return question.question_text;
-    }
-
-    let formattedText = question.question_text;
-    
-    // Convert x^2 to x², x^3 to x³, etc.
-    for (let i = 2; i <= 9; i++) {
-      const superscript = this.getSuperscript(i);
-      formattedText = formattedText.replace(new RegExp(`x\\^${i}`, 'g'), `x${superscript}`);
-      formattedText = formattedText.replace(new RegExp(`\\^${i}`, 'g'), superscript);
-    }
-
-    return formattedText;
+    return question.category === 'LOG'
+      ? formatExponents(question.question_text)
+      : question.question_text;
   }
 
   /**
    * Format answer text for display (handles exponents in LOG questions)
    */
   formatAnswerText(answer: string, category: 'ANG' | 'CG' | 'LOG'): string {
-    if (category !== 'LOG') {
-      return answer;
-    }
-
-    let formattedAnswer = answer;
-    
-    // Convert x^2 to x², x^3 to x³, etc.
-    for (let i = 2; i <= 9; i++) {
-      const superscript = this.getSuperscript(i);
-      formattedAnswer = formattedAnswer.replace(new RegExp(`x\\^${i}`, 'g'), `x${superscript}`);
-      formattedAnswer = formattedAnswer.replace(new RegExp(`\\^${i}`, 'g'), superscript);
-    }
-
-    return formattedAnswer;
-  }
-
-  private getSuperscript(num: number): string {
-    const superscripts: { [key: number]: string } = {
-      0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴', 5: '⁵',
-      6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹'
-    };
-    
-    return num.toString().split('').map(digit => superscripts[parseInt(digit)]).join('');
+    return category === 'LOG' ? formatExponents(answer) : answer;
   }
 
   /**

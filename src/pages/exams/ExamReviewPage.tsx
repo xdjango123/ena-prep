@@ -4,6 +4,7 @@ import { ArrowLeft, Clock, CheckCircle, XCircle, Minus } from 'lucide-react';
 import { QuestionService } from '../../services/questionService';
 import { ExamResultService } from '../../services/examResultService';
 import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
+import { formatExponents } from '../../utils/mathFormatting';
 
 interface Question {
   id: string;
@@ -39,13 +40,21 @@ export const ExamReviewPage: React.FC = () => {
 
         // Load questions for all subjects
         const [angQuestions, cgQuestions, logQuestions] = await Promise.all([
-          QuestionService.getExamBlancQuestionsFromPreGenerated('ANG', examId, userExamType as 'CM' | 'CMS' | 'CS', 20),
-          QuestionService.getExamBlancQuestionsFromPreGenerated('CG', examId, userExamType as 'CM' | 'CMS' | 'CS', 20),
-          QuestionService.getExamBlancQuestionsFromPreGenerated('LOG', examId, userExamType as 'CM' | 'CMS' | 'CS', 20)
+          QuestionService.getExamBlancQuestions('ANG', examId, userExamType as 'CM' | 'CMS' | 'CS', 20),
+          QuestionService.getExamBlancQuestions('CG', examId, userExamType as 'CM' | 'CMS' | 'CS', 20),
+          QuestionService.getExamBlancQuestions('LOG', examId, userExamType as 'CM' | 'CMS' | 'CS', 20)
         ]);
 
         // Combine all questions
-        const allQuestions = [...angQuestions, ...cgQuestions, ...logQuestions];
+        const allQuestions = [...angQuestions, ...cgQuestions, ...logQuestions].map(question => ({
+          ...question,
+          question_text: formatExponents(question.question_text),
+          answer1: formatExponents(question.answer1),
+          answer2: formatExponents(question.answer2),
+          answer3: formatExponents(question.answer3),
+          answer4: question.answer4 ? formatExponents(question.answer4) : null,
+          explanation: question.explanation ? formatExponents(question.explanation) : ''
+        }));
         setQuestions(allQuestions);
 
         // Load exam result

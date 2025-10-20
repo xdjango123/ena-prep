@@ -60,7 +60,8 @@ export class QuestionService {
     limit: number = 10,
     subCategory?: string,
     testNumber?: number,
-    examType?: 'CM' | 'CMS' | 'CS'
+    examType?: 'CM' | 'CMS' | 'CS',
+    testTypes?: ('quiz_series' | 'practice_test' | 'examen_blanc')[]
   ): Promise<Question[]> {
     try {
       let query = supabase
@@ -70,6 +71,14 @@ export class QuestionService {
 
       if (subCategory) {
         query = query.eq('sub_category', subCategory);
+      }
+
+      if (testTypes && testTypes.length > 0) {
+        if (testTypes.length === 1) {
+          query = query.eq('test_type', testTypes[0]);
+        } else {
+          query = query.in('test_type', testTypes);
+        }
       }
 
       // Add exam_type filter if provided
@@ -612,8 +621,8 @@ export class QuestionService {
   }
 
   /**
-   * Get exam blanc questions with 3-option format
-   * This replaces the existing getExamQuestions method for exam blanc
+   * Get exam blanc questions with 3-option format pulled directly from Supabase
+   * Ensures each exam number receives a distinct slice of the pool per subject
    */
   static async getExamBlancQuestions(
     category: 'ANG' | 'CG' | 'LOG',
@@ -622,154 +631,105 @@ export class QuestionService {
     limit: number = 20
   ): Promise<Question[]> {
     try {
-      console.log(`🎯 Loading exam blanc questions for ${category} - Exam ${examId} (${examType})`);
+      const examNumber = parseInt(examId, 10) || 1;
+      console.log(`🎯 Loading exam blanc questions for ${category} - Exam ${examNumber} (${examType})`);
 
-      // Get all available questions for this category and test_type
-      const { data: allQuestions, error: allError } = await supabase
+      const { data, error } = await supabase
         .from('questions')
         .select('*')
         .eq('category', category)
         .eq('test_type', 'examen_blanc')
-        .limit(limit * 3); // Get more for randomization
+        .eq('exam_type', examType)
+        .order('created_at', { ascending: true });
 
-      if (allError) {
-        console.error('Error fetching questions:', allError);
-        throw allError;
+      if (error) {
+        console.error('Error fetching exam blanc questions:', error);
+        throw error;
       }
 
-      if (!allQuestions || allQuestions.length === 0) {
-        console.log(`   No questions found for ${category}`);
+      if (!data || data.length === 0) {
+        console.warn(`⚠️ No examen blanc questions found for ${category} (${examType})`);
         return [];
       }
 
-      // Convert all questions to 3-option format
-      const convertedQuestions = allQuestions.map(q => this.convertTo3OptionsForExamBlanc(q));
+      const convertedQuestions = data.map(q => this.convertTo3OptionsForExamBlanc(q));
 
-      // Separate by difficulty
       const hardQuestions = convertedQuestions.filter(q => q.difficulty === 'HARD');
       const medQuestions = convertedQuestions.filter(q => q.difficulty === 'MED');
       const easyQuestions = convertedQuestions.filter(q => q.difficulty === 'EASY');
 
-      console.log(`   Available: ${hardQuestions.length} HARD, ${medQuestions.length} MED, ${easyQuestions.length} EASY`);
-
-      // Flexible distribution: prioritize HARD, then MED, then EASY
-      const selectedQuestions = [];
-      
-      // Try to get as many HARD as possible (up to 80% of limit)
       const maxHard = Math.min(hardQuestions.length, Math.floor(limit * 0.8));
-      const maxMed = Math.min(medQuestions.length, limit - maxHard);
-      const maxEasy = Math.min(easyQuestions.length, limit - maxHard - maxMed);
+      const remainingAfterHard = limit - maxHard;
+      const maxMed = Math.min(medQuestions.length, Math.floor(remainingAfterHard * 0.6));
+      const maxEasy = Math.min(
+        easyQuestions.length,
+        limit - maxHard - maxMed
+      );
 
-      console.log(`   Will select: ${maxHard} HARD, ${maxMed} MED, ${maxEasy} EASY`);
+      const baseSeed =
+        examNumber * 1000 +
+        category.charCodeAt(0) * 100 +
+        examType.charCodeAt(0);
 
-      // Create seeded random function using examId
-      const seed = parseInt(examId) * 1000 + category.charCodeAt(0) * 100;
-      const seededRandom = (min: number, max: number) => {
-        const x = Math.sin(seed) * 10000;
-        return Math.floor((x - Math.floor(x)) * (max - min + 1)) + min;
+      const takeSlice = (
+        pool: Question[],
+        count: number,
+        seedOffset: number
+      ) => {
+        if (count <= 0 || pool.length === 0) {
+          return [];
+        }
+
+        const shuffled = this.shuffleArrayWithSeed(pool, baseSeed + seedOffset);
+        const startIndex = ((examNumber - 1) * count) % shuffled.length;
+
+        const selection: Question[] = [];
+        for (let i = 0; i < shuffled.length && selection.length < Math.min(count, pool.length); i++) {
+          const index = (startIndex + i) % shuffled.length;
+          const candidate = shuffled[index];
+          if (!selection.some(item => item.id === candidate.id)) {
+            selection.push(candidate);
+          }
+          if (selection.length === count) {
+            break;
+          }
+        }
+
+        if (selection.length < count) {
+          console.warn(
+            `⚠️ Requested ${count} questions but only ${selection.length} available for ${category} (${examType}) in difficulty slice`
+          );
+        }
+
+        return selection;
       };
 
-      // Select questions with seeded randomization
-      if (maxHard > 0) {
-        const shuffledHard = this.shuffleArrayWithSeed([...hardQuestions], seed);
-        selectedQuestions.push(...shuffledHard.slice(0, maxHard));
-      }
-      
-      if (maxMed > 0) {
-        const shuffledMed = this.shuffleArrayWithSeed([...medQuestions], seed + 1);
-        selectedQuestions.push(...shuffledMed.slice(0, maxMed));
-      }
-      
-      if (maxEasy > 0) {
-        const shuffledEasy = this.shuffleArrayWithSeed([...easyQuestions], seed + 2);
-        selectedQuestions.push(...shuffledEasy.slice(0, maxEasy));
+      const selectedQuestions = [
+        ...takeSlice(hardQuestions, maxHard, 1),
+        ...takeSlice(medQuestions, maxMed, 2),
+        ...takeSlice(easyQuestions, maxEasy, 3)
+      ];
+
+      if (selectedQuestions.length < limit) {
+        // Fill the remaining slots from any difficulty without duplicates
+        const remainingPool = convertedQuestions.filter(
+          q => !selectedQuestions.some(selected => selected.id === q.id)
+        );
+        const filler = takeSlice(
+          remainingPool,
+          Math.min(limit - selectedQuestions.length, remainingPool.length),
+          4
+        );
+        selectedQuestions.push(...filler);
       }
 
-      console.log(`✅ Selected ${selectedQuestions.length} exam blanc questions for ${category} (3-option format)`);
-      return selectedQuestions;
+      console.log(
+        `✅ Selected ${selectedQuestions.length} exam blanc questions for ${category} (exam ${examNumber}, ${examType})`
+      );
+      return selectedQuestions.slice(0, Math.min(limit, selectedQuestions.length));
     } catch (error) {
       console.error('Error in getExamBlancQuestions:', error);
       return [];
-    }
-  }
-
-  /**
-   * Get exam blanc questions using pre-generated examens blancs
-   * This is the new preferred method for exam blanc questions
-   */
-  static async getExamBlancQuestionsFromPreGenerated(
-    category: 'ANG' | 'CG' | 'LOG',
-    examId: string,
-    examType: 'CM' | 'CMS' | 'CS',
-    limit: number = 20
-  ): Promise<Question[]> {
-    try {
-      console.log(`🎯 Loading pre-generated exam blanc questions for ${category} - Exam ${examId} (${examType})`);
-
-      // Import the examen blanc service
-      const { examenBlancService } = await import('./examenBlancService');
-      const examNumber = parseInt(examId);
-      
-      if (isNaN(examNumber)) {
-        throw new Error(`Invalid exam ID: ${examId}`);
-      }
-
-      console.log(`   Using pre-generated examen blanc #${examNumber}`);
-      const questions = await examenBlancService.getRandomSubjectQuestions(
-        examType, 
-        examNumber, 
-        category, 
-        limit
-      );
-      
-      // Convert to Question format
-      const convertedQuestions = questions.map(q => ({
-        id: q.id,
-        question_text: q.question_text,
-        answer1: q.answer1,
-        answer2: q.answer2,
-        answer3: q.answer3,
-        answer4: null,
-        correct: q.correct,
-        explanation: q.explanation,
-        category: q.category,
-        difficulty: q.difficulty,
-        test_type: 'examen_blanc' as const,
-        exam_type: examType,
-        sub_category: null, // No sub-category for examen_blanc questions
-        passage_id: null,
-        ai_generated: true,
-        unique_hash: '',
-        question_pool: `${examType}_${q.category}_examen`,
-        usage_count: 0,
-        last_used: null,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        is3Option: true // Mark as 3-option question for exam blanc
-      }));
-
-      console.log(`✅ Loaded ${convertedQuestions.length} pre-generated questions for ${category}`);
-      
-      // Debug: Log first question to see format
-      if (convertedQuestions.length > 0) {
-        console.log(`🔍 Sample question format:`, {
-          id: convertedQuestions[0].id,
-          question_text: convertedQuestions[0].question_text,
-          answer1: convertedQuestions[0].answer1,
-          answer2: convertedQuestions[0].answer2,
-          answer3: convertedQuestions[0].answer3,
-          correct: convertedQuestions[0].correct,
-          is3Option: convertedQuestions[0].is3Option
-        });
-      }
-      
-      return convertedQuestions;
-
-    } catch (error) {
-      console.error('Error in getExamBlancQuestionsFromPreGenerated:', error);
-      // Fallback to the original method
-      console.log('   Falling back to database method...');
-      return this.getExamBlancQuestions(category, examId, examType, limit);
     }
   }
 

@@ -216,6 +216,7 @@ export class ExamResultService {
         .eq('test_type', 'examen_blanc')
         .eq('exam_type', examType)
         .eq('category', 'OVERALL') // Only overall scores
+        .order('created_at', { ascending: false })
         .order('test_number', { ascending: true });
 
       if (error) {

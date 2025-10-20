@@ -4,6 +4,7 @@ import { SupabaseAuthProvider } from './contexts/SupabaseAuthContext';
 import { SidebarProvider } from './contexts/SidebarContext';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import DashboardPage from './pages/DashboardPage';
 import { GeneralKnowledgePage } from './pages/subjects/GeneralKnowledgePage';
 import EnglishSubjectPage from './pages/EnglishSubjectPage';
@@ -23,8 +24,9 @@ import ForumPage from './pages/ForumPage';
 import TutorPage from './pages/TutorPage';
 import ProfilePage from './pages/ProfilePage';
 import EnaGuidePage from './pages/EnaGuidePage';
-import QuickQuizPage from './pages/QuickQuizPage';
 import TestSubscriptionPage from './pages/TestSubscriptionPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
+import QuickQuizPage from './pages/QuickQuizPage';
 import ScrollToTop from './components/ScrollToTop';
 import { RandomPracticeTest } from './components/quiz/RandomPracticeTest';
 import { ExamInterface } from './components/quiz/ExamInterface';
@@ -48,6 +50,8 @@ function App() {
               <Route path="/" element={<PublicLayout><HomePage /></PublicLayout>} />
               <Route path="/login" element={<PublicLayout><LoginPage /></PublicLayout>} />
               <Route path="/signup" element={<PublicLayout><SignupPage /></PublicLayout>} />
+              <Route path="/mot-de-passe-oublie" element={<PublicLayout><ForgotPasswordPage /></PublicLayout>} />
+              <Route path="/reset-password" element={<PublicLayout><ResetPasswordPage /></PublicLayout>} />
               <Route path="/matieres" element={<PublicLayout><SubjectsPage /></PublicLayout>} />
               <Route path="/avis" element={<PublicLayout><ReviewsPage /></PublicLayout>} />
               <Route path="/tarification" element={<PublicLayout><PricingPage /></PublicLayout>} />

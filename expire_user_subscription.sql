@@ -27,3 +27,4 @@ SELECT
     END as status
 FROM subscriptions 
 WHERE user_id = '2a6a2422-1824-4d78-b2fb-906d8567be09';
+

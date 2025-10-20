@@ -1,0 +1,84 @@
+{
+  "exam_type": "CS",
+  "subject": "ANG",
+  "questions": [
+    {
+      "n": 1,
+      "question": "A number of people ....... complained about the noise made by aircraft taking off.",
+      "options": ["has", "have", "haven"],
+      "answer": "have"
+    },
+    {
+      "n": 2,
+      "question": "I think ten CFA .......... too much to pay for such a little thing.",
+      "options": ["is", "am", "are"],
+      "answer": "is"
+    },
+    {
+      "n": 3,
+      "question": "The hotel staff ........ not like new manager’s wife.",
+      "options": ["does", "do", "has done"],
+      "answer": "do"
+    },
+    {
+      "n": 4,
+      "question": "More than one house ------- been broken into during the holidays.",
+      "options": ["has", "have", "having"],
+      "answer": "has"
+    },
+    {
+      "n": 5,
+      "question": "------ fool I was not to listen to her advice.",
+      "options": ["How", "So many", "What"],
+      "answer": "What"
+    },
+    {
+      "n": 6,
+      "question": "------ nice to see you!",
+      "options": ["So much", "What", "How"],
+      "answer": "How"
+    },
+    {
+      "n": 7,
+      "question": "Chris was in -------- hurry that she forgot to call you.",
+      "options": ["so much", "such a", "what a"],
+      "answer": "such a"
+    },
+    {
+      "n": 8,
+      "question": "I have to work -------- hard to please them.",
+      "options": ["so", "so much", "so many"],
+      "answer": "so"
+    },
+    {
+      "n": 9,
+      "question": "---------- lovely this is!",
+      "options": ["Such", "What", "How"],
+      "answer": "What"
+    },
+    {
+      "n": 10,
+      "question": "There were ------- people you could hardly move.",
+      "options": ["so much", "so", "much"],
+      "answer": "so many"
+    },
+    {
+      "n": 11,
+      "question": "He has -------- hair on his chest that he looks like a bear.",
+      "options": ["so", "such a", "so much"],
+      "answer": "so much"
+    },
+    {
+      "n": 12,
+      "question": "His admiration for your art is -------- great that he’d pay any price for it.",
+      "options": ["such", "so", "how"],
+      "answer": "so"
+    },
+    {
+      "n": 13,
+      "question": "Don’t forget to take your passport ------- when you leave.",
+      "options": ["along", "in", "back"],
+      "answer": "along"
+    }
+  ]
+}

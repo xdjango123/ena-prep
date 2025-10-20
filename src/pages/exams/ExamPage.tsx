@@ -43,7 +43,9 @@ export const ExamPage: React.FC = () => {
       const resultsMap = new Map<string, ExamResult>();
       results.forEach(result => {
         const key = `${result.exam_type}-${result.test_number}`;
-        resultsMap.set(key, result);
+        if (!resultsMap.has(key)) {
+          resultsMap.set(key, result);
+        }
       });
 
       setExamResults(resultsMap);

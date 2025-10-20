@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Menu, 
@@ -15,12 +15,12 @@ import {
   ChevronDown, 
   ChevronUp,
   GraduationCap,
-  Settings,
-  ChevronRight
+  Home
 } from 'lucide-react';
 import { useSidebar } from '../../contexts/SidebarContext';
 import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
 import { useSubscriptionStatus } from '../../hooks/useSubscriptionStatus';
+import { getExamTypeFromPlanName } from '../../lib/examTypeUtils';
 
 interface NavItem {
   id: string;
@@ -32,17 +32,35 @@ interface NavItem {
 }
 
 export const Sidebar: React.FC = () => {
-  const { isOpen, isHovered, toggle } = useSidebar();
+  const { isOpen, isHovered, toggle, close } = useSidebar();
   const { user, profile, userSubscriptions, selectedExamType, setSelectedExamType, signOut } = useSupabaseAuth();
   const { hasActiveSubscription } = useSubscriptionStatus();
   const location = useLocation();
   const navigate = useNavigate();
   const [isMatiereOpen, setMatiereOpen] = useState(true);
   const [isExamTypeDropdownOpen, setIsExamTypeDropdownOpen] = useState(false);
+  const [showLogout, setShowLogout] = useState(false);
+
+  const availableExamTypes = useMemo(() => {
+    const derived = userSubscriptions
+      .filter(sub => sub.is_active)
+      .map(sub => getExamTypeFromPlanName(sub.plan_name))
+      .filter((type): type is 'CM' | 'CMS' | 'CS' => type !== null)
+      .filter((type, index, arr) => arr.indexOf(type) === index);
+
+    if (selectedExamType && !derived.includes(selectedExamType)) {
+      return [...derived, selectedExamType];
+    }
+
+    return derived;
+  }, [userSubscriptions, selectedExamType]);
 
   const handleLogout = async () => {
     try {
       await signOut();
+      setIsExamTypeDropdownOpen(false);
+      setShowLogout(false);
+      close();
       navigate('/');
     } catch (error) {
       console.error('Logout failed:', error);
@@ -51,10 +69,18 @@ export const Sidebar: React.FC = () => {
     }
   };
 
+  const handleReturnHome = () => {
+    setIsExamTypeDropdownOpen(false);
+    setShowLogout(false);
+    close();
+    navigate('/');
+  };
+
   const handleExamTypeChange = async (examType: 'CM' | 'CMS' | 'CS') => {
     try {
       await setSelectedExamType(examType);
       setIsExamTypeDropdownOpen(false);
+      close();
     } catch (error) {
       console.error('Error changing exam type:', error);
     }
@@ -70,6 +96,9 @@ export const Sidebar: React.FC = () => {
   };
 
   const handleProfileClick = () => {
+    setIsExamTypeDropdownOpen(false);
+    setShowLogout(false);
+    close();
     navigate('/dashboard/profile');
   };
 
@@ -150,75 +179,76 @@ export const Sidebar: React.FC = () => {
   ];
 
   const sidebarExpanded = isOpen || isHovered;
+  const examTypeTitle = selectedExamType
+    ? getExamTypeDisplayName(selectedExamType)
+    : availableExamTypes.length > 0
+      ? getExamTypeDisplayName(availableExamTypes[0])
+      : 'PrepaENA';
+
+  const handleNavigationClick = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>, disabled: boolean) => {
+    if (disabled) {
+      e.preventDefault();
+      return;
+    }
+    setIsExamTypeDropdownOpen(false);
+    setShowLogout(false);
+    close();
+  };
+
+  useEffect(() => {
+    if (!sidebarExpanded) {
+      setIsExamTypeDropdownOpen(false);
+      setShowLogout(false);
+    }
+  }, [sidebarExpanded]);
 
   return (
     <div className="h-full bg-white border-r border-gray-200 flex flex-col">
       {/* Header */}
       <div className="p-4 border-b border-gray-200">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-3">
           {sidebarExpanded && (
             <div className="flex-1">
-              {/* Exam Type as Main Title */}
-              {(() => {
-                const availableExamTypes = userSubscriptions
-                  .filter(sub => sub.is_active)
-                  .map(sub => {
-                    if (sub.plan_name.includes('CMS')) return 'CMS';
-                    if (sub.plan_name.includes('CS')) return 'CS';
-                    if (sub.plan_name.includes('CM')) return 'CM';
-                    return null;
-                  })
-                  .filter((examType, index, arr) => examType && arr.indexOf(examType) === index) as ('CM' | 'CMS' | 'CS')[];
-
-                if (availableExamTypes.length > 1) {
-                  return (
-                    <div className="relative">
-                      <button
-                        onClick={() => setIsExamTypeDropdownOpen(!isExamTypeDropdownOpen)}
-                        className="w-full flex items-center justify-between px-3 py-3 text-lg font-bold text-gray-900 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors"
-                      >
-                        <span>
-                          {selectedExamType ? getExamTypeDisplayName(selectedExamType) : 'Sélectionner un plan'}
-                        </span>
-                        <ChevronRight className={`w-5 h-5 text-gray-500 transition-transform ${isExamTypeDropdownOpen ? 'rotate-90' : ''}`} />
-                      </button>
-                      
-                      {isExamTypeDropdownOpen && (
-                        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
-                          {availableExamTypes.map((examType) => (
-                            <button
-                              key={examType}
-                              onClick={() => handleExamTypeChange(examType)}
-                              className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors ${
-                                selectedExamType === examType ? 'bg-primary-50 text-primary-700' : 'text-gray-700'
-                              }`}
-                            >
-                              {getExamTypeDisplayName(examType)}
-                            </button>
-                          ))}
-                        </div>
-                      )}
+              {availableExamTypes.length > 1 ? (
+                <div className="relative">
+                  <button
+                    onClick={() => setIsExamTypeDropdownOpen(prev => !prev)}
+                    className="w-full flex items-center justify-between gap-3 px-4 py-3 text-sm font-semibold text-gray-900 bg-gray-100 border border-gray-200 rounded-xl hover:bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-200"
+                  >
+                    <span className="truncate">{examTypeTitle}</span>
+                    <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${isExamTypeDropdownOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                  {isExamTypeDropdownOpen && (
+                    <div className="absolute left-0 right-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden">
+                      {availableExamTypes.map((examType) => (
+                        <button
+                          key={examType}
+                          onClick={() => handleExamTypeChange(examType)}
+                          className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
+                            selectedExamType === examType
+                              ? 'bg-primary-50 text-primary-700'
+                              : 'text-gray-700 hover:bg-gray-50'
+                          }`}
+                        >
+                          {getExamTypeDisplayName(examType)}
+                        </button>
+                      ))}
                     </div>
-                  );
-                } else if (availableExamTypes.length === 1) {
-                  return (
-                    <div className="px-3 py-3 text-lg font-bold text-gray-900 bg-gray-50 border border-gray-200 rounded-lg">
-                      {getExamTypeDisplayName(availableExamTypes[0])}
-                    </div>
-                  );
-                } else {
-                  return (
-                    <div className="px-3 py-3 text-lg font-bold text-gray-500 bg-gray-50 border border-gray-200 rounded-lg">
-                      PrepaENA
-                    </div>
-                  );
-                }
-              })()}
+                  )}
+                </div>
+              ) : (
+                <div className="w-full px-4 py-3 text-sm font-semibold text-gray-900 bg-gray-100 border border-gray-200 rounded-xl">
+                  {examTypeTitle}
+                </div>
+              )}
             </div>
           )}
           <button
-            onClick={toggle}
-            className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
+            onClick={() => {
+              setIsExamTypeDropdownOpen(false);
+              toggle();
+            }}
+            className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors flex-shrink-0"
             aria-label="Toggle sidebar"
           >
             <Menu className="w-5 h-5" />
@@ -258,7 +288,7 @@ export const Sidebar: React.FC = () => {
               ) : (
                 <Link
                   to={isDisabled ? '#' : item.path!}
-                  onClick={isDisabled ? (e) => e.preventDefault() : undefined}
+                  onClick={(e) => handleNavigationClick(e, isDisabled)}
                   className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
                     isDisabled
                       ? 'text-gray-400 cursor-not-allowed opacity-50'
@@ -282,7 +312,7 @@ export const Sidebar: React.FC = () => {
                     <Link
                       key={matiere.id}
                       to={isMatiereDisabled ? '#' : matiere.path!}
-                      onClick={isMatiereDisabled ? (e) => e.preventDefault() : undefined}
+                      onClick={(e) => handleNavigationClick(e, isMatiereDisabled)}
                       className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
                         isMatiereDisabled
                           ? 'text-gray-400 cursor-not-allowed opacity-50'
@@ -306,40 +336,69 @@ export const Sidebar: React.FC = () => {
       {/* User Profile - Enhanced for Mobile */}
       <div className="p-4 border-t border-gray-200">
         {sidebarExpanded ? (
-          <div className="space-y-3">
-            {/* Profile Info - Clickable on Mobile */}
+          <div className="relative space-y-3">
+            {showLogout && (
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="absolute left-0 right-0 top-0 -translate-y-full flex items-center justify-center gap-2 rounded-lg border border-red-200 bg-white px-3 py-2 text-sm font-semibold text-red-600 shadow-lg transition-colors hover:bg-red-50"
+                aria-label="Se déconnecter"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Se déconnecter</span>
+              </button>
+            )}
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleProfileClick}
+                className="flex-1 flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 transition-colors text-left"
+              >
+                <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center text-white text-sm font-medium flex-shrink-0">
+                  {profile ? profile.first_name?.[0] || user?.email?.[0] || 'U' : 'U'}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-gray-900 truncate">
+                    {profile ? profile.first_name || 'Utilisateur' : 'Utilisateur'}
+                  </p>
+                  <p className="text-xs text-gray-500 truncate">
+                    {user?.email}
+                  </p>
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowLogout(prev => !prev)}
+                className={`p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors flex-shrink-0 ${showLogout ? 'text-gray-700' : ''}`}
+                aria-label={showLogout ? "Masquer l'option de déconnexion" : "Afficher l'option de déconnexion"}
+                aria-expanded={showLogout}
+              >
+                <ChevronDown className={`w-4 h-4 transition-transform ${showLogout ? 'rotate-180' : ''}`} />
+              </button>
+            </div>
             <button
-              onClick={handleProfileClick}
-              className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 transition-colors text-left"
+              type="button"
+              onClick={handleReturnHome}
+              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-100 transition-colors"
             >
-              <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center text-white text-sm font-medium flex-shrink-0">
-                {profile ? profile.first_name?.[0] || user?.email?.[0] || 'U' : 'U'}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-gray-900 truncate">
-                  {profile ? profile.first_name || 'Utilisateur' : 'Utilisateur'}
-                </p>
-                <p className="text-xs text-gray-500 truncate">
-                  {user?.email}
-                </p>
-              </div>
-              <Settings className="w-4 h-4 text-gray-400" />
-            </button>
-            
-            {/* Logout Button */}
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors text-left"
-              aria-label="Se déconnecter"
-            >
-              <LogOut className="w-4 h-4" />
-              <span className="text-sm font-medium">Se déconnecter</span>
+              <Home className="w-4 h-4" />
+              <span>Retour à l'accueil</span>
             </button>
           </div>
         ) : (
-          <div className="space-y-2">
-            {/* Collapsed Profile - Clickable */}
+          <div className="relative space-y-2">
+            {showLogout && (
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-full flex items-center justify-center gap-2 rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-semibold text-red-600 shadow-lg transition-colors hover:bg-red-50"
+                aria-label="Se déconnecter"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            )}
             <button
+              type="button"
               onClick={handleProfileClick}
               className="w-full flex justify-center p-2 rounded-lg hover:bg-gray-100 transition-colors"
               aria-label="Ouvrir le profil"
@@ -348,14 +407,23 @@ export const Sidebar: React.FC = () => {
                 {profile ? profile.first_name?.[0] || user?.email?.[0] || 'U' : 'U'}
               </div>
             </button>
-            
-            {/* Collapsed Logout */}
+
             <button
-              onClick={handleLogout}
-              className="w-full flex justify-center p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
-              aria-label="Se déconnecter"
+              type="button"
+              onClick={() => setShowLogout(prev => !prev)}
+              className={`w-full flex justify-center p-2 rounded-lg hover:bg-gray-100 transition-colors ${showLogout ? 'text-gray-700' : 'text-gray-500'}`}
+              aria-label={showLogout ? "Masquer l'option de déconnexion" : "Afficher l'option de déconnexion"}
+              aria-expanded={showLogout}
             >
-              <LogOut className="w-4 h-4" />
+              <ChevronDown className={`w-4 h-4 transition-transform ${showLogout ? 'rotate-180' : ''}`} />
+            </button>
+            <button
+              type="button"
+              onClick={handleReturnHome}
+              className="w-full flex justify-center p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
+              aria-label="Retour à l'accueil"
+            >
+              <Home className="w-4 h-4" />
             </button>
           </div>
         )}

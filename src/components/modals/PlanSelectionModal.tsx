@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check, Plus, ArrowRight } from 'lucide-react';
 import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
+import { getExamTypeFromPlanName } from '../../lib/examTypeUtils';
 
 interface PlanSelectionModalProps {
   isOpen: boolean;
@@ -84,15 +85,15 @@ const PlanSelectionModal: React.FC<PlanSelectionModalProps> = ({
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
   // Check if user has all 3 exam types
-  const userExamTypes = userSubscriptions
-    .filter(sub => sub.is_active)
-    .map(sub => {
-      if (sub.plan_name.includes('CM')) return 'CM';
-      if (sub.plan_name.includes('CMS')) return 'CMS';
-      if (sub.plan_name.includes('CS')) return 'CS';
-      return null;
-    })
-    .filter((examType, index, arr) => examType && arr.indexOf(examType) === index);
+  const userExamTypes = useMemo(
+    () =>
+      userSubscriptions
+        .filter(sub => sub.is_active)
+        .map(sub => getExamTypeFromPlanName(sub.plan_name))
+        .filter((examType): examType is 'CM' | 'CMS' | 'CS' => examType !== null)
+        .filter((examType, index, arr) => arr.indexOf(examType) === index),
+    [userSubscriptions]
+  );
 
   const hasAllExamTypes = userExamTypes.length >= 3;
   const availablePlans = hasAllExamTypes && !isAccountExpired ? [] : PLANS;
@@ -312,12 +313,11 @@ const PlanSelectionModal: React.FC<PlanSelectionModalProps> = ({
                   
                   {actionType === 'cancel' ? (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      {PLANS.filter(plan => {
-                        // Only show plans that user currently has
-                        return userSubscriptions.some(sub => 
-                          sub.is_active && sub.plan_name.includes(plan.examType)
-                        );
-                      }).map((plan) => {
+                      {PLANS.filter(plan =>
+                        userSubscriptions.some(sub =>
+                          sub.is_active && getExamTypeFromPlanName(sub.plan_name) === plan.examType
+                        )
+                      ).map((plan) => {
                         const isSelected = selectedPlans.some(p => p.id === plan.id);
                         
                         return (
@@ -369,8 +369,8 @@ const PlanSelectionModal: React.FC<PlanSelectionModalProps> = ({
                       {availablePlans.map((plan) => {
                       const isSelected = selectedPlans.some(p => p.id === plan.id);
                       // Check if user already has this exam type (active subscription)
-                      const isAlreadyOwned = userSubscriptions.some(sub => 
-                        sub.is_active && sub.plan_name.includes(plan.examType)
+                      const isAlreadyOwned = userSubscriptions.some(sub =>
+                        sub.is_active && getExamTypeFromPlanName(sub.plan_name) === plan.examType
                       );
                       
                       return (

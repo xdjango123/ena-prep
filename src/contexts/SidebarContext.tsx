@@ -27,8 +27,20 @@ export const SidebarProvider: React.FC<SidebarProviderProps> = ({ children }) =>
   const [isOpen, setIsOpen] = useState(false); // Start collapsed for clean look
   const [isHovered, setIsHovered] = useState(false);
 
-  const toggle = () => setIsOpen(!isOpen);
-  const close = () => setIsOpen(false);
+  const toggle = () => {
+    setIsOpen(prev => {
+      const next = !prev;
+      if (!next) {
+        setIsHovered(false);
+      }
+      return next;
+    });
+  };
+
+  const close = () => {
+    setIsOpen(false);
+    setIsHovered(false);
+  };
   const open = () => setIsOpen(true);
   const setHovered = (hovered: boolean) => setIsHovered(hovered);
 

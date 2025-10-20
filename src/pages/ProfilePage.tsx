@@ -31,6 +31,7 @@ import {
   Clock,
   Plus
 } from 'lucide-react';
+import { getExamTypeFromPlanName } from '../lib/examTypeUtils';
 
 // Validation schemas
 const emailSchema = z.object({
@@ -418,9 +419,7 @@ const ProfilePage: React.FC = () => {
                   return unique;
                 }, [] as typeof userSubscriptions)
                 .map((subscription) => {
-                  const examType = subscription.plan_name.includes('CMS') ? 'CMS' : 
-                                  subscription.plan_name.includes('CS') ? 'CS' : 
-                                  subscription.plan_name.includes('CM') ? 'CM' : 'CM';
+                  const examType = getExamTypeFromPlanName(subscription.plan_name, 'CM');
                   const isSelected = selectedExamType === examType;
                   const isExpired = isAccountExpired(subscription.end_date);
                   
@@ -464,7 +463,7 @@ const ProfilePage: React.FC = () => {
                           }`}>
                             {isExpired ? 'Expiré' : isSelected ? 'Actuel' : 'Actif'}
                           </span>
-                          {!isExpired && !isSelected && (
+                          {!isExpired && !isSelected && examType && (
                             <button
                               onClick={() => handleSwitchPlan(examType as 'CM' | 'CMS' | 'CS')}
                               disabled={isSwitchingPlan}
@@ -476,7 +475,7 @@ const ProfilePage: React.FC = () => {
                           {(() => {
                             // Only show cancel button if user has more than 1 active concour
                             const activeConcours = userSubscriptions.filter(sub => sub.is_active).length;
-                            if (activeConcours > 1 && !isExpired) {
+                            if (activeConcours > 1 && !isExpired && examType) {
                               return (
                                 <button
                                   onClick={() => {
@@ -508,13 +507,9 @@ const ProfilePage: React.FC = () => {
             // Check if user has all 3 exam types
             const userExamTypes = userSubscriptions
               .filter(sub => sub.is_active)
-              .map(sub => {
-                if (sub.plan_name.includes('CM')) return 'CM';
-                if (sub.plan_name.includes('CMS')) return 'CMS';
-                if (sub.plan_name.includes('CS')) return 'CS';
-                return null;
-              })
-              .filter((examType, index, arr) => examType && arr.indexOf(examType) === index);
+              .map(sub => getExamTypeFromPlanName(sub.plan_name))
+              .filter((examType): examType is NonNullable<typeof examType> => !!examType)
+              .filter((examType, index, arr) => arr.indexOf(examType) === index);
 
             const hasAllExamTypes = userExamTypes.length >= 3;
             

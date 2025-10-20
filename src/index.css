@@ -524,40 +524,18 @@ body {
   flex-direction: column !important;
 }
 
-/* Fix elongated subject score boxes */
-.subject-score-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-  max-width: 600px;
-  margin: 0 auto;
+/* Subject score list aligned under overall score */
+.subject-score-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
-.subject-score-box {
-  background: #f9fafb;
-  padding: 1rem;
-  border-radius: 0.75rem;
-  text-align: center;
-  min-height: auto;
-  height: auto;
-}
-
-.subject-score-box .score-percentage {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #2563eb;
-  margin-bottom: 0.25rem;
-}
-
-.subject-score-box .subject-name {
-  font-size: 0.875rem;
-  color: #6b7280;
-  margin-bottom: 0.25rem;
-}
-
-.subject-score-box .score-fraction {
-  font-size: 0.75rem;
-  color: #9ca3af;
+.subject-score-item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 /* Answer Review Layout - Clean and Simple */

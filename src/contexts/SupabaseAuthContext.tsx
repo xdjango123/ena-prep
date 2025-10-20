@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase, Profile, Subscription, UserPlan, UserExamType } from '../lib/supabase';
+import { ExamType, getExamTypeFromPlanName } from '../lib/examTypeUtils';
 import { EmailLogService } from '../services/emailLogService';
 import { UserAttemptService } from '../services/userAttemptService';
 
@@ -20,6 +21,7 @@ interface SupabaseAuthContextType {
   updateProfile: (updates: Partial<Profile>) => Promise<{ error: any }>;
   updateEmail: (newEmail: string) => Promise<{ error: any }>;
   updatePassword: (newPassword: string) => Promise<{ error: any }>;
+  resetPassword: (email: string) => Promise<{ error: any }>;
   addExamType: (examType: string) => Promise<{ error: any }>;
   removeExamType: (examType: string) => Promise<{ error: any }>;
   setSelectedExamType: (examType: 'CM' | 'CMS' | 'CS') => Promise<{ error: any }>;
@@ -269,17 +271,15 @@ export const SupabaseAuthProvider: React.FC<SupabaseAuthProviderProps> = ({ chil
           const activeSubscriptions = data.filter(sub => sub.is_active);
           if (activeSubscriptions.length > 0) {
             const firstSubscription = activeSubscriptions[0];
-            const examType = firstSubscription.plan_name.includes('CMS') ? 'CMS' : 
-                            firstSubscription.plan_name.includes('CS') ? 'CS' : 
-                            firstSubscription.plan_name.includes('CM') ? 'CM' : null;
-            
+            const examType = getExamTypeFromPlanName(firstSubscription.plan_name);
+
             if (!examType) {
               console.error('❌ Could not determine exam type from plan name:', firstSubscription.plan_name);
-              return; // ✅ Don't set selectedExamType if we can't determine it
+              return;
             }
-            
+
             console.log(`🔄 Auto-selecting first available exam type: ${examType} (selectedExamType was null)`);
-            setSelectedExamTypeState(examType as 'CM' | 'CMS' | 'CS');
+            setSelectedExamTypeState(examType);
           }
         } else {
           console.log(`ℹ️ fetchUserSubscriptions: selectedExamType already set to ${selectedExamType}, not auto-selecting`);
@@ -315,17 +315,36 @@ export const SupabaseAuthProvider: React.FC<SupabaseAuthProviderProps> = ({ chil
       // Use metadata from Supabase, fallback to localStorage, then defaults
       const firstName = userMetadata?.first_name || userData?.firstName || 'User';
       const lastName = userMetadata?.last_name || userData?.lastName || '';
-      const examTypes = userMetadata?.exam_types || userData?.examTypes;
-      const planNames = userMetadata?.plan_names || userData?.planNames;
+      const examTypes = userMetadata?.exam_types || userData?.examTypes || ['CM'];
+      const planNames = userMetadata?.plan_names || userData?.planNames || ['Prépa CM'];
       
-      // ✅ Validate that we have exam types and plan names
+      // ✅ Check if user already has profile/subscriptions before validation
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', user.id)
+        .single();
+
+      const { data: existingSubscriptions } = await supabase
+        .from('subscriptions')
+        .select('id')
+        .eq('user_id', user.id);
+
+      // If user already has profile/subscriptions, skip creation
+      if (existingProfile || (existingSubscriptions && existingSubscriptions.length > 0)) {
+        console.log('✅ User already has profile/subscriptions, skipping creation');
+        setProfileCreated(true);
+        return;
+      }
+      
+      // ✅ Validate that we have exam types and plan names (only for new users)
       if (!examTypes || examTypes.length === 0) {
-        console.error('❌ No exam types found in metadata or localStorage');
-        throw new Error('No exam types selected during signup');
+        console.error('❌ No exam types found in metadata or localStorage, using defaults');
+        // Don't throw error, use defaults instead
       }
       if (!planNames || planNames.length === 0) {
-        console.error('❌ No plan names found in metadata or localStorage');
-        throw new Error('No plan names found during signup');
+        console.error('❌ No plan names found in metadata or localStorage, using defaults');
+        // Don't throw error, use defaults instead
       }
       
       console.log('✅ Found exam types:', examTypes, 'and plan names:', planNames);
@@ -345,92 +364,92 @@ export const SupabaseAuthProvider: React.FC<SupabaseAuthProviderProps> = ({ chil
       console.log('User metadata:', userMetadata);
       console.log('LocalStorage data:', userData);
 
-      // Check if profile exists
-      const { data: existingProfile } = await supabase
+      // Create profile (we already checked it doesn't exist above)
+      console.log('📝 Creating new profile...');
+      // Calculate expiration date (6 months from now)
+      const expirationDate = new Date();
+      expirationDate.setMonth(expirationDate.getMonth() + 6);
+
+      // Create profile using the collected data
+      const { error: profileError } = await supabase
         .from('profiles')
-        .select('id')
-        .eq('id', user.id)
-        .single();
+        .insert({
+          id: user.id,
+          first_name: firstName,
+          last_name: lastName,
+          plan_name: primaryExamType, // Use plan_name instead of exam_type
+          email: user.email,
+          expiration_date: expirationDate.toISOString(),
+          is_owner: false,
+        });
 
-      if (!existingProfile) {
-        console.log('📝 Profile does not exist, creating...');
-        // Calculate expiration date (6 months from now)
-        const expirationDate = new Date();
-        expirationDate.setMonth(expirationDate.getMonth() + 6);
+      if (profileError) {
+        console.error('Error creating profile:', profileError);
+      } else {
+        console.log('Profile created successfully');
+        await fetchProfile();
+      }
 
-        // Create profile using the collected data
+      // Create subscriptions for all plans (we already checked none exist above)
+      console.log('📝 Creating subscriptions...');
+      const startDate = new Date();
+      const endDate = new Date();
+      endDate.setDate(endDate.getDate() + 30);
+
+      console.log('Creating subscriptions for plans:', planNames);
+      
+      // Create subscriptions for each plan
+      for (let i = 0; i < planNames.length; i++) {
+        const planName = planNames[i];
+        const { error: subscriptionError } = await supabase
+          .from('subscriptions')
+          .insert({
+            user_id: user.id,
+            plan_name: planName,
+            start_date: startDate.toISOString(),
+            end_date: endDate.toISOString(),
+            is_active: true,
+          });
+
+        if (subscriptionError) {
+          console.error(`Error creating subscription for ${planName}:`, subscriptionError);
+        } else {
+          console.log(`Subscription created successfully for ${planName}`);
+        }
+      }
+      
+      // Fetch subscriptions after creating all
+      await fetchSubscription();
+      setProfileCreated(true);
+      console.log('✅ Profile and subscriptions created successfully');
+    } catch (error) {
+      console.error('❌ Error in createUserProfileIfNeeded:', error);
+      // ✅ Set to true to prevent infinite retry loop
+      // Log the error but don't retry indefinitely
+      setProfileCreated(true);
+      
+      // Optionally create a minimal profile for legacy users
+      try {
+        console.log('🔄 Attempting to create minimal profile for legacy user...');
+        const userMetadata = user.user_metadata;
         const { error: profileError } = await supabase
           .from('profiles')
           .insert({
             id: user.id,
-            first_name: firstName,
-            last_name: lastName,
-            plan_name: primaryExamType, // Use plan_name instead of exam_type
+            first_name: userMetadata?.first_name || 'User',
+            last_name: userMetadata?.last_name || '',
+            plan_name: 'CM',
             email: user.email,
-            expiration_date: expirationDate.toISOString(),
             is_owner: false,
           });
 
-        if (profileError) {
-          console.error('Error creating profile:', profileError);
-        } else {
-          console.log('Profile created successfully');
+        if (!profileError) {
+          console.log('✅ Minimal profile created for legacy user');
           await fetchProfile();
         }
-        
-        // Exam types will be handled through subscriptions
-      } else {
-        console.log('✅ Profile already exists, skipping creation');
+      } catch (minimalProfileError) {
+        console.error('❌ Failed to create minimal profile:', minimalProfileError);
       }
-
-      // Check if ANY subscription exists for this user
-      const { data: existingSubscriptions } = await supabase
-        .from('subscriptions')
-        .select('id')
-        .eq('user_id', user.id);
-
-      if (!existingSubscriptions || existingSubscriptions.length === 0) {
-        console.log('📝 No subscriptions exist, creating...');
-        // Create subscriptions for all plans
-        const startDate = new Date();
-        const endDate = new Date();
-        endDate.setDate(endDate.getDate() + 30);
-
-        console.log('Creating subscriptions for plans:', planNames);
-        
-        // Create subscriptions for each plan
-        for (let i = 0; i < planNames.length; i++) {
-          const planName = planNames[i];
-          const { error: subscriptionError } = await supabase
-            .from('subscriptions')
-            .insert({
-              user_id: user.id,
-              plan_name: planName,
-              start_date: startDate.toISOString(),
-              end_date: endDate.toISOString(),
-              is_active: true,
-            });
-
-          if (subscriptionError) {
-            console.error(`Error creating subscription for ${planName}:`, subscriptionError);
-          } else {
-            console.log(`Subscription created successfully for ${planName}`);
-          }
-        }
-        
-        // Fetch subscriptions after creating all
-        await fetchSubscription();
-        setProfileCreated(true);
-        console.log('✅ Profile and subscriptions created successfully');
-      } else {
-        console.log('✅ Subscriptions already exist, skipping creation');
-        setProfileCreated(true);
-      }
-    } catch (error) {
-      console.error('❌ Error in createUserProfileIfNeeded:', error);
-      // ✅ Don't set profileCreated to true if there was an error
-      // This will allow the function to retry on next login
-      setProfileCreated(false);
     }
   };
 
@@ -590,6 +609,25 @@ export const SupabaseAuthProvider: React.FC<SupabaseAuthProviderProps> = ({ chil
     }
   };
 
+  const resetPassword = async (email: string) => {
+    try {
+      const redirectUrl = `${window.location.origin}/reset-password`;
+      
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: redirectUrl,
+      });
+
+      if (error) {
+        console.error('❌ Reset password error:', error);
+      }
+
+      return { error };
+    } catch (error) {
+      console.error('Reset password error:', error);
+      return { error };
+    }
+  };
+
 
   const replaceExamType = async (newExamType: string) => {
     if (!user) return { error: new Error('No user logged in') };
@@ -659,9 +697,7 @@ export const SupabaseAuthProvider: React.FC<SupabaseAuthProviderProps> = ({ chil
       }
 
       // Extract exam type from plan name
-      const examType = subscription.plan_name.includes('CM') ? 'CM' : 
-                      subscription.plan_name.includes('CMS') ? 'CMS' : 
-                      subscription.plan_name.includes('CS') ? 'CS' : 'CM';
+      const examType = getExamTypeFromPlanName(subscription.plan_name, 'CM');
 
       // Update profile with selected plan
       const { error } = await updateProfile({ 
@@ -669,7 +705,7 @@ export const SupabaseAuthProvider: React.FC<SupabaseAuthProviderProps> = ({ chil
       });
 
       if (!error) {
-        setSelectedExamTypeState(examType as 'CM' | 'CMS' | 'CS');
+        setSelectedExamTypeState(examType as ExamType);
         await fetchUserSubscriptions();
       }
 
@@ -705,15 +741,13 @@ export const SupabaseAuthProvider: React.FC<SupabaseAuthProviderProps> = ({ chil
   };
 
   // Get available exam types from user's subscriptions
-  const getAvailableExamTypes = (): ('CM' | 'CMS' | 'CS')[] => {
-    const examTypes: ('CM' | 'CMS' | 'CS')[] = [];
-    
+  const getAvailableExamTypes = (): ExamType[] => {
+    const examTypes: ExamType[] = [];
+
     userSubscriptions.forEach(sub => {
       if (sub.is_active) {
-        const examType = (sub.plan_name.includes('CM') ? 'CM' : 
-                        sub.plan_name.includes('CMS') ? 'CMS' : 
-                        sub.plan_name.includes('CS') ? 'CS' : null) as 'CM' | 'CMS' | 'CS' | null;
-        
+        const examType = getExamTypeFromPlanName(sub.plan_name);
+
         if (examType && !examTypes.includes(examType)) {
           examTypes.push(examType);
         }
@@ -1048,6 +1082,7 @@ export const SupabaseAuthProvider: React.FC<SupabaseAuthProviderProps> = ({ chil
     updateProfile,
     updateEmail,
     updatePassword,
+    resetPassword,
     addExamType,
     removeExamType,
     setSelectedExamType,

@@ -2,7 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
 import { Clock, ChevronRight, ChevronLeft, Check, X, AlertCircle } from 'lucide-react';
-import { ENGLISH_QUESTIONS, EnglishQuestion, getMixedTest } from '../data/englishQuestions';
+import { QuestionService } from '../services/questionService';
+import { formatExponents } from '../utils/mathFormatting';
+
+interface EnglishQuestion {
+  id: string;
+  question: string;
+  options: string[];
+  correctAnswer: number;
+  explanation?: string;
+  difficulty: 'easy' | 'medium' | 'hard';
+  category: string;
+}
 
 interface TestResult {
   questionId: string;
@@ -18,7 +29,7 @@ interface TestConfig {
 }
 
 export default function EnglishTestPage() {
-  const { user } = useSupabaseAuth();
+  const { user, selectedExamType } = useSupabaseAuth();
   const navigate = useNavigate();
   
   const [testConfig, setTestConfig] = useState<TestConfig | null>(null);
@@ -29,6 +40,8 @@ export default function EnglishTestPage() {
   const [testQuestions, setTestQuestions] = useState<EnglishQuestion[]>([]);
   const [results, setResults] = useState<TestResult[]>([]);
   const [showReview, setShowReview] = useState(false);
+  const [isLoadingQuestions, setIsLoadingQuestions] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   // Timer effect
   useEffect(() => {
@@ -46,18 +59,136 @@ export default function EnglishTestPage() {
     return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
-  const startTest = (config: TestConfig) => {
-    setTestConfig(config);
-    const questions = getMixedTest(config.questionCount);
-    setTestQuestions(questions);
-    setTimeLeft(config.timeLimit * 60);
-    
-    // Initialize answers object
-    const initialAnswers: Record<string, number | null> = {};
-    questions.forEach(q => {
-      initialAnswers[q.id] = null;
-    });
-    setAnswers(initialAnswers);
+  const startTest = async (config: TestConfig) => {
+    try {
+      setLoadError(null);
+      setIsSubmitted(false);
+      setShowReview(false);
+      setResults([]);
+      setCurrentQuestion(0);
+      setTestQuestions([]);
+      setAnswers({});
+      setTimeLeft(0);
+      setTestConfig(config);
+      setIsLoadingQuestions(true);
+
+      const effectiveExamType = (selectedExamType ?? 'CM') as
+        | 'CM'
+        | 'CMS'
+        | 'CS';
+
+      const testTypes: ('practice_test' | 'examen_blanc')[] =
+        config.testType === 'practice' ? ['practice_test'] : ['examen_blanc'];
+
+      const seed = Math.floor(Date.now() / 1000);
+
+      const dbQuestions = await QuestionService.getRandomQuestions(
+        'ANG',
+        config.questionCount,
+        undefined,
+        seed,
+        effectiveExamType,
+        testTypes
+      );
+
+      if (!dbQuestions || dbQuestions.length === 0) {
+        throw new Error(
+          'Aucune question disponible pour ce test pour le moment. Veuillez réessayer plus tard.'
+        );
+      }
+
+      const formattedQuestions = dbQuestions
+        .map<EnglishQuestion | null>((dbQ, index) => {
+          const allAnswers = [
+            dbQ.answer1,
+            dbQ.answer2,
+            dbQ.answer3,
+            dbQ.answer4
+          ];
+          const validAnswers = allAnswers.filter(
+            answer => answer && answer !== 'null'
+          ) as string[];
+
+          if (validAnswers.length < 2) {
+            return null;
+          }
+
+          const correctLetter = (dbQ.correct || '').toUpperCase();
+
+          let correctIndex = 0;
+          if (correctLetter === 'A' && allAnswers[0] && allAnswers[0] !== 'null') {
+            correctIndex = validAnswers.indexOf(allAnswers[0]!);
+          } else if (
+            correctLetter === 'B' &&
+            allAnswers[1] &&
+            allAnswers[1] !== 'null'
+          ) {
+            correctIndex = validAnswers.indexOf(allAnswers[1]!);
+          } else if (
+            correctLetter === 'C' &&
+            allAnswers[2] &&
+            allAnswers[2] !== 'null'
+          ) {
+            correctIndex = validAnswers.indexOf(allAnswers[2]!);
+          } else if (
+            correctLetter === 'D' &&
+            allAnswers[3] &&
+            allAnswers[3] !== 'null'
+          ) {
+            correctIndex = validAnswers.indexOf(allAnswers[3]!);
+          }
+
+          const formattedQuestionText = formatExponents(dbQ.question_text);
+          const formattedOptions = validAnswers.map(option => formatExponents(option));
+          const formattedExplanation = formatExponents(
+            (dbQ as any).explanation ||
+              `La réponse correcte est ${
+                formattedOptions[correctIndex >= 0 ? correctIndex : 0]
+              }.`
+          );
+
+          return {
+            id: dbQ.id || `${index}`,
+            question: formattedQuestionText,
+            options: formattedOptions,
+            correctAnswer: correctIndex >= 0 ? correctIndex : 0,
+            explanation: formattedExplanation,
+            difficulty:
+              dbQ.difficulty?.toLowerCase?.() === 'easy' ||
+              dbQ.difficulty?.toLowerCase?.() === 'medium' ||
+              dbQ.difficulty?.toLowerCase?.() === 'hard'
+                ? (dbQ.difficulty.toLowerCase() as 'easy' | 'medium' | 'hard')
+                : 'medium',
+            category: 'Anglais'
+          };
+        })
+        .filter((q): q is EnglishQuestion => q !== null);
+
+      if (formattedQuestions.length === 0) {
+        throw new Error(
+          'Les questions chargées ne sont pas compatibles avec ce test. Veuillez réessayer.'
+        );
+      }
+
+      const initialAnswers: Record<string, number | null> = {};
+      formattedQuestions.forEach(q => {
+        initialAnswers[q.id] = null;
+      });
+
+      setTestQuestions(formattedQuestions);
+      setAnswers(initialAnswers);
+      setTimeLeft(config.timeLimit * 60);
+    } catch (error) {
+      console.error('Error starting English test:', error);
+      setLoadError(
+        error instanceof Error
+          ? error.message
+          : 'Erreur lors du chargement des questions. Veuillez réessayer.'
+      );
+      setTestConfig(null);
+    } finally {
+      setIsLoadingQuestions(false);
+    }
   };
 
   const handleAnswerSelect = (answerIndex: number) => {
@@ -173,6 +304,11 @@ export default function EnglishTestPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white rounded-lg shadow-sm p-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-6 text-center">Test d'Anglais</h1>
+            {loadError && (
+              <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {loadError}
+              </div>
+            )}
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="border-2 border-blue-200 rounded-lg p-6 hover:border-blue-400 transition-colors">
@@ -187,7 +323,9 @@ export default function EnglishTestPage() {
                   <li>• Peut être refait</li>
                 </ul>
                 <button
-                  onClick={() => startTest({ questionCount: 15, timeLimit: 20, testType: 'practice' })}
+                  onClick={() =>
+                    void startTest({ questionCount: 15, timeLimit: 20, testType: 'practice' })
+                  }
                   className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
                 >
                   Commencer le Test de Pratique
@@ -206,7 +344,9 @@ export default function EnglishTestPage() {
                   <li>• Évaluation complète</li>
                 </ul>
                 <button
-                  onClick={() => startTest({ questionCount: 30, timeLimit: 45, testType: 'exam' })}
+                  onClick={() =>
+                    void startTest({ questionCount: 30, timeLimit: 45, testType: 'exam' })
+                  }
                   className="w-full bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700 transition-colors"
                 >
                   Commencer l'Examen Blanc
@@ -342,6 +482,19 @@ export default function EnglishTestPage() {
                 Retour au Tableau de Bord
               </button>
             </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (testConfig && isLoadingQuestions) {
+    return (
+      <div className="min-h-screen bg-gray-50 pt-24 pb-8">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-white rounded-lg shadow-sm p-8 flex flex-col items-center">
+            <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+            <p className="text-gray-600">Chargement des questions d'anglais...</p>
           </div>
         </div>
       </div>
