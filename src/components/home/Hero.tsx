@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Container } from '../ui/Container';
 import { Button } from '../ui/Button';
 import { fadeIn, slideUp, staggerContainer, staggerItem } from '../../utils/animations';
 import { Link, useNavigate } from 'react-router-dom';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Trophy, Target, Star, Award, GraduationCap, BookOpen, Zap, Brain, Users, Clock, CheckCircle } from 'lucide-react';
 
 const userAvatars = [
   {
@@ -27,164 +27,192 @@ const userAvatars = [
   },
 ]
 
-const examTypes = [
-  { value: '', label: 'Sélectionnez votre niveau' },
-  { value: 'CM', label: 'Cour Moyen (CM)' },
-  { value: 'CMS', label: 'Cour Moyen Supérieur (CMS)' },
-  { value: 'CS', label: 'Cour Supérieur (CS)' },
+const examLevels = [
+  { 
+    value: 'CM', 
+    label: 'Cour Moyen (CM)'
+  },
+  { 
+    value: 'CMS', 
+    label: 'Cour Moyen Supérieur (CMS)'
+  },
+  { 
+    value: 'CS', 
+    label: 'Cour Supérieur (CS)'
+  },
 ];
 
 export const Hero: React.FC = () => {
-  const [selectedExam, setSelectedExam] = useState('');
+  const [showQuiz, setShowQuiz] = useState(false);
   const navigate = useNavigate();
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const handleStartQuiz = () => {
-    if (!selectedExam) {
-      alert('Veuillez sélectionner un type d\'examen');
-      return;
-    }
-    navigate(`/quick-quiz?type=${selectedExam}`);
+  const handleQuizSelect = (level: string) => {
+    navigate(`/quick-quiz?type=${level}`);
+    setShowQuiz(false);
   };
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowQuiz(false);
+      }
+    };
+
+    if (showQuiz) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showQuiz]);
+
   return (
-    <section className="pt-10 pb-10 bg-gradient-to-br from-neutral-100 via-white to-primary-50 overflow-hidden">
-      <Container size="xl">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 items-center min-h-[60vh]">
-          {/* LEFT: Hero section, even larger */}
+    <section className="pt-6 xs:pt-8 sm:pt-10 pb-6 xs:pb-8 sm:pb-10 bg-gradient-to-br from-neutral-100 via-white to-primary-50 overflow-hidden relative">
+      {/* Simplified Background Image */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div 
+          className="absolute inset-0 opacity-[0.15] bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: `url('https://images.pexels.com/photos/3183150/pexels-photo-3183150.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&dpr=2')`,
+            backgroundPosition: 'center right',
+            backgroundSize: 'cover'
+          }}
+        ></div>
+        
+        {/* Overlay to ensure text readability */}
+        <div className="absolute inset-0 bg-gradient-to-r from-white/85 via-white/60 to-transparent"></div>
+      </div>
+
+      {/* Simplified Background decorative elements - Mobile optimized */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Floating icons - Hidden on very small screens, simplified positioning */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 0.08, y: 0 }}
+          transition={{ duration: 2, delay: 0.5 }}
+          className="absolute top-8 xs:top-16 sm:top-20 left-2 xs:left-4 sm:left-10 text-primary-300 hidden xs:block"
+        >
+          <Trophy className="w-6 h-6 xs:w-8 xs:h-8 sm:w-10 sm:h-10 sm:w-12 sm:h-12" />
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 0.08, y: 0 }}
+          transition={{ duration: 2, delay: 1 }}
+          className="absolute top-16 xs:top-24 sm:top-32 right-2 xs:right-4 sm:right-20 text-accent-300 hidden xs:block"
+        >
+          <Target className="w-5 h-5 xs:w-6 xs:h-6 sm:w-8 sm:h-8 sm:w-10 sm:h-10" />
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 0.08, x: 0 }}
+          transition={{ duration: 2, delay: 1.5 }}
+          className="absolute bottom-16 xs:bottom-24 sm:bottom-32 left-2 xs:left-4 sm:left-20 text-yellow-300 hidden xs:block"
+        >
+          <Star className="w-6 h-6 xs:w-8 xs:h-8 sm:w-10 sm:h-10 sm:w-12 sm:h-12" />
+        </motion.div>
+        
+        {/* Simplified geometric patterns - Mobile optimized */}
+        <div className="absolute top-0 left-0 w-12 h-12 xs:w-16 xs:h-16 sm:w-20 sm:h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-primary-100 to-transparent rounded-full blur-2xl opacity-20 xs:opacity-30"></div>
+        <div className="absolute bottom-0 right-0 w-16 h-16 xs:w-20 xs:h-20 sm:w-24 xs:h-24 sm:w-32 sm:h-32 bg-gradient-to-tl from-accent-100 to-transparent rounded-full blur-2xl opacity-20 xs:opacity-30"></div>
+        
+        {/* Subtle grid pattern - Reduced opacity on mobile */}
+        <div className="absolute inset-0 opacity-[0.01] xs:opacity-[0.02]" style={{
+          backgroundImage: `radial-gradient(circle at 1px 1px, #3b82f6 1px, transparent 0)`,
+          backgroundSize: '20px 20px'
+        }}></div>
+      </div>
+
+      <Container size="xl" className="relative z-10">
+        <div className="flex flex-col items-center text-center min-h-[60vh] xs:min-h-[65vh] sm:min-h-[70vh] justify-center py-8 xs:py-12 sm:py-16">
+          {/* Main Hero Content - Mobile optimized */}
           <motion.div
             variants={staggerContainer(0.1)}
             initial="hidden"
             animate="visible"
-            className="lg:col-span-7 col-span-1 flex flex-col justify-center text-center lg:text-left"
+            className="max-w-5xl mx-auto px-3 xs:px-4 sm:px-6"
           >
             <motion.h1 
               variants={staggerItem}
-              className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-neutral-950 leading-tight mb-6"
+              className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-neutral-950 leading-tight mb-4 xs:mb-6 px-2 xs:px-0"
             >
-              Le site de<br />
-              <span className="text-primary-500">référence</span> pour<br />
-              réussir l'ENA
+              Votre <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-accent-600">Passeport</span> vers l'<span className="text-transparent bg-clip-text bg-gradient-to-r from-accent-600 to-yellow-600">Excellence</span> ENA
             </motion.h1>
             
             <motion.p 
               variants={staggerItem}
-              className="text-2xl md:text-2.5xl text-neutral-700 mb-10 max-w-xl mx-auto lg:mx-0"
+              className="text-lg xs:text-xl sm:text-2xl md:text-2.5xl text-neutral-700 mb-6 xs:mb-8 sm:mb-10 max-w-3xl mx-auto leading-relaxed px-3 xs:px-4 sm:px-0"
             >
-              Maîtrisez chaque épreuve avec notre accompagnement complet et rejoignez l'élite de l'administration ivoirienne.
+              Preparez le 1er tour avec les meilleurs outils
             </motion.p>
             
             <motion.div 
               variants={staggerItem}
-              className="flex flex-col sm:flex-row gap-5 justify-center lg:justify-start mb-2"
+              className="flex justify-center mb-6 xs:mb-8 px-3 xs:px-4 sm:px-0"
             >
-              <Button to="/signup" size="lg" className="text-lg py-4 px-8">
-                Commencer la préparation
-              </Button>
-              <Button to="/tarification" variant="outline" size="lg" className="text-lg py-4 px-8">
-                Voir les formules
-              </Button>
+              {/* Dropdown container - Mobile optimized */}
+              <div className="relative w-full sm:w-auto" ref={dropdownRef}>
+                <Button 
+                  size="lg" 
+                  className="text-base xs:text-lg py-3 xs:py-4 px-6 xs:px-8 bg-gradient-to-r from-accent-500 to-accent-600 hover:from-accent-600 hover:to-accent-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 w-full sm:w-auto"
+                  onClick={() => setShowQuiz(!showQuiz)}
+                >
+                  Commencez un quiz rapide
+                  <ChevronDown className={`w-4 h-4 xs:w-5 xs:h-5 ml-2 transition-transform duration-300 ${showQuiz ? 'rotate-180' : ''}`} />
+                </Button>
+                
+                {/* Simple dropdown menu - Mobile optimized */}
+                {showQuiz && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="absolute top-full left-0 mt-2 bg-white border border-neutral-200 rounded-lg shadow-lg z-50 w-full min-w-[250px] xs:min-w-[280px] sm:min-w-[300px]"
+                    style={{ minHeight: 'fit-content' }}
+                  >
+                    {examLevels.map((level, index) => (
+                      <button
+                        key={level.value}
+                        onClick={() => handleQuizSelect(level.value)}
+                        className={`w-full px-3 xs:px-4 py-2 xs:py-3 text-left hover:bg-neutral-50 transition-colors text-sm xs:text-base ${
+                          index === 0 ? 'rounded-t-lg' : ''
+                        } ${
+                          index === examLevels.length - 1 ? 'rounded-b-lg' : 'border-b border-neutral-100'
+                        }`}
+                      >
+                        {level.label}
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </div>
             </motion.div>
             
             <motion.div 
               variants={fadeIn}
-              className="mt-8 flex items-center justify-center lg:justify-start"
+              className="flex items-center justify-center px-3 xs:px-4 sm:px-0"
             >
               <div className="flex -space-x-2">
                 {userAvatars.map((avatar, i) => (
                   <img
                     key={i}
-                    className="inline-block h-12 w-12 rounded-full ring-2 ring-white"
+                    className="inline-block h-8 w-8 xs:h-10 xs:w-10 sm:h-12 sm:w-12 rounded-full ring-2 ring-white"
                     src={avatar.type === 'image' ? avatar.src : `https://ui-avatars.com/api/?name=${avatar.name}&background=random&color=fff`}
                     alt={avatar.type === 'image' ? avatar.alt : avatar.name}
                   />
                 ))}
               </div>
-              <div className="ml-4 text-left">
-                <p className="text-base font-semibold text-neutral-950">
+              <div className="ml-3 xs:ml-4 text-left min-w-0">
+                <p className="text-xs xs:text-sm sm:text-base font-semibold text-neutral-950 truncate">
                   Rejoignez +1200 étudiants
                 </p>
-                <p className="text-sm text-neutral-600">
+                <p className="text-xs xs:text-sm text-neutral-600">
                   Déjà en préparation active
                 </p>
               </div>
             </motion.div>
-          </motion.div>
-          
-          {/* RIGHT: Responsive, visually balanced quiz card with abundance shadow effect */}
-          <motion.div 
-            variants={slideUp}
-            initial="hidden"
-            animate="visible"
-            className="lg:col-span-5 col-span-1 relative flex justify-center mt-6 lg:mt-0 order-2 lg:order-none"
-          >
-            {/* Abundance shadow effect: 3 offset shadow layers */}
-            <div className="hidden lg:block absolute -right-6 -bottom-6 w-full h-full bg-neutral-200 rounded-3xl opacity-60 z-0" style={{filter: 'blur(2px)'}}></div>
-            <div className="hidden lg:block absolute -right-3 -bottom-3 w-full h-full bg-neutral-100 rounded-3xl opacity-80 z-0" style={{filter: 'blur(1.5px)'}}></div>
-            <div className="hidden lg:block absolute -right-1.5 -bottom-1.5 w-full h-full bg-neutral-50 rounded-3xl opacity-90 z-0" style={{filter: 'blur(1px)'}}></div>
-            <div className="block relative z-10 bg-white rounded-3xl border border-neutral-200 shadow-2xl py-3 px-6 w-full flex flex-col justify-center lg:py-3 lg:px-6">
-              <h3 className="text-2xl font-bold mb-4 text-center">Commencez votre quiz gratuit</h3>
-              {/* Exam Type Dropdown */}
-              <div className="mb-2">
-                <div className="relative">
-                  <select
-                    value={selectedExam}
-                    onChange={(e) => setSelectedExam(e.target.value)}
-                    className="w-full appearance-none bg-white border border-neutral-300 rounded-lg px-4 py-3 pr-12 text-neutral-700 text-base font-semibold focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                  >
-                    {examTypes.map((type) => (
-                      <option key={type.value} value={type.value}>
-                        {type.label}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 w-6 h-6 text-neutral-400 pointer-events-none" />
-                </div>
-              </div>
-              <div className="bg-primary-50 rounded-lg p-3 mb-2 border border-primary-200 shadow-sm">
-                <p className="text-primary-900 text-center text-base font-semibold whitespace-pre-line">
-                  "En économie, que désigne le terme « main invisible » ?"
-                </p>
-              </div>
-              <div className="space-y-2 mb-2">
-                <div className="flex gap-3 items-center">
-                  <div className="w-7 h-7 rounded-full bg-primary-500 text-white flex items-center justify-center font-bold shrink-0 text-base">
-                    A
-                  </div>
-                  <div className="flex-1 p-3 border border-neutral-200 rounded-lg text-base whitespace-pre-line">
-                    L'autorégulation des marchés par l'intérêt individuel
-                  </div>
-                </div>
-                <div className="flex gap-3 items-center">
-                  <div className="w-7 h-7 rounded-full bg-neutral-200 text-neutral-700 flex items-center justify-center font-bold shrink-0 text-base">
-                    B
-                  </div>
-                  <div className="flex-1 p-3 border border-neutral-200 rounded-lg text-base whitespace-pre-line">
-                    L'intervention de l'État dans l'économie
-                  </div>
-                </div>
-                <div className="flex gap-3 items-center">
-                  <div className="w-7 h-7 rounded-full bg-neutral-200 text-neutral-700 flex items-center justify-center font-bold shrink-0 text-base">
-                    C
-                  </div>
-                  <div className="flex-1 p-3 border border-neutral-200 rounded-lg text-base whitespace-pre-line">
-                    La division du travail dans les entreprises
-                  </div>
-                </div>
-              </div>
-              <div className="mt-1 text-center">
-                <Button 
-                  onClick={handleStartQuiz}
-                  size="lg"
-                  disabled={!selectedExam}
-                  className={!selectedExam ? 'opacity-50 cursor-not-allowed' : ''}
-                >
-                  Commencer le quiz
-                </Button>
-                <p className="font-semibold text-primary-500 text-xs mt-2">
-                  {selectedExam ? `Niveau ${selectedExam} sélectionné` : 'Sélectionnez un niveau pour commencer'}
-                </p>
-              </div>
-            </div>
           </motion.div>
         </div>
       </Container>

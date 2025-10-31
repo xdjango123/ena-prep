@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
+import { SupabaseAuthProvider } from './contexts/SupabaseAuthContext';
 import { SidebarProvider } from './contexts/SidebarContext';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
@@ -9,7 +9,9 @@ import { GeneralKnowledgePage } from './pages/subjects/GeneralKnowledgePage';
 import EnglishSubjectPage from './pages/EnglishSubjectPage';
 import LogicPage from './pages/LogicPage';
 import { ExamPage } from './pages/exams/ExamPage';
+import { ExamReviewPage } from './pages/exams/ExamReviewPage';
 import { DashboardLayout } from './components/layout/DashboardLayout';
+import { ExamLayout } from './components/layout/ExamLayout';
 import { PublicLayout } from './components/layout/PublicLayout';
 import HomePage from './pages/HomePage';
 import SubjectsPage from './pages/SubjectsPage';
@@ -17,13 +19,16 @@ import ReviewsPage from './pages/ReviewsPage';
 import PricingPage from './pages/PricingPage';
 import FAQPage from './pages/FAQPage';
 import PracticePage from './pages/PracticePage';
-import EvaluationTestPage from './pages/EvaluationTestPage';
 import ForumPage from './pages/ForumPage';
 import TutorPage from './pages/TutorPage';
 import ProfilePage from './pages/ProfilePage';
 import EnaGuidePage from './pages/EnaGuidePage';
 import QuickQuizPage from './pages/QuickQuizPage';
+import TestSubscriptionPage from './pages/TestSubscriptionPage';
 import ScrollToTop from './components/ScrollToTop';
+import { RandomPracticeTest } from './components/quiz/RandomPracticeTest';
+import { ExamInterface } from './components/quiz/ExamInterface';
+import { SecureExamInterface } from './components/quiz/SecureExamInterface';
 
 // A placeholder for pages that are not yet implemented
 const PlaceholderPage: React.FC<{ title: string }> = ({ title }) => (
@@ -33,10 +38,9 @@ const PlaceholderPage: React.FC<{ title: string }> = ({ title }) => (
   </div>
 );
 
-
 function App() {
   return (
-    <AuthProvider>
+    <SupabaseAuthProvider>
       <Router>
         <ScrollToTop />
         <SidebarProvider>
@@ -50,18 +54,21 @@ function App() {
               <Route path="/faq" element={<PublicLayout><FAQPage /></PublicLayout>} />
               <Route path="/quick-quiz" element={<PublicLayout><QuickQuizPage /></PublicLayout>} />
 
-              <Route path="/dashboard" element={<DashboardLayout><Outlet /></DashboardLayout>}>
+              <Route path="/dashboard" element={<ExamLayout><Outlet /></ExamLayout>}>
                 <Route index element={<DashboardPage />} />
                 <Route path="practice" element={<PracticePage />} />
-                <Route path="evaluation-test" element={<EvaluationTestPage />} />
+                <Route path="random-practice" element={<RandomPracticeTest onExit={() => window.history.back()} />} />
                 
                 {/* Subject Pages */}
                 <Route path="subject/general-knowledge" element={<GeneralKnowledgePage />} />
                 <Route path="subject/english" element={<EnglishSubjectPage />} />
                 <Route path="subject/logic" element={<LogicPage />} />
                 
-                {/* Exam Page */}
+                {/* Exam Pages */}
                 <Route path="exams" element={<ExamPage />} />
+                <Route path="exam/:examId" element={<ExamInterface onExit={() => window.history.back()} />} />
+                <Route path="secure-exam/:examId" element={<SecureExamInterface onExit={() => window.history.back()} />} />
+                <Route path="exam-review/:examId" element={<ExamReviewPage />} />
 
                 {/* Community & Support Pages */}
                 <Route path="forum" element={<ForumPage />} />
@@ -70,6 +77,7 @@ function App() {
                 
                 {/* User Pages */}
                 <Route path="profile" element={<ProfilePage />} />
+                <Route path="test-subscription" element={<TestSubscriptionPage />} />
 
                 {/* Placeholder routes */}
                 <Route path="billing" element={<PlaceholderPage title="Abonnement" />} />
@@ -78,7 +86,7 @@ function App() {
             </Routes>
           </SidebarProvider>
         </Router>
-    </AuthProvider>
+    </SupabaseAuthProvider>
   );
 }
 

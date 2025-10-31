@@ -4,7 +4,7 @@ import { Container } from '../components/ui/Container';
 import { Section, SectionHeader } from '../components/ui/Section';
 import { subjects } from '../data/subjects';
 import { Globe, Languages, BrainCircuit } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
+import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
 import { Button } from '../components/ui/Button';
 
 const iconMap = {
@@ -38,7 +38,8 @@ const colorMap = {
 }
 
 const SubjectsPage: React.FC = () => {
-  const { isAuthenticated } = useAuth();
+  const { user } = useSupabaseAuth();
+  const isAuthenticated = !!user;
   
   return (
     <Section className="pt-32">

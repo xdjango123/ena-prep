@@ -5,16 +5,19 @@ import { QuizSeries } from '../../components/quiz/QuizSeries';
 import { QuizReview } from '../../components/quiz/QuizReview';
 import { QuizCards } from '../../components/quiz/QuizCards';
 import { QuizResult } from '../../components/quiz/QuizResult';
-import { ChallengeQuiz } from '../../components/quiz/ChallengeQuiz';
 import { getQuestionsBySubject, Question } from '../../data/quizQuestions';
+import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
+import { TestResultService } from '../../services/testResultService';
+import { UserAttemptService } from '../../services/userAttemptService';
 import {
 	TestDetails,
 	ActionButton,
 	TestListItem,
 	FilterPill,
-	RecommendationBanner
 } from './SubjectComponents';
 import { SubjectHeader } from '../../components/SubjectHeader';
+
+type ViewType = 'main' | 'summary' | 'quiz' | 'review' | 'results' | 'learn';
 
 const getQuizState = (subject: string) => {
 	const savedState = localStorage.getItem(`quizState_${subject}`);
@@ -29,88 +32,447 @@ const clearQuizState = (subject: string) => {
 }
 
 const practiceTests = [
-    { id: 'p1', name: 'Practice Test 1', questions: 20, time: 25, topic: 'History' },
-    { id: 'p2', name: 'Practice Test 2', questions: 20, time: 25, topic: 'Geography' },
-    { id: 'p3', name: 'Practice Test 3', questions: 25, time: 30, topic: 'Current Events' },
-    { id: 'p4', name: 'Practice Test 4', questions: 25, time: 30, topic: 'History' },
-    { id: 'p5', name: 'Practice Test 5', questions: 15, time: 20, topic: 'Geography' },
+    { id: 'p1', name: 'Test Pratique 1', questions: 10, time: 15, topic: 'History' },
+    { id: 'p2', name: 'Test Pratique 2', questions: 10, time: 15, topic: 'Geography' },
+    { id: 'p3', name: 'Test Pratique 3', questions: 10, time: 15, topic: 'Current Events' },
+    { id: 'p4', name: 'Test Pratique 4', questions: 10, time: 15, topic: 'History' },
+    { id: 'p5', name: 'Test Pratique 5', questions: 10, time: 15, topic: 'Geography' },
+    { id: 'p6', name: 'Test Pratique 6', questions: 10, time: 15, topic: 'Current Events' },
+    { id: 'p7', name: 'Test Pratique 7', questions: 10, time: 15, topic: 'History' },
+    { id: 'p8', name: 'Test Pratique 8', questions: 10, time: 15, topic: 'Geography' },
+    { id: 'p9', name: 'Test Pratique 9', questions: 10, time: 15, topic: 'Current Events' },
+    { id: 'p10', name: 'Test Pratique 10', questions: 10, time: 15, topic: 'History' },
 ];
 
 const topics = ['All', 'History', 'Geography', 'Current Events'];
 
 const quizzes = [
-    { id: 'q1', name: 'Quiz 1', questions: 50, time: 60 },
-    { id: 'q2', name: 'Quiz 2', questions: 50, time: 60 },
-    { id: 'q3', name: 'Quiz 3', questions: 50, time: 60 },
+    { id: 'q1', name: 'Quiz Series', questions: 15, time: 20 },
 ];
 
-const lastTest = { name: 'Practice Test 2', completed: 10, total: 20 };
-const recommendation = "You're doing great in History! Try focusing on Current Events next.";
+const lastTest = { name: 'Test Pratique 2', completed: 10, total: 20 };
 
 export const GeneralKnowledgePage: React.FC = () => {
-	const [view, setView] = useState<'main' | 'summary' | 'quiz' | 'review' | 'learn' | 'challenge' | 'results'>('main');
-	const [activeSection, setActiveSection] = useState<'practice' | 'quiz' | 'challenge' | null>('quiz');
+	const { profile, user, selectedExamType } = useSupabaseAuth();
+	const [view, setView] = useState<ViewType>('main');
+	const [activeSection, setActiveSection] = useState<'quiz' | 'practice' | null>('quiz');
 	const [selectedTest, setSelectedTest] = useState<TestDetails | null>(null);
 	const [lastAnswers, setLastAnswers] = useState<Map<number, string | number>>(new Map());
     const [activeTopic, setActiveTopic] = useState('All');
 	const [testResults, setTestResults] = useState<Record<string, { score: number; timeSpent: number }>>({});
 	const [lastResult, setLastResult] = useState<{ score: number, correctAnswers: number, totalQuestions: number, timeSpent: number } | null>(null);
+	const [questions, setQuestions] = useState<Question[]>([]);
+	const [isLoadingQuestions, setIsLoadingQuestions] = useState(false);
+	const [error, setError] = useState<string | null>(null);
+	const [isReviewMode, setIsReviewMode] = useState(false);
+
+	// Statistics state
+	const [statistics, setStatistics] = useState({
+		score: 0,
+		testsTaken: 0,
+		timeSpent: 0
+	});
+	const [isLoadingStatistics, setIsLoadingStatistics] = useState(false);
+
+	// Load user statistics - REMOVED (using fetchStatistics instead to avoid race conditions)
 
 	const pausedTestState = getQuizState('Culture Générale');
 
+	// Load test results from database
 	useEffect(() => {
-		const loadedResults = JSON.parse(localStorage.getItem('culture_generale_test_results') || '{}');
-		setTestResults(loadedResults);
+		const loadTestResults = async () => {
+			if (!user?.id) return;
+			
+			try {
+				// Build allowed test pratique numbers from the local definition
+				const allowedNumbers = practiceTests.map(t => parseInt(t.id.replace('p', '')));
+				
+				// Get test results from test_results table
+				const attempts = await TestResultService.getTestResultsByCategory(user.id, 'CG', 'practice', selectedExamType || 'CM'); // Practice tests now include exam_type
+				const filteredAttempts = attempts.filter(attempt => 
+					attempt.test_number && 
+					allowedNumbers.includes(attempt.test_number)
+				);
+				
+				const results: Record<string, { score: number; timeSpent: number }> = {};
+				const latestScores = new Map<number, number>();
+				
+				// Get the latest score for each test number (data is already ordered by created_at desc)
+				filteredAttempts.forEach(attempt => {
+					if (attempt.test_number && attempt.score !== null && !latestScores.has(attempt.test_number)) {
+						latestScores.set(attempt.test_number, attempt.score);
+					}
+				});
+				
+				// Create results object with latest scores
+				latestScores.forEach((score, testNumber) => {
+					const testId = `p${testNumber}`;
+					results[testId] = {
+						score: score,
+						timeSpent: 15 // Assuming 15 minutes per test
+					};
+				});
+				
+				setTestResults(results);
+			} catch (error) {
+				console.error('Error loading test results:', error);
+			}
+		};
+
+		loadTestResults();
+	}, [user?.id, selectedExamType]);
+
+	// Fetch statistics from database
+	useEffect(() => {
+		const fetchStatistics = async () => {
+			if (!user?.id) return;
+			
+			setIsLoadingStatistics(true);
+			try {
+				// Build allowed test pratique numbers from the local definition
+				const allowedNumbers = practiceTests.map(t => parseInt(t.id.replace('p', '')));
+				
+				// Get average score for CG category from test_results table, filtered by allowed tests
+				const score = await TestResultService.getAverageScoreForTestNumbers(
+					user.id,
+					'CG',
+					'practice',
+					allowedNumbers,
+					selectedExamType || 'CM' // Practice tests now include exam_type
+				);
+				
+				// Get test count for CG category from test_results table
+				const attempts = await TestResultService.getTestResultsByCategory(user.id, 'CG', 'practice', selectedExamType || 'CM'); // Practice tests now include exam_type
+				const filteredAttempts = attempts.filter(attempt => 
+					attempt.test_number && 
+					allowedNumbers.includes(attempt.test_number)
+				);
+				const uniqueTests = new Set(filteredAttempts.map(a => a.test_number));
+				const testsTaken = uniqueTests.size;
+				
+				// Calculate time spent (assuming 15 minutes per test for now)
+				const timeSpent = Math.round(testsTaken * 15 / 60); // Convert to hours
+				
+				setStatistics({
+					score,
+					testsTaken,
+					timeSpent
+				});
+			} catch (error) {
+				console.error('Error fetching statistics:', error);
+			} finally {
+				setIsLoadingStatistics(false);
+			}
+		};
+
+		fetchStatistics();
+	}, [user?.id, selectedExamType]);
+
+	// Function to refresh statistics (same logic as loadUserStatistics)
+	const refreshStatistics = async () => {
+		if (!user?.id) return;
+		
+		setIsLoadingStatistics(true);
+		try {
+			console.log('Refreshing statistics for user:', user.id);
+			const allowedNumbers = practiceTests.map(t => parseInt(t.id.replace('p', '')));
+			
+			// Get average score for CG category from test_results table, filtered by allowed tests
+			const score = await TestResultService.getAverageScoreForTestNumbers(
+				user.id,
+				'CG',
+				'practice',
+				allowedNumbers,
+				selectedExamType || undefined
+			);
+			console.log('Average score:', score);
+			
+			// Get test count for CG category from test_results table
+			const attempts = await TestResultService.getTestResultsByCategory(user.id, 'CG', 'practice', selectedExamType || undefined);
+			console.log('All attempts:', attempts);
+			const filteredAttempts = attempts.filter(attempt => 
+				attempt.test_number && 
+				allowedNumbers.includes(attempt.test_number)
+			);
+			const uniqueTests = new Set(filteredAttempts.map(a => a.test_number));
+			const testsTaken = uniqueTests.size;
+			console.log('Tests taken:', testsTaken);
+			
+			// Calculate time spent (assuming 15 minutes per test for now)
+			const timeSpent = Math.round(testsTaken * 15 / 60); // Convert to hours
+			
+			setStatistics({
+				score,
+				testsTaken,
+				timeSpent
+			});
+			
+			// Also refresh individual test results - get latest score for each allowed test
+			const results: Record<string, { score: number; timeSpent: number }> = {};
+			const latestScores = new Map<number, number>();
+			filteredAttempts.forEach(attempt => {
+				if (attempt.test_number && attempt.score !== null && !latestScores.has(attempt.test_number)) {
+					latestScores.set(attempt.test_number, attempt.score);
+				}
+			});
+			latestScores.forEach((score, testNumber) => {
+				const testId = `p${testNumber}`;
+				results[testId] = { score, timeSpent: 15 };
+			});
+			setTestResults(results);
+		} catch (error) {
+			console.error('Error refreshing statistics:', error);
+		} finally {
+			setIsLoadingStatistics(false);
+		}
+	};
+
+	// Load questions from database
+	useEffect(() => {
+		const loadQuestions = async () => {
+			setIsLoadingQuestions(true);
+			try {
+				const loadedQuestions = await getQuestionsBySubject('culture-generale', selectedExamType || 'CM');
+				setQuestions(loadedQuestions.slice(0, 15)); // Limit to 15 questions for quiz
+			} catch (error) {
+				console.error('Error loading questions:', error);
+				setError('Failed to load questions');
+			} finally {
+				setIsLoadingQuestions(false);
+			}
+		};
+		loadQuestions();
+	}, [selectedExamType]);
+
+	const loadQuestionsForTest = async (testNumber: number) => {
+		setIsLoadingQuestions(true);
+		try {
+			const loadedQuestions = await getQuestionsBySubject('culture-generale', selectedExamType || 'CM', testNumber);
+			setQuestions(loadedQuestions.slice(0, 15)); // Limit to 15 questions for quiz
+		} catch (error) {
+			console.error('Error loading questions:', error);
+			setError('Failed to load questions');
+		} finally {
+			setIsLoadingQuestions(false);
+		}
+	};
+
+	// Scroll to top when component mounts
+	useEffect(() => {
+		window.scrollTo({ top: 0, behavior: 'smooth' });
 	}, []);
 
-	const handleSectionToggle = (section: 'practice' | 'quiz' | 'challenge') => {
-		setActiveSection(prev => (prev === section ? null : section));
-	};
-
-	const handleStart = (test: TestDetails) => {
-		if (activeSection === 'practice') {
-			clearQuizState('Culture Générale');
+	// Refresh statistics when returning to main view
+	useEffect(() => {
+		if (view === 'main' && user?.id) {
+			refreshStatistics();
 		}
-		setSelectedTest(test);
-		setView('summary');
+	}, [view, user?.id]);
+
+	// Handle section toggle with scroll management
+	const handleSectionToggle = (section: 'quiz' | 'practice') => {
+		setActiveSection(section);
+		// Scroll to top of the page when switching sections
+		window.scrollTo({ top: 0, behavior: 'smooth' });
 	};
 
-	const startQuiz = () => setView('quiz');
+	// Handle view changes with scroll management
+	const handleViewChange = (newView: ViewType) => {
+		setView(newView);
+		// Scroll to top when changing views
+		window.scrollTo({ top: 0, behavior: 'smooth' });
+	};
+
+	// Handle start quiz with scroll management
+	const startQuiz = () => {
+		setView('quiz');
+		// Scroll to top when starting quiz
+		window.scrollTo({ top: 0, behavior: 'smooth' });
+	};
+
+	// Handle start test pratique
+	const handleStart = async (test: TestDetails) => {
+		// Load questions for this specific test to ensure randomization
+		await loadQuestionsForTest(parseInt(test.id.replace('p', '')));
+		setSelectedTest(test);
+		setView('quiz');
+		// Scroll to top when starting test
+		window.scrollTo({ top: 0, behavior: 'smooth' });
+	};
+
+	// Handle review test pratique
+	const handleReview = async (test: TestDetails) => {
+		try {
+			if (!user?.id) {
+				console.error('No user ID available for review');
+				return;
+			}
+
+			const testNumber = parseInt(test.id.replace('p', ''));
+			
+			// Try to get the actual test data from the database
+			const testData = await UserAttemptService.getTestDataForReview(user.id, 'CG', testNumber);
+			
+							if (testData) {
+					// Use the actual test data from the database
+					console.log('Loading actual test data for review:', testData);
+					setQuestions(testData.questions);
+					setLastAnswers(testData.userAnswers);
+					setLastResult({
+						score: testData.score,
+						correctAnswers: testData.correctAnswers,
+						totalQuestions: testData.totalQuestions,
+						timeSpent: testData.timeSpent
+					});
+					setSelectedTest(test);
+					setIsReviewMode(false);
+					setView('results');
+			} else {
+				// Fallback to loading questions and using estimated data
+				console.log('No test data found, using fallback review mode');
+				await loadQuestionsForTest(testNumber);
+				setSelectedTest(test);
+				
+									// Get historical attempt for score
+					const historicalAttempt = await UserAttemptService.getLatestTestAttempt(
+						user.id,
+						'CG',
+						testNumber,
+						'practice'
+					);
+					
+					if (historicalAttempt) {
+					setLastResult({
+						score: historicalAttempt.score || 0,
+						correctAnswers: Math.round((historicalAttempt.score || 0) * questions.length / 100),
+						totalQuestions: questions.length,
+						timeSpent: 15 * 60 // Assuming 15 minutes
+					});
+				}
+				
+									setLastAnswers(new Map());
+					setIsReviewMode(false);
+					setView('results');
+			}
+			
+			// Scroll to top when starting review
+			window.scrollTo({ top: 0, behavior: 'smooth' });
+		} catch (error) {
+			console.error('Error loading review data:', error);
+			// Fallback to normal review mode
+			setIsReviewMode(true);
+			setView('quiz');
+		}
+	};
 
     const filteredPracticeTests = activeTopic === 'All' 
     ? practiceTests 
     : practiceTests.filter(test => test.topic === activeTopic);
 
 	if (view === 'learn') {
-		return <QuizCards subject="Culture Générale" subjectColor="blue" onExit={() => setView('main')} />
+		return <QuizCards subject="Culture Générale" subjectColor="blue" onExit={() => { setView('main'); setActiveSection('quiz'); }} />
 	}
 
-	if (view === 'challenge') {
-		return <ChallengeQuiz subject="Culture Générale" onExit={() => setView('main')} />
-	}
+	if (view === 'quiz') {
+		if (!selectedTest) {
+			return (
+				<div className="flex items-center justify-center min-h-screen">
+					<div className="text-center">
+						<div className="text-red-600 text-xl mb-4">Erreur: Aucun test sélectionné</div>
+						<button 
+							onClick={() => setView('main')} 
+							className="px-6 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600"
+						>
+							Retour au menu principal
+						</button>
+					</div>
+				</div>
+			);
+		}
 
-	if (view === 'quiz' && selectedTest) {
-		return (
-			<QuizSeries
-				subject="Culture Générale"
-				subjectColor="blue"
-				questions={getQuestionsBySubject('culture-generale')}
-				duration={selectedTest.time * 60}
-				onExit={() => { setView('main'); setActiveSection(null); }}
-				onFinish={(answers, timeSpent) => {
-					const correctAnswers = getQuestionsBySubject('culture-generale').reduce((count, q) => {
-						return answers.get(q.id) === q.correctAnswer ? count + 1 : count;
+		if (isLoadingQuestions) {
+			return (
+				<div className="flex items-center justify-center min-h-screen">
+					<div className="text-center">
+						<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+						<p className="mt-4 text-gray-600">Chargement des questions...</p>
+					</div>
+				</div>
+			);
+		}
+
+				return (
+				<QuizSeries
+					subject="Culture Générale"
+					subjectColor="blue"
+					questions={questions}
+					duration={selectedTest.time * 60}
+					onExit={() => { 
+						setView('main'); 
+						setActiveSection('practice'); 
+						setIsReviewMode(false);
+					}}
+					onFinish={async (answers, timeSpent) => {
+					const correctAnswers = questions.reduce((count, q) => {
+						// More robust comparison logic
+						const isCorrect = (() => {
+							if (q.type === 'multiple-choice' && typeof q.correctAnswer === 'number') {
+								// For multiple choice, compare the selected index with the correct index
+								return answers.get(q.id) === q.correctAnswer;
+							} else if (q.type === 'true-false') {
+								// For true/false, compare strings
+								return String(answers.get(q.id)).toLowerCase() === String(q.correctAnswer).toLowerCase();
+							}
+							// Fallback comparison
+							return answers.get(q.id) === q.correctAnswer;
+						})();
+						return isCorrect ? count + 1 : count;
 					}, 0);
-					const score = Math.round((correctAnswers / getQuestionsBySubject('culture-generale').length) * 100);
+					const score = Math.round((correctAnswers / questions.length) * 100);
 
-					const newResults = { ...testResults, [selectedTest.id]: { score, timeSpent } };
-					localStorage.setItem('culture_generale_test_results', JSON.stringify(newResults));
-					setTestResults(newResults);
+					// Save to database
+					if (user?.id && selectedTest) {
+						try {
+							// Save score to test_results table (for statistics and tracking)
+							await TestResultService.saveTestResult(
+								user.id,
+								'practice',
+								'CG',
+								score,
+								parseInt(selectedTest.id.replace('p', '')), // Extract test number from id
+								selectedExamType || 'CM' // Include exam_type for practice tests
+							);
+							
+							// Save detailed test data to user_attempts table (for review functionality)
+							const testData = {
+								questions: questions,
+								userAnswers: Array.from(answers.entries()),
+								correctAnswers: correctAnswers,
+								totalQuestions: questions.length,
+								timeSpent: timeSpent
+							};
+
+							await UserAttemptService.saveUserAttempt(
+								user.id,
+								'practice',
+								'CG',
+								undefined, // subCategory
+								parseInt(selectedTest.id.replace('p', '')), // testNumber
+								score, // score
+								testData // test data for review
+							);
+							
+							// Refresh statistics after saving
+							await refreshStatistics();
+						} catch (error) {
+							console.error('Error saving test result to database:', error);
+						}
+					}
 
 					setLastResult({
 						score,
 						correctAnswers,
-						totalQuestions: getQuestionsBySubject('culture-generale').length,
+						totalQuestions: questions.length,
 						timeSpent
 					});
 					setLastAnswers(answers);
@@ -125,13 +487,17 @@ export const GeneralKnowledgePage: React.FC = () => {
 			<QuizResult
 				{...lastResult}
 				subjectColor="blue"
+				questions={questions}
+				userAnswers={lastAnswers}
 				onRedo={() => {
 					setView('summary');
 				}}
 				onReview={() => setView('review')}
-				onExit={() => {
+				onExit={async () => {
 					setView('main');
 					setActiveSection('practice');
+					// Refresh statistics and test results when returning to main view
+					await refreshStatistics();
 				}}
 			/>
 		);
@@ -140,9 +506,13 @@ export const GeneralKnowledgePage: React.FC = () => {
 	if (view === 'review') {
 		return (
 			<QuizReview 
-				questions={getQuestionsBySubject('culture-generale')} 
+				questions={questions} 
 				userAnswers={lastAnswers}
-				onBack={() => setView('main')}
+				onBack={async () => {
+					setView('main');
+					// Refresh statistics and test results when returning to main view
+					await refreshStatistics();
+				}}
 			/>
 		);
 	}
@@ -168,40 +538,44 @@ export const GeneralKnowledgePage: React.FC = () => {
 		);
 	}
 
+
+
 	return (
-		<div className="p-6 space-y-6">
+		<div className="p-2 sm:p-3 lg:p-6 space-y-2 sm:space-y-3 lg:space-y-6 pb-20">
 			<SubjectHeader 
 				subjectName="Culture Générale"
 				icon={Globe}
-				score={78}
-				testsTaken={8}
-				timeSpent={12}
-				gradientFrom="from-primary-600"
-				gradientTo="to-primary-700"
+				score={isLoadingStatistics ? 0 : statistics.score}
+				testsTaken={isLoadingStatistics ? 0 : statistics.testsTaken}
+				timeSpent={isLoadingStatistics ? 0 : statistics.timeSpent}
+				gradientFrom="from-blue-500"
+				gradientTo="to-blue-600"
 			/>
 
-			<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+			<div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3 lg:gap-4">
 				<ActionButton icon={Trophy} title="Quiz" color="blue" active={activeSection === 'quiz'} onClick={() => handleSectionToggle('quiz')} />
-				<ActionButton icon={Target} title="Practice Test" color="blue" active={activeSection === 'practice'} onClick={() => handleSectionToggle('practice')} />
-				<ActionButton icon={Zap} title="Challenge" color="blue" active={activeSection === 'challenge'} onClick={() => handleSectionToggle('challenge')} />
+				<ActionButton icon={Target} title="Test Pratique" color="blue" active={activeSection === 'practice'} onClick={() => handleSectionToggle('practice')} />
 			</div>
 
+
+
 			{activeSection === 'practice' && (
-				<div className="space-y-6">
-					<div className="bg-white rounded-xl shadow-sm border p-6">
-						<h2 className="text-xl font-bold mb-4">Practice by Topic</h2>
-						<div className="flex flex-wrap gap-2 mb-6">
+				<div className="space-y-2 sm:space-y-3 lg:space-y-6">
+					<div className="bg-white rounded-xl shadow-sm border p-2 sm:p-3 lg:p-6">
+						<h2 className="text-base sm:text-lg lg:text-xl font-bold mb-2 sm:mb-3 lg:mb-4">Practice by Topic</h2>
+						<div className="flex flex-wrap gap-1.5 sm:gap-2 mb-3 sm:mb-4 lg:mb-6">
 							{topics.map(topic => (
 								<FilterPill key={topic} topic={topic} activeTopic={activeTopic} setActiveTopic={setActiveTopic} color="blue" />
 							))}
 						</div>
 						
-						<div className="space-y-3">
+						<div className="space-y-1.5 sm:space-y-2 lg:space-y-3">
 							{filteredPracticeTests.map(test => (
 								<TestListItem 
 									key={test.id} 
 									test={test} 
 									onStart={() => handleStart(test)} 
+									onReview={() => handleReview(test)}
 									color="blue"
 									result={testResults[test.id]}
 								/>
@@ -209,40 +583,27 @@ export const GeneralKnowledgePage: React.FC = () => {
 						</div>
 					</div>
 
-					<RecommendationBanner recommendation={recommendation} />
 				</div>
 			)}
 
 			{activeSection === 'quiz' && (
-				<div className="bg-white rounded-xl shadow-sm border p-8 mt-4 text-center">
-					<Trophy className="w-16 h-16 text-blue-500 mx-auto mb-4" />
-					<h2 className="text-2xl font-bold mb-3">Apprenez avec des quiz interactifs</h2>
-					<p className="text-gray-600 max-w-2xl mx-auto mb-6">
+				<div className="bg-white rounded-xl shadow-sm border p-3 sm:p-4 lg:p-8 mt-4 text-center">
+					<Trophy className="w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 text-blue-500 mx-auto mb-3 sm:mb-4" />
+					<h2 className="text-lg sm:text-xl lg:text-2xl font-bold mb-2 sm:mb-3">Apprenez avec des quiz interactifs</h2>
+					<p className="text-gray-600 max-w-2xl mx-auto mb-4 sm:mb-6 text-xs sm:text-sm lg:text-base">
 						Nos quiz d'apprentissage sont conçus pour vous aider à maîtriser les concepts une question à la fois. Obtenez des commentaires immédiats, retournez les cartes pour voir les explications et apprenez à votre propre rythme.
 					</p>
+					<div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4 sm:mb-6">
+						<p className="text-blue-700 text-xs sm:text-sm font-medium">
+							📅 <strong>Quiz hebdomadaire :</strong> Les questions changent chaque semaine pour vous offrir une variété constante de contenu d'apprentissage.
+						</p>
+					</div>
 					<button 
 						onClick={() => setView('learn')}
-						className="inline-flex items-center gap-2 px-8 py-3 rounded-lg bg-blue-500 text-white font-semibold hover:bg-blue-600 transition-colors"
+						className="inline-flex items-center gap-2 px-4 sm:px-6 lg:px-8 py-2 sm:py-3 rounded-lg bg-blue-500 text-white font-semibold hover:bg-blue-600 transition-colors text-sm sm:text-base"
 					>
-						<Play className="w-5 h-5" />
+						<Play className="w-4 h-4 sm:w-5 sm:h-5" />
 						Commencer l'apprentissage
-					</button>
-				</div>
-			)}
-
-			{activeSection === 'challenge' && (
-				<div className="bg-white rounded-xl shadow-sm border p-8 mt-4 text-center">
-					<Zap className="w-16 h-16 text-blue-500 mx-auto mb-4" />
-					<h2 className="text-2xl font-bold mb-3">Défi Hebdomadaire</h2>
-					<p className="text-gray-600 max-w-2xl mx-auto mb-6">
-						Testez vos connaissances avec notre défi hebdomadaire ! Répondez à 10 questions en 5 minutes et voyez comment vous vous situez.
-					</p>
-					<button 
-						onClick={() => setView('challenge')}
-						className="inline-flex items-center gap-2 px-8 py-3 rounded-lg bg-blue-500 text-white font-semibold hover:bg-blue-600 transition-colors"
-					>
-						<Play className="w-5 h-5" />
-						Commencer le Défi
 					</button>
 				</div>
 			)}

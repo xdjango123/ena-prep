@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
 import { Clock, ChevronRight, ChevronLeft, Check, X, AlertCircle } from 'lucide-react';
 import { ENGLISH_QUESTIONS, EnglishQuestion, getMixedTest } from '../data/englishQuestions';
 
@@ -18,7 +18,7 @@ interface TestConfig {
 }
 
 export default function EnglishTestPage() {
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
   const navigate = useNavigate();
   
   const [testConfig, setTestConfig] = useState<TestConfig | null>(null);
@@ -145,6 +145,27 @@ export default function EnglishTestPage() {
     return results.filter(r => r.selectedAnswer === null).length;
   };
 
+  // Function to get conditional subtitle based on score
+  const getSubtitle = (score: number) => {
+    if (score < 30) {
+      return 'Encore un effort, voici vos résultats.';
+    } else if (score >= 30 && score < 50) {
+      return 'Peut mieux faire, voici vos résultats.';
+    } else if (score >= 50 && score < 70) {
+      return 'En progrès, voici vos résultats.';
+    } else if (score >= 70 && score < 85) {
+      return 'Encourageant, voici vos résultats.';
+    } else if (score >= 85 && score < 95) {
+      return 'Très bien, voici vos résultats.';
+    } else if (score >= 95 && score < 100) {
+      return 'Excellent, voici vos résultats.';
+    } else if (score === 100) {
+      return 'Parfait, voici vos résultats.';
+    } else {
+      return 'Encore un effort, voici vos résultats.';
+    }
+  };
+
   // Test selection screen
   if (!testConfig) {
     return (
@@ -218,7 +239,7 @@ export default function EnglishTestPage() {
                 <Check className="w-8 h-8 text-green-600" />
               </div>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">Test Terminé !</h1>
-              <p className="text-gray-600">Voici vos résultats</p>
+              <p className="text-gray-600">{getSubtitle(Math.round((getTotalScore() / testQuestions.length) * 100))}</p>
             </div>
 
             {/* Score Summary */}

@@ -3,6 +3,14 @@ export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
+      screens: {
+        'xs': '320px',
+        'sm': '640px',
+        'md': '768px',
+        'lg': '1024px',
+        'xl': '1280px',
+        '2xl': '1536px',
+      },
       colors: {
         primary: {
           50: '#eff6ff',
@@ -62,6 +70,9 @@ export default {
       },
       spacing: {
         '128': '32rem',
+      },
+      fontSize: {
+        '2.5xl': ['1.5rem', { lineHeight: '2rem' }],
       },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-in-out',

@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { NavLink, Link } from 'react-router-dom';
+import { NavLink, Link, useNavigate } from 'react-router-dom';
 import { Menu, X, GraduationCap, LogOut, User, Settings, CreditCard, TrendingUp, LayoutDashboard } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Container } from '../ui/Container';
 import { Button } from '../ui/Button';
-import { useAuth } from '../../contexts/AuthContext';
+import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
 
 const navigation = [
   { name: 'Accueil', to: '/' },
@@ -15,7 +15,10 @@ const navigation = [
 ];
 
 export const Header: React.FC = () => {
-  const { isAuthenticated, user, logout } = useAuth();
+  const { user, profile, signOut } = useSupabaseAuth();
+  const navigate = useNavigate();
+  const isAuthenticated = !!user;
+  const userName = profile ? `${profile.first_name} ${profile.last_name}` : user?.email || 'Utilisateur';
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -39,27 +42,35 @@ export const Header: React.FC = () => {
     };
   }, [isUserMenuOpen]);
 
-  const handleLogout = () => {
-    logout();
-    setIsUserMenuOpen(false);
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      setIsUserMenuOpen(false);
+      // Redirect to home page after successful logout
+      navigate('/');
+    } catch (error) {
+      console.error('Logout failed:', error);
+      // Even if logout fails, redirect to home for better UX
+      navigate('/');
+    }
   };
 
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-primary-600 shadow-md py-3' : 'bg-primary-600 shadow-sm py-4'
+        isScrolled ? 'bg-primary-600 shadow-md py-2 xs:py-3' : 'bg-primary-600 shadow-sm py-3 xs:py-4'
       }`}
     >
       <Container>
-        <div className="flex items-center justify-between w-full">
+        <div className="flex items-center justify-between">
           {/* Logo - Far Left */}
           <div className="flex-shrink-0">
             <Link 
               to="/" 
-              className="flex items-center gap-2 text-white font-bold text-xl"
+              className="flex items-center gap-2 text-white font-bold text-lg xs:text-xl"
             >
-              <GraduationCap size={28} />
-              <span>ENAplus<sup className="text-sm">+</sup></span>
+              <GraduationCap size={24} className="flex-shrink-0 xs:w-7 xs:h-7" />
+              <span>PrepaENA</span>
             </Link>
           </div>
 
@@ -94,26 +105,26 @@ export const Header: React.FC = () => {
                     to="/dashboard" 
                     className="flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium text-white/90 hover:text-white hover:bg-primary-700"
                 >
-                  <User className="w-5 h-5" />
-                  <span>{user?.name}</span>
+                  <User className="w-5 h-5 flex-shrink-0" />
+                  <span>{userName}</span>
                 </Link>
-                
+
                 <AnimatePresence>
                 {isUserMenuOpen && (
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                     className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg py-1 z-50 border"
                   >
                     <div className="px-4 py-2 text-sm text-gray-500 border-b">
-                        Connecté en tant que <strong>{user?.name}</strong>
+                        Connecté en tant que <strong>{userName}</strong>
                     </div>
                     <Link
                       to="/dashboard"
                       className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     >
-                      <LayoutDashboard className="w-4 h-4 mr-2" />
+                      <LayoutDashboard className="w-4 h-4 mr-2 flex-shrink-0" />
                       Tableau de bord
                     </Link>
                     <div className="border-t border-gray-100 my-1"></div>
@@ -121,21 +132,21 @@ export const Header: React.FC = () => {
                       to="/dashboard/profile"
                       className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     >
-                      <User className="w-4 h-4 mr-2" />
+                      <User className="w-4 h-4 mr-2 flex-shrink-0" />
                       Mon Profil
                     </Link>
                     <Link
                       to="/dashboard/billing"
                       className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     >
-                      <CreditCard className="w-4 h-4 mr-2" />
+                      <CreditCard className="w-4 h-4 mr-2 flex-shrink-0" />
                       Abonnement
                     </Link>
                     <Link
                       to="/dashboard/analytics"
                       className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     >
-                      <TrendingUp className="w-4 h-4 mr-2" />
+                      <TrendingUp className="w-4 h-4 mr-2 flex-shrink-0" />
                       Analytics
                     </Link>
                     <div className="border-t border-gray-100 my-1"></div>
@@ -143,7 +154,7 @@ export const Header: React.FC = () => {
                       onClick={handleLogout}
                       className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     >
-                      <LogOut className="w-4 h-4 mr-2" />
+                      <LogOut className="w-4 h-4 mr-2 flex-shrink-0" />
                       Se déconnecter
                     </button>
                   </motion.div>
@@ -168,10 +179,11 @@ export const Header: React.FC = () => {
 
           {/* Mobile menu button */}
           <button
-            className="md:hidden p-2 rounded-md text-white hover:bg-primary-700"
+            className="md:hidden p-2 rounded-md text-white hover:bg-primary-700 flex-shrink-0"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label="Toggle mobile menu"
           >
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            {isMobileMenuOpen ? <X size={20} className="xs:w-6 xs:h-6" /> : <Menu size={20} className="xs:w-6 xs:h-6" />}
           </button>
         </div>
       </Container>
@@ -179,13 +191,19 @@ export const Header: React.FC = () => {
       {/* Mobile Navigation */}
       <AnimatePresence>
         {isMobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-            className="md:hidden bg-primary-700 border-t border-primary-500 mt-2"
-          >
+          <>
+            {/* Overlay to close menu when clicking outside */}
+            <div 
+              className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="md:hidden bg-primary-700 border-t border-primary-500 mt-2 overflow-x-hidden relative z-50"
+            >
             <Container>
               <div className="py-2 space-y-1">
                 {navigation.map((item) => (
@@ -193,7 +211,7 @@ export const Header: React.FC = () => {
                     key={item.name}
                     to={item.to}
                     className={({ isActive }) =>
-                      `block px-3 py-2 rounded-md text-base font-medium ${
+                      `block px-3 py-2 rounded-md text-sm xs:text-base font-medium ${
                         isActive
                           ? 'bg-primary-800 text-white'
                           : 'text-white/90 hover:bg-primary-800 hover:text-white'
@@ -207,12 +225,12 @@ export const Header: React.FC = () => {
                 <div className="pt-4 pb-2 border-t border-primary-500">
                   {isAuthenticated ? (
                     <div className="space-y-2">
-                      <div className="px-3 py-2 text-sm font-medium text-white/70">
-                        Connecté en tant que {user?.name}
+                      <div className="px-3 py-2 text-xs xs:text-sm font-medium text-white/70 truncate">
+                        Connecté en tant que {userName}
                       </div>
                       <Link
                         to="/dashboard"
-                        className="block px-3 py-2 rounded-md text-base font-medium text-white/90 hover:bg-primary-800 hover:text-white"
+                        className="block px-3 py-2 rounded-md text-sm xs:text-base font-medium text-white/90 hover:bg-primary-800 hover:text-white"
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
                         Tableau de bord
@@ -222,9 +240,9 @@ export const Header: React.FC = () => {
                           handleLogout();
                           setIsMobileMenuOpen(false);
                         }}
-                        className="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-white/90 hover:bg-primary-800 hover:text-white flex items-center"
+                        className="w-full text-left block px-3 py-2 rounded-md text-sm xs:text-base font-medium text-white/90 hover:bg-primary-800 hover:text-white flex items-center"
                       >
-                        <LogOut className="w-4 h-4 mr-2" />
+                        <LogOut className="w-4 h-4 mr-2 flex-shrink-0" />
                         Se déconnecter
                       </button>
                     </div>
@@ -245,7 +263,8 @@ export const Header: React.FC = () => {
                 </div>
               </div>
             </Container>
-          </motion.div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </header>

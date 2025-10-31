@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { Container } from '../ui/Container';
 import { Section, SectionHeader } from '../ui/Section';
 import { staggerContainer, staggerItem } from '../../utils/animations';
@@ -54,6 +55,12 @@ const colorMap = {
 };
 
 export const SubjectsPreview: React.FC = () => {
+  const navigate = useNavigate();
+
+  const handleCompetitionClick = (id: string) => {
+    navigate(`/signup?competition=${id}`);
+  };
+
   return (
     <Section>
       <Container>
@@ -73,7 +80,10 @@ export const SubjectsPreview: React.FC = () => {
             const colors = colorMap[c.color as keyof typeof colorMap];
             return (
               <motion.div key={c.id} variants={staggerItem}>
-                <div className={`p-8 rounded-xl h-full flex flex-col shadow-sm transition-all ${colors.bg} ${colors.hoverBg}`}>
+                <div
+                  className={`p-8 rounded-xl h-full flex flex-col shadow-sm transition-all cursor-pointer ${colors.bg} ${colors.hoverBg}`}
+                  onClick={() => handleCompetitionClick(c.id)}
+                >
                   <div className="flex-grow flex flex-col items-center text-center">
                     <div className={`w-14 h-14 rounded-full flex items-center justify-center mb-5 ${colors.buttonBg}`}>
                       <Icon className="w-8 h-8 text-white" />

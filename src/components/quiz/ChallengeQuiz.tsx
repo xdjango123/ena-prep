@@ -1,7 +1,24 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { getQuestionsBySubject, Question } from '../../data/quizQuestions';
+import { getQuestionsBySubject } from '../../data/quizQuestions';
 import { useNavigate } from 'react-router-dom';
 import { Clock, CheckCircle, XCircle } from 'lucide-react';
+
+// Updated Question interface to include passages
+interface Question {
+  id: number;
+  type: 'multiple-choice' | 'true-false' | 'fill-blank' | 'matching';
+  question: string;
+  options?: string[];
+  correctAnswer: string | number;
+  explanation?: string;
+  difficulty: 'easy' | 'medium' | 'hard';
+  passage?: {
+    id: string;
+    title?: string;
+    content: string;
+    category?: string;
+  };
+}
 
 interface ChallengeQuizProps {
     subject: string;
@@ -10,14 +27,33 @@ interface ChallengeQuizProps {
 
 export const ChallengeQuiz: React.FC<ChallengeQuizProps> = ({ subject, onExit }) => {
     const navigate = useNavigate();
-    const questions = useMemo(() => {
-        return getQuestionsBySubject(subject.toLowerCase().replace(' ', '-')).slice(0, 10);
-    }, [subject]);
+    const [questions, setQuestions] = useState<Question[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [userAnswers, setUserAnswers] = useState<(string | null)[]>(Array(10).fill(null));
     const [timeLeft, setTimeLeft] = useState(300); // 5 minutes in seconds
     const [isFinished, setIsFinished] = useState(false);
+
+    // Load questions from database
+    useEffect(() => {
+        const loadQuestions = async () => {
+            setLoading(true);
+            try {
+                const subjectLower = subject.toLowerCase().replace(' ', '-');
+                const loadedQuestions = await getQuestionsBySubject(subjectLower);
+                setQuestions(loadedQuestions.slice(0, 10)); // Limit to 10 questions
+            } catch (error) {
+                setError('Failed to fetch questions');
+                console.error(error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadQuestions();
+    }, [subject]);
 
     useEffect(() => {
         if (isFinished) return;
@@ -36,6 +72,49 @@ export const ChallengeQuiz: React.FC<ChallengeQuizProps> = ({ subject, onExit })
         return () => clearInterval(timer);
     }, [isFinished]);
 
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
+                    <p className="mt-4 text-gray-600">Chargement des questions...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="text-center">
+                    <div className="text-red-600 text-xl mb-4">{error}</div>
+                    <button 
+                        onClick={onExit} 
+                        className="px-6 py-2 rounded-lg bg-primary-500 text-white hover:bg-primary-600"
+                    >
+                        Retour
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    if (questions.length === 0) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="text-center">
+                    <div className="text-red-600 text-xl mb-4">Aucune question disponible</div>
+                    <button 
+                        onClick={onExit} 
+                        className="px-6 py-2 rounded-lg bg-primary-500 text-white hover:bg-primary-600"
+                    >
+                        Retour
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
     const handleAnswer = (answer: string) => {
         const newAnswers = [...userAnswers];
         newAnswers[currentQuestionIndex] = answer;
@@ -53,8 +132,20 @@ export const ChallengeQuiz: React.FC<ChallengeQuizProps> = ({ subject, onExit })
     const calculateScore = () => {
         return userAnswers.reduce((score, answer, index) => {
             const question = questions[index];
-            const correctAnswerValue = question.type === 'multiple-choice' ? question.options?.[question.correctAnswer as number] : question.correctAnswer;
-            return answer === correctAnswerValue ? score + 1 : score;
+            // More robust comparison logic
+            const isCorrect = (() => {
+                if (question.type === 'multiple-choice' && typeof question.correctAnswer === 'number') {
+                    // For multiple choice, compare the selected option with the correct option text
+                    const correctOptionText = question.options?.[question.correctAnswer];
+                    return answer === correctOptionText;
+                } else if (question.type === 'true-false') {
+                    // For true/false, compare strings
+                    return String(answer).toLowerCase() === String(question.correctAnswer).toLowerCase();
+                }
+                // Fallback comparison
+                return answer === question.correctAnswer;
+            })();
+            return isCorrect ? score + 1 : score;
         }, 0);
     };
 
@@ -65,11 +156,48 @@ export const ChallengeQuiz: React.FC<ChallengeQuizProps> = ({ subject, onExit })
                 <h1 className="text-3xl font-bold mb-4">Défi terminé !</h1>
                 <p className="text-xl mb-6">Votre score : <span className="font-bold text-primary-500">{score} / {questions.length}</span></p>
                 <div className="space-y-4">
-                    {questions.map((q, index) => {
-                         const correctAnswerValue = q.type === 'multiple-choice' ? q.options?.[q.correctAnswer as number] : q.correctAnswer;
-                         const isCorrect = userAnswers[index] === correctAnswerValue;
+                    {questions.map((q: Question, index: number) => {
+                         // More robust comparison logic for display
+                         const isCorrect = (() => {
+                             if (q.type === 'multiple-choice' && typeof q.correctAnswer === 'number') {
+                                 // For multiple choice, compare the selected option with the correct option text
+                                 const correctOptionText = q.options?.[q.correctAnswer];
+                                 return userAnswers[index] === correctOptionText;
+                             } else if (q.type === 'true-false') {
+                                 // For true/false, compare strings
+                                 return String(userAnswers[index]).toLowerCase() === String(q.correctAnswer).toLowerCase();
+                             }
+                             // Fallback comparison
+                             return userAnswers[index] === q.correctAnswer;
+                         })();
+                         
+                         const correctAnswerValue = q.type === 'multiple-choice' && typeof q.correctAnswer === 'number'
+                             ? q.options?.[q.correctAnswer]
+                             : q.correctAnswer;
+                         
                          return (
                             <div key={q.id} className={`p-4 rounded-lg border ${isCorrect ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+                                {/* Passage Section - Show if question has a passage */}
+                                {q.passage && (
+                                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
+                                        <div className="mb-2">
+                                            <h4 className="text-sm font-semibold text-blue-900 mb-1">
+                                                {q.passage.title || 'Texte de référence'}
+                                            </h4>
+                                            {q.passage.category && (
+                                                <span className="inline-block px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded">
+                                                    {q.passage.category}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="prose prose-sm max-w-none">
+                                            <div className="text-blue-800 leading-relaxed whitespace-pre-wrap text-xs">
+                                                {q.passage.content}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                                
                                 <p className="font-semibold">{q.question}</p>
                                 <div className="flex items-center justify-center mt-2">
                                     {isCorrect ? <CheckCircle className="w-5 h-5 text-green-500 mr-2" /> : <XCircle className="w-5 h-5 text-red-500 mr-2" />}
@@ -105,9 +233,30 @@ export const ChallengeQuiz: React.FC<ChallengeQuizProps> = ({ subject, onExit })
             </div>
 
             <div className="bg-white p-8 rounded-xl shadow-lg">
+                {/* Passage Section - Show if question has a passage */}
+                {currentQuestion.passage && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                        <div className="mb-3">
+                            <h3 className="text-base font-semibold text-blue-900 mb-2">
+                                {currentQuestion.passage.title || 'Texte de référence'}
+                            </h3>
+                            {currentQuestion.passage.category && (
+                                <span className="inline-block px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded">
+                                    {currentQuestion.passage.category}
+                                </span>
+                            )}
+                        </div>
+                        <div className="prose prose-sm max-w-none">
+                            <div className="text-blue-800 leading-relaxed whitespace-pre-wrap text-sm">
+                                {currentQuestion.passage.content}
+                            </div>
+                        </div>
+                    </div>
+                )}
+                
                 <h2 className="text-xl font-semibold mb-4">{currentQuestionIndex + 1}. {currentQuestion.question}</h2>
                 <div className="space-y-3">
-                    {currentQuestion.options?.map((option, index) => (
+                    {currentQuestion.options?.map((option: string, index: number) => (
                         <button
                             key={index}
                             onClick={() => handleAnswer(option)}
@@ -116,7 +265,7 @@ export const ChallengeQuiz: React.FC<ChallengeQuizProps> = ({ subject, onExit })
                             {option}
                         </button>
                     ))}
-                    {currentQuestion.type === 'true-false' && ['Vrai', 'Faux'].map(option => (
+                    {currentQuestion.type === 'true-false' && ['Vrai', 'Faux'].map((option: string) => (
                         <button
                             key={option}
                             onClick={() => handleAnswer(option.toLowerCase())}

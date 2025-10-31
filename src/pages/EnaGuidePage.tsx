@@ -46,31 +46,31 @@ const EnaGuidePage: React.FC = () => {
           <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">Aperçu du Concours ENA</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="text-center p-6 bg-blue-50 rounded-xl border border-blue-200">
-              <GraduationCap className="w-12 h-12 text-blue-600 mx-auto mb-4" />
-              <h3 className="font-bold text-blue-800 mb-2">3 Niveaux</h3>
-              <p className="text-blue-600">CM, CMS, CS selon votre niveau d'études</p>
+            <div className="text-center p-6 bg-gray-50 rounded-xl border border-gray-200">
+              <GraduationCap className="w-12 h-12 text-gray-600 mx-auto mb-4" />
+              <h3 className="font-bold text-gray-800 mb-2">3 Niveaux</h3>
+              <p className="text-gray-600">CM, CMS, CS selon votre niveau d'études</p>
             </div>
             
-            <div className="text-center p-6 bg-green-50 rounded-xl border border-green-200">
-              <Clock className="w-12 h-12 text-green-600 mx-auto mb-4" />
-              <h3 className="font-bold text-green-800 mb-2">Durée</h3>
-              <p className="text-green-600">3h30 à 4h15 selon le niveau</p>
+            <div className="text-center p-6 bg-gray-50 rounded-xl border border-gray-200">
+              <Clock className="w-12 h-12 text-gray-600 mx-auto mb-4" />
+              <h3 className="font-bold text-gray-800 mb-2">Durée</h3>
+              <p className="text-gray-600">3h30 à 4h15 selon le niveau</p>
             </div>
             
-            <div className="text-center p-6 bg-purple-50 rounded-xl border border-purple-200">
-              <Target className="w-12 h-12 text-purple-600 mx-auto mb-4" />
-              <h3 className="font-bold text-purple-800 mb-2">3 Matières</h3>
-              <p className="text-purple-600">Culture générale, Anglais, Logique</p>
+            <div className="text-center p-6 bg-gray-50 rounded-xl border border-gray-200">
+              <Target className="w-12 h-12 text-gray-600 mx-auto mb-4" />
+              <h3 className="font-bold text-gray-800 mb-2">3 Matières</h3>
+              <p className="text-gray-600">Culture générale, Anglais, Logique</p>
             </div>
           </div>
 
-          <div className="bg-gradient-to-r from-yellow-50 to-yellow-100 border border-yellow-200 rounded-xl p-6">
+          <div className="bg-gray-50 border border-gray-200 rounded-xl p-6">
             <div className="flex items-start gap-4">
-              <Info className="w-6 h-6 text-yellow-600 mt-1 flex-shrink-0" />
+              <Info className="w-6 h-6 text-gray-600 mt-1 flex-shrink-0" />
               <div>
-                <h4 className="font-bold text-yellow-800 mb-2">Important à savoir</h4>
-                <p className="text-yellow-700">
+                <h4 className="font-bold text-gray-800 mb-2">Important à savoir</h4>
+                <p className="text-gray-700">
                   L'ENA forme les futurs cadres de l'administration publique de Côte d'Ivoire. 
                   Le concours est très sélectif et nécessite une préparation rigoureuse dans toutes les matières.
                 </p>
@@ -99,8 +99,7 @@ const EnaGuidePage: React.FC = () => {
                 requirement: 'BEPC ou BAC',
                 duration: '3h00',
                 questions: '80-90 questions',
-                description: 'Niveau d\'entrée pour les titulaires du BEPC ou du BAC. Questions de niveau fondamental.',
-                color: 'blue'
+                description: 'Niveau d\'entrée pour les titulaires du BEPC ou du BAC. Questions de niveau fondamental.'
               },
               {
                 level: 'CMS',
@@ -108,8 +107,7 @@ const EnaGuidePage: React.FC = () => {
                 requirement: 'Licence (BAC+3)',
                 duration: '3h30',
                 questions: '95-105 questions',
-                description: 'Niveau intermédiaire pour les titulaires d\'une Licence. Difficultés progressives.',
-                color: 'orange'
+                description: 'Niveau intermédiaire pour les titulaires d\'une Licence. Difficultés progressives.'
               },
               {
                 level: 'CS',
@@ -117,30 +115,29 @@ const EnaGuidePage: React.FC = () => {
                 requirement: 'Master (BAC+5)',
                 duration: '4h00',
                 questions: '110-120 questions',
-                description: 'Niveau avancé pour les titulaires d\'un Master. Questions complexes et approfondies.',
-                color: 'red'
+                description: 'Niveau avancé pour les titulaires d\'un Master. Questions complexes et approfondies.'
               }
             ].map((level, index) => (
-              <div key={index} className={`p-6 bg-${level.color}-50 rounded-xl border border-${level.color}-200`}>
+              <div key={index} className="p-6 bg-gray-50 rounded-xl border border-gray-200">
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <h3 className={`text-xl font-bold text-${level.color}-800 mb-1`}>
+                    <h3 className="text-xl font-bold text-gray-800 mb-1">
                       {level.level} - {level.title}
                     </h3>
-                    <p className={`text-${level.color}-600 font-medium`}>
+                    <p className="text-gray-600 font-medium">
                       Requis : {level.requirement}
                     </p>
                   </div>
                   <div className="text-right">
-                    <div className={`text-sm font-medium text-${level.color}-700 mb-1`}>
+                    <div className="text-sm font-medium text-gray-700 mb-1">
                       {level.duration}
                     </div>
-                    <div className={`text-xs text-${level.color}-600`}>
+                    <div className="text-xs text-gray-600">
                       {level.questions}
                     </div>
                   </div>
                 </div>
-                <p className={`text-${level.color}-700`}>{level.description}</p>
+                <p className="text-gray-700">{level.description}</p>
               </div>
             ))}
           </div>
@@ -162,10 +159,9 @@ const EnaGuidePage: React.FC = () => {
             {[
               {
                 subject: 'Culture Générale',
-                icon: <BookOpen className="w-8 h-8 text-blue-600" />,
-                color: 'blue',
+                icon: <BookOpen className="w-8 h-8 text-gray-600" />,
                 topics: [
-                  'Histoire du Sénégal et de l\'Afrique',
+                  'Histoire de la Côte d\'Ivoire et de l\'Afrique',
                   'Géographie et économie',
                   'Institutions politiques',
                   'Actualités nationales et internationales',
@@ -175,8 +171,7 @@ const EnaGuidePage: React.FC = () => {
               },
               {
                 subject: 'Anglais',
-                icon: <Users className="w-8 h-8 text-green-600" />,
-                color: 'green',
+                icon: <Users className="w-8 h-8 text-gray-600" />,
                 topics: [
                   'Grammaire et conjugaison',
                   'Vocabulaire professionnel',
@@ -188,8 +183,7 @@ const EnaGuidePage: React.FC = () => {
               },
               {
                 subject: 'Logique et Mathématiques',
-                icon: <Target className="w-8 h-8 text-purple-600" />,
-                color: 'purple',
+                icon: <Target className="w-8 h-8 text-gray-600" />,
                 topics: [
                   'Raisonnement logique',
                   'Suites numériques',
@@ -200,19 +194,19 @@ const EnaGuidePage: React.FC = () => {
                 tips: 'Entraînez-vous régulièrement avec des exercices variés'
               }
             ].map((subject, index) => (
-              <div key={index} className={`p-6 bg-${subject.color}-50 rounded-xl border border-${subject.color}-200`}>
+              <div key={index} className="p-6 bg-gray-50 rounded-xl border border-gray-200">
                 <div className="flex items-center gap-3 mb-4">
                   {subject.icon}
-                  <h3 className={`text-xl font-bold text-${subject.color}-800`}>
+                  <h3 className="text-xl font-bold text-gray-800">
                     {subject.subject}
                   </h3>
                 </div>
                 
                 <div className="mb-4">
-                  <h4 className={`font-semibold text-${subject.color}-700 mb-2`}>Thèmes principaux :</h4>
+                  <h4 className="font-semibold text-gray-700 mb-2">Thèmes principaux :</h4>
                   <ul className="space-y-1">
                     {subject.topics.map((topic, topicIndex) => (
-                      <li key={topicIndex} className={`flex items-center gap-2 text-${subject.color}-600 text-sm`}>
+                      <li key={topicIndex} className="flex items-center gap-2 text-gray-600 text-sm">
                         <CheckCircle className="w-3 h-3" />
                         {topic}
                       </li>
@@ -220,10 +214,10 @@ const EnaGuidePage: React.FC = () => {
                   </ul>
                 </div>
                 
-                <div className={`p-3 bg-${subject.color}-100 rounded-lg`}>
+                <div className="p-3 bg-gray-100 rounded-lg">
                   <div className="flex items-start gap-2">
-                    <Lightbulb className={`w-4 h-4 text-${subject.color}-600 mt-0.5 flex-shrink-0`} />
-                    <p className={`text-${subject.color}-700 text-sm font-medium`}>
+                    <Lightbulb className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" />
+                    <p className="text-gray-700 text-sm font-medium">
                       {subject.tips}
                     </p>
                   </div>
@@ -248,50 +242,44 @@ const EnaGuidePage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {[
               {
-                icon: <Calendar className="w-6 h-6 text-blue-600" />,
+                icon: <Calendar className="w-6 h-6 text-gray-600" />,
                 title: 'Planification',
-                tip: 'Établissez un planning de révision sur 6 mois minimum',
-                color: 'blue'
+                tip: 'Établissez un planning de révision sur 6 mois minimum'
               },
               {
-                icon: <Clock className="w-6 h-6 text-green-600" />,
+                icon: <Clock className="w-6 h-6 text-gray-600" />,
                 title: 'Gestion du temps',
-                tip: 'Entraînez-vous avec des examens chronométrés',
-                color: 'green'
+                tip: 'Entraînez-vous avec des examens chronométrés'
               },
               {
-                icon: <BookOpen className="w-6 h-6 text-purple-600" />,
+                icon: <BookOpen className="w-6 h-6 text-gray-600" />,
                 title: 'Lectures régulières',
-                tip: 'Lisez quotidiennement journaux et revues spécialisées',
-                color: 'purple'
+                tip: 'Lisez quotidiennement journaux et revues spécialisées'
               },
               {
-                icon: <Users className="w-6 h-6 text-orange-600" />,
+                icon: <Users className="w-6 h-6 text-gray-600" />,
                 title: 'Groupes d\'étude',
-                tip: 'Rejoignez des groupes de candidats pour échanger',
-                color: 'orange'
+                tip: 'Rejoignez des groupes de candidats pour échanger'
               },
               {
-                icon: <Target className="w-6 h-6 text-red-600" />,
+                icon: <Target className="w-6 h-6 text-gray-600" />,
                 title: 'Tests blancs',
-                tip: 'Passez des examens blancs régulièrement',
-                color: 'red'
+                tip: 'Passez des examens blancs régulièrement'
               },
               {
-                icon: <Award className="w-6 h-6 text-yellow-600" />,
+                icon: <Award className="w-6 h-6 text-gray-600" />,
                 title: 'Motivation',
-                tip: 'Gardez vos objectifs de carrière en tête',
-                color: 'yellow'
+                tip: 'Gardez vos objectifs de carrière en tête'
               }
             ].map((tip, index) => (
-              <div key={index} className={`p-4 bg-${tip.color}-50 rounded-lg border border-${tip.color}-200`}>
+              <div key={index} className="p-4 bg-gray-50 rounded-lg border border-gray-200">
                 <div className="flex items-start gap-3">
-                  <div className={`p-2 bg-${tip.color}-100 rounded-lg`}>
+                  <div className="p-2 bg-gray-100 rounded-lg">
                     {tip.icon}
                   </div>
                   <div>
-                    <h4 className={`font-bold text-${tip.color}-800 mb-1`}>{tip.title}</h4>
-                    <p className={`text-${tip.color}-600 text-sm`}>{tip.tip}</p>
+                    <h4 className="font-bold text-gray-800 mb-1">{tip.title}</h4>
+                    <p className="text-gray-600 text-sm">{tip.tip}</p>
                   </div>
                 </div>
               </div>
@@ -370,29 +358,7 @@ const EnaGuidePage: React.FC = () => {
           </motion.div>
         </div>
 
-        {/* CTA Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.2 }}
-          className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-8 text-white text-center"
-        >
-          <Star className="w-12 h-12 mx-auto mb-4 opacity-90" />
-          <h3 className="text-2xl font-bold mb-4">Prêt à commencer votre préparation ?</h3>
-          <p className="text-blue-100 mb-6 max-w-2xl mx-auto">
-            Rejoignez ENAplus+ et bénéficiez d'une préparation complète avec des examens blancs, 
-            des corrections détaillées et un suivi personnalisé.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button to="/dashboard/evaluation-test" variant="secondary" size="lg">
-              Faire le test d'évaluation
-            </Button>
-            <Button to="/tarification" variant="outline" size="lg" className="border-white text-white hover:bg-white hover:text-blue-600">
-              Voir nos formules
-            </Button>
-          </div>
-        </motion.div>
+
       </Container>
     </div>
   );

@@ -3,7 +3,7 @@ import { Header } from './Header';
 import { Footer } from './Footer';
 
 interface PublicLayoutProps {
-    children: React.ReactNode;
+  children: React.ReactNode;
 }
 
 export const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
@@ -14,4 +14,4 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
             <Footer />
         </div>
     );
-}; 
+};

@@ -70,27 +70,6 @@ const PricingPage: React.FC = () => {
               </motion.div>
             ))}
           </motion.div>
-
-          {/* Compact horizontal block for Accès Total */}
-          <div className="max-w-6xl mx-auto mt-2 flex justify-center">
-            {pricingTiers.filter(tier => tier.id === 'all').map((tier) => (
-              <div key={tier.id} className="flex flex-col md:flex-row items-center bg-primary-50 border border-primary-200 rounded-2xl shadow-sm px-10 py-6 gap-4 w-full max-w-6xl">
-                <div className="flex-1 text-center md:text-left">
-                  <div className="text-lg font-bold text-primary-800 mb-1">{tier.name}</div>
-                  <div className="text-xl font-bold text-primary-900 mb-1">{tier.price}</div>
-                  <div className="text-sm text-primary-700 mb-2">Accès à tous les concours (CM, CMS, CS)</div>
-                </div>
-                <Button
-                  variant="primary"
-                  to="/signup"
-                  size="lg"
-                  className="min-w-[180px]"
-                >
-                  {tier.buttonText}
-                </Button>
-              </div>
-            ))}
-          </div>
           
           <div className="mt-8">
             <h3 className="text-2xl font-bold mb-6 text-center">Questions fréquentes sur les abonnements</h3>

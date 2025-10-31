@@ -17,7 +17,7 @@ export const Container: React.FC<ContainerProps> = ({
   return (
     <Component
       className={clsx(
-        'mx-auto px-4 sm:px-6',
+        'mx-auto px-3 xs:px-4 sm:px-6',
         {
           'max-w-screen-sm': size === 'sm',
           'max-w-screen-md': size === 'md',
