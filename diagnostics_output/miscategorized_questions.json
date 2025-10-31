@@ -1,0 +1,42 @@
+[
+  {
+    "question_id": "2f3ac973-eb80-4f60-9fb3-8e34a5c9f319",
+    "current_category": "CG",
+    "suggested_category": "ANG",
+    "confidence": 1.0,
+    "question_preview": "Quel accord donne naissance au Fonds Monétaire International (FMI)?",
+    "exam_type": "CS",
+    "difficulty": "MED",
+    "sub_category": "Économie"
+  },
+  {
+    "question_id": "81864d9a-ec2d-4e99-923a-850b4a659c4a",
+    "current_category": "CG",
+    "suggested_category": "ANG",
+    "confidence": 1.0,
+    "question_preview": "Que signifie G.F.A?",
+    "exam_type": "CS",
+    "difficulty": "HARD",
+    "sub_category": "Administration"
+  },
+  {
+    "question_id": "38d5683f-44dd-45b6-bac2-612dc0eb02fd",
+    "current_category": "CG",
+    "suggested_category": "ANG",
+    "confidence": 0.8571,
+    "question_preview": "Dans quelle phrase n’y a-t-il pas de redondance ?",
+    "exam_type": "CM",
+    "difficulty": "MED",
+    "sub_category": "Aptitude verbale"
+  },
+  {
+    "question_id": "12bc076c-4ec5-4db2-87be-068a25be20cc",
+    "current_category": "CG",
+    "suggested_category": "ANG",
+    "confidence": 0.7143,
+    "question_preview": "Quel est le principal rôle des alvéoles pulmonaires?",
+    "exam_type": "CMS",
+    "difficulty": "HARD",
+    "sub_category": "Aptitude Verbale et CG"
+  }
+]

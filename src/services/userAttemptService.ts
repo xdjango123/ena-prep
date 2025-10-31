@@ -8,13 +8,14 @@ export class UserAttemptService {
     subCategory?: string,
     testNumber?: number,
     score?: number,
-    testData?: {
-      questions: any[]
-      userAnswers: [string | number, string | number][]
-      correctAnswers: number
-      totalQuestions: number
-      timeSpent: number
-    }
+  testData?: {
+    questions: any[]
+    userAnswers: [string | number, string | number][]
+    correctAnswers: number
+    totalQuestions: number
+    timeSpent: number
+    exam_type?: 'CM' | 'CMS' | 'CS'
+  }
   ): Promise<boolean> {
     try {
       console.log('Saving user attempt with detailed data:', { userId, testType, category, testNumber, score });

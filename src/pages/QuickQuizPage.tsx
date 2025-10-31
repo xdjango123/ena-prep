@@ -591,248 +591,112 @@ const QuickQuizPage: React.FC = () => {
 
           {/* Question Corrections */}
           <div className="relative mt-4">
-            {/* 1st full card */}
-            <div className="bg-white border border-neutral-200 rounded-lg p-4 xs:p-6 mb-4 shadow">
-              <div className="flex items-start gap-3 xs:gap-4 mb-4">
-                <span className="text-base xs:text-lg">{getSubjectIcon(questions[0]?.subject || 'N/A')}</span>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-sm font-medium text-neutral-600">Question 1</span>
-                    <span className="text-xs text-neutral-500">• {questions[0]?.subject || 'N/A'}</span>
-                    {userAnswers[0] === questions[0]?.correctAnswer ?
-                      <CheckCircle className="w-4 h-4 xs:w-5 xs:h-5 text-green-500" /> :
-                      <XCircle className="w-4 h-4 xs:w-5 xs:h-5 text-red-500" />
-                    }
-                  </div>
-                  <h3 className="font-semibold text-neutral-900 mb-4 text-sm xs:text-base">{questions[0]?.question || 'N/A'}</h3>
-                  <div className="space-y-2 mb-4">
-                    {questions[0]?.options && questions[0]?.type === 'multiple-choice' && questions[0]?.options.map((option, optionIndex) => (
-                      <div
-                        key={optionIndex}
-                        className={`flex items-center gap-3 p-3 rounded-lg ${
-                          optionIndex === questions[0]?.correctAnswer
-                            ? 'bg-green-50 border border-green-200'
-                            : userAnswers[0] === optionIndex && userAnswers[0] !== questions[0]?.correctAnswer
-                            ? 'bg-red-50 border border-red-200'
-                            : 'bg-neutral-50'
-                        }`}
-                      >
-                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium ${
-                          optionIndex === questions[0]?.correctAnswer
-                            ? 'bg-green-500 text-white'
-                            : userAnswers[0] === optionIndex && userAnswers[0] !== questions[0]?.correctAnswer
-                            ? 'bg-red-500 text-white'
-                            : 'bg-neutral-300 text-neutral-700'
-                        }`}>
-                          {String.fromCharCode(65 + optionIndex)}
-                        </div>
-                        <span className={optionIndex === questions[0]?.correctAnswer ? 'font-medium' : ''}>
-                          {option}
-                        </span>
-                        {optionIndex === questions[0]?.correctAnswer && (
-                          <CheckCircle className="w-4 h-4 text-green-500 ml-auto" />
-                        )}
-                        {userAnswers[0] === optionIndex && userAnswers[0] !== questions[0]?.correctAnswer && (
-                          <XCircle className="w-4 h-4 text-red-500 ml-auto" />
-                        )}
-                      </div>
-                    ))}
-                    {questions[0]?.type === 'true-false' && (
-                      <>
-                        <div className={`flex items-center gap-3 p-3 rounded-lg ${
-                          String(questions[0]?.correctAnswer).toLowerCase() === 'vrai'
-                            ? 'bg-green-50 border border-green-200'
-                            : userAnswers[0] === 0 && String(questions[0]?.correctAnswer).toLowerCase() !== 'vrai'
-                            ? 'bg-red-50 border border-red-200'
-                            : 'bg-neutral-50'
-                        }`}>
-                          <div className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium ${
-                            String(questions[0]?.correctAnswer).toLowerCase() === 'vrai'
-                              ? 'bg-green-500 text-white'
-                              : userAnswers[0] === 0 && String(questions[0]?.correctAnswer).toLowerCase() !== 'vrai'
-                              ? 'bg-red-500 text-white'
-                              : 'bg-neutral-300 text-neutral-700'
-                          }`}>
-                            A
-                          </div>
-                          <span>Vrai</span>
-                          {String(questions[0]?.correctAnswer).toLowerCase() === 'vrai' && (
-                            <CheckCircle className="w-4 h-4 text-green-500 ml-auto" />
-                          )}
-                          {userAnswers[0] === 0 && String(questions[0]?.correctAnswer).toLowerCase() !== 'vrai' && (
-                            <XCircle className="w-4 h-4 text-red-500 ml-auto" />
-                          )}
-                        </div>
-                        <div className={`flex items-center gap-3 p-3 rounded-lg ${
-                          String(questions[0]?.correctAnswer).toLowerCase() === 'faux'
-                            ? 'bg-green-50 border border-green-200'
-                            : userAnswers[0] === 1 && String(questions[0]?.correctAnswer).toLowerCase() !== 'faux'
-                            ? 'bg-red-50 border border-red-200'
-                            : 'bg-neutral-50'
-                        }`}>
-                          <div className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium ${
-                            String(questions[0]?.correctAnswer).toLowerCase() === 'faux'
-                              ? 'bg-green-500 text-white'
-                              : userAnswers[0] === 1 && String(questions[0]?.correctAnswer).toLowerCase() !== 'faux'
-                              ? 'bg-red-500 text-white'
-                              : 'bg-neutral-300 text-neutral-700'
-                          }`}>
-                            B
-                          </div>
-                          <span>Faux</span>
-                          {String(questions[0]?.correctAnswer).toLowerCase() === 'faux' && (
-                            <CheckCircle className="w-4 h-4 text-green-500 ml-auto" />
-                          )}
-                          {userAnswers[0] === 1 && String(questions[0]?.correctAnswer).toLowerCase() !== 'faux' && (
-                            <XCircle className="w-4 h-4 text-red-500 ml-auto" />
-                          )}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                    <p className="text-blue-800 text-sm">
-                      <strong>Explication :</strong> {questions[0]?.explanation || 'Aucune explication fournie.'}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <div className="space-y-4">
+              {questions.map((question, index) => {
+                if (!question) return null;
 
-            {/* 2nd full card */}
-            <div className="bg-white border border-neutral-200 rounded-lg p-6 mb-4 shadow">
-              <div className="flex items-start gap-4 mb-4">
-                <span className="text-lg">{getSubjectIcon(questions[1]?.subject || 'N/A')}</span>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-sm font-medium text-neutral-600">Question 2</span>
-                    <span className="text-xs text-neutral-500">• {questions[1]?.subject || 'N/A'}</span>
-                    {userAnswers[1] === questions[1]?.correctAnswer ?
-                      <CheckCircle className="w-5 h-5 text-green-500" /> :
-                      <XCircle className="w-5 h-5 text-red-500" />
-                    }
-                  </div>
-                  <h3 className="font-semibold text-neutral-900 mb-4">{questions[1]?.question || 'N/A'}</h3>
-                  <div className="space-y-2 mb-4">
-                    {questions[1]?.options && questions[1]?.type === 'multiple-choice' && questions[1]?.options.map((option, optionIndex) => (
-                      <div
-                        key={optionIndex}
-                        className={`flex items-center gap-3 p-3 rounded-lg ${
-                          optionIndex === questions[1]?.correctAnswer
-                            ? 'bg-green-50 border border-green-200'
-                            : userAnswers[1] === optionIndex && userAnswers[1] !== questions[1]?.correctAnswer
-                            ? 'bg-red-50 border border-red-200'
-                            : 'bg-neutral-50'
-                        }`}
-                      >
-                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium ${
-                          optionIndex === questions[1]?.correctAnswer
-                            ? 'bg-green-500 text-white'
-                            : userAnswers[1] === optionIndex && userAnswers[1] !== questions[1]?.correctAnswer
-                            ? 'bg-red-500 text-white'
-                            : 'bg-neutral-300 text-neutral-700'
-                        }`}>
-                          {String.fromCharCode(65 + optionIndex)}
-                        </div>
-                        <span className={optionIndex === questions[1]?.correctAnswer ? 'font-medium' : ''}>
-                          {option}
-                        </span>
-                        {optionIndex === questions[1]?.correctAnswer && (
-                          <CheckCircle className="w-4 h-4 text-green-500 ml-auto" />
-                        )}
-                        {userAnswers[1] === optionIndex && userAnswers[1] !== questions[1]?.correctAnswer && (
-                          <XCircle className="w-4 h-4 text-red-500 ml-auto" />
-                        )}
-                      </div>
-                    ))}
-                    {questions[1]?.type === 'true-false' && (
-                      <>
-                        <div className={`flex items-center gap-3 p-3 rounded-lg ${
-                          String(questions[1]?.correctAnswer).toLowerCase() === 'vrai'
-                            ? 'bg-green-50 border border-green-200'
-                            : userAnswers[1] === 0 && String(questions[1]?.correctAnswer).toLowerCase() !== 'vrai'
-                            ? 'bg-red-50 border border-red-200'
-                            : 'bg-neutral-50'
-                        }`}>
-                          <div className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium ${
-                            String(questions[1]?.correctAnswer).toLowerCase() === 'vrai'
-                              ? 'bg-green-500 text-white'
-                              : userAnswers[1] === 0 && String(questions[1]?.correctAnswer).toLowerCase() !== 'vrai'
-                              ? 'bg-red-500 text-white'
-                              : 'bg-neutral-300 text-neutral-700'
-                          }`}>
-                            A
-                          </div>
-                          <span>Vrai</span>
-                          {String(questions[1]?.correctAnswer).toLowerCase() === 'vrai' && (
-                            <CheckCircle className="w-4 h-4 text-green-500 ml-auto" />
-                          )}
-                          {userAnswers[1] === 0 && String(questions[1]?.correctAnswer).toLowerCase() !== 'vrai' && (
-                            <XCircle className="w-4 h-4 text-red-500 ml-auto" />
-                          )}
-                        </div>
-                        <div className={`flex items-center gap-3 p-3 rounded-lg ${
-                          String(questions[1]?.correctAnswer).toLowerCase() === 'faux'
-                            ? 'bg-green-50 border border-green-200'
-                            : userAnswers[1] === 1 && String(questions[1]?.correctAnswer).toLowerCase() !== 'faux'
-                            ? 'bg-red-50 border border-red-200'
-                            : 'bg-neutral-50'
-                        }`}>
-                          <div className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium ${
-                            String(questions[1]?.correctAnswer).toLowerCase() === 'faux'
-                              ? 'bg-green-500 text-white'
-                              : userAnswers[1] === 1 && String(questions[1]?.correctAnswer).toLowerCase() !== 'faux'
-                              ? 'bg-red-500 text-white'
-                              : 'bg-neutral-300 text-neutral-700'
-                          }`}>
-                            B
-                          </div>
-                          <span>Faux</span>
-                          {String(questions[1]?.correctAnswer).toLowerCase() === 'faux' && (
-                            <CheckCircle className="w-4 h-4 text-green-500 ml-auto" />
-                          )}
-                          {userAnswers[1] === 1 && String(questions[1]?.correctAnswer).toLowerCase() !== 'faux' && (
-                            <XCircle className="w-4 h-4 text-red-500 ml-auto" />
-                          )}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                    <p className="text-blue-800 text-sm">
-                      <strong>Explication :</strong> {questions[1]?.explanation || 'Aucune explication fournie.'}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
+                const userAnswer = userAnswers[index];
 
-            {/* 3rd blurred card with shadow and overlay CTA */}
-            <div className="relative mb-8">
-              {/* Overlay CTA centered on blurred card */}
-              <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
-                <div className="flex items-center gap-3 bg-white/80 rounded-lg px-6 py-3 shadow-lg pointer-events-auto">
-                  <Lock className="w-6 h-6 text-primary-500" />
-                  <Button size="md" to="/signup" variant="ghost" className="text-primary-700 font-bold text-lg px-2 py-1 pointer-events-auto">
-                    Voir tous les résultats
-                  </Button>
-                </div>
-              </div>
-              <div className="absolute left-0 right-0 bottom-0 h-8 bg-black/10 rounded-b-lg blur-md z-10"></div>
-              <div className="bg-white border border-neutral-200 rounded-lg p-6 blur-sm opacity-70 shadow-lg relative z-0">
-                <div className="flex items-start gap-4 mb-4">
-                  <span className="text-lg">{getSubjectIcon(questions[2]?.subject || 'N/A')}</span>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-sm font-medium text-neutral-600">Question 3</span>
-                      <span className="text-xs text-neutral-500">• {questions[2]?.subject || 'N/A'}</span>
+                const normalizedCorrectIndex = (() => {
+                  if (typeof question.correctAnswer === 'number') {
+                    return question.correctAnswer;
+                  }
+                  if (typeof question.correctAnswer === 'string') {
+                    const normalized = question.correctAnswer.toLowerCase();
+                    if (normalized === 'a' || normalized === 'vrai' || normalized === 'true') return 0;
+                    if (normalized === 'b' || normalized === 'faux' || normalized === 'false') return 1;
+                    if (normalized === 'c') return 2;
+                    if (normalized === 'd') return 3;
+                    const parsed = parseInt(question.correctAnswer, 10);
+                    if (!Number.isNaN(parsed)) return parsed;
+                  }
+                  return null;
+                })();
+
+                const isUserCorrect = normalizedCorrectIndex !== null
+                  ? userAnswer === normalizedCorrectIndex
+                  : userAnswer !== null && userAnswer === question.correctAnswer;
+
+                const options = question.options || [];
+
+                return (
+                  <div
+                    key={question.id ?? index}
+                    className="bg-white border border-neutral-200 rounded-lg p-4 xs:p-6 shadow"
+                  >
+                    <div className="flex items-start gap-3 xs:gap-4 mb-4">
+                      <span className="text-base xs:text-lg">{getSubjectIcon(question.subject || 'N/A')}</span>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-sm font-medium text-neutral-600">Question {index + 1}</span>
+                          <span className="text-xs text-neutral-500">• {question.subject || 'N/A'}</span>
+                          {userAnswer !== null && (
+                            isUserCorrect ? (
+                              <CheckCircle className="w-4 h-4 xs:w-5 xs:h-5 text-green-500" />
+                            ) : (
+                              <XCircle className="w-4 h-4 xs:w-5 xs:h-5 text-red-500" />
+                            )
+                          )}
+                        </div>
+                        <h3 className="font-semibold text-neutral-900 mb-4 text-sm xs:text-base">
+                          {question.question || 'N/A'}
+                        </h3>
+                        <div className="space-y-2 mb-4">
+                          {options.length > 0 ? (
+                            options.map((option, optionIndex) => {
+                              const isCorrectOption = normalizedCorrectIndex === optionIndex;
+                              const isUserSelection = userAnswer === optionIndex;
+                              return (
+                                <div
+                                  key={optionIndex}
+                                  className={`flex items-center gap-3 p-3 rounded-lg ${
+                                    isCorrectOption
+                                      ? 'bg-green-50 border border-green-200'
+                                      : isUserSelection && !isCorrectOption
+                                      ? 'bg-red-50 border border-red-200'
+                                      : 'bg-neutral-50'
+                                  }`}
+                                >
+                                  <div
+                                    className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium ${
+                                      isCorrectOption
+                                        ? 'bg-green-500 text-white'
+                                        : isUserSelection && !isCorrectOption
+                                        ? 'bg-red-500 text-white'
+                                        : 'bg-neutral-300 text-neutral-700'
+                                    }`}
+                                  >
+                                    {String.fromCharCode(65 + optionIndex)}
+                                  </div>
+                                  <span className={isCorrectOption ? 'font-medium' : ''}>
+                                    {option}
+                                  </span>
+                                  {isCorrectOption && (
+                                    <CheckCircle className="w-4 h-4 text-green-500 ml-auto" />
+                                  )}
+                                  {isUserSelection && !isCorrectOption && (
+                                    <XCircle className="w-4 h-4 text-red-500 ml-auto" />
+                                  )}
+                                </div>
+                              );
+                            })
+                          ) : (
+                            <div className="p-3 rounded-lg border border-neutral-200 bg-neutral-50 text-sm text-neutral-600">
+                              <div>Réponse correcte : {String(question.correctAnswer)}</div>
+                              <div>Votre réponse : {userAnswer !== null ? String(userAnswer) : 'Aucune réponse'}</div>
+                            </div>
+                          )}
+                        </div>
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                          <p className="text-blue-800 text-sm">
+                            <strong>Explication :</strong> {question.explanation || 'Aucune explication fournie.'}
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                    <div className="h-4 bg-neutral-200 rounded w-2/3 mb-2"></div>
-                    <div className="h-4 bg-neutral-200 rounded w-1/2 mb-2"></div>
-                    <div className="h-4 bg-neutral-200 rounded w-1/4"></div>
                   </div>
-                </div>
-              </div>
+                );
+              })}
             </div>
           </div>
           

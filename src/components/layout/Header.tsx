@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
-import { Menu, X, GraduationCap, LogOut, User, Settings, CreditCard, TrendingUp, LayoutDashboard } from 'lucide-react';
+import { Menu, X, LogOut, User, Settings, CreditCard, TrendingUp, LayoutDashboard } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Container } from '../ui/Container';
 import { Button } from '../ui/Button';
 import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
+import logoSymbol from '../../../logo/symbol.png';
 
 const navigation = [
   { name: 'Accueil', to: '/' },
@@ -57,31 +58,35 @@ export const Header: React.FC = () => {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-primary-600 shadow-md py-2 xs:py-3' : 'bg-primary-600 shadow-sm py-3 xs:py-4'
+      className={`fixed top-0 left-0 right-0 z-50 h-14 md:h-16 bg-primary-600 transition-shadow duration-300 ${
+        isScrolled ? 'shadow-md' : 'shadow-sm'
       }`}
     >
-      <Container>
-        <div className="flex items-center justify-between">
+      <Container className="h-full">
+        <div className="flex h-full items-center justify-between gap-6">
           {/* Logo - Far Left */}
           <div className="flex-shrink-0">
             <Link 
               to="/" 
-              className="flex items-center gap-2 text-white font-bold text-lg xs:text-xl"
+              className="flex items-center gap-3 text-white font-semibold leading-none whitespace-nowrap"
             >
-              <GraduationCap size={24} className="flex-shrink-0 xs:w-7 xs:h-7" />
-              <span>PrepaENA</span>
+              <img 
+                src={logoSymbol} 
+                alt="PrepaENA"
+                className="block h-7 md:h-8 w-auto"
+              />
+              <span className="text-lg md:text-xl leading-none whitespace-nowrap">PrepaENA</span>
             </Link>
           </div>
 
           {/* Desktop Navigation - Center */}
-          <nav className="hidden md:flex items-center space-x-6 flex-1 justify-center">
+          <nav className="hidden md:flex h-full items-center gap-6 flex-1 justify-center">
             {navigation.map((item) => (
               <NavLink
                 key={item.name}
                 to={item.to}
                 className={({ isActive }) => 
-                  `px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  `px-3 py-2 rounded-md text-sm leading-none font-medium transition-colors ${
                     isActive
                       ? 'text-white bg-primary-700'
                       : 'text-white/90 hover:text-white hover:bg-primary-700'
@@ -94,7 +99,7 @@ export const Header: React.FC = () => {
           </nav>
 
           {/* User Section - Far Right */}
-          <div className="hidden md:flex items-center space-x-4 flex-shrink-0">
+          <div className="hidden md:flex items-center gap-4 flex-shrink-0 leading-none">
             {isAuthenticated ? (
               <div 
                 className="relative"
@@ -103,7 +108,7 @@ export const Header: React.FC = () => {
               >
                 <Link 
                     to="/dashboard" 
-                    className="flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium text-white/90 hover:text-white hover:bg-primary-700"
+                    className="flex items-center gap-2 px-3 py-2 rounded-md text-sm leading-none font-medium text-white/90 hover:text-white hover:bg-primary-700"
                 >
                   <User className="w-5 h-5 flex-shrink-0" />
                   <span>{userName}</span>
@@ -145,7 +150,7 @@ export const Header: React.FC = () => {
                     <div className="border-t border-gray-100 my-1"></div>
                     <button
                       onClick={handleLogout}
-                      className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="w-full text-left flex items-center px-4 py-2 text-sm leading-none text-gray-700 hover:bg-gray-100"
                     >
                       <LogOut className="w-4 h-4 mr-2 flex-shrink-0" />
                       Se déconnecter
@@ -157,12 +162,12 @@ export const Header: React.FC = () => {
             ) : (
               <>
                 <Link to="/login">
-                  <Button variant="outline" size="sm" className="border-white text-white hover:bg-white hover:text-primary-600">
+                  <Button variant="outline" size="sm" className="border-white text-white hover:bg-white hover:text-primary-600 text-sm leading-none">
                     Connexion
                   </Button>
                 </Link>
                 <Link to="/signup">
-                  <Button variant="accent" size="sm">
+                  <Button variant="accent" size="sm" className="text-sm leading-none">
                     Inscription
                   </Button>
                 </Link>
@@ -172,7 +177,7 @@ export const Header: React.FC = () => {
 
           {/* Mobile menu button */}
           <button
-            className="md:hidden p-2 rounded-md text-white hover:bg-primary-700 flex-shrink-0"
+            className="md:hidden p-2 rounded-md text-white hover:bg-primary-700 flex-shrink-0 leading-none"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label="Toggle mobile menu"
           >

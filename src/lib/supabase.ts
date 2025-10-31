@@ -11,6 +11,22 @@ export interface Question {
   difficulty: 'easy' | 'medium' | 'hard'
 }
 
+export interface ExamQuestionSnapshotRow {
+  id: string
+  order: number
+  question_text: string
+  answer1: string
+  answer2: string
+  answer3: string
+  answer4: string
+  correct: string
+  explanation: string
+  category: string
+  difficulty: string
+  type?: string
+  is3Option?: boolean
+}
+
 const supabaseUrl = 'https://ohngxnhnbwnystzkqzwy.supabase.co'
 const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9obmd4bmhuYndueXN0emtxend5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE4NTc2MzcsImV4cCI6MjA2NzQzMzYzN30.Epn0NnYiDRQh9NM3XRbe5j3YH6fuvQfX-UivRuQ8Sbk'
 
@@ -85,11 +101,12 @@ export interface UserAttempt {
   test_number: number | null
   score: number | null
   test_data: {
-    questions: Question[]
-    userAnswers: [number, string | number][]
+    questions: (Question | ExamQuestionSnapshotRow)[]
+    userAnswers: [string | number, string | number][]
     correctAnswers: number
     totalQuestions: number
     timeSpent: number
+    exam_type?: 'CM' | 'CMS' | 'CS'
   } | null
   created_at: string
 }

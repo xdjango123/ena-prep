@@ -1,12 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
-  Menu, 
   LayoutDashboard, 
   BookCopy, 
   Globe, 
   Languages, 
-  Calculator, 
   BrainCircuit, 
   FileText, 
   Users, 
@@ -21,6 +19,7 @@ import { useSidebar } from '../../contexts/SidebarContext';
 import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
 import { useSubscriptionStatus } from '../../hooks/useSubscriptionStatus';
 import { getExamTypeFromPlanName } from '../../lib/examTypeUtils';
+import logoSymbol from '../../../logo/symbol.png';
 
 interface NavItem {
   id: string;
@@ -32,7 +31,7 @@ interface NavItem {
 }
 
 export const Sidebar: React.FC = () => {
-  const { isOpen, isHovered, toggle, close } = useSidebar();
+  const { isOpen, isHovered, close } = useSidebar();
   const { user, profile, userSubscriptions, selectedExamType, setSelectedExamType, signOut } = useSupabaseAuth();
   const { hasActiveSubscription } = useSubscriptionStatus();
   const location = useLocation();
@@ -203,23 +202,37 @@ export const Sidebar: React.FC = () => {
   }, [sidebarExpanded]);
 
   return (
-    <div className="h-full bg-white border-r border-gray-200 flex flex-col">
+    <div className="h-full border-r border-primary-900 bg-gradient-to-b from-primary-700 via-primary-800 to-primary-900 text-white flex flex-col">
       {/* Header */}
-      <div className="p-4 border-b border-gray-200">
-        <div className="flex items-center justify-between gap-3">
-          {sidebarExpanded && (
-            <div className="flex-1">
+      <div className="p-4 border-b border-white/10">
+        <div className={`flex ${sidebarExpanded ? 'justify-start' : 'justify-center'}`}>
+          <Link to="/" className={`inline-flex items-center ${sidebarExpanded ? 'gap-2.5' : ''}`}>
+            <img
+              src={logoSymbol}
+              alt="PrepaENA"
+              className={`${sidebarExpanded ? 'h-9' : 'h-7'} w-auto`}
+            />
+            {sidebarExpanded && (
+              <span className="text-white text-lg font-semibold leading-none whitespace-nowrap">PrepaENA</span>
+            )}
+            <span className="sr-only">PrepaENA</span>
+          </Link>
+        </div>
+        {sidebarExpanded && (
+          <>
+            <div className="mt-3 h-px bg-white/15" />
+            <div className="mt-3">
               {availableExamTypes.length > 1 ? (
                 <div className="relative">
                   <button
                     onClick={() => setIsExamTypeDropdownOpen(prev => !prev)}
-                    className="w-full flex items-center justify-between gap-3 px-4 py-3 text-sm font-semibold text-gray-900 bg-gray-100 border border-gray-200 rounded-xl hover:bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-200"
+                    className="w-full flex items-center justify-between gap-3 px-4 py-3 text-sm font-semibold text-white bg-white/10 border border-white/20 rounded-xl hover:bg-white/15 transition-colors focus:outline-none focus:ring-2 focus:ring-white/40"
                   >
                     <span className="truncate">{examTypeTitle}</span>
-                    <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${isExamTypeDropdownOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`w-4 h-4 text-white/80 transition-transform ${isExamTypeDropdownOpen ? 'rotate-180' : ''}`} />
                   </button>
                   {isExamTypeDropdownOpen && (
-                    <div className="absolute left-0 right-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden">
+                    <div className="absolute left-0 right-0 mt-2 bg-white text-primary-800 border border-white/30 rounded-xl shadow-lg z-50 overflow-hidden">
                       {availableExamTypes.map((examType) => (
                         <button
                           key={examType}
@@ -227,7 +240,7 @@ export const Sidebar: React.FC = () => {
                           className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
                             selectedExamType === examType
                               ? 'bg-primary-50 text-primary-700'
-                              : 'text-gray-700 hover:bg-gray-50'
+                              : 'text-primary-800 hover:bg-primary-50'
                           }`}
                         >
                           {getExamTypeDisplayName(examType)}
@@ -237,27 +250,17 @@ export const Sidebar: React.FC = () => {
                   )}
                 </div>
               ) : (
-                <div className="w-full px-4 py-3 text-sm font-semibold text-gray-900 bg-gray-100 border border-gray-200 rounded-xl">
+                <div className="w-full px-4 py-3 text-sm font-semibold text-white bg-white/10 border border-white/20 rounded-xl">
                   {examTypeTitle}
                 </div>
               )}
             </div>
-          )}
-          <button
-            onClick={() => {
-              setIsExamTypeDropdownOpen(false);
-              toggle();
-            }}
-            className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors flex-shrink-0"
-            aria-label="Toggle sidebar"
-          >
-            <Menu className="w-5 h-5" />
-          </button>
-        </div>
+          </>
+        )}
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-2">
+      <nav className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
         {navItems.map((item) => {
           const isDisabled = item.requiresSubscription && !hasActiveSubscription;
           
@@ -267,12 +270,12 @@ export const Sidebar: React.FC = () => {
                 <button
                   onClick={isDisabled ? undefined : item.action}
                   disabled={isDisabled}
-                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 ${
                     isDisabled
-                      ? 'text-gray-400 cursor-not-allowed opacity-50'
+                      ? 'text-white/40 cursor-not-allowed opacity-50'
                       : isLinkActive('/dashboard/subject') && item.id === 'matieres'
-                      ? 'bg-primary-100 text-primary-700'
-                      : 'text-gray-700 hover:bg-gray-100'
+                      ? 'bg-white text-primary-700'
+                      : 'text-white/80 hover:bg-white/15'
                   }`}
                 >
                   {item.icon}
@@ -289,12 +292,12 @@ export const Sidebar: React.FC = () => {
                 <Link
                   to={isDisabled ? '#' : item.path!}
                   onClick={(e) => handleNavigationClick(e, isDisabled)}
-                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 ${
                     isDisabled
-                      ? 'text-gray-400 cursor-not-allowed opacity-50'
+                      ? 'text-white/40 cursor-not-allowed opacity-50'
                       : isLinkActive(item.path!)
-                      ? 'bg-primary-100 text-primary-700'
-                      : 'text-gray-700 hover:bg-gray-100'
+                      ? 'bg-white text-primary-700'
+                      : 'text-white/80 hover:bg-white/15'
                   }`}
                 >
                   {item.icon}
@@ -313,16 +316,16 @@ export const Sidebar: React.FC = () => {
                       key={matiere.id}
                       to={isMatiereDisabled ? '#' : matiere.path!}
                       onClick={(e) => handleNavigationClick(e, isMatiereDisabled)}
-                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30 ${
                         isMatiereDisabled
-                          ? 'text-gray-400 cursor-not-allowed opacity-50'
+                          ? 'text-white/40 cursor-not-allowed opacity-50'
                           : isLinkActive(matiere.path!)
-                          ? 'bg-primary-50 text-primary-600'
-                          : 'text-gray-600 hover:bg-gray-50'
+                          ? 'bg-white/90 text-primary-700'
+                          : 'text-white/70 hover:bg-white/10'
                       }`}
                     >
                       {matiere.icon}
-                      <span className="text-sm">{matiere.label}</span>
+                      <span className="text-sm font-medium">{matiere.label}</span>
                     </Link>
                   );
                 })}
@@ -334,97 +337,102 @@ export const Sidebar: React.FC = () => {
       </nav>
 
       {/* User Profile - Enhanced for Mobile */}
-      <div className="p-4 border-t border-gray-200">
+      <div className="p-4 border-t border-white/10">
         {sidebarExpanded ? (
-          <div className="relative space-y-3">
-            {showLogout && (
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="absolute left-0 right-0 top-0 -translate-y-full flex items-center justify-center gap-2 rounded-lg border border-red-200 bg-white px-3 py-2 text-sm font-semibold text-red-600 shadow-lg transition-colors hover:bg-red-50"
-                aria-label="Se déconnecter"
-              >
-                <LogOut className="w-4 h-4" />
-                <span>Se déconnecter</span>
-              </button>
-            )}
-            <div className="flex items-center gap-2">
+          <div className="space-y-4">
+            <button
+              type="button"
+              onClick={handleReturnHome}
+              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-white/80 hover:bg-white/15 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+            >
+              <Home className="w-4 h-4" />
+              <span>Retour à l'accueil</span>
+            </button>
+            <div className="h-px bg-white/15" />
+            <div className="relative space-y-3">
+              {showLogout && (
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="absolute left-0 right-0 top-0 -translate-y-full flex items-center justify-center gap-2 rounded-lg border border-red-200 bg-white px-3 py-2 text-sm font-semibold text-red-600 shadow-lg transition-colors hover:bg-red-50"
+                  aria-label="Se déconnecter"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Se déconnecter</span>
+                </button>
+              )}
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleProfileClick}
+                  className="flex-1 flex items-center gap-3 p-2 rounded-lg hover:bg-white/15 transition-colors text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+                >
+                  <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-white text-sm font-medium flex-shrink-0">
+                    {profile ? profile.first_name?.[0] || user?.email?.[0] || 'U' : 'U'}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-white truncate">
+                      {profile ? profile.first_name || 'Utilisateur' : 'Utilisateur'}
+                    </p>
+                    <p className="text-xs text-white/70 truncate">
+                      {user?.email}
+                    </p>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowLogout(prev => !prev)}
+                  className={`p-2 rounded-lg text-white/70 hover:bg-white/15 transition-colors flex-shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 ${showLogout ? 'text-white' : ''}`}
+                  aria-label={showLogout ? "Masquer l'option de déconnexion" : "Afficher l'option de déconnexion"}
+                  aria-expanded={showLogout}
+                >
+                  <ChevronDown className={`w-4 h-4 transition-transform ${showLogout ? 'rotate-180' : ''}`} />
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <button
+              type="button"
+              onClick={handleReturnHome}
+              className="w-full flex justify-center p-2 rounded-lg text-white/80 hover:bg-white/15 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+              aria-label="Retour à l'accueil"
+            >
+              <Home className="w-4 h-4" />
+            </button>
+            <div className="h-px bg-white/15" />
+            <div className="relative space-y-2">
+              {showLogout && (
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-full flex items-center justify-center gap-2 rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-semibold text-red-600 shadow-lg transition-colors hover:bg-red-50"
+                  aria-label="Se déconnecter"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              )}
               <button
                 type="button"
                 onClick={handleProfileClick}
-                className="flex-1 flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 transition-colors text-left"
+                className="w-full flex justify-center p-2 rounded-lg hover:bg-white/15 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+                aria-label="Ouvrir le profil"
               >
-                <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center text-white text-sm font-medium flex-shrink-0">
+                <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-white text-sm font-medium">
                   {profile ? profile.first_name?.[0] || user?.email?.[0] || 'U' : 'U'}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-gray-900 truncate">
-                    {profile ? profile.first_name || 'Utilisateur' : 'Utilisateur'}
-                  </p>
-                  <p className="text-xs text-gray-500 truncate">
-                    {user?.email}
-                  </p>
                 </div>
               </button>
               <button
                 type="button"
                 onClick={() => setShowLogout(prev => !prev)}
-                className={`p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors flex-shrink-0 ${showLogout ? 'text-gray-700' : ''}`}
+                className={`w-full flex justify-center p-2 rounded-lg hover:bg-white/15 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 ${showLogout ? 'text-white' : 'text-white/70'}`}
                 aria-label={showLogout ? "Masquer l'option de déconnexion" : "Afficher l'option de déconnexion"}
                 aria-expanded={showLogout}
               >
                 <ChevronDown className={`w-4 h-4 transition-transform ${showLogout ? 'rotate-180' : ''}`} />
               </button>
             </div>
-            <button
-              type="button"
-              onClick={handleReturnHome}
-              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-100 transition-colors"
-            >
-              <Home className="w-4 h-4" />
-              <span>Retour à l'accueil</span>
-            </button>
-          </div>
-        ) : (
-          <div className="relative space-y-2">
-            {showLogout && (
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-full flex items-center justify-center gap-2 rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-semibold text-red-600 shadow-lg transition-colors hover:bg-red-50"
-                aria-label="Se déconnecter"
-              >
-                <LogOut className="w-4 h-4" />
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={handleProfileClick}
-              className="w-full flex justify-center p-2 rounded-lg hover:bg-gray-100 transition-colors"
-              aria-label="Ouvrir le profil"
-            >
-              <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
-                {profile ? profile.first_name?.[0] || user?.email?.[0] || 'U' : 'U'}
-              </div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setShowLogout(prev => !prev)}
-              className={`w-full flex justify-center p-2 rounded-lg hover:bg-gray-100 transition-colors ${showLogout ? 'text-gray-700' : 'text-gray-500'}`}
-              aria-label={showLogout ? "Masquer l'option de déconnexion" : "Afficher l'option de déconnexion"}
-              aria-expanded={showLogout}
-            >
-              <ChevronDown className={`w-4 h-4 transition-transform ${showLogout ? 'rotate-180' : ''}`} />
-            </button>
-            <button
-              type="button"
-              onClick={handleReturnHome}
-              className="w-full flex justify-center p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
-              aria-label="Retour à l'accueil"
-            >
-              <Home className="w-4 h-4" />
-            </button>
           </div>
         )}
       </div>

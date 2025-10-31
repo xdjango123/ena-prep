@@ -12,11 +12,14 @@ interface Question {
   answer1: string;
   answer2: string;
   answer3: string;
-  answer4: string | null;
+  answer4?: string | null;
   correct: string;
   explanation: string;
   category: string;
   difficulty: string;
+  type?: 'multiple-choice' | 'true-false';
+  is3Option?: boolean;
+  order?: number;
 }
 
 export const ExamReviewPage: React.FC = () => {
@@ -38,24 +41,57 @@ export const ExamReviewPage: React.FC = () => {
       try {
         setLoading(true);
 
-        // Load questions for all subjects
-        const [angQuestions, cgQuestions, logQuestions] = await Promise.all([
-          QuestionService.getExamBlancQuestions('ANG', examId, userExamType as 'CM' | 'CMS' | 'CS', 20),
-          QuestionService.getExamBlancQuestions('CG', examId, userExamType as 'CM' | 'CMS' | 'CS', 20),
-          QuestionService.getExamBlancQuestions('LOG', examId, userExamType as 'CM' | 'CMS' | 'CS', 20)
-        ]);
+        const parsedExamId = parseInt(examId, 10);
 
-        // Combine all questions
-        const allQuestions = [...angQuestions, ...cgQuestions, ...logQuestions].map(question => ({
-          ...question,
-          question_text: formatExponents(question.question_text),
-          answer1: formatExponents(question.answer1),
-          answer2: formatExponents(question.answer2),
-          answer3: formatExponents(question.answer3),
-          answer4: question.answer4 ? formatExponents(question.answer4) : null,
-          explanation: question.explanation ? formatExponents(question.explanation) : ''
-        }));
-        setQuestions(allQuestions);
+        // Try to load persisted attempt data first
+        const attempt = await ExamResultService.getExamAttempt(
+          user.id,
+          userExamType as 'CM' | 'CMS' | 'CS',
+          parsedExamId
+        );
+
+        if (attempt) {
+          setUserAnswers(attempt.userAnswers);
+        } else {
+          setUserAnswers(new Map());
+        }
+
+        let questionList: Question[] = [];
+
+        if (attempt && attempt.questions && attempt.questions.length > 0) {
+          console.log('📚 Loading questions from stored exam attempt');
+          questionList = attempt.questions
+            .slice()
+            .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+            .map(question => ({
+              ...question,
+              question_text: formatExponents(question.question_text),
+              answer1: formatExponents(question.answer1 || ''),
+              answer2: formatExponents(question.answer2 || ''),
+              answer3: formatExponents(question.answer3 || ''),
+              answer4: question.answer4 ? formatExponents(question.answer4) : '',
+              explanation: question.explanation ? formatExponents(question.explanation) : ''
+            }));
+        } else {
+          console.log('📚 Stored attempt missing questions, falling back to live query');
+          const [angQuestions, cgQuestions, logQuestions] = await Promise.all([
+            QuestionService.getExamBlancQuestions('ANG', examId, userExamType as 'CM' | 'CMS' | 'CS', 20),
+            QuestionService.getExamBlancQuestions('CG', examId, userExamType as 'CM' | 'CMS' | 'CS', 20),
+            QuestionService.getExamBlancQuestions('LOG', examId, userExamType as 'CM' | 'CMS' | 'CS', 20)
+          ]);
+
+          questionList = [...angQuestions, ...cgQuestions, ...logQuestions].map(question => ({
+            ...question,
+            question_text: formatExponents(question.question_text),
+            answer1: formatExponents(question.answer1 || ''),
+            answer2: formatExponents(question.answer2 || ''),
+            answer3: formatExponents(question.answer3 || ''),
+            answer4: question.answer4 ? formatExponents(question.answer4) : '',
+            explanation: question.explanation ? formatExponents(question.explanation) : ''
+          }));
+        }
+
+        setQuestions(questionList);
 
         // Load exam result
         const result = await ExamResultService.getExamResult(
@@ -64,17 +100,6 @@ export const ExamReviewPage: React.FC = () => {
           parseInt(examId)
         );
         setExamResult(result);
-
-        // Load real user answers from the database
-        console.log('🔍 Loading user answers for exam:', examId);
-        const realAnswers = await ExamResultService.getUserAnswers(
-          user.id,
-          userExamType as 'CM' | 'CMS' | 'CS',
-          parseInt(examId)
-        );
-        console.log('📊 Loaded user answers:', realAnswers.size, 'answers');
-        console.log('📊 User answers:', Array.from(realAnswers.entries()).slice(0, 5)); // Show first 5
-        setUserAnswers(realAnswers);
 
       } catch (error) {
         console.error('Error loading exam data:', error);
@@ -87,13 +112,31 @@ export const ExamReviewPage: React.FC = () => {
   }, [examId, user, userExamType]);
 
   const getOptionText = (question: Question, option: string) => {
-    switch (option) {
-      case 'A': return question.answer1;
-      case 'B': return question.answer2;
-      case 'C': return question.answer3;
+    const upperOption = option?.toUpperCase();
+    switch (upperOption) {
+      case 'A': return question.answer1 || '';
+      case 'B': return question.answer2 || '';
+      case 'C': return question.answer3 || '';
       case 'D': return question.answer4 || '';
       default: return '';
     }
+  };
+
+  const getAnswerOptions = (question: Question) => {
+    const options: { key: string; text: string }[] = [];
+    if (question.answer1) {
+      options.push({ key: 'A', text: question.answer1 });
+    }
+    if (question.answer2) {
+      options.push({ key: 'B', text: question.answer2 });
+    }
+    if (question.answer3) {
+      options.push({ key: 'C', text: question.answer3 });
+    }
+    if (question.answer4 && question.answer4.trim()) {
+      options.push({ key: 'D', text: question.answer4 });
+    }
+    return options;
   };
 
   const getCategoryColor = (category: string) => {
@@ -162,9 +205,28 @@ export const ExamReviewPage: React.FC = () => {
         <div className="space-y-6">
           {questions.map((question, index) => {
             const userAnswer = userAnswers.get(question.id);
-            const isCorrect = userAnswer === question.correct;
-            const correctAnswerText = getOptionText(question, question.correct);
-            const userAnswerText = userAnswer ? getOptionText(question, userAnswer) : "Pas de réponse";
+            const answerOptions = getAnswerOptions(question);
+            const userAnswerLetter = userAnswer ? userAnswer.toString().trim().toUpperCase() : '';
+            const correctLetter = question.correct ? question.correct.toString().trim().toUpperCase() : '';
+
+            let isCorrect = false;
+            if (userAnswerLetter && correctLetter) {
+              isCorrect = userAnswerLetter === correctLetter;
+            }
+
+            const correctAnswerText = correctLetter ? getOptionText(question, correctLetter) : question.correct || '';
+
+            let userAnswerText = 'Pas de réponse';
+            if (userAnswerLetter) {
+              const optionText = getOptionText(question, userAnswerLetter);
+              if (optionText) {
+                userAnswerText = optionText;
+              } else if (userAnswerLetter === 'A' || userAnswerLetter === 'B') {
+                userAnswerText = userAnswerLetter === 'A' ? 'Vrai' : 'Faux';
+              } else {
+                userAnswerText = userAnswerLetter;
+              }
+            }
 
             return (
               <div key={question.id} className="bg-white rounded-lg shadow-sm border p-6">
@@ -197,44 +259,49 @@ export const ExamReviewPage: React.FC = () => {
 
                 {/* Options */}
                 <div className="space-y-2 mb-4">
-                  {['A', 'B', 'C'].map((option) => {
-                    const optionText = getOptionText(question, option);
-                    const isUserAnswer = userAnswer === option;
-                    const isCorrectAnswer = question.correct === option;
+                  {answerOptions.length > 0 ? (
+                    answerOptions.map(({ key, text }) => {
+                      const isUserAnswer = userAnswerLetter === key;
+                      const isCorrectAnswer = correctLetter === key;
                     
-                    let bgColor = 'bg-gray-50 border-gray-200';
-                    if (isCorrectAnswer) {
-                      bgColor = 'bg-green-50 border-green-200';
-                    } else if (isUserAnswer && !isCorrectAnswer) {
-                      bgColor = 'bg-red-50 border-red-200';
-                    }
+                      let bgColor = 'bg-gray-50 border-gray-200';
+                      if (isCorrectAnswer) {
+                        bgColor = 'bg-green-50 border-green-200';
+                      } else if (isUserAnswer && !isCorrectAnswer) {
+                        bgColor = 'bg-red-50 border-red-200';
+                      }
 
-                    return (
-                      <div
-                        key={option}
-                        className={`p-3 rounded-lg border ${bgColor} ${
-                          isCorrectAnswer ? 'ring-2 ring-green-200' : ''
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium ${
-                            isCorrectAnswer ? 'bg-green-600 text-white' : 
-                            isUserAnswer ? 'bg-red-600 text-white' : 
-                            'bg-gray-200 text-gray-700'
-                          }`}>
-                            {option}
-                          </span>
-                          <span className="text-gray-900">{optionText}</span>
-                          {isCorrectAnswer && (
-                            <CheckCircle className="w-5 h-5 text-green-600 ml-auto" />
-                          )}
-                          {isUserAnswer && !isCorrectAnswer && (
-                            <XCircle className="w-5 h-5 text-red-600 ml-auto" />
-                          )}
+                      return (
+                        <div
+                          key={key}
+                          className={`p-3 rounded-lg border ${bgColor} ${
+                            isCorrectAnswer ? 'ring-2 ring-green-200' : ''
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium ${
+                              isCorrectAnswer ? 'bg-green-600 text-white' : 
+                              isUserAnswer ? 'bg-red-600 text-white' : 
+                              'bg-gray-200 text-gray-700'
+                            }`}>
+                              {key}
+                            </span>
+                            <span className="text-gray-900">{text}</span>
+                            {isCorrectAnswer && (
+                              <CheckCircle className="w-5 h-5 text-green-600 ml-auto" />
+                            )}
+                            {isUserAnswer && !isCorrectAnswer && (
+                              <XCircle className="w-5 h-5 text-red-600 ml-auto" />
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })
+                  ) : (
+                    <div className="p-3 rounded-lg border bg-yellow-50 border-yellow-200 text-yellow-800 text-sm">
+                      Options indisponibles pour cette question. Veuillez contacter le support si le problème persiste.
+                    </div>
+                  )}
                 </div>
 
                 {/* User Answer Summary */}

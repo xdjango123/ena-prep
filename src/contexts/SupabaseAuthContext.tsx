@@ -218,22 +218,51 @@ export const SupabaseAuthProvider: React.FC<SupabaseAuthProviderProps> = ({ chil
         setIsSubscriptionActive(false);
         setSubscriptionExpired(true);
       } else if (data && data.length > 0) {
-        // Get the most recent subscription
-        const latestSubscription = data[0];
-        setSubscription(latestSubscription);
-        
-        // Check subscription status
-        const { isActive, isExpired } = checkSubscriptionStatus(latestSubscription);
-        setIsSubscriptionActive(isActive);
-        setSubscriptionExpired(isExpired);
-        
-        console.log('Subscription status:', { 
-          plan: latestSubscription.plan_name, 
-          endDate: latestSubscription.end_date, 
-          isActive, 
-          isExpired,
-          isActiveInDB: latestSubscription.is_active
-        });
+        const now = new Date();
+        const toTimestamp = (value?: string | null) => {
+          if (!value) return Number.MAX_SAFE_INTEGER;
+          const time = new Date(value).getTime();
+          return Number.isNaN(time) ? Number.MIN_SAFE_INTEGER : time;
+        };
+
+        const latestActive = data.reduce<Subscription | null>((latest, current) => {
+          if (!current.is_active) return latest;
+          if (current.end_date) {
+            const endDate = new Date(current.end_date);
+            if (Number.isNaN(endDate.getTime()) || endDate < now) {
+              return latest;
+            }
+          }
+
+          if (!latest) {
+            return current;
+          }
+
+          return toTimestamp(current.end_date) > toTimestamp(latest.end_date) ? current : latest;
+        }, null);
+
+        const fallbackSubscription = data[0];
+        const subscriptionToUse = latestActive ?? fallbackSubscription ?? null;
+
+        setSubscription(subscriptionToUse);
+
+        if (subscriptionToUse) {
+          const { isActive, isExpired } = checkSubscriptionStatus(subscriptionToUse);
+          setIsSubscriptionActive(isActive);
+          setSubscriptionExpired(isExpired);
+
+          console.log('Subscription status:', {
+            plan: subscriptionToUse.plan_name,
+            endDate: subscriptionToUse.end_date,
+            isActive,
+            isExpired,
+            isActiveInDB: subscriptionToUse.is_active,
+            selectedSource: latestActive ? 'active' : 'fallback'
+          });
+        } else {
+          setIsSubscriptionActive(false);
+          setSubscriptionExpired(true);
+        }
       } else {
         // No subscriptions found
         setSubscription(null);

@@ -1,0 +1,520 @@
+[
+  {
+    "question_id": "00d5e155-6673-4828-b157-eee5dd0ac318",
+    "issue": "incorrect_answer",
+    "details": "La question manque de contexte pour établir un classement et l'explication repose sur une association arbitraire.",
+    "validation": {
+      "correct_answer_is_valid": false,
+      "correct_answer_feedback": "La question manque de contexte pour établir un classement et l'explication repose sur une association arbitraire.",
+      "explanation_language": "french",
+      "explanation_sentence_count": 3,
+      "explanation_is_specific": false,
+      "explanation_feedback": "L'explication propose une justification basée sur une association arbitraire entre la personne grammaticale et un rang de classement, sans lien logique valide.",
+      "needs_new_explanation": true
+    }
+  },
+  {
+    "question_id": "22b0c018-fa9d-4b92-b1e6-f685cbb9e3c0",
+    "issue": "incorrect_answer",
+    "details": "La justification de la bonne réponse est basée sur une affirmation factuellement incorrecte.",
+    "validation": {
+      "correct_answer_is_valid": false,
+      "correct_answer_feedback": "La justification de la bonne réponse est basée sur une affirmation factuellement incorrecte.",
+      "explanation_language": "french",
+      "explanation_sentence_count": 3,
+      "explanation_is_specific": true,
+      "explanation_feedback": "L'explication est factuellement incorrecte en affirmant que le nom 'bandite' n'existe pas en français.",
+      "needs_new_explanation": true
+    }
+  },
+  {
+    "question_id": "464a4282-8629-4b8c-aeff-f1eb995d7f41",
+    "issue": "incorrect_answer",
+    "details": "La bonne réponse attendue 'A' utilise le futur parfait ('will have finished'), et non le passé parfait ('had finished'). Aucune des options ne présente le passé parfait.",
+    "validation": {
+      "correct_answer_is_valid": false,
+      "correct_answer_feedback": "La bonne réponse attendue 'A' utilise le futur parfait ('will have finished'), et non le passé parfait ('had finished'). Aucune des options ne présente le passé parfait.",
+      "explanation_language": "french",
+      "explanation_sentence_count": 3,
+      "explanation_is_specific": false,
+      "explanation_feedback": "L'explication fournie est complètement hors sujet et fait référence à un événement historique sans rapport avec la question sur le temps verbal, et elle indique une réponse 'B' différente de la bonne réponse attendue 'A'.",
+      "needs_new_explanation": true
+    }
+  },
+  {
+    "question_id": "48e3224b-42b7-4da2-a462-fd747ff55132",
+    "issue": "incorrect_answer_after_generation",
+    "details": "La bonne réponse attendue (A: 4689.6 cm³) ne correspond pas au volume calculé (4678.4 cm³) ni à la conclusion de l'explication.",
+    "validation": {
+      "correct_answer_is_valid": false,
+      "correct_answer_feedback": "La bonne réponse attendue (A: 4689.6 cm³) ne correspond pas au volume calculé (4678.4 cm³) ni à la conclusion de l'explication.",
+      "explanation_language": "french",
+      "explanation_sentence_count": 3,
+      "explanation_is_specific": true,
+      "explanation_feedback": "L'explication est claire, détaillée et fournit le calcul correct tout en soulignant l'absence de correspondance parmi les options.",
+      "needs_new_explanation": false
+    }
+  },
+  {
+    "question_id": "4fac09fd-0288-4fbb-93f3-655eb881c256",
+    "issue": "incorrect_answer",
+    "details": "La bonne réponse attendue (C) est incorrecte. Le calcul indique que la bonne réponse est A (2 min 30 s).",
+    "validation": {
+      "correct_answer_is_valid": false,
+      "correct_answer_feedback": "La bonne réponse attendue (C) est incorrecte. Le calcul indique que la bonne réponse est A (2 min 30 s).",
+      "explanation_language": "french",
+      "explanation_sentence_count": 2,
+      "explanation_is_specific": false,
+      "explanation_feedback": "L'explication identifie correctement la distance totale et la vitesse, mais la durée calculée (3 minutes) est erronée. Le calcul de 6 km / 144 km/h donne 2 minutes 30 secondes, et non 3 minutes.",
+      "needs_new_explanation": true
+    }
+  },
+  {
+    "question_id": "65abe971-e303-4bbe-8b64-620327bc1a59",
+    "issue": "incorrect_answer",
+    "details": "L'option B ('Essentiel') est correctement orthographiée. L'explication fait référence à un mot ('Crutial') qui n'est pas présent dans les options.",
+    "validation": {
+      "correct_answer_is_valid": false,
+      "correct_answer_feedback": "L'option B ('Essentiel') est correctement orthographiée. L'explication fait référence à un mot ('Crutial') qui n'est pas présent dans les options.",
+      "explanation_language": "french",
+      "explanation_sentence_count": 3,
+      "explanation_is_specific": false,
+      "explanation_feedback": "L'explication fait référence à des mots ('Crutial', 'Parmi') qui ne sont pas présents dans les options, la rendant non pertinente pour justifier la bonne réponse parmi les options fournies.",
+      "needs_new_explanation": true
+    }
+  },
+  {
+    "question_id": "681e7e70-8ca6-4e21-89b2-f9219f5e2ca1",
+    "issue": "incorrect_answer",
+    "details": "La réponse C est incorrecte car Fally n'est pas au milieu de la chorale (position 4 pour 7 personnes) dans cette option.",
+    "validation": {
+      "correct_answer_is_valid": false,
+      "correct_answer_feedback": "La réponse C est incorrecte car Fally n'est pas au milieu de la chorale (position 4 pour 7 personnes) dans cette option.",
+      "explanation_language": "french",
+      "explanation_sentence_count": 3,
+      "explanation_is_specific": false,
+      "explanation_feedback": "L'explication est basée sur une réponse incorrecte. Elle n'explique pas concrètement comment la réponse C respecte toutes les conditions, notamment l'emplacement de Fally au milieu, et ne détaille pas pourquoi les autres options sont invalides.",
+      "needs_new_explanation": true
+    }
+  },
+  {
+    "question_id": "81c7039b-d1ae-4d31-be22-f99d0df33641",
+    "issue": "incorrect_answer",
+    "details": "La réponse attendue (A) ne contient pas de virgule, ce qui la rend inappropriée pour une question sur son bon usage. L'option B, en revanche, utilise correctement la virgule.",
+    "validation": {
+      "correct_answer_is_valid": false,
+      "correct_answer_feedback": "La réponse attendue (A) ne contient pas de virgule, ce qui la rend inappropriée pour une question sur son bon usage. L'option B, en revanche, utilise correctement la virgule.",
+      "explanation_language": "french",
+      "explanation_sentence_count": 3,
+      "explanation_is_specific": false,
+      "explanation_feedback": "L'explication est contradictoire avec l'option A fournie, car elle décrit un usage de la virgule qui est absent de cette option. Elle manque également de détails concrets sur les erreurs des autres options.",
+      "needs_new_explanation": true
+    }
+  },
+  {
+    "question_id": "a30a76bf-fb2e-4f02-91d0-787f4f77bdbf",
+    "issue": "incorrect_answer",
+    "details": "La réponse attendue C n'est pas la seule solution valide selon les contraintes données.",
+    "validation": {
+      "correct_answer_is_valid": false,
+      "correct_answer_feedback": "La réponse attendue C n'est pas la seule solution valide selon les contraintes données.",
+      "explanation_language": "french",
+      "explanation_sentence_count": 1,
+      "explanation_is_specific": false,
+      "explanation_feedback": "L'explication est une phrase unique et part d'une prémisse non établie dans l'énoncé, ne justifiant pas l'unicité de la réponse.",
+      "needs_new_explanation": true
+    }
+  },
+  {
+    "question_id": "a528c974-a6ee-49a6-bc13-111f75b56253",
+    "issue": "incorrect_answer",
+    "details": "L'explication fournie contient des erreurs de calcul et une logique incohérente, ce qui empêche de valider que la bonne réponse attendue (A) est la meilleure option.",
+    "validation": {
+      "correct_answer_is_valid": false,
+      "correct_answer_feedback": "L'explication fournie contient des erreurs de calcul et une logique incohérente, ce qui empêche de valider que la bonne réponse attendue (A) est la meilleure option.",
+      "explanation_language": "french",
+      "explanation_sentence_count": 4,
+      "explanation_is_specific": false,
+      "explanation_feedback": "L'explication est entièrement en français mais contient des erreurs factuelles (la somme de la colonne 3 est 52, non 67) et une logique incohérente (la série des sommes 44, 73, 67 ne suit pas la règle 'ajouter 6 à chaque colonne'). De plus, elle dépasse le nombre maximal de 3 phrases.",
+      "needs_new_explanation": true
+    }
+  },
+  {
+    "question_id": "a60c57db-0eea-4220-be79-e5500ea102db",
+    "issue": "incorrect_answer",
+    "details": "La bonne réponse attendue (B) est incorrecte ; la solution de l'équation 6 - 3x - 4 = 10 + 2 est x = -10/3.",
+    "validation": {
+      "correct_answer_is_valid": false,
+      "correct_answer_feedback": "La bonne réponse attendue (B) est incorrecte ; la solution de l'équation 6 - 3x - 4 = 10 + 2 est x = -10/3.",
+      "explanation_language": "french",
+      "explanation_sentence_count": 3,
+      "explanation_is_specific": false,
+      "explanation_feedback": "L'explication est factuellement incorrecte car la valeur de x qu'elle mentionne (-4) ne correspond pas à la résolution de l'équation.",
+      "needs_new_explanation": true
+    }
+  },
+  {
+    "question_id": "b37ee5fe-b142-4412-aff4-0c646c831945",
+    "issue": "incorrect_answer",
+    "details": "L'option A utilise le futur parfait, non le passé parfait. Aucune des options proposées ne contient le passé parfait.",
+    "validation": {
+      "correct_answer_is_valid": false,
+      "correct_answer_feedback": "L'option A utilise le futur parfait, non le passé parfait. Aucune des options proposées ne contient le passé parfait.",
+      "explanation_language": "french",
+      "explanation_sentence_count": 3,
+      "explanation_is_specific": false,
+      "explanation_feedback": "L'explication est complètement hors sujet, car elle traite de l'origine de la pizza et non de l'utilisation du passé parfait en anglais. De plus, elle contredit la bonne réponse attendue en indiquant que B est la bonne réponse.",
+      "needs_new_explanation": true
+    }
+  },
+  {
+    "question_id": "c21a3e65-04a7-4fbc-8904-1f32d2076ddb",
+    "issue": "incorrect_answer",
+    "details": "La bonne réponse attendue ne peut être validée car l'explication fournie est incorrecte et ambiguë.",
+    "validation": {
+      "correct_answer_is_valid": false,
+      "correct_answer_feedback": "La bonne réponse attendue ne peut être validée car l'explication fournie est incorrecte et ambiguë.",
+      "explanation_language": "french",
+      "explanation_sentence_count": 3,
+      "explanation_is_specific": false,
+      "explanation_feedback": "L'explication contient des erreurs de calcul flagrantes (ex: 45 minutes de 9h à midi au lieu de 180) et des incohérences logiques qui la rendent incompréhensible et fausse.",
+      "needs_new_explanation": true
+    }
+  },
+  {
+    "question_id": "c353a03b-229f-42fa-b021-b956fbb4f987",
+    "issue": "incorrect_answer_after_generation",
+    "details": "La question utilise le terme 'nouveau' sans date de référence, rendant la réponse D potentiellement incorrecte car le président actuel de l'Union Africaine n'est pas sud-africain.",
+    "validation": {
+      "correct_answer_is_valid": false,
+      "correct_answer_feedback": "La question utilise le terme 'nouveau' sans date de référence, rendant la réponse D potentiellement incorrecte car le président actuel de l'Union Africaine n'est pas sud-africain.",
+      "explanation_language": "french",
+      "explanation_sentence_count": 3,
+      "explanation_is_specific": false,
+      "explanation_feedback": "L'explication justifie la réponse D en supposant qu'elle est correcte, mais la validité de D dépend du contexte temporel de la question qui est ambigu.",
+      "needs_new_explanation": true
+    }
+  },
+  {
+    "question_id": "ccf6cd45-9463-468b-8078-2962d262ab53",
+    "issue": "incorrect_answer",
+    "details": "La bonne réponse attendue (C - Vrai) est incorrecte. La distance totale parcourue est de 15 km, ce qui rend l'affirmation de la question (\"12 km\") fausse. La bonne réponse devrait être A.",
+    "validation": {
+      "correct_answer_is_valid": false,
+      "correct_answer_feedback": "La bonne réponse attendue (C - Vrai) est incorrecte. La distance totale parcourue est de 15 km, ce qui rend l'affirmation de la question (\"12 km\") fausse. La bonne réponse devrait être A.",
+      "explanation_language": "french",
+      "explanation_sentence_count": 3,
+      "explanation_is_specific": false,
+      "explanation_feedback": "L'explication est factuellement incorrecte car les calculs (10km/h * 20/60h + 20km/h * 30/60h + 10km/h * 10/60h = 10/3 km + 10 km + 5/3 km = 15 km) démontrent que la distance totale est de 15 km et non 12 km. Elle soutient donc une réponse attendue erronée.",
+      "needs_new_explanation": true
+    }
+  },
+  {
+    "question_id": "d8384276-a4ad-44e6-9732-b18160e86733",
+    "issue": "incorrect_answer",
+    "details": "La bonne réponse attendue (A) est contredite par l'explication fournie (qui indique B). De plus, l'option D est également grammaticalement incorrecte, ce qui rend la question ambiguë si elle n'attend qu'une seule réponse.",
+    "validation": {
+      "correct_answer_is_valid": false,
+      "correct_answer_feedback": "La bonne réponse attendue (A) est contredite par l'explication fournie (qui indique B). De plus, l'option D est également grammaticalement incorrecte, ce qui rend la question ambiguë si elle n'attend qu'une seule réponse.",
+      "explanation_language": "french",
+      "explanation_sentence_count": 3,
+      "explanation_is_specific": false,
+      "explanation_feedback": "L'explication est complètement hors sujet, fait référence à 'how long' et à la durée, ce qui n'a aucun rapport avec l'identification d'une faute grammaticale dans les options. Elle ne justifie ni A, ni B, ni aucune autre option par rapport à la question posée.",
+      "needs_new_explanation": true
+    }
+  },
+  {
+    "question_id": "d938debb-19c8-4c94-b5d6-8adadf8576b6",
+    "issue": "incorrect_answer",
+    "details": "L'option A utilise le futur antérieur ('will have gone'), pas le passé antérieur comme demandé par la question.",
+    "validation": {
+      "correct_answer_is_valid": false,
+      "correct_answer_feedback": "L'option A utilise le futur antérieur ('will have gone'), pas le passé antérieur comme demandé par la question.",
+      "explanation_language": "french",
+      "explanation_sentence_count": 3,
+      "explanation_is_specific": false,
+      "explanation_feedback": "L'explication fournie est entièrement hors sujet et concerne les missions Apollo, sans rapport avec la grammaire anglaise.",
+      "needs_new_explanation": true
+    }
+  },
+  {
+    "question_id": "df9e719f-1eca-45e7-9651-1e54a58ac6a0",
+    "issue": "incorrect_answer",
+    "details": "La question ne fournit pas la liste de mots nécessaire pour déterminer le rang de classement du mot \"jeune\", rendant la vérification de la bonne réponse impossible.",
+    "validation": {
+      "correct_answer_is_valid": false,
+      "correct_answer_feedback": "La question ne fournit pas la liste de mots nécessaire pour déterminer le rang de classement du mot \"jeune\", rendant la vérification de la bonne réponse impossible.",
+      "explanation_language": "french",
+      "explanation_sentence_count": 3,
+      "explanation_is_specific": true,
+      "explanation_feedback": "L'explication est bien formulée, entièrement en français et fournit des détails concrets pour justifier la réponse attendue, même si le contexte de la question est manquant.",
+      "needs_new_explanation": true
+    }
+  },
+  {
+    "question_id": "e36e4c8a-6391-4ba8-a77a-2f09d2aee05a",
+    "issue": "incorrect_answer",
+    "details": "La validité de la bonne réponse est compromise par l'erreur factuelle concernant Tingréla. Si Tingréla n'est pas frontalière (géographiquement, la ville principale est à l'intérieur des terres et la ville de Tingréla frontalière l'est avec le Mali et non le Libéria), alors il y aurait potentiellement deux bonnes réponses (A et B) à la question 'n'est pas frontalière', rendant la question ambiguë.",
+    "validation": {
+      "correct_answer_is_valid": false,
+      "correct_answer_feedback": "La validité de la bonne réponse est compromise par l'erreur factuelle concernant Tingréla. Si Tingréla n'est pas frontalière (géographiquement, la ville principale est à l'intérieur des terres et la ville de Tingréla frontalière l'est avec le Mali et non le Libéria), alors il y aurait potentiellement deux bonnes réponses (A et B) à la question 'n'est pas frontalière', rendant la question ambiguë.",
+      "explanation_language": "french",
+      "explanation_sentence_count": 3,
+      "explanation_is_specific": true,
+      "explanation_feedback": "L'explication est bien rédigée et spécifique pour chaque option, mais elle contient une erreur géographique majeure concernant Tingréla. Tingréla n'est pas frontalière du Libéria.",
+      "needs_new_explanation": true
+    }
+  },
+  {
+    "question_id": "e6d4a807-a78c-4b2a-8c59-24f484d20780",
+    "issue": "incorrect_answer",
+    "details": "La réponse attendue (A) est correcte mais n'est pas unique, car l'hindouisme (C) croit également en la réincarnation.",
+    "validation": {
+      "correct_answer_is_valid": false,
+      "correct_answer_feedback": "La réponse attendue (A) est correcte mais n'est pas unique, car l'hindouisme (C) croit également en la réincarnation.",
+      "explanation_language": "french",
+      "explanation_sentence_count": 3,
+      "explanation_is_specific": false,
+      "explanation_feedback": "L'explication contient une erreur factuelle majeure en affirmant que l'hindouisme ne croit pas en la réincarnation.",
+      "needs_new_explanation": true
+    }
+  },
+  {
+    "question_id": "eb82ec76-42d1-4c0f-941b-0668d1929fbd",
+    "issue": "incorrect_answer",
+    "details": "La validité de la bonne réponse ne peut être confirmée, car la question manque de contexte essentiel (la liste de mots à partir de laquelle le rang de \"grâce\" doit être déterminé n'est pas fournie).",
+    "validation": {
+      "correct_answer_is_valid": false,
+      "correct_answer_feedback": "La validité de la bonne réponse ne peut être confirmée, car la question manque de contexte essentiel (la liste de mots à partir de laquelle le rang de \"grâce\" doit être déterminé n'est pas fournie).",
+      "explanation_language": "french",
+      "explanation_sentence_count": 3,
+      "explanation_is_specific": false,
+      "explanation_feedback": "L'explication fournie affirme le rang de 23 mais ne justifie pas concrètement cette position ni ne fournit le contexte nécessaire (la liste de mots) pour la vérifier. La raison donnée (\"car le 'g' vient avant les lettres suivantes dans l'alphabet\") est trop générale pour expliquer un rang numérique précis de 23.",
+      "needs_new_explanation": true
+    }
+  },
+  {
+    "question_id": "067515dd-bb45-44a5-be51-700ed69f15f3",
+    "issue": "incorrect_answer_after_generation",
+    "details": "La question ne contient aucune information permettant de déduire le nombre de personnes venant de Paris.",
+    "validation": {
+      "correct_answer_is_valid": false,
+      "correct_answer_feedback": "La question ne contient aucune information permettant de déduire le nombre de personnes venant de Paris.",
+      "explanation_language": "french",
+      "explanation_sentence_count": 3,
+      "explanation_is_specific": true,
+      "explanation_feedback": "L'explication est claire et spécifique dans son raisonnement, mais ce raisonnement repose sur une supposition de 'régularité' qui n'est pas indiquée ou implicite dans la question.",
+      "needs_new_explanation": true
+    }
+  },
+  {
+    "question_id": "18fa9976-db24-4504-b1b7-8c40f0bf9210",
+    "issue": "incorrect_answer",
+    "details": "La bonne réponse attendue (E, option C) ne peut pas être déduite logiquement des séquences de lettres par un schéma arithmétique simple et cohérent. Les deux schémas logiques les plus évidents mènent à la lettre C (option A).",
+    "validation": {
+      "correct_answer_is_valid": false,
+      "correct_answer_feedback": "La bonne réponse attendue (E, option C) ne peut pas être déduite logiquement des séquences de lettres par un schéma arithmétique simple et cohérent. Les deux schémas logiques les plus évidents mènent à la lettre C (option A).",
+      "explanation_language": "french",
+      "explanation_sentence_count": 4,
+      "explanation_is_specific": false,
+      "explanation_feedback": "L'explication est trop longue (4 phrases au lieu de 2-3) et contient une erreur factuelle dans la séquence numérique fournie pour la troisième grille (indique 5-21-5 au lieu de 10-21-5 pour J-U-E). De plus, la 'logique' qui mènerait à la lettre E n'est pas clairement explicitée et semble inconsistante avec les progressions observées pour les autres éléments.",
+      "needs_new_explanation": true
+    }
+  },
+  {
+    "question_id": "5562e97a-1603-45c1-9271-a33fca8247fa",
+    "issue": "incorrect_answer",
+    "details": "Le nombre de filières (9) indiqué pour l'ENA ne correspond pas aux informations généralement admises concernant cette institution (qui est d'ailleurs remplacée par l'INSP).",
+    "validation": {
+      "correct_answer_is_valid": false,
+      "correct_answer_feedback": "Le nombre de filières (9) indiqué pour l'ENA ne correspond pas aux informations généralement admises concernant cette institution (qui est d'ailleurs remplacée par l'INSP).",
+      "explanation_language": "french",
+      "explanation_sentence_count": 3,
+      "explanation_is_specific": true,
+      "explanation_feedback": "L'explication est bien structurée, en français naturel et inclut des exemples concrets, mais elle repose sur une prémisse factuellement incorrecte concernant le nombre de filières de l'ENA.",
+      "needs_new_explanation": true
+    }
+  },
+  {
+    "question_id": "7cdafa5d-583e-4938-b3e6-4517c5b2feda",
+    "issue": "incorrect_answer",
+    "details": "La réponse D est correcte, mais elle n'est pas la seule ni la meilleure option car la réponse A est également correcte et valide pour l'accord sujet-verbe.",
+    "validation": {
+      "correct_answer_is_valid": false,
+      "correct_answer_feedback": "La réponse D est correcte, mais elle n'est pas la seule ni la meilleure option car la réponse A est également correcte et valide pour l'accord sujet-verbe.",
+      "explanation_language": "french",
+      "explanation_sentence_count": 3,
+      "explanation_is_specific": false,
+      "explanation_feedback": "L'explication fournie est totalement hors sujet. Elle fait référence à une autre question concernant le choix d'un verbe ('visiter' un musée) et une autre réponse (B), sans aucun rapport avec l'accord sujet-verbe de la question actuelle.",
+      "needs_new_explanation": true
+    }
+  },
+  {
+    "question_id": "8e7f7bda-3999-46ec-8b4a-562524038b7e",
+    "issue": "incorrect_answer",
+    "details": "L'option C est une traduction anglaise du COD et non le COD français attendu de la phrase.",
+    "validation": {
+      "correct_answer_is_valid": false,
+      "correct_answer_feedback": "L'option C est une traduction anglaise du COD et non le COD français attendu de la phrase.",
+      "explanation_language": "french",
+      "explanation_sentence_count": 4,
+      "explanation_is_specific": true,
+      "explanation_feedback": "L'explication est pertinente et grammaticalement correcte, mais elle dépasse le nombre de phrases autorisé (4 au lieu de 2 ou 3).",
+      "needs_new_explanation": true
+    }
+  },
+  {
+    "question_id": "a92d5b06-6a15-4e70-ba20-55ea8e0d82df",
+    "issue": "incorrect_answer",
+    "details": "L'explication fournie décrit une règle qui ne correspond pas aux séquences de nombres de la question, rendant impossible la validation de la bonne réponse attendue.",
+    "validation": {
+      "correct_answer_is_valid": false,
+      "correct_answer_feedback": "L'explication fournie décrit une règle qui ne correspond pas aux séquences de nombres de la question, rendant impossible la validation de la bonne réponse attendue.",
+      "explanation_language": "french",
+      "explanation_sentence_count": 4,
+      "explanation_is_specific": false,
+      "explanation_feedback": "L'explication dépasse le nombre de phrases requis (2-3) et la règle qu'elle décrit (ex: 2 * 6 + 2 = 14) contredit directement les nombres présents dans la séquence (2, 6, 30), ce qui la rend non pertinente pour résoudre le problème posé.",
+      "needs_new_explanation": true
+    }
+  },
+  {
+    "question_id": "ad7667c8-3ac0-42bb-af6c-00639fb12973",
+    "issue": "incorrect_answer",
+    "details": "La bonne réponse attendue est incorrecte. L'opération (35/(-7) - 5×6 - 8/(-2)) équivaut à -31, non -21.",
+    "validation": {
+      "correct_answer_is_valid": false,
+      "correct_answer_feedback": "La bonne réponse attendue est incorrecte. L'opération (35/(-7) - 5×6 - 8/(-2)) équivaut à -31, non -21.",
+      "explanation_language": "french",
+      "explanation_sentence_count": 3,
+      "explanation_is_specific": false,
+      "explanation_feedback": "L'explication ne détaille pas les étapes de calcul et se base sur une réponse qui s'avère incorrecte.",
+      "needs_new_explanation": true
+    }
+  },
+  {
+    "question_id": "bad25713-6fb8-4eb2-91bf-85eaf66bbd7e",
+    "issue": "incorrect_answer",
+    "details": "La bonne réponse attendue (C) est explicitement contredite par l'explication fournie, qui indique que Patrice Beaumelle (B) est le nouvel entraîneur.",
+    "validation": {
+      "correct_answer_is_valid": false,
+      "correct_answer_feedback": "La bonne réponse attendue (C) est explicitement contredite par l'explication fournie, qui indique que Patrice Beaumelle (B) est le nouvel entraîneur.",
+      "explanation_language": "french",
+      "explanation_sentence_count": 3,
+      "explanation_is_specific": false,
+      "explanation_feedback": "L'explication est contradictoire, affirmant que C est la bonne réponse mais précisant qu'Emerse Faé n'est pas le nouvel entraîneur et mentionnant Patrice Beaumelle à la place. Elle contient également des informations factuellement incorrectes.",
+      "needs_new_explanation": true
+    }
+  },
+  {
+    "question_id": "be733f75-35e8-4ccc-be76-07ef1ff18b13",
+    "issue": "incorrect_answer",
+    "details": "Les lettres \"www\" ne figurent pas habituellement en tête d'une adresse électronique (e-mail), mais plutôt dans une adresse web (URL), rendant la prémisse de la question incorrecte.",
+    "validation": {
+      "correct_answer_is_valid": false,
+      "correct_answer_feedback": "Les lettres \"www\" ne figurent pas habituellement en tête d'une adresse électronique (e-mail), mais plutôt dans une adresse web (URL), rendant la prémisse de la question incorrecte.",
+      "explanation_language": "french",
+      "explanation_sentence_count": 3,
+      "explanation_is_specific": false,
+      "explanation_feedback": "L'explication répète l'erreur factuelle de la question concernant la présence de \"www\" dans une adresse électronique.",
+      "needs_new_explanation": true
+    }
+  },
+  {
+    "question_id": "c0387b97-ab39-4a1a-9de5-7418b53b48d4",
+    "issue": "incorrect_answer",
+    "details": "La bonne réponse attendue (B) est incorrecte. Zéguibéroua doit obtenir 13,5 points (option A) pour atteindre une moyenne de 12.",
+    "validation": {
+      "correct_answer_is_valid": false,
+      "correct_answer_feedback": "La bonne réponse attendue (B) est incorrecte. Zéguibéroua doit obtenir 13,5 points (option A) pour atteindre une moyenne de 12.",
+      "explanation_language": "french",
+      "explanation_sentence_count": 4,
+      "explanation_is_specific": false,
+      "explanation_feedback": "L'explication contient des erreurs de calcul et de raisonnement, et le nombre de phrases (4) dépasse la limite autorisée (2 ou 3).",
+      "needs_new_explanation": true
+    }
+  },
+  {
+    "question_id": "c98f9158-0d22-4d26-aa51-c17b0cf1694f",
+    "issue": "incorrect_answer",
+    "details": "L'option C semble également correcte, ce qui invalide l'unicité de la réponse B comme seule bonne réponse.",
+    "validation": {
+      "correct_answer_is_valid": false,
+      "correct_answer_feedback": "L'option C semble également correcte, ce qui invalide l'unicité de la réponse B comme seule bonne réponse.",
+      "explanation_language": "french",
+      "explanation_sentence_count": 3,
+      "explanation_is_specific": false,
+      "explanation_feedback": "L'explication ne justifie pas concrètement pourquoi l'option C est fausse, alors qu'elle semble grammaticalement correcte. De plus, elle utilise 'souvenirs joyeux' au lieu de 'moments heureux' pour l'antécédent.",
+      "needs_new_explanation": true
+    }
+  },
+  {
+    "question_id": "cbc96f82-6888-4f31-980e-b1418535001d",
+    "issue": "incorrect_answer",
+    "details": "La réponse attendue C est incorrecte car -1,1 n'est pas supérieur à -1 ; en réalité, il lui est inférieur.",
+    "validation": {
+      "correct_answer_is_valid": false,
+      "correct_answer_feedback": "La réponse attendue C est incorrecte car -1,1 n'est pas supérieur à -1 ; en réalité, il lui est inférieur.",
+      "explanation_language": "french",
+      "explanation_sentence_count": 3,
+      "explanation_is_specific": false,
+      "explanation_feedback": "L'explication est factuellement incorrecte car elle affirme que -1,1 est supérieur à -1 et se situe à sa droite sur une droite numérique, ce qui est faux.",
+      "needs_new_explanation": true
+    }
+  },
+  {
+    "question_id": "ce902db0-b752-4b30-a31f-bd06c5f29325",
+    "issue": "incorrect_answer",
+    "details": "La question est ambiguë car toutes les options (A, B, C, D) contiennent un participe pendant, rendant le choix d'une seule bonne réponse invalide.",
+    "validation": {
+      "correct_answer_is_valid": false,
+      "correct_answer_feedback": "La question est ambiguë car toutes les options (A, B, C, D) contiennent un participe pendant, rendant le choix d'une seule bonne réponse invalide.",
+      "explanation_language": "french",
+      "explanation_sentence_count": 4,
+      "explanation_is_specific": false,
+      "explanation_feedback": "L'explication fournie porte sur un sujet complètement différent (l'usage des verbes modaux 'might', 'must', 'could') et n'a aucun rapport avec la question sur les participes pendants. Elle dépasse également le nombre de phrases autorisé.",
+      "needs_new_explanation": true
+    }
+  },
+  {
+    "question_id": "ec023e4d-2467-42fa-8b43-960dffebc546",
+    "issue": "incorrect_answer",
+    "details": "L'option C, 'what people believe', est trop générale et ne capture pas précisément l'objectif principal d'une théorie morale normative, qui vise à établir des principes plutôt qu'à simplement décrire des croyances. Bien que l'explication tente de la spécifier ('ce que les individus croient être juste ou injuste'), l'option telle qu'elle est formulée est ambiguë.",
+    "validation": {
+      "correct_answer_is_valid": false,
+      "correct_answer_feedback": "L'option C, 'what people believe', est trop générale et ne capture pas précisément l'objectif principal d'une théorie morale normative, qui vise à établir des principes plutôt qu'à simplement décrire des croyances. Bien que l'explication tente de la spécifier ('ce que les individus croient être juste ou injuste'), l'option telle qu'elle est formulée est ambiguë.",
+      "explanation_language": "french",
+      "explanation_sentence_count": 3,
+      "explanation_is_specific": true,
+      "explanation_feedback": "L'explication est claire, concise et justifie la réponse C en interprétant son sens dans le contexte de ce que les individus croient être juste ou injuste, et explique pourquoi les autres options sont moins larges. Cependant, la justification s'appuie sur une interprétation spécifique de l'option C qui n'est pas explicite dans le libellé de l'option.",
+      "needs_new_explanation": true
+    }
+  },
+  {
+    "question_id": "eee40d67-8a5f-4301-b6dd-158c918f1525",
+    "issue": "incorrect_answer",
+    "details": "L'explication fournie ne permet pas de justifier la réponse C (7) et contient des informations contradictoires.",
+    "validation": {
+      "correct_answer_is_valid": false,
+      "correct_answer_feedback": "L'explication fournie ne permet pas de justifier la réponse C (7) et contient des informations contradictoires.",
+      "explanation_language": "french",
+      "explanation_sentence_count": 4,
+      "explanation_is_specific": false,
+      "explanation_feedback": "L'explication contient des erreurs logiques et factuelles. Elle affirme notamment que le total de la troisième colonne doit être 5 (ce qui impliquerait que le '?' est 0), puis dit qu'il faut compléter la première colonne à 18 avec le chiffre 7 (ce qui est faux car la première colonne somme déjà à 18). De plus, elle dépasse le nombre de phrases autorisées.",
+      "needs_new_explanation": true
+    }
+  },
+  {
+    "question_id": "fa866dcc-8d8c-4bf3-b35c-51e0815fbac0",
+    "issue": "incorrect_answer",
+    "details": "La bonne réponse attendue (B) est incorrecte. Le calcul donne 30 km/h (Option A).",
+    "validation": {
+      "correct_answer_is_valid": false,
+      "correct_answer_feedback": "La bonne réponse attendue (B) est incorrecte. Le calcul donne 30 km/h (Option A).",
+      "explanation_language": "french",
+      "explanation_sentence_count": 4,
+      "explanation_is_specific": false,
+      "explanation_feedback": "L'explication est trop longue (4 phrases) et ne détaille pas concrètement les étapes du calcul, se contentant d'affirmer le résultat.",
+      "needs_new_explanation": true
+    }
+  }
+]

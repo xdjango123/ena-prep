@@ -11,6 +11,107 @@ export interface ExamResult {
   created_at: string;
 }
 
+export interface ExamQuestionSnapshot {
+  id: string;
+  order: number;
+  question_text: string;
+  answer1: string;
+  answer2: string;
+  answer3: string;
+  answer4: string;
+  correct: string;
+  explanation: string;
+  category: string;
+  difficulty: string;
+  type?: string;
+  is3Option?: boolean;
+}
+
+export interface ExamAttemptData {
+  questions: ExamQuestionSnapshot[];
+  userAnswers: Map<string, string>;
+  created_at?: string;
+}
+
+const isExamQuestionSnapshot = (question: unknown): question is ExamQuestionSnapshot => {
+  if (!question || typeof question !== 'object') {
+    return false;
+  }
+
+  return 'question_text' in question && 'answer1' in question && 'answer2' in question && 'answer3' in question && 'answer4' in question;
+};
+
+const normalizeQuestionSnapshot = (question: any, fallbackOrder: number): ExamQuestionSnapshot => {
+  if (isExamQuestionSnapshot(question)) {
+    return {
+      id: typeof question.id === 'string' ? question.id : String(question.id ?? `question-${fallbackOrder}`),
+      order: typeof question.order === 'number' ? question.order : fallbackOrder,
+      question_text: question.question_text ?? '',
+      answer1: question.answer1 ?? '',
+      answer2: question.answer2 ?? '',
+      answer3: question.answer3 ?? '',
+      answer4: question.answer4 ?? '',
+      correct: (question.correct ?? 'A').toString().toUpperCase(),
+      explanation: question.explanation ?? '',
+      category: question.category ?? 'ANG',
+      difficulty: question.difficulty ?? 'medium',
+      type: question.type,
+      is3Option: question.is3Option
+    };
+  }
+
+  const questionText = question?.question ?? question?.question_text ?? '';
+  const optionsArray: string[] = Array.isArray(question?.options)
+    ? question.options.map((opt: unknown) => (opt ?? '').toString())
+    : [
+        question?.answer1,
+        question?.answer2,
+        question?.answer3,
+        question?.answer4
+      ].filter((opt: unknown) => opt !== undefined && opt !== null).map((opt: unknown) => (opt ?? '').toString());
+
+  while (optionsArray.length < 4) {
+    optionsArray.push('');
+  }
+
+  const computedCorrect = (() => {
+    if (typeof question?.correct === 'string') {
+      return question.correct.toUpperCase();
+    }
+    if (typeof question?.correctAnswer === 'number') {
+      return String.fromCharCode(65 + question.correctAnswer);
+    }
+    if (typeof question?.correctAnswer === 'string') {
+      const normalized = question.correctAnswer.trim().toUpperCase();
+      if (/^[0-3]$/.test(normalized)) {
+        return String.fromCharCode(65 + parseInt(normalized, 10));
+      }
+      if (/^[A-D]$/.test(normalized)) {
+        return normalized;
+      }
+    }
+    return 'A';
+  })();
+
+  const normalizedQuestion: ExamQuestionSnapshot = {
+    id: question?.id ? String(question.id) : `legacy-${fallbackOrder}`,
+    order: fallbackOrder,
+    question_text: questionText,
+    answer1: optionsArray[0] ?? '',
+    answer2: optionsArray[1] ?? '',
+    answer3: optionsArray[2] ?? '',
+    answer4: optionsArray[3] ?? '',
+    correct: computedCorrect,
+    explanation: question?.explanation ?? '',
+    category: question?.category ?? 'ANG',
+    difficulty: question?.difficulty ?? 'medium',
+    type: question?.type,
+    is3Option: question?.is3Option ?? optionsArray.filter(option => option).length === 3
+  };
+
+  return normalizedQuestion;
+};
+
 export class ExamResultService {
   /**
    * Save exam result to database using test_results table
@@ -21,7 +122,8 @@ export class ExamResultService {
     examNumber: number,
     overallScore: number,
     subjectScores: { ANG: number; CG: number; LOG: number },
-    userAnswers?: Map<string, string>
+    userAnswers?: Map<string, string>,
+    questionSnapshot?: ExamQuestionSnapshot[]
   ): Promise<boolean> {
     try {
       console.log('Saving exam result:', { userId, examType, examNumber, overallScore, subjectScores });
@@ -99,10 +201,11 @@ export class ExamResultService {
             examNumber,
             overallScore,
             {
-              questions: [], // We don't need to store questions here
+              exam_type: examType,
+              questions: questionSnapshot ?? [],
               userAnswers: userAnswersArray,
               correctAnswers: Math.round((overallScore / 100) * userAnswers.size),
-              totalQuestions: userAnswers.size,
+              totalQuestions: questionSnapshot?.length ?? userAnswers.size,
               timeSpent: 0 // We don't track time spent in this context
             }
           );
@@ -274,11 +377,11 @@ export class ExamResultService {
   /**
    * Get user answers for an exam
    */
-  static async getUserAnswers(
+  static async getExamAttempt(
     userId: string,
     examType: 'CM' | 'CMS' | 'CS',
     examNumber: number
-  ): Promise<Map<string, string>> {
+  ): Promise<ExamAttemptData | null> {
     try {
       const { UserAttemptService } = await import('./userAttemptService');
       const attempts = await UserAttemptService.getUserAttempts(userId);
@@ -286,59 +389,79 @@ export class ExamResultService {
       console.log('🔍 All user attempts:', attempts.length);
       console.log('🔍 Looking for examen_blanc, test_number:', examNumber);
       
-      // Find the attempt for this exam
-      const examAttempt = attempts.find(attempt => 
-        attempt.test_type === 'examen_blanc' && 
-        attempt.test_number === examNumber
-      );
+      const examAttempt = attempts.find(attempt => {
+        if (attempt.test_type !== 'examen_blanc' || attempt.test_number !== examNumber) {
+          return false;
+        }
+        const attemptData = attempt.test_data;
+        if (!attemptData?.exam_type) {
+          return true;
+        }
+        return attemptData.exam_type === examType;
+      });
       
       console.log('🔍 Found exam attempt:', examAttempt ? 'YES' : 'NO');
-      if (examAttempt) {
-        console.log('🔍 Exam attempt details:', {
-          id: examAttempt.id,
-          test_type: examAttempt.test_type,
-          test_number: examAttempt.test_number,
-          has_test_data: !!examAttempt.test_data,
-          has_userAnswers: !!(examAttempt.test_data && examAttempt.test_data.userAnswers)
-        });
+      if (!examAttempt || !examAttempt.test_data) {
+        console.log('❌ No exam attempt found or missing test_data');
+        return null;
       }
 
-      if (examAttempt && examAttempt.test_data && examAttempt.test_data.userAnswers) {
-        console.log('🔍 Found exam attempt with user answers:', examAttempt.test_data.userAnswers.length);
-        const userAnswersMap = new Map<string, string>();
-        examAttempt.test_data.userAnswers.forEach(([questionId, answer], index) => {
-          console.log(`  Answer ${index + 1}: questionId=${questionId}, answer=${answer}`);
-          // Check for null/undefined values before converting to string
-          if (questionId !== null && questionId !== undefined && 
-              answer !== null && answer !== undefined) {
-            
-            // Convert number answers to letters (0=A, 1=B, 2=C)
-            let letterAnswer: string;
-            if (typeof answer === 'number' && answer >= 0 && answer <= 2) {
-              letterAnswer = String.fromCharCode(65 + answer); // 0->A, 1->B, 2->C
-              console.log(`    Converted number ${answer} to letter ${letterAnswer}`);
-            } else {
-              letterAnswer = answer.toString();
-            }
-            
-            // Store with the questionId as string (this should match the question.id in the review page)
-            // questionId is already a string, so no need to convert
-            userAnswersMap.set(questionId.toString(), letterAnswer);
+      const { test_data } = examAttempt;
+      const storedQuestions: ExamQuestionSnapshot[] = Array.isArray(test_data.questions)
+        ? test_data.questions.map((item: unknown, index: number) => normalizeQuestionSnapshot(item, index))
+        : [];
+
+      const userAnswersMap = new Map<string, string>();
+      const answersArray: [string | number, string | number][] = Array.isArray(test_data.userAnswers)
+        ? test_data.userAnswers
+        : [];
+
+      answersArray.forEach(([questionId, answer], index) => {
+        console.log(`  Answer ${index + 1}: questionId=${questionId}, answer=${answer}`);
+        if (questionId === null || questionId === undefined || answer === null || answer === undefined) {
+          console.log(`  Skipping invalid answer: questionId=${questionId}, answer=${answer}`);
+          return;
+        }
+
+        let normalizedAnswer: string;
+        if (typeof answer === 'number') {
+          normalizedAnswer = String.fromCharCode(65 + answer);
+        } else {
+          const answerString = String(answer);
+          if (/^[0-3]$/.test(answerString)) {
+            normalizedAnswer = String.fromCharCode(65 + parseInt(answerString, 10));
+          } else if (/^(true|false)$/i.test(answerString)) {
+            normalizedAnswer = answerString.toLowerCase() === 'true' ? 'A' : 'B';
+          } else if (answerString.length === 1) {
+            normalizedAnswer = answerString.toUpperCase();
           } else {
-            console.log(`  Skipping invalid answer: questionId=${questionId}, answer=${answer}`);
+            normalizedAnswer = answerString;
           }
-        });
-        console.log('📊 Final user answers map:', userAnswersMap.size, 'answers');
-        console.log('📊 Sample answers:', Array.from(userAnswersMap.entries()).slice(0, 3));
-        return userAnswersMap;
-      }
+        }
 
-      console.log('❌ No exam attempt found or no user answers available');
-      return new Map();
+        userAnswersMap.set(questionId.toString(), normalizedAnswer);
+      });
 
+      console.log('📊 Final user answers map:', userAnswersMap.size, 'answers');
+      console.log('📊 Sample answers:', Array.from(userAnswersMap.entries()).slice(0, 3));
+
+      return {
+        questions: storedQuestions,
+        userAnswers: userAnswersMap,
+        created_at: examAttempt.created_at
+      };
     } catch (error) {
-      console.error('Error getting user answers:', error);
-      return new Map();
+      console.error('Error getting exam attempt data:', error);
+      return null;
     }
+  }
+
+  static async getUserAnswers(
+    userId: string,
+    examType: 'CM' | 'CMS' | 'CS',
+    examNumber: number
+  ): Promise<Map<string, string>> {
+    const attempt = await this.getExamAttempt(userId, examType, examNumber);
+    return attempt?.userAnswers ?? new Map();
   }
 }

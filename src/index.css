@@ -64,75 +64,14 @@ body {
   background-color: var(--gray-50);
 }
 
-/* Exam Mode - Completely Override Dashboard Layout */
+/* Exam Mode - isolate dashboard chrome without blocking scroll */
 .exam-mode {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  width: 100vw !important;
-  height: 100vh !important;
-  z-index: 9999 !important;
+  position: relative !important;
+  width: 100% !important;
+  min-height: 100vh !important;
   background: var(--gray-50) !important;
-  overflow: hidden !important;
-}
-
-/* Hide ALL dashboard elements in exam mode */
-.exam-mode .fixed,
-.exam-mode .lg\\:ml-64,
-.exam-mode .lg\\:hidden,
-.exam-mode .bg-white,
-.exam-mode .border-b,
-.exam-mode .border-gray-200,
-.exam-mode .px-3,
-.exam-mode .xs\\:px-4,
-.exam-mode .py-3,
-.exam-mode .flex,
-.exam-mode .items-center,
-.exam-mode .justify-between,
-.exam-mode .sticky,
-.exam-mode .top-0,
-.exam-mode .z-30,
-.exam-mode .gap-3,
-.exam-mode .min-w-0,
-.exam-mode .p-2,
-.exam-mode .rounded-lg,
-.exam-mode .text-gray-500,
-.exam-mode .hover\\:bg-gray-100,
-.exam-mode .flex-shrink-0,
-.exam-mode .w-5,
-.exam-mode .h-5,
-.exam-mode .font-semibold,
-.exam-mode .text-gray-800,
-.exam-mode .truncate,
-.exam-mode .text-sm,
-.exam-mode .xs\\:text-base,
-.exam-mode .main,
-.exam-mode .px-3,
-.exam-mode .xs\\:px-4,
-.exam-mode .sm\\:px-6,
-.exam-mode .lg\\:px-8,
-.exam-mode .bg-neutral-50,
-.exam-mode .min-h-screen,
-.exam-mode .w-full,
-.exam-mode .max-w-full,
-.exam-mode .overflow-x-hidden {
-  display: none !important;
-}
-
-/* Force exam content to take full space */
-.exam-mode > * {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  width: 100vw !important;
-  height: 100vh !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  z-index: 10000 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
 }
 
 /* Progress Bar */

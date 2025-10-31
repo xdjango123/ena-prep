@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
 interface SidebarContextType {
   isOpen: boolean;
@@ -23,11 +23,23 @@ interface SidebarProviderProps {
   children: ReactNode;
 }
 
+const getIsDesktop = () => {
+  if (typeof window === 'undefined') {
+    return true;
+  }
+  return window.innerWidth >= 1024;
+};
+
 export const SidebarProvider: React.FC<SidebarProviderProps> = ({ children }) => {
-  const [isOpen, setIsOpen] = useState(false); // Start collapsed for clean look
+  const [isOpen, setIsOpen] = useState(getIsDesktop);
   const [isHovered, setIsHovered] = useState(false);
 
   const toggle = () => {
+    if (getIsDesktop()) {
+      setIsOpen(true);
+      setIsHovered(false);
+      return;
+    }
     setIsOpen(prev => {
       const next = !prev;
       if (!next) {
@@ -38,11 +50,37 @@ export const SidebarProvider: React.FC<SidebarProviderProps> = ({ children }) =>
   };
 
   const close = () => {
+    if (getIsDesktop()) {
+      setIsHovered(false);
+      return;
+    }
     setIsOpen(false);
     setIsHovered(false);
   };
-  const open = () => setIsOpen(true);
+  const open = () => {
+    setIsOpen(true);
+    if (!getIsDesktop()) {
+      setIsHovered(false);
+    }
+  };
   const setHovered = (hovered: boolean) => setIsHovered(hovered);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (getIsDesktop()) {
+        setIsOpen(true);
+        setIsHovered(false);
+      } else {
+        setIsOpen(false);
+        setIsHovered(false);
+      }
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
+    }
+  }, []);
 
   const value: SidebarContextType = {
     isOpen,

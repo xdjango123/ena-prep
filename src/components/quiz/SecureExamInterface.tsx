@@ -57,31 +57,31 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
   }, []);
 
   // Security: Detect tab switching and window focus
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        setTabSwitchCount(prev => prev + 1);
-        setWarningDismissed(false); // Reset warning dismissed state on new tab switch
-        if (tabSwitchCount >= 2) {
-          handleFinishExam();
-        }
-      }
-    };
-
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      e.preventDefault();
-      e.returnValue = 'Êtes-vous sûr de vouloir quitter l\'examen ? Votre examen sera terminé automatiquement.';
-      return 'Êtes-vous sûr de vouloir quitter l\'examen ? Votre examen sera terminé automatiquement.';
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('beforeunload', handleBeforeUnload);
-
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
-  }, [tabSwitchCount]);
+  // useEffect(() => {
+  //   const handleVisibilityChange = () => {
+  //     if (document.hidden) {
+  //       setTabSwitchCount(prev => prev + 1);
+  //       setWarningDismissed(false); // Reset warning dismissed state on new tab switch
+  //       if (tabSwitchCount >= 2) {
+  //         handleFinishExam();
+  //       }
+  //     }
+  //   };
+  //
+  //   const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+  //     e.preventDefault();
+  //     e.returnValue = 'Êtes-vous sûr de vouloir quitter l\'examen ? Votre examen sera terminé automatiquement.';
+  //     return 'Êtes-vous sûr de vouloir quitter l\'examen ? Votre examen sera terminé automatiquement.';
+  //   };
+  //
+  //   document.addEventListener('visibilitychange', handleVisibilityChange);
+  //   window.addEventListener('beforeunload', handleBeforeUnload);
+  //
+  //   return () => {
+  //     document.removeEventListener('visibilitychange', handleVisibilityChange);
+  //     window.removeEventListener('beforeunload', handleBeforeUnload);
+  //   };
+  // }, [tabSwitchCount]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -431,19 +431,95 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
       console.log(`💾 Saving to database: user=${user.id}, examType=${userExamType}, examNumber=${examId}, score=${overallScore}`);
       
       try {
+        const normalizeAnswerToLetter = (
+          question: Question,
+          answer: string | number | null | undefined
+        ): string | null => {
+          if (answer === null || answer === undefined) {
+            return null;
+          }
+
+          if (question.type === 'multiple-choice') {
+            if (typeof answer === 'number') {
+              return String.fromCharCode(65 + answer);
+            }
+
+            if (typeof answer === 'string') {
+              if (answer.length === 1 && /[A-D]/i.test(answer)) {
+                return answer.toUpperCase();
+              }
+
+              const numericValue = Number(answer);
+              if (!Number.isNaN(numericValue) && numericValue >= 0 && numericValue <= 3) {
+                return String.fromCharCode(65 + numericValue);
+              }
+
+              return answer.toUpperCase();
+            }
+
+            return String(answer).toUpperCase();
+          }
+
+          const normalized = String(answer).toLowerCase();
+          if (normalized === 'true') return 'A';
+          if (normalized === 'false') return 'B';
+          if (normalized.length === 1) return normalized.toUpperCase();
+          return normalized;
+        };
+
+        const questionsSnapshot = questions.map((q, index) => {
+          const options = q.type === 'multiple-choice'
+            ? q.options || []
+            : ['Vrai', 'Faux'];
+
+          const paddedOptions = [...options];
+          while (paddedOptions.length < 4) {
+            paddedOptions.push('');
+          }
+
+          const correctLetter =
+            q.type === 'multiple-choice' && typeof q.correctAnswer === 'number'
+              ? String.fromCharCode(65 + q.correctAnswer)
+              : normalizeAnswerToLetter(q, q.correctAnswer) || 'A';
+
+          return {
+            id: q.id,
+            order: index,
+            question_text: q.question,
+            answer1: paddedOptions[0] || '',
+            answer2: paddedOptions[1] || '',
+            answer3: paddedOptions[2] || '',
+            answer4: paddedOptions[3] || '',
+            correct: correctLetter,
+            explanation: q.explanation ?? '',
+            category: q.category,
+            difficulty: q.difficulty,
+            type: q.type,
+            is3Option: q.is3Option ?? false
+          };
+        });
+
+        const questionsById = new Map(questions.map(q => [q.id, q]));
+
         // Convert userAnswers to Map<string, string> for the service
         const userAnswersString = new Map<string, string>();
         userAnswers.forEach((value, key) => {
-          userAnswersString.set(key, String(value));
+          const question = questionsById.get(key);
+          if (!question) return;
+          const normalized = normalizeAnswerToLetter(question, value);
+          if (normalized) {
+            userAnswersString.set(key, normalized);
+          }
         });
-        
+
         const saveResult = await ExamResultService.saveExamResult(
           user.id,
           userExamType as 'CM' | 'CMS' | 'CS',
           parseInt(examId || '1'),
           overallScore,
           subjectPercentages,
-          userAnswersString
+          userAnswersString,
+          questionsSnapshot
         );
         
         console.log(`💾 Save result: ${saveResult ? 'SUCCESS' : 'FAILED'}`);
