@@ -11,15 +11,24 @@ import json
 import hashlib
 from datetime import datetime
 from typing import List, Dict, Any
-from supabase import create_client, Client
+from supabase import Client
+from question_audit.db import SupabaseConfigError, get_supabase_client
 
-# Supabase configuration
-SUPABASE_URL = "https://ohngxnhnbwnystzkqzwy.supabase.co"
-SUPABASE_SERVICE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9obmd4bmhuYndueXN0emtxend5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MTg1NzYzNywiZXhwIjoyMDY3NDMzNjM3fQ.4I2VHFZZodcHI_-twFBqWxh74zCBKh1rENoTOI_nVwE"
+try:
+    from dotenv import load_dotenv  # type: ignore
+except ImportError:  # pragma: no cover
+    load_dotenv = None
+else:
+    load_dotenv()
 
 class QuestionInserter:
     def __init__(self):
-        self.supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+        try:
+            self.supabase: Client = get_supabase_client()
+        except SupabaseConfigError as exc:
+            print(f'❌ {exc}')
+            sys.exit(1)
+
         self.questions_inserted = 0
         self.questions_failed = 0
         self.duplicates_skipped = 0

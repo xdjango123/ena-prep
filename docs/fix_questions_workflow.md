@@ -2,20 +2,18 @@
 
 ## 1. Prerequisites
 - Install Python 3.10+ and Node 18+.
-- Copy your Supabase credentials into environment variables (scripts already
-  default to the project credentials baked into `question_audit/db.py`, so this
-  step is only needed when you want to override them):
+- Copy your Supabase credentials into environment variables (or place them in a local `.env` file that you load before running the scripts):
   ```bash
   export SUPABASE_URL="https://<project>.supabase.co"
   export SUPABASE_SERVICE_KEY="service_role_key"
   ```
 - If you plan to generate GPT suggestions, also set:
   ```bash
-  export OPENAI_API_KEY="sk-..."
+  export OPENAI_API_KEY="your-openai-api-key"
   ```
 - The explanation audit now also calls Gemini; set:
   ```bash
-  export GEMINI_API_KEY="AIza..."
+  export GEMINI_API_KEY="your-gemini-api-key"
   ```
 - Install Python dependencies:
   ```bash

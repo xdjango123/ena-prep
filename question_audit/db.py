@@ -2,20 +2,20 @@
 
 from __future__ import annotations
 
-import json
-import os
 import functools
 import inspect
+import json
+import os
 from typing import Any, Dict, Iterable, List, Optional
 
 from supabase import Client, create_client
 
-DEFAULT_SUPABASE_URL = "https://ohngxnhnbwnystzkqzwy.supabase.co"
-DEFAULT_SUPABASE_SERVICE_KEY = (
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9obmd4bmhu"
-    "YndueXN0emtxend5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MTg1NzYzNywiZXhwIjoyMD"
-    "Y3NDMzNjM3fQ.4I2VHFZZodcHI_-twFBqWxh74zCBKh1rENoTOI_nVwE"
-)
+try:  # Optional support for python-dotenv without introducing a hard dependency.
+    from dotenv import load_dotenv  # type: ignore
+except ImportError:  # pragma: no cover - module may not be installed in all environments.
+    load_dotenv = None
+else:
+    load_dotenv()  # Load values from a local .env if present.
 
 
 class SupabaseConfigError(RuntimeError):
@@ -24,18 +24,16 @@ class SupabaseConfigError(RuntimeError):
 
 def get_supabase_client() -> Client:
     """Create and return a Supabase client using environment variables.
-    Falls back to the default project credentials when env vars are not set.
-
     Raises:
         SupabaseConfigError: If credentials are not available.
     """
-    url = os.getenv("SUPABASE_URL") or DEFAULT_SUPABASE_URL
-    key = os.getenv("SUPABASE_SERVICE_KEY") or DEFAULT_SUPABASE_SERVICE_KEY
+    url = os.getenv("SUPABASE_URL")
+    key = os.getenv("SUPABASE_SERVICE_KEY")
 
     if not url or not key:
         raise SupabaseConfigError(
-            "Set SUPABASE_URL and SUPABASE_SERVICE_KEY environment variables "
-            "before running the diagnostics scripts."
+            "Missing Supabase credentials. Ensure SUPABASE_URL and SUPABASE_SERVICE_KEY "
+            "are defined in the environment (or provided via a local .env file)."
         )
 
     return create_client(url, key)

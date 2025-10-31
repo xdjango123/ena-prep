@@ -3,20 +3,22 @@
 Script to deactivate a specific user's subscription for testing renewal functionality
 """
 
-import os
 import sys
-from supabase import create_client, Client
+from supabase import Client
+from question_audit.db import SupabaseConfigError, get_supabase_client
 
-# Supabase configuration
-SUPABASE_URL = "https://ohngxnhnbwnystzkqzwy.supabase.co"
-SUPABASE_SERVICE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9obmd4bmhuYndueXN0emtxend5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MTg1NzYzNywiZXhwIjoyMDY3NDMzNjM3fQ.4I2VHFZZodcHI_-twFBqWxh74zCBKh1rENoTOI_nVwE"
+try:
+    from dotenv import load_dotenv  # type: ignore
+except ImportError:  # pragma: no cover
+    load_dotenv = None
+else:
+    load_dotenv()
 
-def deactivate_user_subscription(user_id: str):
-    """Deactivate all subscriptions for a specific user"""
-    supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
-    
+def deactivate_user_subscription(client: Client, user_id: str) -> bool:
+    """Deactivate all subscriptions for a specific user."""
     print(f"🔍 Deactivating subscriptions for user: {user_id}")
     
+    supabase = client
     try:
         # First, check current subscription status
         print("\n1. Checking current subscription status...")
@@ -56,12 +58,11 @@ def deactivate_user_subscription(user_id: str):
         print(f"❌ Error deactivating subscriptions: {e}")
         return False
 
-def check_user_profile(user_id: str):
-    """Check user profile information"""
-    supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
-    
+def check_user_profile(client: Client, user_id: str) -> None:
+    """Check user profile information."""
     print(f"\n🔍 Checking user profile for: {user_id}")
     
+    supabase = client
     try:
         response = supabase.table('profiles').select('*').eq('id', user_id).execute()
         
@@ -87,11 +88,17 @@ def main():
     print(f"Target User ID: {user_id}")
     print("=" * 50)
     
+    try:
+        supabase = get_supabase_client()
+    except SupabaseConfigError as exc:
+        print(f"❌ {exc}")
+        sys.exit(1)
+    
     # Check user profile first
-    check_user_profile(user_id)
+    check_user_profile(supabase, user_id)
     
     # Deactivate subscriptions
-    success = deactivate_user_subscription(user_id)
+    success = deactivate_user_subscription(supabase, user_id)
     
     if success:
         print(f"\n✅ SUCCESS: User {user_id} subscriptions have been deactivated")

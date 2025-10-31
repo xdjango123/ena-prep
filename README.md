@@ -48,10 +48,10 @@ npm install
 ```
 
 3. **Configuration Supabase**
-Créer un fichier `.env.local` à la racine du projet :
+Copier le fichier `.env.example` vers `.env.local` (ou `.env`) à la racine du projet puis le compléter :
 ```env
-VITE_SUPABASE_URL=https://ohngxnhnbwnystzkqzwy.supabase.co
-VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9obmd4bmhuYndueXN0emtxend5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE4NTc2MzcsImV4cCI6MjA2NzQzMzYzN30.Epn0NnYiDRQh9NM3XRbe5j3YH6fuvQfX-UivRuQ8Sbk
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
 4. **Lancer le serveur de développement**

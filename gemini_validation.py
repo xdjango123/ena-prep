@@ -11,10 +11,23 @@ import random
 from typing import Dict, List, Any, Optional
 import google.generativeai as genai
 
+try:  # Automatically load a local .env when python-dotenv is present.
+    from dotenv import load_dotenv  # type: ignore
+except ImportError:  # pragma: no cover
+    load_dotenv = None
+else:
+    load_dotenv()
+
+ENV_GEMINI_KEY = "GEMINI_API_KEY"
+
 class GeminiValidator:
     def __init__(self):
-        # Initialize Gemini - API key embedded
-        gemini_api_key = "AIzaSyDRckxzlghuQ2o-FD-LbM_CMkdOJM7WWhY"
+        # Initialize Gemini with credentials from the environment
+        gemini_api_key = os.getenv(ENV_GEMINI_KEY)
+        if not gemini_api_key:
+            print(f"❌ Missing {ENV_GEMINI_KEY}. Set it before running this script.")
+            sys.exit(1)
+
         try:
             genai.configure(api_key=gemini_api_key)
             self.model = genai.GenerativeModel('gemini-2.5-flash')
