@@ -5,7 +5,7 @@
 Your OpenAI API key was exposed in git history. **You must revoke it immediately:**
 
 1. Go to: https://platform.openai.com/api-keys
-2. Find the key starting with `sk-proj-t1-BZ61FvDFW0jwv68DJuaHUh6F1E...`
+2. Find the exposed API key (look for keys that match the pattern in your git history)
 3. Click "Revoke" or delete it
 4. Generate a new key and update your `.env` file
 
