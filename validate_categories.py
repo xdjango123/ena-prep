@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Identify questions categorized as CG that look like ANG."""
+"""Identify ANG/CG questions whose language does not match their category."""
 
 from __future__ import annotations
 
@@ -8,9 +8,14 @@ from pathlib import Path
 import os
 from typing import Dict, List
 
-from question_audit.db import dump_json, fetch_questions, get_supabase_client
+from question_audit.db import (
+    SupabaseConfigError,
+    dump_json,
+    fetch_questions,
+    get_supabase_client,
+)
 from question_audit.language import detect_language_scores
-from question_audit.logging_utils import info
+from question_audit.logging_utils import info, warn
 from question_audit.text_utils import flatten_options, preview
 
 
@@ -37,6 +42,11 @@ def parse_args() -> argparse.Namespace:
         default="diagnostics_output",
         help="Directory for JSON reports (default: diagnostics_output)",
     )
+    parser.add_argument(
+        "--output-prefix",
+        default=None,
+        help="Prefix for generated JSON files (default: derived from categories)",
+    )
     return parser.parse_args()
 
 
@@ -47,13 +57,24 @@ def english_confidence(text: str) -> float:
     return 0.0
 
 
+def french_confidence(text: str) -> float:
+    for lang in detect_language_scores(text):
+        if lang.lang == "fr":
+            return lang.prob
+    return 0.0
+
+
 def main() -> None:
     args = parse_args()
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
     info("Connecting to Supabase...")
-    client = get_supabase_client()
+    try:
+        client = get_supabase_client()
+    except SupabaseConfigError as exc:
+        warn(f"Supabase configuration error: {exc}")
+        return
 
     info(f"Fetching questions in category {args.source_category}")
     rows = fetch_questions(
@@ -88,14 +109,26 @@ def main() -> None:
                 ),
             ]
         )
-        confidence = english_confidence(combined_text)
-        if confidence >= args.threshold:
+        eng_conf = english_confidence(combined_text)
+        fr_conf = french_confidence(combined_text)
+        target = args.suggested_category.upper()
+
+        if target == "CG":
+            meets_threshold = fr_conf >= args.threshold
+            primary_conf = fr_conf
+        else:
+            meets_threshold = eng_conf >= args.threshold
+            primary_conf = eng_conf
+
+        if meets_threshold:
             flagged.append(
                 {
                     "question_id": row["id"],
                     "current_category": row.get("category"),
                     "suggested_category": args.suggested_category,
-                    "confidence": round(confidence, 4),
+                    "confidence": round(primary_conf, 4),
+                    "english_confidence": round(eng_conf, 4),
+                    "french_confidence": round(fr_conf, 4),
                     "question_preview": preview(row.get("question_text", "")),
                     "exam_type": row.get("exam_type"),
                     "difficulty": row.get("difficulty"),
@@ -103,13 +136,20 @@ def main() -> None:
                 }
             )
 
-    dump_json(os.fspath(output_dir / "miscategorized_questions.json"), flagged)
+    output_prefix = (
+        args.output_prefix
+        or f"miscategorized_{args.source_category.lower()}_to_{args.suggested_category.lower()}"
+    )
+    flagged_path = output_dir / f"{output_prefix}_questions.json"
+    summary_path = output_dir / f"{output_prefix}_summary.json"
+
+    dump_json(os.fspath(flagged_path), flagged)
     summary = {
         "reviewed": len(rows),
         "flagged": len(flagged),
     }
-    dump_json(os.fspath(output_dir / "miscategorized_questions_summary.json"), summary)
-    info("Category validation complete.")
+    dump_json(os.fspath(summary_path), summary)
+    info(f"Category validation complete. Results saved to {flagged_path} and {summary_path}.")
 
 
 if __name__ == "__main__":
