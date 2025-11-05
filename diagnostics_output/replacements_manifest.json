@@ -1,6 +1,6 @@
 {
   "created_at": "2025-11-05T18:38:47.560993+00:00",
-  "updated_at": "2025-11-05T18:40:18.196489+00:00",
+  "updated_at": "2025-11-05T21:41:32.790329+00:00",
   "questions": [
     {
       "question_id": "d20ae96c-758a-4bcf-a7d3-0075067443f7",
@@ -50,34 +50,60 @@
       "ai_review": {
         "status": "ok",
         "should_flag": true,
-        "reason": "La question est acceptable en termes de grammaire anglaise et de justification de la réponse correcte. Cependant, l'ENA est une école d'administration publique en Côte d'Ivoire. Une question d'anglais, bien que possible, devrait être justifiée par sa pertinence pour les compétences attendues d'un futur administrateur. L'absence de contexte ou de lien clair avec les besoins de l'administration publique ivoirienne rend la question discutable et justifie son remplacement par une question plus pertinente ou contextualisée. De plus, la catégorie 'ANG' avec une 'probabilité anglaise insuffisante' suggère un manque de pertinence contextuelle.",
+        "reason": "La question est acceptable en termes de grammaire anglaise et d'explication. Cependant, l'ENA Côte d'Ivoire est une institution francophone. Une question d'anglais dans un examen principal semble inappropriée, d'où le 'category_mismatch'. Il faudrait soit la supprimer, soit la déplacer dans une section spécifiquement dédiée à l'anglais (si une telle section existe et est pertinente pour l'examen).",
         "raw": {
           "should_flag": true,
-          "reason": "La question est acceptable en termes de grammaire anglaise et de justification de la réponse correcte. Cependant, l'ENA est une école d'administration publique en Côte d'Ivoire. Une question d'anglais, bien que possible, devrait être justifiée par sa pertinence pour les compétences attendues d'un futur administrateur. L'absence de contexte ou de lien clair avec les besoins de l'administration publique ivoirienne rend la question discutable et justifie son remplacement par une question plus pertinente ou contextualisée. De plus, la catégorie 'ANG' avec une 'probabilité anglaise insuffisante' suggère un manque de pertinence contextuelle."
+          "reason": "La question est acceptable en termes de grammaire anglaise et d'explication. Cependant, l'ENA Côte d'Ivoire est une institution francophone. Une question d'anglais dans un examen principal semble inappropriée, d'où le 'category_mismatch'. Il faudrait soit la supprimer, soit la déplacer dans une section spécifiquement dédiée à l'anglais (si une telle section existe et est pertinente pour l'examen)."
         },
         "label": "confirmed"
       },
       "generation": {
-        "status": "failed",
-        "attempts": [
-          {
-            "attempt": 1,
-            "phase": "language",
-            "error": "English probability too low (en=0.14)"
+        "status": "success",
+        "attempts": [],
+        "generated_entry": {
+          "question_id": "d20ae96c-758a-4bcf-a7d3-0075067443f7",
+          "exam_type": "CS",
+          "category": "ANG",
+          "original_category": "ANG",
+          "test_type": "examen_blanc",
+          "sub_category": "English Language Skills",
+          "reasons": [
+            "full_scan",
+            "category_mismatch"
+          ],
+          "recommended_category": "ANG",
+          "notes": [
+            {
+              "reason": "full_scan",
+              "details": "Full catalogue scan executed (flagged-only disabled).",
+              "metadata": {
+                "source": "flag_summary"
+              }
+            },
+            {
+              "reason": "category_mismatch",
+              "details": "Catégorie ANG mais probabilité anglaise insuffisante.",
+              "metadata": {
+                "english_probability": 0.143,
+                "threshold": 0.6
+              }
+            }
+          ],
+          "generated": {
+            "question_text": "In a professional email, which of the following sentences correctly uses the phrasal verb 'to follow up'?",
+            "answers": {
+              "A": "I will follow up with you on the project details tomorrow.",
+              "B": "I will follow up the meeting with a detailed report.",
+              "C": "I will follow up to the client for more information.",
+              "D": "I will follow up about the meeting yesterday."
+            },
+            "correct_letter": "A",
+            "explanation": "La phrase A utilise correctement le phrasal verb 'to follow up' avec la préposition 'with', indiquant qu'une action de suivi sera effectuée avec une personne. Les autres options contiennent des erreurs de préposition ou de contexte : B manque de préposition, C utilise une préposition incorrecte, et D est ambiguë quant au temps du suivi.",
+            "difficulty": "HARD"
           },
-          {
-            "attempt": 2,
-            "phase": "language",
-            "error": "English probability too low (en=0.00)"
-          },
-          {
-            "attempt": 3,
-            "phase": "language",
-            "error": "English probability too low (en=0.00)"
-          }
-        ],
-        "generated_entry": null,
-        "took_seconds": 15.697
+          "token_signature": "in a professional email which of the following sentences correctly uses the phrasal verb to follow up"
+        },
+        "took_seconds": 5.867
       },
       "source": {
         "flag_summary": {
@@ -87,7 +113,7 @@
         },
         "question_preview": "I suggest...........a cab."
       },
-      "processed_at": "2025-11-05T18:39:05.744127+00:00"
+      "processed_at": "2025-11-05T21:29:36.075545+00:00"
     },
     {
       "question_id": "6564b8e9-9775-4628-b69b-bda93b7c8251",
@@ -377,26 +403,43 @@
         "label": "confirmed"
       },
       "generation": {
-        "status": "failed",
-        "attempts": [
-          {
-            "attempt": 1,
-            "phase": "language",
-            "error": "English probability too low (en=0.29)"
+        "status": "success",
+        "attempts": [],
+        "generated_entry": {
+          "question_id": "dace8aac-6a48-46e2-a526-83535ded53e5",
+          "exam_type": "CM",
+          "category": "ANG",
+          "original_category": "ANG",
+          "test_type": "practice_test",
+          "sub_category": "Sentence Structure",
+          "reasons": [
+            "full_scan"
+          ],
+          "recommended_category": "ANG",
+          "notes": [
+            {
+              "reason": "full_scan",
+              "details": "Full catalogue scan executed (flagged-only disabled).",
+              "metadata": {
+                "source": "flag_summary"
+              }
+            }
+          ],
+          "generated": {
+            "question_text": "In the context of a business meeting in Abidjan, which sentence correctly uses the future perfect tense?",
+            "answers": {
+              "A": "By the time the meeting starts, we will have reviewed the report.",
+              "B": "By the time the meeting starts, we will review the report.",
+              "C": "By the time the meeting starts, we are reviewing the report.",
+              "D": "By the time the meeting starts, we reviewed the report."
+            },
+            "correct_letter": "A",
+            "explanation": "La phrase correcte utilise le futur antérieur pour indiquer qu'une action sera terminée avant un moment futur spécifique. 'We will have reviewed' est la forme correcte pour exprimer qu'à l'heure du début de la réunion, le rapport aura déjà été examiné. Les autres options utilisent des temps verbaux incorrects pour cette structure temporelle.",
+            "difficulty": "HARD"
           },
-          {
-            "attempt": 2,
-            "phase": "language",
-            "error": "English probability too low (en=0.29)"
-          },
-          {
-            "attempt": 3,
-            "phase": "language",
-            "error": "English probability too low (en=0.29)"
-          }
-        ],
-        "generated_entry": null,
-        "took_seconds": 19.246
+          "token_signature": "in the context of a business meeting in abidjan which sentence correctly uses the future perfect tense"
+        },
+        "took_seconds": 6.391
       },
       "source": {
         "flag_summary": {
@@ -406,7 +449,7 @@
         },
         "question_preview": "Choose the sentence with correct structure and parallelism:"
       },
-      "processed_at": "2025-11-05T18:39:46.957847+00:00"
+      "processed_at": "2025-11-05T21:41:27.086026+00:00"
     },
     {
       "question_id": "0f0fe8db-4509-4a50-ba9a-05672d0f61cf",
@@ -644,6 +687,119 @@
         "question_preview": "Can you ..... me your pen for a moment?"
       },
       "processed_at": "2025-11-05T18:40:18.196416+00:00"
+    },
+    {
+      "question_id": "7d1d8b9e-7153-46ae-a2a7-52f27c9fae7f",
+      "exam_type": "CM",
+      "category": "ANG",
+      "test_type": "quiz_series",
+      "sub_category": "Grammar",
+      "difficulty": "EASY",
+      "heuristic_findings": [
+        {
+          "type": "full_scan",
+          "message": "Full catalogue scan executed (flagged-only disabled).",
+          "severity": "warning",
+          "metadata": {
+            "source": "flag_summary"
+          }
+        },
+        {
+          "type": "category_mismatch",
+          "message": "Catégorie ANG mais probabilité anglaise insuffisante.",
+          "severity": "warning",
+          "metadata": {
+            "english_probability": 0.0,
+            "threshold": 0.6
+          }
+        }
+      ],
+      "findings": [
+        {
+          "type": "full_scan",
+          "message": "Full catalogue scan executed (flagged-only disabled).",
+          "severity": "warning",
+          "metadata": {
+            "source": "flag_summary"
+          }
+        },
+        {
+          "type": "category_mismatch",
+          "message": "Catégorie ANG mais probabilité anglaise insuffisante.",
+          "severity": "warning",
+          "metadata": {
+            "english_probability": 0.0,
+            "threshold": 0.6
+          }
+        }
+      ],
+      "ai_review": {
+        "status": "ok",
+        "should_flag": true,
+        "reason": "La question est valide en termes de grammaire anglaise et de réponse correcte. Cependant, l'examen étant destiné à l'ENA en Côte d'Ivoire, une question d'anglais est inappropriée. La catégorie 'ANG' est donc incorrecte et la question doit être remplacée par une question pertinente pour le concours de l'ENA.",
+        "raw": {
+          "should_flag": true,
+          "reason": "La question est valide en termes de grammaire anglaise et de réponse correcte. Cependant, l'examen étant destiné à l'ENA en Côte d'Ivoire, une question d'anglais est inappropriée. La catégorie 'ANG' est donc incorrecte et la question doit être remplacée par une question pertinente pour le concours de l'ENA."
+        },
+        "label": "confirmed"
+      },
+      "generation": {
+        "status": "success",
+        "attempts": [],
+        "generated_entry": {
+          "question_id": "7d1d8b9e-7153-46ae-a2a7-52f27c9fae7f",
+          "exam_type": "CM",
+          "category": "ANG",
+          "original_category": "ANG",
+          "test_type": "quiz_series",
+          "sub_category": "Grammar",
+          "reasons": [
+            "full_scan",
+            "category_mismatch"
+          ],
+          "recommended_category": "ANG",
+          "notes": [
+            {
+              "reason": "full_scan",
+              "details": "Full catalogue scan executed (flagged-only disabled).",
+              "metadata": {
+                "source": "flag_summary"
+              }
+            },
+            {
+              "reason": "category_mismatch",
+              "details": "Catégorie ANG mais probabilité anglaise insuffisante.",
+              "metadata": {
+                "english_probability": 0.0,
+                "threshold": 0.6
+              }
+            }
+          ],
+          "generated": {
+            "question_text": "In a professional email, which sentence correctly uses the future perfect tense?",
+            "answers": {
+              "A": "By the end of the week, I will have completed the report.",
+              "B": "By the end of the week, I will complete the report.",
+              "C": "By the end of the week, I complete the report.",
+              "D": "By the end of the week, I am completing the report."
+            },
+            "correct_letter": "A",
+            "explanation": "La phrase A utilise correctement le futur antérieur ('will have completed'), qui exprime une action qui sera terminée avant un moment précis dans le futur. Les autres options utilisent des temps verbaux incorrects pour cette structure temporelle : B utilise le futur simple, C le présent simple, et D le présent continu.",
+            "difficulty": "HARD"
+          },
+          "token_signature": "in a professional email which sentence correctly uses the future perfect tense"
+        },
+        "took_seconds": 4.283
+      },
+      "source": {
+        "flag_summary": {
+          "question_id": "7d1d8b9e-7153-46ae-a2a7-52f27c9fae7f",
+          "issue": "full_scan",
+          "details": "Full catalogue scan executed (flagged-only disabled)."
+        },
+        "question_preview": "Fatou is very ..... mathematics."
+      },
+      "processed_at": "2025-11-05T21:41:32.790280+00:00"
     }
   ]
 }

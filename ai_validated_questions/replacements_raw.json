@@ -178,5 +178,125 @@
       "difficulty": "HARD"
     },
     "token_signature": "in a professional email which word best completes the sentence i would appreciate it if you could the report by friday"
+  },
+  {
+    "question_id": "d20ae96c-758a-4bcf-a7d3-0075067443f7",
+    "exam_type": "CS",
+    "category": "ANG",
+    "original_category": "ANG",
+    "test_type": "examen_blanc",
+    "sub_category": "English Language Skills",
+    "reasons": [
+      "full_scan",
+      "category_mismatch"
+    ],
+    "recommended_category": "ANG",
+    "notes": [
+      {
+        "reason": "full_scan",
+        "details": "Full catalogue scan executed (flagged-only disabled).",
+        "metadata": {
+          "source": "flag_summary"
+        }
+      },
+      {
+        "reason": "category_mismatch",
+        "details": "Catégorie ANG mais probabilité anglaise insuffisante.",
+        "metadata": {
+          "english_probability": 0.143,
+          "threshold": 0.6
+        }
+      }
+    ],
+    "generated": {
+      "question_text": "In a professional email, which of the following sentences correctly uses the phrasal verb 'to follow up'?",
+      "answers": {
+        "A": "I will follow up with you on the project details tomorrow.",
+        "B": "I will follow up the meeting with a detailed report.",
+        "C": "I will follow up to the client for more information.",
+        "D": "I will follow up about the meeting yesterday."
+      },
+      "correct_letter": "A",
+      "explanation": "La phrase A utilise correctement le phrasal verb 'to follow up' avec la préposition 'with', indiquant qu'une action de suivi sera effectuée avec une personne. Les autres options contiennent des erreurs de préposition ou de contexte : B manque de préposition, C utilise une préposition incorrecte, et D est ambiguë quant au temps du suivi.",
+      "difficulty": "HARD"
+    },
+    "token_signature": "in a professional email which of the following sentences correctly uses the phrasal verb to follow up"
+  },
+  {
+    "question_id": "dace8aac-6a48-46e2-a526-83535ded53e5",
+    "exam_type": "CM",
+    "category": "ANG",
+    "original_category": "ANG",
+    "test_type": "practice_test",
+    "sub_category": "Sentence Structure",
+    "reasons": [
+      "full_scan"
+    ],
+    "recommended_category": "ANG",
+    "notes": [
+      {
+        "reason": "full_scan",
+        "details": "Full catalogue scan executed (flagged-only disabled).",
+        "metadata": {
+          "source": "flag_summary"
+        }
+      }
+    ],
+    "generated": {
+      "question_text": "In the context of a business meeting in Abidjan, which sentence correctly uses the future perfect tense?",
+      "answers": {
+        "A": "By the time the meeting starts, we will have reviewed the report.",
+        "B": "By the time the meeting starts, we will review the report.",
+        "C": "By the time the meeting starts, we are reviewing the report.",
+        "D": "By the time the meeting starts, we reviewed the report."
+      },
+      "correct_letter": "A",
+      "explanation": "La phrase correcte utilise le futur antérieur pour indiquer qu'une action sera terminée avant un moment futur spécifique. 'We will have reviewed' est la forme correcte pour exprimer qu'à l'heure du début de la réunion, le rapport aura déjà été examiné. Les autres options utilisent des temps verbaux incorrects pour cette structure temporelle.",
+      "difficulty": "HARD"
+    },
+    "token_signature": "in the context of a business meeting in abidjan which sentence correctly uses the future perfect tense"
+  },
+  {
+    "question_id": "7d1d8b9e-7153-46ae-a2a7-52f27c9fae7f",
+    "exam_type": "CM",
+    "category": "ANG",
+    "original_category": "ANG",
+    "test_type": "quiz_series",
+    "sub_category": "Grammar",
+    "reasons": [
+      "full_scan",
+      "category_mismatch"
+    ],
+    "recommended_category": "ANG",
+    "notes": [
+      {
+        "reason": "full_scan",
+        "details": "Full catalogue scan executed (flagged-only disabled).",
+        "metadata": {
+          "source": "flag_summary"
+        }
+      },
+      {
+        "reason": "category_mismatch",
+        "details": "Catégorie ANG mais probabilité anglaise insuffisante.",
+        "metadata": {
+          "english_probability": 0.0,
+          "threshold": 0.6
+        }
+      }
+    ],
+    "generated": {
+      "question_text": "In a professional email, which sentence correctly uses the future perfect tense?",
+      "answers": {
+        "A": "By the end of the week, I will have completed the report.",
+        "B": "By the end of the week, I will complete the report.",
+        "C": "By the end of the week, I complete the report.",
+        "D": "By the end of the week, I am completing the report."
+      },
+      "correct_letter": "A",
+      "explanation": "La phrase A utilise correctement le futur antérieur ('will have completed'), qui exprime une action qui sera terminée avant un moment précis dans le futur. Les autres options utilisent des temps verbaux incorrects pour cette structure temporelle : B utilise le futur simple, C le présent simple, et D le présent continu.",
+      "difficulty": "HARD"
+    },
+    "token_signature": "in a professional email which sentence correctly uses the future perfect tense"
   }
 ]

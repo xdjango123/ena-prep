@@ -733,6 +733,7 @@ def main() -> None:
                 generation_status="success",
                 attempts=0,
                 failure_reason=None,
+                review_label="skipped",
             )
             continue
 
