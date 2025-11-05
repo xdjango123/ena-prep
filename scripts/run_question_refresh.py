@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
-"""Orchestrate the question refresh pipeline.
+"""Orchestrate the streaming question refresh pipeline.
 
 Steps performed:
-1. collect_replacement_candidates.py     (always run first)
-2. generate_replacements.py              (optionally with --limit/--overwrite)
-3. process_generated_questions.py        (dry-run + optional insert/delete)
+1. collect_replacement_candidates.py (modular audit + inline generation)
+2. process_generated_questions.py    (dry-run + optional insert/delete)
 
-The script assumes all environment variables (Supabase, OpenAI, Gemini)
-are already exported.
+All required environment variables (Supabase, OpenAI, Gemini) must already
+be exported before running this script.
 """
 
 from __future__ import annotations
@@ -39,14 +38,9 @@ def run_step(command: List[str], description: str) -> None:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "--skip-collect",
+        "--skip-audit",
         action="store_true",
         help="Skip collect_replacement_candidates.py",
-    )
-    parser.add_argument(
-        "--skip-generate",
-        action="store_true",
-        help="Skip generate_replacements.py",
     )
     parser.add_argument(
         "--skip-process",
@@ -54,14 +48,52 @@ def parse_args() -> argparse.Namespace:
         help="Skip process_generated_questions.py",
     )
     parser.add_argument(
-        "--generation-limit",
+        "--audit-limit",
         type=int,
-        help="Limit passed to generate_replacements.py (default: all)",
+        help="Forwarded to collect_replacement_candidates.py as --limit",
     )
     parser.add_argument(
-        "--generation-overwrite",
+        "--audit-input",
+        help="Forwarded to collect_replacement_candidates.py as --input",
+    )
+    parser.add_argument(
+        "--audit-flagged-only",
         action="store_true",
-        help="Pass --overwrite to generate_replacements.py",
+        help="Process only IDs from the audit input (default: scan full catalogue).",
+    )
+    parser.add_argument(
+        "--audit-gemini-model",
+        help="Override the Gemini model used for rule confirmation.",
+    )
+    parser.add_argument(
+        "--audit-resume",
+        action="store_true",
+        help="Forwarded to collect_replacement_candidates.py as --resume",
+    )
+    parser.add_argument(
+        "--audit-dry-run-generation",
+        action="store_true",
+        help="Forwarded to collect_replacement_candidates.py as --dry-run-generation",
+    )
+    parser.add_argument(
+        "--audit-max-retries",
+        type=int,
+        help="Forwarded to collect_replacement_candidates.py as --max-retries",
+    )
+    parser.add_argument(
+        "--audit-sleep",
+        type=float,
+        help="Forwarded to collect_replacement_candidates.py as --sleep",
+    )
+    parser.add_argument(
+        "--audit-english-threshold",
+        type=float,
+        help="Forwarded to collect_replacement_candidates.py as --english-threshold",
+    )
+    parser.add_argument(
+        "--audit-french-threshold",
+        type=float,
+        help="Forwarded to collect_replacement_candidates.py as --french-threshold",
     )
     parser.add_argument(
         "--dry-run",
@@ -79,30 +111,48 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
 
-    if not args.skip_collect:
+    if not args.skip_audit:
+        audit_cmd = [sys.executable, "scripts/collect_replacement_candidates.py"]
+        if args.audit_limit is not None:
+            audit_cmd.extend(["--limit", str(args.audit_limit)])
+        if args.audit_input:
+            audit_cmd.extend(["--input", args.audit_input])
+        if args.audit_resume:
+            audit_cmd.append("--resume")
+        if args.audit_dry_run_generation:
+            audit_cmd.append("--dry-run-generation")
+        if args.audit_flagged_only:
+            audit_cmd.append("--flagged-only")
+        if args.audit_gemini_model:
+            audit_cmd.extend(["--audit-gemini-model", args.audit_gemini_model])
+        if args.audit_max_retries is not None:
+            audit_cmd.extend(["--max-retries", str(args.audit_max_retries)])
+        if args.audit_sleep is not None:
+            audit_cmd.extend(["--sleep", str(args.audit_sleep)])
+        if args.audit_english_threshold is not None:
+            audit_cmd.extend(
+                ["--english-threshold", str(args.audit_english_threshold)]
+            )
+        if args.audit_french_threshold is not None:
+            audit_cmd.extend(
+                ["--french-threshold", str(args.audit_french_threshold)]
+            )
         run_step(
-            [sys.executable, "scripts/collect_replacement_candidates.py"],
-            "collect_replacement_candidates.py",
+            audit_cmd,
+            "collect_replacement_candidates.py (audit + generation)",
         )
     else:
         print(">>> Skipping collect_replacement_candidates.py")
 
-    if not args.skip_generate:
-        cmd = [sys.executable, "scripts/generate_replacements.py"]
-        if args.generation_limit is not None:
-            cmd.extend(["--limit", str(args.generation_limit)])
-        if args.generation_overwrite:
-            cmd.append("--overwrite")
-        run_step(cmd, "generate_replacements.py")
-    else:
-        print(">>> Skipping generate_replacements.py")
-
     if not args.skip_process:
         replacements_path = PROJECT_ROOT / "ai_validated_questions/replacements_raw.json"
         if not replacements_path.exists():
-            raise FileNotFoundError(
-                f"{replacements_path} not found. Run generate_replacements.py first."
+            print(
+                ">>> No replacements found. Either no questions were flagged or generation was in dry-run mode."
             )
+            print(">>> Skipping process_generated_questions.py")
+            print("\nPipeline complete.")
+            return
 
         dry_cmd = [
             sys.executable,

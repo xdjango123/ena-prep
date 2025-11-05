@@ -1,0 +1,37 @@
+{
+  "created_at": "2025-11-05T18:38:47.560157+00:00",
+  "updated_at": "2025-11-05T18:40:18.203772+00:00",
+  "processed": 7,
+  "flagged": 6,
+  "issue_counts": {
+    "full_scan": 6,
+    "category_mismatch": 4,
+    "duplicate_question": 1
+  },
+  "generation": {
+    "success": 4,
+    "failed": 2,
+    "skipped": 1
+  },
+  "total_attempts": 12,
+  "total_retries": 6,
+  "failures": [
+    {
+      "question_id": "d20ae96c-758a-4bcf-a7d3-0075067443f7",
+      "reason": "English probability too low (en=0.14); English probability too low (en=0.00); English probability too low (en=0.00)",
+      "timestamp": "2025-11-05T18:39:05.746736+00:00"
+    },
+    {
+      "question_id": "dace8aac-6a48-46e2-a526-83535ded53e5",
+      "reason": "English probability too low (en=0.29); English probability too low (en=0.29); English probability too low (en=0.29)",
+      "timestamp": "2025-11-05T18:39:46.963453+00:00"
+    }
+  ],
+  "last_question_id": "33b5c4bf-1f26-4b17-9cdb-2ce1ef74abdf",
+  "ai_review": {
+    "confirmed": 6,
+    "cleared": 1,
+    "skipped": 0,
+    "error": 0
+  }
+}

@@ -1,0 +1,649 @@
+{
+  "created_at": "2025-11-05T18:38:47.560993+00:00",
+  "updated_at": "2025-11-05T18:40:18.196489+00:00",
+  "questions": [
+    {
+      "question_id": "d20ae96c-758a-4bcf-a7d3-0075067443f7",
+      "exam_type": "CS",
+      "category": "ANG",
+      "test_type": "examen_blanc",
+      "sub_category": "English Language Skills",
+      "difficulty": "MED",
+      "heuristic_findings": [
+        {
+          "type": "full_scan",
+          "message": "Full catalogue scan executed (flagged-only disabled).",
+          "severity": "warning",
+          "metadata": {
+            "source": "flag_summary"
+          }
+        },
+        {
+          "type": "category_mismatch",
+          "message": "Catégorie ANG mais probabilité anglaise insuffisante.",
+          "severity": "warning",
+          "metadata": {
+            "english_probability": 0.143,
+            "threshold": 0.6
+          }
+        }
+      ],
+      "findings": [
+        {
+          "type": "full_scan",
+          "message": "Full catalogue scan executed (flagged-only disabled).",
+          "severity": "warning",
+          "metadata": {
+            "source": "flag_summary"
+          }
+        },
+        {
+          "type": "category_mismatch",
+          "message": "Catégorie ANG mais probabilité anglaise insuffisante.",
+          "severity": "warning",
+          "metadata": {
+            "english_probability": 0.143,
+            "threshold": 0.6
+          }
+        }
+      ],
+      "ai_review": {
+        "status": "ok",
+        "should_flag": true,
+        "reason": "La question est acceptable en termes de grammaire anglaise et de justification de la réponse correcte. Cependant, l'ENA est une école d'administration publique en Côte d'Ivoire. Une question d'anglais, bien que possible, devrait être justifiée par sa pertinence pour les compétences attendues d'un futur administrateur. L'absence de contexte ou de lien clair avec les besoins de l'administration publique ivoirienne rend la question discutable et justifie son remplacement par une question plus pertinente ou contextualisée. De plus, la catégorie 'ANG' avec une 'probabilité anglaise insuffisante' suggère un manque de pertinence contextuelle.",
+        "raw": {
+          "should_flag": true,
+          "reason": "La question est acceptable en termes de grammaire anglaise et de justification de la réponse correcte. Cependant, l'ENA est une école d'administration publique en Côte d'Ivoire. Une question d'anglais, bien que possible, devrait être justifiée par sa pertinence pour les compétences attendues d'un futur administrateur. L'absence de contexte ou de lien clair avec les besoins de l'administration publique ivoirienne rend la question discutable et justifie son remplacement par une question plus pertinente ou contextualisée. De plus, la catégorie 'ANG' avec une 'probabilité anglaise insuffisante' suggère un manque de pertinence contextuelle."
+        },
+        "label": "confirmed"
+      },
+      "generation": {
+        "status": "failed",
+        "attempts": [
+          {
+            "attempt": 1,
+            "phase": "language",
+            "error": "English probability too low (en=0.14)"
+          },
+          {
+            "attempt": 2,
+            "phase": "language",
+            "error": "English probability too low (en=0.00)"
+          },
+          {
+            "attempt": 3,
+            "phase": "language",
+            "error": "English probability too low (en=0.00)"
+          }
+        ],
+        "generated_entry": null,
+        "took_seconds": 15.697
+      },
+      "source": {
+        "flag_summary": {
+          "question_id": "d20ae96c-758a-4bcf-a7d3-0075067443f7",
+          "issue": "full_scan",
+          "details": "Full catalogue scan executed (flagged-only disabled)."
+        },
+        "question_preview": "I suggest...........a cab."
+      },
+      "processed_at": "2025-11-05T18:39:05.744127+00:00"
+    },
+    {
+      "question_id": "6564b8e9-9775-4628-b69b-bda93b7c8251",
+      "exam_type": "CM",
+      "category": "CG",
+      "test_type": "practice_test",
+      "sub_category": "Aptitude verbale",
+      "difficulty": "MED",
+      "heuristic_findings": [
+        {
+          "type": "full_scan",
+          "message": "Full catalogue scan executed (flagged-only disabled).",
+          "severity": "warning",
+          "metadata": {
+            "source": "flag_summary"
+          }
+        },
+        {
+          "type": "duplicate_question",
+          "message": "Question en doublon détectée dans le catalogue.",
+          "severity": "warning",
+          "metadata": {
+            "match_count": 1,
+            "samples": [
+              {
+                "id": "22b0c018-fa9d-4b92-b1e6-f685cbb9e3c0",
+                "exam_type": "CM",
+                "category": "CG",
+                "preview": "Un de ces noms féminins n’existe pas. Lequel ?"
+              }
+            ],
+            "signature": "un de ces noms feminins n existe pas lequel"
+          }
+        }
+      ],
+      "findings": [
+        {
+          "type": "full_scan",
+          "message": "Full catalogue scan executed (flagged-only disabled).",
+          "severity": "warning",
+          "metadata": {
+            "source": "flag_summary"
+          }
+        },
+        {
+          "type": "duplicate_question",
+          "message": "Question en doublon détectée dans le catalogue.",
+          "severity": "warning",
+          "metadata": {
+            "match_count": 1,
+            "samples": [
+              {
+                "id": "22b0c018-fa9d-4b92-b1e6-f685cbb9e3c0",
+                "exam_type": "CM",
+                "category": "CG",
+                "preview": "Un de ces noms féminins n’existe pas. Lequel ?"
+              }
+            ],
+            "signature": "un de ces noms feminins n existe pas lequel"
+          }
+        }
+      ],
+      "ai_review": {
+        "status": "ok",
+        "should_flag": true,
+        "reason": "La question est mal formulée et potentiellement trompeuse. Bien que \"bandit\" soit principalement masculin, il peut être utilisé (rarement) pour désigner une femme bandit. L'absence d'une quatrième option (D) est également un problème. De plus, la détection d'un doublon indique qu'elle doit être revue ou supprimée.",
+        "raw": {
+          "should_flag": true,
+          "reason": "La question est mal formulée et potentiellement trompeuse. Bien que \"bandit\" soit principalement masculin, il peut être utilisé (rarement) pour désigner une femme bandit. L'absence d'une quatrième option (D) est également un problème. De plus, la détection d'un doublon indique qu'elle doit être revue ou supprimée."
+        },
+        "label": "confirmed"
+      },
+      "generation": {
+        "status": "success",
+        "attempts": [],
+        "generated_entry": {
+          "question_id": "6564b8e9-9775-4628-b69b-bda93b7c8251",
+          "exam_type": "CM",
+          "category": "CG",
+          "original_category": "CG",
+          "test_type": "practice_test",
+          "sub_category": "Aptitude verbale",
+          "reasons": [
+            "full_scan",
+            "duplicate_question"
+          ],
+          "recommended_category": "CG",
+          "notes": [
+            {
+              "reason": "full_scan",
+              "details": "Full catalogue scan executed (flagged-only disabled).",
+              "metadata": {
+                "source": "flag_summary"
+              }
+            },
+            {
+              "reason": "duplicate_question",
+              "details": "Question en doublon détectée dans le catalogue.",
+              "metadata": {
+                "match_count": 1,
+                "samples": [
+                  {
+                    "id": "22b0c018-fa9d-4b92-b1e6-f685cbb9e3c0",
+                    "exam_type": "CM",
+                    "category": "CG",
+                    "preview": "Un de ces noms féminins n’existe pas. Lequel ?"
+                  }
+                ],
+                "signature": "un de ces noms feminins n existe pas lequel"
+              }
+            }
+          ],
+          "generated": {
+            "question_text": "Dans le contexte de la Côte d'Ivoire, quel terme décrit le mieux le processus par lequel une communauté locale s'organise pour gérer ses ressources naturelles de manière durable et équitable ?",
+            "answers": {
+              "A": "Autonomisation communautaire",
+              "B": "Gestion participative",
+              "C": "Décentralisation",
+              "D": "Planification stratégique"
+            },
+            "correct_letter": "B",
+            "explanation": "La 'gestion participative' est le terme qui décrit le mieux le processus par lequel une communauté locale s'organise pour gérer ses ressources naturelles de manière durable et équitable. Ce concept implique la participation active des membres de la communauté dans la prise de décisions concernant l'utilisation et la conservation des ressources. En Côte d'Ivoire, ce modèle est souvent encouragé pour assurer que les pratiques de gestion tiennent compte des besoins et des connaissances locales. Les autres options, bien qu'importantes, ne capturent pas spécifiquement cet aspect de participation collective et de gestion durable.",
+            "difficulty": "HARD"
+          },
+          "token_signature": "dans le contexte de la cote d ivoire quel terme decrit le mieux le processus par lequel une communaute locale s organise pour gerer ses ressources naturelles de maniere durable et equitable"
+        },
+        "took_seconds": 6.557
+      },
+      "source": {
+        "flag_summary": {
+          "question_id": "6564b8e9-9775-4628-b69b-bda93b7c8251",
+          "issue": "full_scan",
+          "details": "Full catalogue scan executed (flagged-only disabled)."
+        },
+        "question_preview": "Un de ces noms féminins n’existe pas. Lequel ?"
+      },
+      "processed_at": "2025-11-05T18:39:13.990977+00:00"
+    },
+    {
+      "question_id": "02003fcc-b1a0-4f54-8c85-3a353ef33c06",
+      "exam_type": "CM",
+      "category": "ANG",
+      "test_type": "quiz_series",
+      "sub_category": "Grammar",
+      "difficulty": "EASY",
+      "heuristic_findings": [
+        {
+          "type": "full_scan",
+          "message": "Full catalogue scan executed (flagged-only disabled).",
+          "severity": "warning",
+          "metadata": {
+            "source": "flag_summary"
+          }
+        },
+        {
+          "type": "category_mismatch",
+          "message": "Catégorie ANG mais probabilité anglaise insuffisante.",
+          "severity": "warning",
+          "metadata": {
+            "english_probability": 0.0,
+            "threshold": 0.6
+          }
+        }
+      ],
+      "findings": [
+        {
+          "type": "full_scan",
+          "message": "Full catalogue scan executed (flagged-only disabled).",
+          "severity": "warning",
+          "metadata": {
+            "source": "flag_summary"
+          }
+        },
+        {
+          "type": "category_mismatch",
+          "message": "Catégorie ANG mais probabilité anglaise insuffisante.",
+          "severity": "warning",
+          "metadata": {
+            "english_probability": 0.0,
+            "threshold": 0.6
+          }
+        }
+      ],
+      "ai_review": {
+        "status": "ok",
+        "should_flag": true,
+        "reason": "Bien que la question soit grammaticalement correcte et la bonne réponse identifiée, la catégorie 'ANG' (Anglais) est inappropriée pour un examen de l'ENA en Côte d'Ivoire. L'ENA est une école d'administration publique, et les questions d'anglais, si elles existent, devraient être contextualisées par rapport à l'administration publique ou aux relations internationales, et non être de simples questions de grammaire anglaise de base. La question devrait être remplacée par une question d'anglais plus pertinente pour le contexte de l'ENA ou supprimée si l'anglais n'est pas un domaine d'évaluation pertinent.",
+        "raw": {
+          "should_flag": true,
+          "reason": "Bien que la question soit grammaticalement correcte et la bonne réponse identifiée, la catégorie 'ANG' (Anglais) est inappropriée pour un examen de l'ENA en Côte d'Ivoire. L'ENA est une école d'administration publique, et les questions d'anglais, si elles existent, devraient être contextualisées par rapport à l'administration publique ou aux relations internationales, et non être de simples questions de grammaire anglaise de base. La question devrait être remplacée par une question d'anglais plus pertinente pour le contexte de l'ENA ou supprimée si l'anglais n'est pas un domaine d'évaluation pertinent."
+        },
+        "label": "confirmed"
+      },
+      "generation": {
+        "status": "success",
+        "attempts": [],
+        "generated_entry": {
+          "question_id": "02003fcc-b1a0-4f54-8c85-3a353ef33c06",
+          "exam_type": "CM",
+          "category": "ANG",
+          "original_category": "ANG",
+          "test_type": "quiz_series",
+          "sub_category": "Grammar",
+          "reasons": [
+            "full_scan",
+            "category_mismatch"
+          ],
+          "recommended_category": "ANG",
+          "notes": [
+            {
+              "reason": "full_scan",
+              "details": "Full catalogue scan executed (flagged-only disabled).",
+              "metadata": {
+                "source": "flag_summary"
+              }
+            },
+            {
+              "reason": "category_mismatch",
+              "details": "Catégorie ANG mais probabilité anglaise insuffisante.",
+              "metadata": {
+                "english_probability": 0.0,
+                "threshold": 0.6
+              }
+            }
+          ],
+          "generated": {
+            "question_text": "In the context of a business meeting, which sentence correctly uses the future perfect tense?",
+            "answers": {
+              "A": "By the time the meeting starts, we will have reviewed the report.",
+              "B": "By the time the meeting starts, we will review the report.",
+              "C": "By the time the meeting starts, we are reviewing the report.",
+              "D": "By the time the meeting starts, we reviewed the report."
+            },
+            "correct_letter": "A",
+            "explanation": "La phrase A utilise correctement le futur antérieur ('will have reviewed'), qui exprime une action qui sera terminée avant un moment futur spécifique. Les autres options utilisent des temps verbaux incorrects pour cette structure temporelle : B utilise le futur simple, C le présent continu, et D le passé simple.",
+            "difficulty": "HARD"
+          },
+          "token_signature": "in the context of a business meeting which sentence correctly uses the future perfect tense"
+        },
+        "took_seconds": 7.481
+      },
+      "source": {
+        "flag_summary": {
+          "question_id": "02003fcc-b1a0-4f54-8c85-3a353ef33c06",
+          "issue": "full_scan",
+          "details": "Full catalogue scan executed (flagged-only disabled)."
+        },
+        "question_preview": "What is the past participle of 'eat'?"
+      },
+      "processed_at": "2025-11-05T18:39:23.414850+00:00"
+    },
+    {
+      "question_id": "dace8aac-6a48-46e2-a526-83535ded53e5",
+      "exam_type": "CM",
+      "category": "ANG",
+      "test_type": "practice_test",
+      "sub_category": "Sentence Structure",
+      "difficulty": "HARD",
+      "heuristic_findings": [
+        {
+          "type": "full_scan",
+          "message": "Full catalogue scan executed (flagged-only disabled).",
+          "severity": "warning",
+          "metadata": {
+            "source": "flag_summary"
+          }
+        }
+      ],
+      "findings": [
+        {
+          "type": "full_scan",
+          "message": "Full catalogue scan executed (flagged-only disabled).",
+          "severity": "warning",
+          "metadata": {
+            "source": "flag_summary"
+          }
+        }
+      ],
+      "ai_review": {
+        "status": "ok",
+        "should_flag": true,
+        "reason": "La question est mal formulée car l'option D est vide. Cela rend la question invalide et ne permet pas d'évaluer correctement la compréhension du parallélisme et de la structure grammaticale. L'option D doit être remplacée par une phrase incorrecte mais plausible.",
+        "raw": {
+          "should_flag": true,
+          "reason": "La question est mal formulée car l'option D est vide. Cela rend la question invalide et ne permet pas d'évaluer correctement la compréhension du parallélisme et de la structure grammaticale. L'option D doit être remplacée par une phrase incorrecte mais plausible."
+        },
+        "label": "confirmed"
+      },
+      "generation": {
+        "status": "failed",
+        "attempts": [
+          {
+            "attempt": 1,
+            "phase": "language",
+            "error": "English probability too low (en=0.29)"
+          },
+          {
+            "attempt": 2,
+            "phase": "language",
+            "error": "English probability too low (en=0.29)"
+          },
+          {
+            "attempt": 3,
+            "phase": "language",
+            "error": "English probability too low (en=0.29)"
+          }
+        ],
+        "generated_entry": null,
+        "took_seconds": 19.246
+      },
+      "source": {
+        "flag_summary": {
+          "question_id": "dace8aac-6a48-46e2-a526-83535ded53e5",
+          "issue": "full_scan",
+          "details": "Full catalogue scan executed (flagged-only disabled)."
+        },
+        "question_preview": "Choose the sentence with correct structure and parallelism:"
+      },
+      "processed_at": "2025-11-05T18:39:46.957847+00:00"
+    },
+    {
+      "question_id": "0f0fe8db-4509-4a50-ba9a-05672d0f61cf",
+      "exam_type": "CM",
+      "category": "ANG",
+      "test_type": "quiz_series",
+      "sub_category": "Grammar",
+      "difficulty": "EASY",
+      "heuristic_findings": [
+        {
+          "type": "full_scan",
+          "message": "Full catalogue scan executed (flagged-only disabled).",
+          "severity": "warning",
+          "metadata": {
+            "source": "flag_summary"
+          }
+        },
+        {
+          "type": "category_mismatch",
+          "message": "Catégorie ANG mais probabilité anglaise insuffisante.",
+          "severity": "warning",
+          "metadata": {
+            "english_probability": 0.0,
+            "threshold": 0.6
+          }
+        }
+      ],
+      "findings": [
+        {
+          "type": "full_scan",
+          "message": "Full catalogue scan executed (flagged-only disabled).",
+          "severity": "warning",
+          "metadata": {
+            "source": "flag_summary"
+          }
+        },
+        {
+          "type": "category_mismatch",
+          "message": "Catégorie ANG mais probabilité anglaise insuffisante.",
+          "severity": "warning",
+          "metadata": {
+            "english_probability": 0.0,
+            "threshold": 0.6
+          }
+        }
+      ],
+      "ai_review": {
+        "status": "ok",
+        "should_flag": true,
+        "reason": "La question est correcte grammaticalement et l'explication est pertinente. Cependant, l'absence d'une quatrième option (D) est une erreur. De plus, bien que la question soit en anglais, la catégorie 'ANG' est signalée comme potentiellement incorrecte car le contexte de l'examen est l'ENA en Côte d'Ivoire. Il faudrait évaluer si l'anglais est une compétence testée directement ou si la question est un test de raisonnement logique utilisant l'anglais comme support. Si l'anglais n'est pas une compétence testée, la question devrait être reformulée en français ou la catégorie devrait être revue.",
+        "raw": {
+          "should_flag": true,
+          "reason": "La question est correcte grammaticalement et l'explication est pertinente. Cependant, l'absence d'une quatrième option (D) est une erreur. De plus, bien que la question soit en anglais, la catégorie 'ANG' est signalée comme potentiellement incorrecte car le contexte de l'examen est l'ENA en Côte d'Ivoire. Il faudrait évaluer si l'anglais est une compétence testée directement ou si la question est un test de raisonnement logique utilisant l'anglais comme support. Si l'anglais n'est pas une compétence testée, la question devrait être reformulée en français ou la catégorie devrait être revue."
+        },
+        "label": "confirmed"
+      },
+      "generation": {
+        "status": "success",
+        "attempts": [],
+        "generated_entry": {
+          "question_id": "0f0fe8db-4509-4a50-ba9a-05672d0f61cf",
+          "exam_type": "CM",
+          "category": "ANG",
+          "original_category": "ANG",
+          "test_type": "quiz_series",
+          "sub_category": "Grammar",
+          "reasons": [
+            "full_scan",
+            "category_mismatch"
+          ],
+          "recommended_category": "ANG",
+          "notes": [
+            {
+              "reason": "full_scan",
+              "details": "Full catalogue scan executed (flagged-only disabled).",
+              "metadata": {
+                "source": "flag_summary"
+              }
+            },
+            {
+              "reason": "category_mismatch",
+              "details": "Catégorie ANG mais probabilité anglaise insuffisante.",
+              "metadata": {
+                "english_probability": 0.0,
+                "threshold": 0.6
+              }
+            }
+          ],
+          "generated": {
+            "question_text": "In the context of a business meeting, which sentence correctly uses the future perfect tense?",
+            "answers": {
+              "A": "By the time the meeting starts, we will have reviewed the report.",
+              "B": "By the time the meeting starts, we will review the report.",
+              "C": "By the time the meeting starts, we are reviewing the report.",
+              "D": "By the time the meeting starts, we reviewed the report."
+            },
+            "correct_letter": "A",
+            "explanation": "La phrase correcte utilise le futur antérieur pour indiquer qu'une action sera terminée avant un moment futur spécifique. 'We will have reviewed' est la forme correcte pour exprimer cela. Les autres options utilisent des temps verbaux incorrects pour ce contexte : 'will review' (futur simple), 'are reviewing' (présent continu), et 'reviewed' (passé simple).",
+            "difficulty": "HARD"
+          },
+          "token_signature": "in the context of a business meeting which sentence correctly uses the future perfect tense"
+        },
+        "took_seconds": 6.734
+      },
+      "source": {
+        "flag_summary": {
+          "question_id": "0f0fe8db-4509-4a50-ba9a-05672d0f61cf",
+          "issue": "full_scan",
+          "details": "Full catalogue scan executed (flagged-only disabled)."
+        },
+        "question_preview": "I ..... in Bouaké for three years now."
+      },
+      "processed_at": "2025-11-05T18:39:55.866229+00:00"
+    },
+    {
+      "question_id": "33b5c4bf-1f26-4b17-9cdb-2ce1ef74abdf",
+      "exam_type": "CM",
+      "category": "ANG",
+      "test_type": "quiz_series",
+      "sub_category": "Vocabulary",
+      "difficulty": "EASY",
+      "heuristic_findings": [
+        {
+          "type": "full_scan",
+          "message": "Full catalogue scan executed (flagged-only disabled).",
+          "severity": "warning",
+          "metadata": {
+            "source": "flag_summary"
+          }
+        },
+        {
+          "type": "category_mismatch",
+          "message": "Catégorie ANG mais probabilité anglaise insuffisante.",
+          "severity": "warning",
+          "metadata": {
+            "english_probability": 0.0,
+            "threshold": 0.6
+          }
+        }
+      ],
+      "findings": [
+        {
+          "type": "full_scan",
+          "message": "Full catalogue scan executed (flagged-only disabled).",
+          "severity": "warning",
+          "metadata": {
+            "source": "flag_summary"
+          }
+        },
+        {
+          "type": "category_mismatch",
+          "message": "Catégorie ANG mais probabilité anglaise insuffisante.",
+          "severity": "warning",
+          "metadata": {
+            "english_probability": 0.0,
+            "threshold": 0.6
+          }
+        }
+      ],
+      "ai_review": {
+        "status": "ok",
+        "should_flag": true,
+        "reason": "La question est correcte grammaticalement et la réponse C est bien la bonne. Cependant, la catégorie 'ANG' (Anglais) est inappropriée car la question est en anglais. De plus, l'explication est en français, ce qui est incohérent avec la catégorie 'ANG'. Il faudrait soit changer la catégorie, soit traduire l'explication en anglais. Le 'category_mismatch' est donc justifié.",
+        "raw": {
+          "should_flag": true,
+          "reason": "La question est correcte grammaticalement et la réponse C est bien la bonne. Cependant, la catégorie 'ANG' (Anglais) est inappropriée car la question est en anglais. De plus, l'explication est en français, ce qui est incohérent avec la catégorie 'ANG'. Il faudrait soit changer la catégorie, soit traduire l'explication en anglais. Le 'category_mismatch' est donc justifié."
+        },
+        "label": "confirmed"
+      },
+      "generation": {
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "phase": "language",
+            "error": "English probability too low (en=0.00)"
+          },
+          {
+            "attempt": 2,
+            "phase": "language",
+            "error": "English probability too low (en=0.14)"
+          }
+        ],
+        "generated_entry": {
+          "question_id": "33b5c4bf-1f26-4b17-9cdb-2ce1ef74abdf",
+          "exam_type": "CM",
+          "category": "ANG",
+          "original_category": "ANG",
+          "test_type": "quiz_series",
+          "sub_category": "Vocabulary",
+          "reasons": [
+            "full_scan",
+            "category_mismatch"
+          ],
+          "recommended_category": "ANG",
+          "notes": [
+            {
+              "reason": "full_scan",
+              "details": "Full catalogue scan executed (flagged-only disabled).",
+              "metadata": {
+                "source": "flag_summary"
+              }
+            },
+            {
+              "reason": "category_mismatch",
+              "details": "Catégorie ANG mais probabilité anglaise insuffisante.",
+              "metadata": {
+                "english_probability": 0.0,
+                "threshold": 0.6
+              }
+            }
+          ],
+          "generated": {
+            "question_text": "In a professional email, which word best completes the sentence: 'I would appreciate it if you could ______ the report by Friday.'?",
+            "answers": {
+              "A": "submit",
+              "B": "send",
+              "C": "deliver",
+              "D": "forward"
+            },
+            "correct_letter": "A",
+            "explanation": "The verb 'submit' is the most appropriate in a professional context when referring to formally handing in a report. 'Send' and 'forward' are more general and less formal, while 'deliver' implies physical delivery, which is less common in a digital context.",
+            "difficulty": "HARD"
+          },
+          "token_signature": "in a professional email which word best completes the sentence i would appreciate it if you could the report by friday"
+        },
+        "took_seconds": 20.992
+      },
+      "source": {
+        "flag_summary": {
+          "question_id": "33b5c4bf-1f26-4b17-9cdb-2ce1ef74abdf",
+          "issue": "full_scan",
+          "details": "Full catalogue scan executed (flagged-only disabled)."
+        },
+        "question_preview": "Can you ..... me your pen for a moment?"
+      },
+      "processed_at": "2025-11-05T18:40:18.196416+00:00"
+    }
+  ]
+}

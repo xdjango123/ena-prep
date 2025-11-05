@@ -1,0 +1,182 @@
+[
+  {
+    "question_id": "6564b8e9-9775-4628-b69b-bda93b7c8251",
+    "exam_type": "CM",
+    "category": "CG",
+    "original_category": "CG",
+    "test_type": "practice_test",
+    "sub_category": "Aptitude verbale",
+    "reasons": [
+      "full_scan",
+      "duplicate_question"
+    ],
+    "recommended_category": "CG",
+    "notes": [
+      {
+        "reason": "full_scan",
+        "details": "Full catalogue scan executed (flagged-only disabled).",
+        "metadata": {
+          "source": "flag_summary"
+        }
+      },
+      {
+        "reason": "duplicate_question",
+        "details": "Question en doublon détectée dans le catalogue.",
+        "metadata": {
+          "match_count": 1,
+          "samples": [
+            {
+              "id": "22b0c018-fa9d-4b92-b1e6-f685cbb9e3c0",
+              "exam_type": "CM",
+              "category": "CG",
+              "preview": "Un de ces noms féminins n’existe pas. Lequel ?"
+            }
+          ],
+          "signature": "un de ces noms feminins n existe pas lequel"
+        }
+      }
+    ],
+    "generated": {
+      "question_text": "Dans le contexte de la Côte d'Ivoire, quel terme décrit le mieux le processus par lequel une communauté locale s'organise pour gérer ses ressources naturelles de manière durable et équitable ?",
+      "answers": {
+        "A": "Autonomisation communautaire",
+        "B": "Gestion participative",
+        "C": "Décentralisation",
+        "D": "Planification stratégique"
+      },
+      "correct_letter": "B",
+      "explanation": "La 'gestion participative' est le terme qui décrit le mieux le processus par lequel une communauté locale s'organise pour gérer ses ressources naturelles de manière durable et équitable. Ce concept implique la participation active des membres de la communauté dans la prise de décisions concernant l'utilisation et la conservation des ressources. En Côte d'Ivoire, ce modèle est souvent encouragé pour assurer que les pratiques de gestion tiennent compte des besoins et des connaissances locales. Les autres options, bien qu'importantes, ne capturent pas spécifiquement cet aspect de participation collective et de gestion durable.",
+      "difficulty": "HARD"
+    },
+    "token_signature": "dans le contexte de la cote d ivoire quel terme decrit le mieux le processus par lequel une communaute locale s organise pour gerer ses ressources naturelles de maniere durable et equitable"
+  },
+  {
+    "question_id": "02003fcc-b1a0-4f54-8c85-3a353ef33c06",
+    "exam_type": "CM",
+    "category": "ANG",
+    "original_category": "ANG",
+    "test_type": "quiz_series",
+    "sub_category": "Grammar",
+    "reasons": [
+      "full_scan",
+      "category_mismatch"
+    ],
+    "recommended_category": "ANG",
+    "notes": [
+      {
+        "reason": "full_scan",
+        "details": "Full catalogue scan executed (flagged-only disabled).",
+        "metadata": {
+          "source": "flag_summary"
+        }
+      },
+      {
+        "reason": "category_mismatch",
+        "details": "Catégorie ANG mais probabilité anglaise insuffisante.",
+        "metadata": {
+          "english_probability": 0.0,
+          "threshold": 0.6
+        }
+      }
+    ],
+    "generated": {
+      "question_text": "In the context of a business meeting, which sentence correctly uses the future perfect tense?",
+      "answers": {
+        "A": "By the time the meeting starts, we will have reviewed the report.",
+        "B": "By the time the meeting starts, we will review the report.",
+        "C": "By the time the meeting starts, we are reviewing the report.",
+        "D": "By the time the meeting starts, we reviewed the report."
+      },
+      "correct_letter": "A",
+      "explanation": "La phrase A utilise correctement le futur antérieur ('will have reviewed'), qui exprime une action qui sera terminée avant un moment futur spécifique. Les autres options utilisent des temps verbaux incorrects pour cette structure temporelle : B utilise le futur simple, C le présent continu, et D le passé simple.",
+      "difficulty": "HARD"
+    },
+    "token_signature": "in the context of a business meeting which sentence correctly uses the future perfect tense"
+  },
+  {
+    "question_id": "0f0fe8db-4509-4a50-ba9a-05672d0f61cf",
+    "exam_type": "CM",
+    "category": "ANG",
+    "original_category": "ANG",
+    "test_type": "quiz_series",
+    "sub_category": "Grammar",
+    "reasons": [
+      "full_scan",
+      "category_mismatch"
+    ],
+    "recommended_category": "ANG",
+    "notes": [
+      {
+        "reason": "full_scan",
+        "details": "Full catalogue scan executed (flagged-only disabled).",
+        "metadata": {
+          "source": "flag_summary"
+        }
+      },
+      {
+        "reason": "category_mismatch",
+        "details": "Catégorie ANG mais probabilité anglaise insuffisante.",
+        "metadata": {
+          "english_probability": 0.0,
+          "threshold": 0.6
+        }
+      }
+    ],
+    "generated": {
+      "question_text": "In the context of a business meeting, which sentence correctly uses the future perfect tense?",
+      "answers": {
+        "A": "By the time the meeting starts, we will have reviewed the report.",
+        "B": "By the time the meeting starts, we will review the report.",
+        "C": "By the time the meeting starts, we are reviewing the report.",
+        "D": "By the time the meeting starts, we reviewed the report."
+      },
+      "correct_letter": "A",
+      "explanation": "La phrase correcte utilise le futur antérieur pour indiquer qu'une action sera terminée avant un moment futur spécifique. 'We will have reviewed' est la forme correcte pour exprimer cela. Les autres options utilisent des temps verbaux incorrects pour ce contexte : 'will review' (futur simple), 'are reviewing' (présent continu), et 'reviewed' (passé simple).",
+      "difficulty": "HARD"
+    },
+    "token_signature": "in the context of a business meeting which sentence correctly uses the future perfect tense"
+  },
+  {
+    "question_id": "33b5c4bf-1f26-4b17-9cdb-2ce1ef74abdf",
+    "exam_type": "CM",
+    "category": "ANG",
+    "original_category": "ANG",
+    "test_type": "quiz_series",
+    "sub_category": "Vocabulary",
+    "reasons": [
+      "full_scan",
+      "category_mismatch"
+    ],
+    "recommended_category": "ANG",
+    "notes": [
+      {
+        "reason": "full_scan",
+        "details": "Full catalogue scan executed (flagged-only disabled).",
+        "metadata": {
+          "source": "flag_summary"
+        }
+      },
+      {
+        "reason": "category_mismatch",
+        "details": "Catégorie ANG mais probabilité anglaise insuffisante.",
+        "metadata": {
+          "english_probability": 0.0,
+          "threshold": 0.6
+        }
+      }
+    ],
+    "generated": {
+      "question_text": "In a professional email, which word best completes the sentence: 'I would appreciate it if you could ______ the report by Friday.'?",
+      "answers": {
+        "A": "submit",
+        "B": "send",
+        "C": "deliver",
+        "D": "forward"
+      },
+      "correct_letter": "A",
+      "explanation": "The verb 'submit' is the most appropriate in a professional context when referring to formally handing in a report. 'Send' and 'forward' are more general and less formal, while 'deliver' implies physical delivery, which is less common in a digital context.",
+      "difficulty": "HARD"
+    },
+    "token_signature": "in a professional email which word best completes the sentence i would appreciate it if you could the report by friday"
+  }
+]
