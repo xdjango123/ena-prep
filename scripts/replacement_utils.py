@@ -290,7 +290,7 @@ Contexte :
 
 Contraintes :
 1. Question originale, sans reprise de formulations existantes.
-2. Options numérotées A, B, C et D (D peut être null si seulement 3 options pertinentes).
+2. Fournis exactement trois options distinctes (A, B, C), adaptées au niveau HARD.
 3. Une seule bonne réponse, indiquée par la lettre correspondante.
 4. Explication claire, en français, justifiant la bonne réponse et montrant la difficulté.
 5. Ajuste le contenu au contexte ivoirien lorsqu'il est pertinent (surtout pour CG).
@@ -301,10 +301,9 @@ Réponds UNIQUEMENT avec un JSON du format :
   "answers": {{
     "A": "...",
     "B": "...",
-    "C": "...",
-    "D": "..." ou null
+    "C": "..."
   }},
-  "correct_letter": "A" | "B" | "C" | "D",
+  "correct_letter": "A" | "B" | "C",
   "explanation": "...",
   "difficulty": "HARD"
 }}
@@ -373,11 +372,16 @@ def generate_replacement_for_target(
             time.sleep(max(config.sleep_seconds, 0.0))
             continue
 
-        answers = candidate.get("answers") or {}
+        raw_answers = candidate.get("answers") or {}
+        answers = {
+            "A": raw_answers.get("A"),
+            "B": raw_answers.get("B"),
+            "C": raw_answers.get("C"),
+        }
         correct_letter = candidate.get("correct_letter")
         question_text = candidate.get("question_text")
         explanation = candidate.get("explanation")
-        if not isinstance(answers, dict) or correct_letter not in {"A", "B", "C", "D"}:
+        if correct_letter not in {"A", "B", "C"}:
             attempts.append(
                 {
                     "attempt": attempt + 1,
@@ -404,7 +408,6 @@ def generate_replacement_for_target(
             answers.get("A") or "",
             answers.get("B") or "",
             answers.get("C") or "",
-            answers.get("D") or "",
         ]
         joined = " ".join(part for part in text_parts if part)
         scores = {lang.lang: lang.prob for lang in detect_language_scores(joined)}
@@ -447,7 +450,6 @@ Options:
 A) {answers.get('A')}
 B) {answers.get('B')}
 C) {answers.get('C')}
-D) {answers.get('D')}
 Bonne réponse: {correct_letter}
 Explication: {explanation}
 
@@ -526,7 +528,6 @@ Réponds UNIQUEMENT avec du JSON:
                     "A": (answers.get("A") or "").strip(),
                     "B": (answers.get("B") or "").strip(),
                     "C": (answers.get("C") or "").strip(),
-                    "D": (answers.get("D") or None) and (answers.get("D") or None).strip() or None,
                 },
                 "correct_letter": correct_letter,
                 "explanation": explanation.strip(),

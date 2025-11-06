@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Clock, CheckCircle, XCircle, SkipForward, Home, Trophy, Brain, ChevronLeft, ChevronRight, Repeat } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import MathText from '../common/MathText';
 
 interface Question {
   id: number;
@@ -482,7 +483,11 @@ export const QuizSeries: React.FC<QuizSeriesProps> = ({
                       )}
                     </div>
                     
-                    <h3 className="font-semibold text-gray-900 mb-4">{question.question}</h3>
+                    <MathText
+                      text={question.question}
+                      block
+                      className="font-semibold text-gray-900 mb-4"
+                    />
                     
                     {question.type === 'multiple-choice' && question.options && (
                       <div className="space-y-2 mb-4">
@@ -511,7 +516,7 @@ export const QuizSeries: React.FC<QuizSeriesProps> = ({
                                 {String.fromCharCode(65 + optionIndex)}
                               </div>
                               <span className={isCorrectOption ? 'font-medium' : ''}>
-                                {option}
+                                <MathText text={option} />
                               </span>
                               {isCorrectOption && (
                                 <CheckCircle className="w-4 h-4 text-green-500 ml-auto" />
@@ -674,9 +679,11 @@ export const QuizSeries: React.FC<QuizSeriesProps> = ({
               <h4 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">
                 Question
               </h4>
-              <p className="text-gray-700 text-base sm:text-lg">
-                {currentQuestion.question}
-              </p>
+              <MathText
+                text={currentQuestion.question}
+                block
+                className="text-gray-700 text-base sm:text-lg"
+              />
             </div>
             
             <div className="space-y-4">
@@ -688,7 +695,7 @@ export const QuizSeries: React.FC<QuizSeriesProps> = ({
                     onClick={() => handleAnswerSelect(index)}
                     className={`p-4 border rounded-lg cursor-pointer transition-all duration-200 ${isSelected ? `${getColorClasses(subjectColor, '100', 'bg')} ${getColorClasses(subjectColor, '500', 'border')} shadow-md` : 'bg-white border-gray-200 hover:border-gray-300'}`}
                   >
-                    {option}
+                    <MathText text={option} />
                   </div>
                 );
               })}

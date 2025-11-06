@@ -1,4 +1,5 @@
 import React from 'react';
+import MathText from '../common/MathText';
 import { QuestionWithPassage } from '../../services/questionService';
 
 interface QuestionWithPassageProps {
@@ -88,9 +89,11 @@ export const QuestionWithPassageComponent: React.FC<QuestionWithPassageProps> = 
           <h4 className="text-lg font-semibold text-neutral-900 mb-2">
             Question
           </h4>
-          <p className="text-neutral-700 text-base">
-            {question.question_text}
-          </p>
+          <MathText
+            text={question.question_text}
+            block
+            className="text-neutral-700 text-base"
+          />
         </div>
 
         {/* Answer Options */}
@@ -116,7 +119,7 @@ export const QuestionWithPassageComponent: React.FC<QuestionWithPassageProps> = 
                   {option.key}
                 </div>
                 <span className={showCorrectAnswer && index === correctAnswerIndex ? 'font-medium' : ''}>
-                  {option.text}
+                  <MathText text={option.text} />
                 </span>
                 {showCorrectAnswer && (
                   <>
@@ -142,7 +145,7 @@ export const QuestionWithPassageComponent: React.FC<QuestionWithPassageProps> = 
           <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <h5 className="font-semibold text-blue-900 mb-2">Explication</h5>
             <p className="text-blue-800 text-sm">
-              Réponse correcte: {question.correct}
+              Réponse correcte: <MathText text={question.correct} />
             </p>
           </div>
         )}

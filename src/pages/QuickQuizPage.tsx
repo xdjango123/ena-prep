@@ -9,6 +9,7 @@ import { VisitorService } from '../services/visitorService';
 import { TestResultService } from '../services/testResultService';
 import { QuestionService, QuestionWithPassage } from '../services/questionService';
 import { getQuestionsBySubject } from '../data/quizQuestions';
+import MathText from '../components/common/MathText';
 
 // Remove the hardcoded quizData array and replace with dynamic fetching
 
@@ -434,9 +435,11 @@ const QuickQuizPage: React.FC = () => {
                 </div>
               </div>
               
-              <h2 className="text-lg xs:text-xl font-semibold text-neutral-900 mb-6 xs:mb-8 leading-relaxed">
-                {question.question}
-              </h2>
+              <MathText
+                text={question.question}
+                block
+                className="text-lg xs:text-xl font-semibold text-neutral-900 mb-6 xs:mb-8 leading-relaxed"
+              />
               
               <div className="space-y-3 xs:space-y-4 mb-6 xs:mb-8">
                 {question.options && question.type === 'multiple-choice' && question.options.map((option, index) => (
@@ -457,7 +460,9 @@ const QuickQuizPage: React.FC = () => {
                       }`}>
                         {String.fromCharCode(65 + index)}
                       </div>
-                      <span className="text-sm xs:text-base">{option}</span>
+                      <span className="text-sm xs:text-base">
+                        <MathText text={option} />
+                      </span>
                     </div>
                   </button>
                 ))}
@@ -638,9 +643,11 @@ const QuickQuizPage: React.FC = () => {
                             )
                           )}
                         </div>
-                        <h3 className="font-semibold text-neutral-900 mb-4 text-sm xs:text-base">
-                          {question.question || 'N/A'}
-                        </h3>
+                        <MathText
+                          text={question.question || 'N/A'}
+                          block
+                          className="font-semibold text-neutral-900 mb-4 text-sm xs:text-base"
+                        />
                         <div className="space-y-2 mb-4">
                           {options.length > 0 ? (
                             options.map((option, optionIndex) => {
@@ -669,7 +676,7 @@ const QuickQuizPage: React.FC = () => {
                                     {String.fromCharCode(65 + optionIndex)}
                                   </div>
                                   <span className={isCorrectOption ? 'font-medium' : ''}>
-                                    {option}
+                                    <MathText text={option} />
                                   </span>
                                   {isCorrectOption && (
                                     <CheckCircle className="w-4 h-4 text-green-500 ml-auto" />
@@ -682,14 +689,20 @@ const QuickQuizPage: React.FC = () => {
                             })
                           ) : (
                             <div className="p-3 rounded-lg border border-neutral-200 bg-neutral-50 text-sm text-neutral-600">
-                              <div>Réponse correcte : {String(question.correctAnswer)}</div>
-                              <div>Votre réponse : {userAnswer !== null ? String(userAnswer) : 'Aucune réponse'}</div>
+                              <div>
+                                Réponse correcte : <MathText text={String(question.correctAnswer)} />
+                              </div>
+                              <div>
+                                Votre réponse :{' '}
+                                <MathText text={userAnswer !== null ? String(userAnswer) : 'Aucune réponse'} />
+                              </div>
                             </div>
                           )}
                         </div>
                         <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                           <p className="text-blue-800 text-sm">
-                            <strong>Explication :</strong> {question.explanation || 'Aucune explication fournie.'}
+                            <strong>Explication :</strong>{' '}
+                            <MathText text={question.explanation || 'Aucune explication fournie.'} />
                           </p>
                         </div>
                       </div>

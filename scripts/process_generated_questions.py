@@ -218,7 +218,12 @@ class GeneratedQuestionProcessor:
         generated: List[GeneratedQuestion] = []
         for item in data:
             question_id = item.get("question_id") or item.get("id") or "generated"
-            question_data = item.get("question_data", {})
+            question_data = (
+                item.get("question_data")
+                or item.get("generated")
+                or (item.get("generated_entry") or {}).get("generated")
+                or {}
+            )
             question_text = question_data.get("question_text") or item.get("question_text")
             if not question_text:
                 continue
@@ -277,34 +282,48 @@ class GeneratedQuestionProcessor:
         self.stats["accepted"] += 1
 
     def _prepare_question_payload(self, raw: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        question_data = raw.get("question_data") or {}
+        question_data = (
+            raw.get("question_data")
+            or raw.get("generated")
+            or (raw.get("generated_entry") or {}).get("generated")
+            or {}
+        )
         question_text = question_data.get("question_text") or raw.get("question_text")
         if not question_text:
             return None
 
-        answers = [
-            question_data.get("answer1") or raw.get("answer1"),
-            question_data.get("answer2") or raw.get("answer2"),
-            question_data.get("answer3") or raw.get("answer3"),
-        ]
-        answers.append(question_data.get("answer4") or raw.get("answer4"))
+        answers_dict = question_data.get("answers") if isinstance(question_data.get("answers"), dict) else None
+        if answers_dict:
+            answer1 = answers_dict.get("A")
+            answer2 = answers_dict.get("B")
+            answer3 = answers_dict.get("C")
+            answer4 = answers_dict.get("D")
+        else:
+            answer1 = question_data.get("answer1") or raw.get("answer1")
+            answer2 = question_data.get("answer2") or raw.get("answer2")
+            answer3 = question_data.get("answer3") or raw.get("answer3")
+            answer4 = question_data.get("answer4") or raw.get("answer4")
 
-        final_answer = raw.get("final_answer") or question_data.get("correct")
-        final_explanation = raw.get("final_explanation") or question_data.get("explanation")
+        final_answer = (
+            question_data.get("correct_letter")
+            or question_data.get("correct")
+            or raw.get("final_answer")
+        )
+        final_explanation = question_data.get("explanation") or raw.get("final_explanation")
 
         payload = {
             "question_text": question_text.strip(),
-            "answer1": (answers[0] or "").strip(),
-            "answer2": (answers[1] or "").strip(),
-            "answer3": (answers[2] or "").strip(),
-            "answer4": (answers[3] or None) and (answers[3] or None).strip() or None,
+            "answer1": (answer1 or "").strip(),
+            "answer2": (answer2 or "").strip(),
+            "answer3": (answer3 or "").strip(),
+            "answer4": (answer4 or None) and (answer4 or None).strip() or None,
             "correct": (final_answer or "").strip().upper(),
             "explanation": (final_explanation or "").strip(),
-            "category": question_data.get("category"),
+            "category": question_data.get("category") or raw.get("category"),
             "difficulty": "HARD",  # enforce HARD difficulty
-            "exam_type": question_data.get("exam_type"),
-            "test_type": question_data.get("test_type"),
-            "sub_category": question_data.get("sub_category"),
+            "exam_type": question_data.get("exam_type") or raw.get("exam_type"),
+            "test_type": question_data.get("test_type") or raw.get("test_type"),
+            "sub_category": question_data.get("sub_category") or raw.get("sub_category"),
         }
 
         # Skip if any core fields missing

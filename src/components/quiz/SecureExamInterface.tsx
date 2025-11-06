@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { X, Clock, CheckCircle, XCircle, Home, Trophy, Brain, ChevronLeft, ChevronRight, AlertTriangle, Shield, Menu, Flag, Save, CheckSquare, Eye } from 'lucide-react';
 import { QuestionService } from '../../services/questionService';
+import MathText from '../common/MathText';
 import { formatExponents } from '../../utils/mathFormatting';
 import { ExamResultService } from '../../services/examResultService';
 import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
@@ -803,7 +804,11 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
                         </div>
 
                         {/* Question Text */}
-                        <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">{question.question}</h3>
+                        <MathText
+                          text={question.question}
+                          block
+                          className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4"
+                        />
 
                         {/* Options and Answers - Use original working CSS classes */}
                         <div className="answer-review-options flex flex-col gap-3">
@@ -829,7 +834,9 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
                                 <div className="answer-review-option-prefix w-7 h-7 rounded-full flex items-center justify-center font-semibold text-sm">
                                   {String.fromCharCode(65 + optionIndex)}
                                 </div>
-                                <div className="answer-review-option-text flex-1 text-sm leading-5">{option}</div>
+                                <div className="answer-review-option-text flex-1 text-sm leading-5">
+                                  <MathText text={option} />
+                                </div>
                                 {isCorrectAnswer && (
                                   <div className="answer-review-status text-green-600 font-semibold text-sm">✓ Correct</div>
                                 )}
@@ -859,7 +866,9 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
                                 <div className="answer-review-option-prefix w-7 h-7 rounded-full flex items-center justify-center font-semibold text-sm">
                                   {optionIndex === 0 ? 'V' : 'F'}
                                 </div>
-                                <div className="answer-review-option-text flex-1 text-sm leading-5">{option}</div>
+                                <div className="answer-review-option-text flex-1 text-sm leading-5">
+                                  <MathText text={option} />
+                                </div>
                                 {isCorrectAnswer && (
                                   <div className="answer-review-status text-green-600 font-semibold text-sm">✓ Correct</div>
                                 )}
@@ -876,13 +885,26 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
                           <div className="text-sm">
                             <span className="text-gray-600">Votre réponse:</span>
                             <span className={`ml-2 font-medium ${isCorrect ? 'text-green-600' : 'text-red-600'}`}>
-                              {userAnswer ? 
-                                (question.type === 'multiple-choice' ? 
-                                  String.fromCharCode(65 + (typeof userAnswer === 'string' && userAnswer.length === 1 ? userAnswer.charCodeAt(0) - 65 : Number(userAnswer))) + ': ' + question.options?.[typeof userAnswer === 'string' && userAnswer.length === 1 ? userAnswer.charCodeAt(0) - 65 : Number(userAnswer)] :
+                              <MathText
+                                text={
                                   userAnswer
-                                ) : 
-                                'Pas de réponse'
-                              }
+                                    ? question.type === 'multiple-choice'
+                                      ? `${String.fromCharCode(
+                                          65 +
+                                            (typeof userAnswer === 'string' && userAnswer.length === 1
+                                              ? userAnswer.charCodeAt(0) - 65
+                                              : Number(userAnswer))
+                                        )}: ${
+                                          question.options?.[
+                                            typeof userAnswer === 'string' && userAnswer.length === 1
+                                              ? userAnswer.charCodeAt(0) - 65
+                                              : Number(userAnswer)
+                                          ] ?? ''
+                                        }`
+                                      : String(userAnswer)
+                                    : 'Pas de réponse'
+                                }
+                              />
                             </span>
                           </div>
                         </div>
@@ -891,7 +913,7 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
                         {question.explanation && (
                           <div className="bg-blue-50 rounded-lg p-4">
                             <h4 className="font-medium text-blue-900 mb-2">Explication:</h4>
-                            <p className="text-blue-800 text-sm">{question.explanation}</p>
+                            <MathText text={question.explanation} className="text-blue-800 text-sm" block />
                           </div>
                         )}
                       </div>
@@ -1159,7 +1181,11 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
 
             {/* Question Card */}
             <div className="question-card">
-              <h2 className="question-title text-lg sm:text-xl lg:text-2xl">{currentQuestion.question}</h2>
+              <MathText
+                text={currentQuestion.question}
+                block
+                className="question-title text-lg sm:text-xl lg:text-2xl"
+              />
               
               <div className="space-y-3">
                 {currentQuestion.type === 'multiple-choice' && currentQuestion.options?.map((option, index) => {
@@ -1174,7 +1200,9 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
                       <div className="answer-prefix">
                         {String.fromCharCode(65 + index)}
                       </div>
-                      <div className="answer-text text-sm sm:text-base">{option}</div>
+                      <div className="answer-text text-sm sm:text-base">
+                        <MathText text={option} />
+                      </div>
                     </div>
                   );
                 })}

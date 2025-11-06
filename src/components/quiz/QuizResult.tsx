@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Award, Clock, Hash, CheckCircle, Repeat, Eye, XCircle, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import MathText from '../common/MathText';
 
 interface Question {
   id: number;
@@ -217,7 +218,11 @@ export const QuizResult: React.FC<QuizResultProps> = ({
                       )}
                     </div>
                     
-                    <h3 className="font-semibold text-gray-900 mb-4">{question.question}</h3>
+                    <MathText
+                      text={question.question}
+                      block
+                      className="font-semibold text-gray-900 mb-4"
+                    />
                     
                     {question.type === 'multiple-choice' && question.options && (
                       <div className="space-y-2 mb-4">
@@ -246,7 +251,7 @@ export const QuizResult: React.FC<QuizResultProps> = ({
                                 {String.fromCharCode(65 + optionIndex)}
                               </div>
                               <span className={isCorrectOption ? 'font-medium' : ''}>
-                                {option}
+                                <MathText text={option} />
                               </span>
                               {isCorrectOption && (
                                 <CheckCircle className="w-4 h-4 text-green-500 ml-auto" />
@@ -288,7 +293,7 @@ export const QuizResult: React.FC<QuizResultProps> = ({
                                 {String.fromCharCode(65 + optionIndex)}
                               </div>
                               <span className={isCorrectOption ? 'font-medium' : ''}>
-                                {option}
+                                <MathText text={option} />
                               </span>
                               {isCorrectOption && (
                                 <CheckCircle className="w-4 h-4 text-green-500 ml-auto" />
@@ -304,11 +309,13 @@ export const QuizResult: React.FC<QuizResultProps> = ({
                     
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                       <p className="text-blue-800 text-sm">
-                        <strong>Réponse correcte :</strong> {getCorrectAnswerText()}
+                        <strong>Réponse correcte :</strong>{' '}
+                        <MathText text={getCorrectAnswerText()} />
                       </p>
                       {question.explanation && (
                         <p className="text-blue-800 text-sm mt-2">
-                          <strong>Explication :</strong> {question.explanation}
+                          <strong>Explication :</strong>{' '}
+                          <MathText text={question.explanation} />
                         </p>
                       )}
                     </div>

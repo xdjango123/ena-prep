@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
 import { Clock, ChevronRight, ChevronLeft, Check, X, AlertCircle } from 'lucide-react';
 import { QuestionService } from '../services/questionService';
+import MathText from '../components/common/MathText';
 import { formatExponents } from '../utils/mathFormatting';
 
 interface EnglishQuestion {
@@ -428,7 +429,7 @@ export default function EnglishTestPage() {
                           </div>
                         </div>
                         
-                        <p className="text-gray-900 mb-3">{question.question}</p>
+                        <MathText text={question.question} block className="text-gray-900 mb-3" />
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                           {question.options.map((option, optionIndex) => (
@@ -442,9 +443,13 @@ export default function EnglishTestPage() {
                                   : 'bg-gray-50 text-gray-700'
                               }`}
                             >
-                              {String.fromCharCode(97 + optionIndex)}. {option}
-                              {optionIndex === question.correctAnswer && ' ✓'}
-                              {userAnswer === optionIndex && optionIndex !== question.correctAnswer && ' ✗'}
+                              <MathText
+                                text={`${String.fromCharCode(97 + optionIndex)}. ${option}${
+                                  optionIndex === question.correctAnswer ? ' ✓' : ''
+                                }${
+                                  userAnswer === optionIndex && optionIndex !== question.correctAnswer ? ' ✗' : ''
+                                }`}
+                              />
                             </div>
                           ))}
                         </div>
@@ -539,9 +544,11 @@ export default function EnglishTestPage() {
               <span className="inline-block bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full mb-4">
                 {question.category} - {question.difficulty}
               </span>
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">
-                {question.question}
-              </h2>
+              <MathText
+                text={question.question}
+                block
+                className="text-xl font-semibold text-gray-900 mb-6"
+              />
             </div>
 
             <div className="space-y-4 mb-8">
@@ -566,7 +573,7 @@ export default function EnglishTestPage() {
                       )}
                     </div>
                     <span className="text-gray-900">
-                      {String.fromCharCode(97 + index)}. {option}
+                      <MathText text={`${String.fromCharCode(97 + index)}. ${option}`} />
                     </span>
                   </div>
                 </button>

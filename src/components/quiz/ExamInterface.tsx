@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Clock, CheckCircle, XCircle, Home, Trophy, Brain, ChevronLeft, ChevronRight } from 'lucide-react';
 import { QuestionService } from '../../services/questionService';
+import MathText from '../common/MathText';
 import { formatExponents } from '../../utils/mathFormatting';
 import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
 
@@ -365,7 +366,11 @@ export const ExamInterface: React.FC<ExamInterfaceProps> = ({ onExit }) => {
       {/* Question Card */}
       <div className="flex-grow flex items-center justify-center px-2 sm:px-4">
         <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8 w-full max-w-3xl">
-          <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">{currentQuestion.question}</h2>
+          <MathText
+            text={currentQuestion.question}
+            block
+            className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-4 sm:mb-6"
+          />
           
           <div className="space-y-4">
             {currentQuestion.type === 'multiple-choice' && currentQuestion.options?.map((option, index) => {
@@ -376,7 +381,7 @@ export const ExamInterface: React.FC<ExamInterfaceProps> = ({ onExit }) => {
                   onClick={() => handleAnswerSelect(index)}
                   className={`p-4 border rounded-lg cursor-pointer transition-all duration-200 ${isSelected ? 'bg-blue-100 border-blue-500 shadow-md' : 'bg-white border-gray-200 hover:border-gray-300'}`}
                 >
-                  {option}
+                  <MathText text={option} />
                 </div>
               );
             })}

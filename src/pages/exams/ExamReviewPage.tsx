@@ -4,6 +4,7 @@ import { ArrowLeft, Clock, CheckCircle, XCircle, Minus } from 'lucide-react';
 import { QuestionService } from '../../services/questionService';
 import { ExamResultService } from '../../services/examResultService';
 import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
+import MathText from '../../components/common/MathText';
 import { formatExponents } from '../../utils/mathFormatting';
 
 interface Question {
@@ -254,7 +255,11 @@ export const ExamReviewPage: React.FC = () => {
 
                 {/* Question Text */}
                 <div className="mb-4">
-                  <p className="text-gray-900 font-medium">{question.question_text}</p>
+                  <MathText
+                    text={question.question_text}
+                    block
+                    className="text-gray-900 font-medium"
+                  />
                 </div>
 
                 {/* Options */}
@@ -286,7 +291,9 @@ export const ExamReviewPage: React.FC = () => {
                             }`}>
                               {key}
                             </span>
-                            <span className="text-gray-900">{text}</span>
+                            <span className="text-gray-900">
+                              <MathText text={text} />
+                            </span>
                             {isCorrectAnswer && (
                               <CheckCircle className="w-5 h-5 text-green-600 ml-auto" />
                             )}
@@ -310,12 +317,14 @@ export const ExamReviewPage: React.FC = () => {
                     <div>
                       <span className="text-gray-600">Votre réponse:</span>
                       <span className={`ml-2 font-medium ${isCorrect ? 'text-green-600' : 'text-red-600'}`}>
-                        {userAnswerText || 'Pas de réponse'}
+                        <MathText text={userAnswerText || 'Pas de réponse'} />
                       </span>
                     </div>
                     <div>
                       <span className="text-gray-600">Bonne réponse:</span>
-                      <span className="ml-2 font-medium text-green-600">{correctAnswerText}</span>
+                      <span className="ml-2 font-medium text-green-600">
+                        <MathText text={correctAnswerText} />
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -323,7 +332,7 @@ export const ExamReviewPage: React.FC = () => {
                 {/* Explanation */}
                 <div className="bg-blue-50 rounded-lg p-4">
                   <h4 className="font-medium text-blue-900 mb-2">Explication:</h4>
-                  <p className="text-blue-800 text-sm">{question.explanation}</p>
+                  <MathText text={question.explanation} className="text-blue-800 text-sm" block />
                 </div>
               </div>
             );
