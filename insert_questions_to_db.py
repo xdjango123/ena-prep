@@ -120,7 +120,7 @@ class QuestionInserter:
             'difficulty': question['difficulty'].upper(),
             'exam_type': question['exam_type'],
             'test_type': question['test_type'],
-            'sub_category': question.get('sub_category', '').strip(),
+            'sub_category': (question.get('sub_category') or '').strip(),
             'unique_hash': self.create_unique_hash(question['question_text'].strip()),
             'ai_generated': True,
             'question_pool': f"{question['exam_type']}_{question['category']}_{question['test_type']}",
@@ -128,6 +128,9 @@ class QuestionInserter:
             'created_at': datetime.now().isoformat(),
             'updated_at': datetime.now().isoformat()
         }
+
+        if question.get("test_number") is not None:
+            cleaned_question["test_number"] = question["test_number"]
         
         return {
             "valid": True,

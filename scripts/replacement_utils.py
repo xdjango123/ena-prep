@@ -78,25 +78,17 @@ def _get_openai_client() -> OpenAI:
     return _OPENAI_CLIENT
 
 
-def _get_gemini_model(model_name: str, json_mode: bool = False):
+def _get_gemini_model(model_name: str):
     global _GENAI_MODEL, _GENAI_MODEL_NAME
     if genai is None:
         raise RuntimeError("google-generativeai package not available.")
-    # Create a new model instance if JSON mode is needed or model changed
-    cache_key = f"{model_name}_{json_mode}"
-    if _GENAI_MODEL is None or _GENAI_MODEL_NAME != cache_key:
+    if _GENAI_MODEL is None or _GENAI_MODEL_NAME != model_name:
         api_key = os.getenv("GEMINI_API_KEY")
         if not api_key:
             raise RuntimeError("Missing GEMINI_API_KEY environment variable.")
         genai.configure(api_key=api_key)
-        generation_config = {}
-        if json_mode:
-            generation_config = {
-                "response_mime_type": "application/json",
-                "temperature": 0.0,
-            }
-        _GENAI_MODEL = genai.GenerativeModel(model_name, generation_config=generation_config)
-        _GENAI_MODEL_NAME = cache_key
+        _GENAI_MODEL = genai.GenerativeModel(model_name)
+        _GENAI_MODEL_NAME = model_name
     return _GENAI_MODEL
 
 
@@ -105,9 +97,9 @@ def get_openai_client() -> OpenAI:
     return _get_openai_client()
 
 
-def get_gemini_model(model_name: str, json_mode: bool = False):
+def get_gemini_model(model_name: str):
     """Public helper to reuse the shared Gemini model."""
-    return _get_gemini_model(model_name, json_mode=json_mode)
+    return _get_gemini_model(model_name)
 
 
 def extract_json_object(text: str) -> Optional[Dict[str, object]]:
@@ -255,15 +247,6 @@ def build_prompt(target: ReplacementTarget) -> str:
     sub_category = target.sub_category or "N/A"
     reasons = ", ".join(target.reasons) if target.reasons else "renouvellement"
     language_hint = "anglais" if target.category == "ANG" else "français"
-    ang_guidance = ""
-    if target.category == "ANG":
-        ang_guidance = (
-            "\n- Pour les questions ANG, privilégie un point concret de grammaire ou de vocabulaire (temps verbaux, "
-            "prépositions, phrasal verbs, accords) dans un contexte professionnel ou quotidien. "
-            "Les options doivent rester courtes (mots ou courtes expressions) comme dans les QCM scolaires.\n"
-            "- La difficulté doit être soutenue mais accessible : un candidat sérieux peut raisonner pour trouver la bonne réponse "
-            "sans connaissances linguistiques universitaires."
-        )
     notes_text = "\n".join(
         f"- {note.get('reason')}: {note.get('details')}"
         for note in target.notes
@@ -286,11 +269,10 @@ Contexte :
 - Sous-catégorie : {sub_category}
 - Raisons du remplacement : {reasons}
 {notes_block}
-{ang_guidance}
 
 Contraintes :
 1. Question originale, sans reprise de formulations existantes.
-2. Fournis exactement trois options distinctes (A, B, C), adaptées au niveau HARD.
+2. Options numérotées A, B, C et D (D peut être null si seulement 3 options pertinentes).
 3. Une seule bonne réponse, indiquée par la lettre correspondante.
 4. Explication claire, en français, justifiant la bonne réponse et montrant la difficulté.
 5. Ajuste le contenu au contexte ivoirien lorsqu'il est pertinent (surtout pour CG).
@@ -301,9 +283,10 @@ Réponds UNIQUEMENT avec un JSON du format :
   "answers": {{
     "A": "...",
     "B": "...",
-    "C": "..."
+    "C": "...",
+    "D": "..." ou null
   }},
-  "correct_letter": "A" | "B" | "C",
+  "correct_letter": "A" | "B" | "C" | "D",
   "explanation": "...",
   "difficulty": "HARD"
 }}
@@ -326,7 +309,7 @@ def generate_replacement_for_target(
         }
 
     openai_client = _get_openai_client()
-    gemini_model = _get_gemini_model(config.gemini_model, json_mode=True)
+    gemini_model = _get_gemini_model(config.gemini_model)
 
     for attempt in range(config.max_retries + 1):
         prompt = build_prompt(target)
@@ -372,16 +355,11 @@ def generate_replacement_for_target(
             time.sleep(max(config.sleep_seconds, 0.0))
             continue
 
-        raw_answers = candidate.get("answers") or {}
-        answers = {
-            "A": raw_answers.get("A"),
-            "B": raw_answers.get("B"),
-            "C": raw_answers.get("C"),
-        }
+        answers = candidate.get("answers") or {}
         correct_letter = candidate.get("correct_letter")
         question_text = candidate.get("question_text")
         explanation = candidate.get("explanation")
-        if correct_letter not in {"A", "B", "C"}:
+        if not isinstance(answers, dict) or correct_letter not in {"A", "B", "C", "D"}:
             attempts.append(
                 {
                     "attempt": attempt + 1,
@@ -408,6 +386,7 @@ def generate_replacement_for_target(
             answers.get("A") or "",
             answers.get("B") or "",
             answers.get("C") or "",
+            answers.get("D") or "",
         ]
         joined = " ".join(part for part in text_parts if part)
         scores = {lang.lang: lang.prob for lang in detect_language_scores(joined)}
@@ -450,6 +429,7 @@ Options:
 A) {answers.get('A')}
 B) {answers.get('B')}
 C) {answers.get('C')}
+D) {answers.get('D')}
 Bonne réponse: {correct_letter}
 Explication: {explanation}
 
@@ -464,14 +444,8 @@ Réponds UNIQUEMENT avec du JSON:
 }}
 """
             validation = gemini_model.generate_content(validation_prompt)
-            validation_text = _extract_response_text(validation)
-            if not validation_text:
-                raise ValueError("Empty response from Gemini validation.")
-            
-            validation_payload = extract_json_object(validation_text)
-            if validation_payload is None:
-                raise ValueError(f"Gemini validation returned non-JSON content: {validation_text[:160]}")
-            
+            validation_text = validation.text.strip()
+            validation_payload = json.loads(validation_text)
             checks = [
                 validation_payload.get("approved"),
                 validation_payload.get("difficulty_ok"),
@@ -482,19 +456,11 @@ Réponds UNIQUEMENT avec du JSON:
             approved = all(bool(check) for check in checks)
             validation_reason = validation_payload.get("reason", "")
         except Exception as exc:
-            error_detail = str(exc)
-            # Log the raw response for debugging
-            raw_response = ""
-            try:
-                raw_response = _extract_response_text(validation) if 'validation' in locals() else "N/A"
-            except Exception:
-                pass
             attempts.append(
                 {
                     "attempt": attempt + 1,
                     "phase": "validation",
-                    "error": error_detail,
-                    "raw_response_preview": preview(raw_response, length=200) if raw_response else None,
+                    "error": str(exc),
                 }
             )
             time.sleep(max(config.sleep_seconds, 0.0))
@@ -528,6 +494,7 @@ Réponds UNIQUEMENT avec du JSON:
                     "A": (answers.get("A") or "").strip(),
                     "B": (answers.get("B") or "").strip(),
                     "C": (answers.get("C") or "").strip(),
+                    "D": (answers.get("D") or None) and (answers.get("D") or None).strip() or None,
                 },
                 "correct_letter": correct_letter,
                 "explanation": explanation.strip(),

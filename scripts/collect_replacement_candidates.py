@@ -14,13 +14,19 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import signal
 import sys
 import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, Dict, Iterable, List, Optional, Tuple
+
+from difflib import SequenceMatcher
+
+NEAR_DUPLICATE_THRESHOLD = 0.95
+EXACT_DUPLICATE_EPS = 1e-9
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
@@ -34,6 +40,11 @@ from question_audit.db import (
 from question_audit.language import detect_language_scores
 from question_audit.logging_utils import info, warn
 from question_audit.text_utils import flatten_options, normalize_text, preview, token_signature
+from question_audit.model_checks import (
+    ModelValidators,
+    LLM_TASK_METADATA,
+    run_llm_checks,
+)
 
 from scripts.replacement_utils import (
     GenerationConfig,
@@ -110,6 +121,43 @@ def build_duplicate_index(rows: Iterable[Dict[str, Any]], *, min_length: int = 2
     return index
 
 
+def build_similarity_index(rows: Iterable[Dict[str, Any]]) -> Dict[Tuple[str, str], List[Tuple[str, str, str]]]:
+    """Return mapping keyed by (exam_type, category) -> list of (id, normalized_text, preview)."""
+    index: Dict[Tuple[str, str], List[Tuple[str, str, str]]] = {}
+    for row in rows:
+        text = row.get("question_text") or ""
+        normalized = normalize_text(text)
+        if not normalized:
+            continue
+        key = ((row.get("exam_type") or "UNKNOWN"), (row.get("category") or "UNKNOWN"))
+        index.setdefault(key, []).append(
+            (str(row.get("id")), normalized, preview(text, length=120))
+        )
+    return index
+
+
+def best_similarity_match(
+    question: Dict[str, Any],
+    similarity_index: Dict[Tuple[str, str], List[Tuple[str, str, str]]],
+) -> Tuple[float, Optional[Tuple[str, str]]]:
+    key = ((question.get("exam_type") or "UNKNOWN"), (question.get("category") or "UNKNOWN"))
+    text = normalize_text(question.get("question_text") or "")
+    candidates = similarity_index.get(key) or []
+    best_ratio = 0.0
+    best_match: Optional[Tuple[str, str]] = None
+    question_id = str(question.get("id"))
+    for candidate_id, candidate_text, candidate_preview in candidates:
+        if candidate_id == question_id:
+            continue
+        ratio = SequenceMatcher(None, text, candidate_text).ratio()
+        if ratio > best_ratio:
+            best_ratio = ratio
+            best_match = (candidate_id, candidate_preview)
+            if math.isclose(best_ratio, 1.0, rel_tol=1e-9):
+                break
+    return best_ratio, best_match
+
+
 def duplicate_check(question: Dict[str, Any], duplicate_index: Dict[str, List[Dict[str, Any]]]) -> Optional[AuditFinding]:
     signature = token_signature(question.get("question_text") or "")
     if not signature:
@@ -150,7 +198,6 @@ def category_check(
         part
         for part in [
             question.get("question_text") or "",
-            question.get("explanation") or "",
             flatten_options(
                 [
                     question.get("answer1") or "",
@@ -643,6 +690,16 @@ def parse_args() -> argparse.Namespace:
         default="gemini-2.0-flash",
         help="Gemini model name used to confirm violations before regeneration.",
     )
+    parser.add_argument(
+        "--audit-gpt-model",
+        default="gpt-4o-mini",
+        help="GPT model name used to confirm Gemini flags.",
+    )
+    parser.add_argument(
+        "--model-cache",
+        default="diagnostics_output/model_validation_cache.json",
+        help="Path to shared model validation cache.",
+    )
     return parser.parse_args()
 
 
@@ -659,6 +716,12 @@ def main() -> None:
         client = get_supabase_client()
     except SupabaseConfigError as exc:
         raise SystemExit(f"Supabase configuration error: {exc}") from exc
+
+    validators = ModelValidators(
+        gemini_model=args.audit_gemini_model,
+        gpt_model=args.audit_gpt_model,
+        cache_path=(PROJECT_ROOT / args.model_cache).resolve(),
+    )
 
     info("Fetching questions from Supabase…")
     columns = [
@@ -679,6 +742,7 @@ def main() -> None:
     all_rows = fetch_questions(client, columns=columns)
     question_map = {str(row.get("id")): row for row in all_rows if row.get("id")}
     duplicate_index = build_duplicate_index(all_rows)
+    similarity_index = build_similarity_index(all_rows)
     info(f"Loaded {len(question_map)} questions; starting audit loop.")
 
     if not flagged and scan_all:
@@ -752,6 +816,33 @@ def main() -> None:
         if duplicate:
             findings.append(duplicate)
 
+        ratio, best_match = best_similarity_match(question, similarity_index)
+        if best_match:
+            if math.isclose(ratio, 1.0, rel_tol=EXACT_DUPLICATE_EPS):
+                findings.append(
+                    AuditFinding(
+                        finding_type="duplicate_question",
+                        message="Question identique détectée dans le catalogue.",
+                        metadata={
+                            "match_id": best_match[0],
+                            "similarity": ratio,
+                            "preview": best_match[1],
+                        },
+                    )
+                )
+            elif ratio >= NEAR_DUPLICATE_THRESHOLD:
+                findings.append(
+                    AuditFinding(
+                        finding_type="near_duplicate",
+                        message="Question très similaire détectée (à vérifier manuellement).",
+                        metadata={
+                            "match_id": best_match[0],
+                            "similarity": round(ratio, 3),
+                            "preview": best_match[1],
+                        },
+                    )
+                )
+
         category = category_check(
             question,
             english_threshold=args.english_threshold,
@@ -761,6 +852,28 @@ def main() -> None:
             findings.append(category)
 
         findings.extend(run_quality_checks(question))
+
+        llm_issues, llm_details = run_llm_checks(question, validators)
+        for issue in llm_issues:
+            task_meta = LLM_TASK_METADATA.get(
+                issue["task"],
+                {"label": f"{issue['task']}_issue", "error_label": f"{issue['task']}_llm_error", "message": issue.get("reason", "")},
+            )
+            metadata = issue.get("metadata") or {}
+            if issue["status"] == "flagged":
+                finding_type = task_meta.get("label", f"{issue['task']}_issue")
+                message = issue.get("reason") or task_meta.get("message", "Anomalie détectée par LLM.")
+            else:
+                finding_type = task_meta.get("error_label", f"{issue['task']}_llm_error")
+                message = issue.get("reason") or "Erreur pendant la validation automatique."
+            findings.append(
+                AuditFinding(
+                    finding_type=finding_type,
+                    message=message,
+                    severity="warning",
+                    metadata=metadata,
+                )
+            )
 
         heuristic_findings = list(findings)
         review_info = {
@@ -801,6 +914,7 @@ def main() -> None:
                     "question_id": question_id,
                     "heuristic_findings": [finding.to_dict() for finding in heuristic_findings],
                     "final_findings": [],
+                    "llm_results": llm_details,
                     "review": {**review_info, "label": review_label},
                     "generation_status": "skipped",
                 },
@@ -877,6 +991,7 @@ def main() -> None:
                 "difficulty": question.get("difficulty"),
                 "heuristic_findings": [finding.to_dict() for finding in heuristic_findings],
                 "findings": [finding.to_dict() for finding in findings],
+                "llm_results": llm_details,
                 "ai_review": {**review_info, "label": review_label},
                 "generation": generation_payload,
                 "source": {
@@ -894,6 +1009,7 @@ def main() -> None:
                 "question_id": question_id,
                 "heuristic_findings": [finding.to_dict() for finding in heuristic_findings],
                 "final_findings": [finding.to_dict() for finding in findings],
+                "llm_results": llm_details,
                 "review": {**review_info, "label": review_label},
                 "generation_status": generation_status,
             },
@@ -912,6 +1028,7 @@ def main() -> None:
         processed += 1
 
     info(f"Audit loop finished. Processed {processed} question(s).")
+    validators.flush_cache()
     
     # Generate final summary
     summary.flush()

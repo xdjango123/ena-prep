@@ -12,6 +12,7 @@ be exported before running this script.
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import subprocess
 import sys
@@ -33,6 +34,49 @@ def run_step(command: List[str], description: str) -> None:
         raise RuntimeError(
             f"{description} failed with exit code {result.returncode}"
         )
+
+
+def prompt_user(message: str, *, default: bool = False, auto_confirm: bool = False) -> bool:
+    if auto_confirm:
+        return True
+    prompt = "Y/n" if default else "y/N"
+    try:
+        reply = input(f"{message} [{prompt}]: ").strip().lower()
+    except EOFError:
+        return default
+    if not reply:
+        return default
+    return reply in {"y", "yes", "o", "oui"}
+
+
+def print_audit_summary(summary_path: Path) -> None:
+    if not summary_path.exists():
+        print(f">>> Audit summary not found at {summary_path}")
+        return
+    try:
+        with summary_path.open("r", encoding="utf-8") as handle:
+            data = json.load(handle)
+    except json.JSONDecodeError as exc:
+        print(f">>> Unable to parse audit summary ({exc})")
+        return
+    print("\n=== Audit Summary ===")
+    print(f"Processed: {data.get('processed', 0)}")
+    print(f"Flagged:   {data.get('flagged', 0)}")
+    generation = data.get("generation", {}) or {}
+    print(
+        f"Generation – success:{generation.get('success', 0)} "
+        f"failed:{generation.get('failed', 0)} skipped:{generation.get('skipped', 0)}"
+    )
+    ai_review = data.get("ai_review", {}) or {}
+    print(
+        f"AI review – confirmed:{ai_review.get('confirmed', 0)} "
+        f"cleared:{ai_review.get('cleared', 0)} errors:{ai_review.get('error', 0)}"
+    )
+    if data.get("issue_counts"):
+        print("Top issues:")
+        for key, value in sorted(data["issue_counts"].items(), key=lambda kv: kv[1], reverse=True)[:8]:
+            print(f"  - {key}: {value}")
+    print("=====================\n")
 
 
 def parse_args() -> argparse.Namespace:
@@ -105,11 +149,28 @@ def parse_args() -> argparse.Namespace:
         type=int,
         help="Limit passed to process_generated_questions.py",
     )
+    parser.add_argument(
+        "--yes-generation",
+        action="store_true",
+        help="Automatically continue to processing after the audit summary.",
+    )
+    parser.add_argument(
+        "--yes-insert",
+        action="store_true",
+        help="Automatically continue with insertion/deletion after validation.",
+    )
+    parser.add_argument(
+        "--yes-all",
+        action="store_true",
+        help="Bypass all interactive prompts.",
+    )
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
+    auto_generation = args.yes_all or args.yes_generation
+    auto_insert = args.yes_all or args.yes_insert
 
     if not args.skip_audit:
         audit_cmd = [sys.executable, "scripts/collect_replacement_candidates.py"]
@@ -141,6 +202,20 @@ def main() -> None:
             audit_cmd,
             "collect_replacement_candidates.py (audit + generation)",
         )
+        summary_path = PROJECT_ROOT / "diagnostics_output/realtime_summary.json"
+        print_audit_summary(summary_path)
+        if args.skip_process:
+            auto_proceed = True
+        else:
+            auto_proceed = auto_generation
+        if not args.skip_process:
+            if not prompt_user(
+                "Proceed to validation of generated questions?",
+                default=False,
+                auto_confirm=auto_proceed,
+            ):
+                print(">>> Aborting before validation step.")
+                return
     else:
         print(">>> Skipping collect_replacement_candidates.py")
 
@@ -176,6 +251,13 @@ def main() -> None:
             ]
             if args.process_limit is not None:
                 live_cmd.extend(["--limit", str(args.process_limit)])
+            if not prompt_user(
+                "Ready to insert validated questions and delete originals?",
+                default=False,
+                auto_confirm=auto_insert,
+            ):
+                print(">>> Insertion skipped.")
+                return
             run_step(live_cmd, "process_generated_questions.py (apply)")
         else:
             print(">>> Dry-run enabled: skipping insert/delete step.")

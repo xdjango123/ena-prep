@@ -35,6 +35,7 @@ from question_audit.db import (
     get_supabase_client,
 )
 from question_audit.text_utils import normalize_text, token_signature
+from question_audit.model_checks import ModelValidators, run_llm_checks
 
 DetectorFactory.seed = 42  # make language detection deterministic
 
@@ -45,11 +46,13 @@ except Exception:  # pragma: no cover - optional
     QuestionInserter = None  # type: ignore
 
 
-SIMILARITY_HARD_STOP = 0.92
-SIMILARITY_MANUAL_REVIEW_LOW = 0.85
-SIMILARITY_MANUAL_REVIEW_HIGH = 0.92
+SIMILARITY_DUPLICATE_THRESHOLD = 0.999
+SIMILARITY_MANUAL_REVIEW_LOW = 0.95
+SIMILARITY_MANUAL_REVIEW_HIGH = SIMILARITY_DUPLICATE_THRESHOLD
 DEFAULT_INPUT = "ai_validated_questions/successful_questions_ready.json"
 DEFAULT_READY_OUTPUT = "ai_validated_questions/ready_for_insert.json"
+READY_SOURCE_IDS = "ai_validated_questions/ready_for_insert_source_ids.json"
+INGESTED_IDS_PATH = "ai_validated_questions/ingested_source_ids.json"
 CONFLICTS_PATH = "diagnostics_output/generated_conflicts.json"
 MANUAL_REVIEW_DIR = Path("diagnostics_output/duplicates")
 MANUAL_REVIEW_CANDIDATES = MANUAL_REVIEW_DIR / "manual_review_candidates.json"
@@ -80,6 +83,8 @@ class GeneratedQuestionProcessor:
         self.cwd = Path(args.cwd).resolve()
         self.input_path = self.cwd / args.input
         self.ready_output_path = self.cwd / args.output
+        self.ready_source_ids_path = self.cwd / READY_SOURCE_IDS
+        self.ingested_ids_path = self.cwd / INGESTED_IDS_PATH
         self.conflicts_path = self.cwd / CONFLICTS_PATH
         self.manual_review_candidates_path = self.cwd / MANUAL_REVIEW_CANDIDATES
         self.manual_review_resolved_path = self.cwd / MANUAL_REVIEW_RESOLVED
@@ -105,6 +110,12 @@ class GeneratedQuestionProcessor:
         self.manual_review_resolved = self._load_manual_review_resolved()
         self.supabase_client = self._init_supabase_client()
         self.existing_questions = self._load_existing_questions()
+        self.ingested_ids = self._load_ingested_ids()
+        self.validators = ModelValidators(
+            gemini_model=args.gemini_model,
+            gpt_model=args.gpt_model,
+            cache_path=(self.cwd / args.model_cache).resolve(),
+        )
 
     def _load_manual_review_resolved(self) -> Dict[str, Dict[str, str]]:
         if not self.manual_review_resolved_path.exists():
@@ -153,9 +164,15 @@ class GeneratedQuestionProcessor:
         return existing
 
     def run(self) -> None:
-        generated = self._load_generated_questions()
-        for entry in generated:
-            self._process_generated(entry)
+        if self.args.use_ready_cache:
+            self._load_ready_cache()
+        else:
+            print("Loading generated questions…")
+            generated = self._load_generated_questions()
+            print(f"Loaded {len(generated)} generated entries.")
+            for idx, entry in enumerate(generated, start=1):
+                print(f"[{idx}/{len(generated)}] Validating {entry.question_id}…")
+                self._process_generated(entry)
 
         if self.manual_review_entries:
             MANUAL_REVIEW_DIR.mkdir(parents=True, exist_ok=True)
@@ -165,9 +182,10 @@ class GeneratedQuestionProcessor:
             self.conflicts_path.parent.mkdir(parents=True, exist_ok=True)
             self._write_json(self.conflicts_path, self.conflicts)
 
-        if self.accepted_questions:
+        if self.accepted_questions and not self.args.use_ready_cache:
             self.ready_output_path.parent.mkdir(parents=True, exist_ok=True)
             self._write_json(self.ready_output_path, self.accepted_questions)
+            self._write_json(self.ready_source_ids_path, self.accepted_source_ids)
 
         if self.args.insert and self.accepted_questions:
             self._insert_questions()
@@ -177,6 +195,7 @@ class GeneratedQuestionProcessor:
             errors_path.parent.mkdir(parents=True, exist_ok=True)
             self._write_json(errors_path, self.potential_errors)
 
+        self.validators.flush_cache()
         self._print_summary()
 
     def _insert_questions(self) -> None:
@@ -202,11 +221,138 @@ class GeneratedQuestionProcessor:
                 else self.replaced_source_ids
             )
             self._delete_original_questions(target_ids, dry_run=self.args.dry_run)
+        if not self.args.dry_run and self.replaced_source_ids:
+            self._record_ingested_ids(self.replaced_source_ids)
 
     def _write_json(self, path: Path, payload: Any) -> None:
         with path.open("w", encoding="utf-8") as handle:
             json.dump(payload, handle, ensure_ascii=False, indent=2)
             handle.write("\n")
+
+    def _load_ready_cache(self) -> None:
+        if not self.ready_output_path.exists():
+            raise SystemExit(f"Ready-for-insert payload not found: {self.ready_output_path}")
+        if not self.ready_source_ids_path.exists():
+            self._rebuild_ready_source_ids()
+
+        with self.ready_output_path.open("r", encoding="utf-8") as handle:
+            cached_questions = json.load(handle)
+        with self.ready_source_ids_path.open("r", encoding="utf-8") as handle:
+            cached_source_ids = json.load(handle)
+
+        if not isinstance(cached_questions, list) or not isinstance(cached_source_ids, list):
+            raise SystemExit("Ready cache malformed: expected lists for questions and source IDs.")
+        if len(cached_questions) != len(cached_source_ids):
+            raise SystemExit(
+                f"Ready cache mismatch: {len(cached_questions)} questions vs {len(cached_source_ids)} source IDs."
+            )
+
+        filtered_questions: List[Dict[str, Any]] = []
+        filtered_source_ids: List[str] = []
+        for question, source_id in zip(cached_questions, cached_source_ids):
+            source_id_str = str(source_id)
+            if source_id_str in self.ingested_ids:
+                continue
+            filtered_questions.append(question)
+            filtered_source_ids.append(source_id_str)
+
+        self.accepted_questions = filtered_questions
+        self.accepted_source_ids = filtered_source_ids
+        self.stats["loaded"] = len(self.accepted_questions)
+        self.stats["accepted"] = len(self.accepted_questions)
+        print(f"Loaded {len(self.accepted_questions)} cached ready-to-insert questions.")
+
+    def _rebuild_ready_source_ids(self) -> None:
+        """Recreate ready_for_insert_source_ids.json by aligning ready payloads to replacements_raw."""
+        if not self.input_path.exists():
+            raise SystemExit(
+                f"Cannot rebuild source IDs: input file not found at {self.input_path}"
+            )
+        ready_payload = json.loads(self.ready_output_path.read_text(encoding="utf-8"))
+        raw_payload = json.loads(self.input_path.read_text(encoding="utf-8"))
+        if not isinstance(ready_payload, list):
+            raise SystemExit("Ready payload malformed; expected a list.")
+        mapping: List[str] = []
+        ready_idx = 0
+
+        for item in raw_payload:
+            if ready_idx >= len(ready_payload):
+                break
+            question_id = str(item.get("question_id") or item.get("id") or "")
+            generated_block = (
+                item.get("generated")
+                or (item.get("generated_entry") or {}).get("generated")
+                or {}
+            )
+            ready_block = ready_payload[ready_idx]
+            if self._same_question(ready_block, generated_block):
+                mapping.append(question_id)
+                ready_idx += 1
+
+        if ready_idx != len(ready_payload):
+            raise SystemExit(
+                "Unable to rebuild ready_for_insert_source_ids.json "
+                f"(matched {ready_idx}/{len(ready_payload)} entries)."
+            )
+
+        self._write_json(self.ready_source_ids_path, mapping)
+        print(
+            f"Rebuilt {len(mapping)} ready-for-insert source IDs at {self.ready_source_ids_path}"
+        )
+
+    @staticmethod
+    def _same_question(ready_block: Dict[str, Any], generated_block: Dict[str, Any]) -> bool:
+        """Return True when the ready and generated question payloads describe the same question."""
+        if not ready_block or not generated_block:
+            return False
+        if ready_block.get("question_text") != generated_block.get("question_text"):
+            return False
+        ready_answers = [
+            ready_block.get("answer1"),
+            ready_block.get("answer2"),
+            ready_block.get("answer3"),
+            ready_block.get("answer4"),
+        ]
+        gen_answers = [
+            generated_block.get("answers", {}).get("A")
+            if isinstance(generated_block.get("answers"), dict)
+            else generated_block.get("answer1"),
+            generated_block.get("answers", {}).get("B")
+            if isinstance(generated_block.get("answers"), dict)
+            else generated_block.get("answer2"),
+            generated_block.get("answers", {}).get("C")
+            if isinstance(generated_block.get("answers"), dict)
+            else generated_block.get("answer3"),
+            generated_block.get("answers", {}).get("D")
+            if isinstance(generated_block.get("answers"), dict)
+            else generated_block.get("answer4"),
+        ]
+        return all(
+            (ready_answers[idx] or "").strip() == (gen_answers[idx] or "").strip()
+            for idx in range(4)
+        )
+
+    def _load_ingested_ids(self) -> set[str]:
+        if not self.ingested_ids_path.exists():
+            return set()
+        try:
+            with self.ingested_ids_path.open("r", encoding="utf-8") as handle:
+                data = json.load(handle)
+            if isinstance(data, list):
+                return {str(item) for item in data if item}
+        except json.JSONDecodeError:
+            pass
+        return set()
+
+    def _record_ingested_ids(self, new_ids: List[str]) -> None:
+        if not new_ids:
+            return
+        updated = set(self.ingested_ids)
+        updated.update(str(item) for item in new_ids if item)
+        self.ingested_ids = updated
+        self.ingested_ids_path.parent.mkdir(parents=True, exist_ok=True)
+        with self.ingested_ids_path.open("w", encoding="utf-8") as handle:
+            json.dump(sorted(updated), handle, ensure_ascii=False, indent=2)
 
     def _load_generated_questions(self) -> List[GeneratedQuestion]:
         if not self.input_path.exists():
@@ -218,6 +364,8 @@ class GeneratedQuestionProcessor:
         generated: List[GeneratedQuestion] = []
         for item in data:
             question_id = item.get("question_id") or item.get("id") or "generated"
+            if question_id in self.ingested_ids:
+                continue
             question_data = (
                 item.get("question_data")
                 or item.get("generated")
@@ -238,6 +386,27 @@ class GeneratedQuestionProcessor:
             )
         self.stats["loaded"] = len(generated)
         return generated
+
+    def _llm_validate_question(self, payload: Dict[str, Any], generated: GeneratedQuestion) -> bool:
+        issues, details = run_llm_checks(payload, self.validators)
+        if not issues:
+            return True
+        for issue in issues:
+            reason = f"llm_{issue['task']}_{issue['status']}"
+            self._add_potential_error(
+                reason,
+                {
+                    "question_id": generated.question_id,
+                    "question_text": payload.get("question_text"),
+                    "exam_type": payload.get("exam_type"),
+                    "category": payload.get("category"),
+                },
+                extras={
+                    "llm_issue": issue,
+                    "llm_results": details,
+                },
+            )
+        return False
 
     def _add_potential_error(
         self,
@@ -275,6 +444,9 @@ class GeneratedQuestionProcessor:
             return
 
         if not self._validate_answers(question_payload):
+            return
+
+        if not self._llm_validate_question(question_payload, generated):
             return
 
         self.accepted_questions.append(question_payload)
@@ -380,7 +552,7 @@ class GeneratedQuestionProcessor:
 
         # Evaluate similarity against existing questions
         best_existing = self._best_match(generated.normalized_text, self.existing_questions)
-        if best_existing and best_existing[0] >= SIMILARITY_HARD_STOP:
+        if best_existing and best_existing[0] >= SIMILARITY_DUPLICATE_THRESHOLD:
             self._record_conflict(
                 f"Similarity {best_existing[0]:.3f} with existing question",
                 payload,
@@ -395,6 +567,7 @@ class GeneratedQuestionProcessor:
                 self.manual_review_entries.append(
                     {
                         "review_key": review_key,
+                        "issue_type": "near_duplicate",
                         "similarity": round(best_existing[0], 3),
                         "generated_question": {
                             "question_id": generated.question_id,
@@ -663,6 +836,26 @@ def parse_args() -> argparse.Namespace:
         "--delete-originals",
         action="store_true",
         help="After successful insertion, delete source question IDs present in the input (requires Supabase credentials)",
+    )
+    parser.add_argument(
+        "--use-ready-cache",
+        action="store_true",
+        help="Skip validation and reuse the existing ready_for_insert cache for insertion",
+    )
+    parser.add_argument(
+        "--gemini-model",
+        default="gemini-2.0-flash",
+        help="Gemini model to use for automated validation (default: gemini-2.0-flash)",
+    )
+    parser.add_argument(
+        "--gpt-model",
+        default="gpt-4o-mini",
+        help="GPT model to confirm Gemini flags (default: gpt-4o-mini)",
+    )
+    parser.add_argument(
+        "--model-cache",
+        default="diagnostics_output/model_validation_cache.json",
+        help="Path to the shared model validation cache file",
     )
     return parser.parse_args()
 

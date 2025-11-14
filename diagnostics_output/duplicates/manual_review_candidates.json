@@ -1,0 +1,1037 @@
+[
+  {
+    "review_key": "cm_exam_01_CG_10|0ed6cb94-97dd-4aff-a74a-15a6b2e5b18d",
+    "similarity": 0.857,
+    "generated_question": {
+      "question_id": "cm_exam_01_CG_10",
+      "question_text": "Quel est le synonyme de “hâbleur” ?",
+      "exam_type": "CM",
+      "category": "CG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "0ed6cb94-97dd-4aff-a74a-15a6b2e5b18d",
+      "question_text": "Quel est le synonyme de 'abroger' ?"
+    }
+  },
+  {
+    "review_key": "cm_exam_01_CG_12|2d4aa426-eab1-49d8-a7c2-5aa7e2eeff5d",
+    "similarity": 0.898,
+    "generated_question": {
+      "question_id": "cm_exam_01_CG_12",
+      "question_text": "Quelle est la monnaie officielle de la Mauritanie ?",
+      "exam_type": "CM",
+      "category": "CG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "2d4aa426-eab1-49d8-a7c2-5aa7e2eeff5d",
+      "question_text": "Quelle est la monnaie officielle de la Suisse ?"
+    }
+  },
+  {
+    "review_key": "cm_exam_01_ANG_18|b22f3f46-2170-4f5f-844f-e948158a5653",
+    "similarity": 0.875,
+    "generated_question": {
+      "question_id": "cm_exam_01_ANG_18",
+      "question_text": "They arrived __________ the airport at 6 PM.",
+      "exam_type": "CM",
+      "category": "ANG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "b22f3f46-2170-4f5f-844f-e948158a5653",
+      "question_text": "He arrived ___ the airport at 6 p.m."
+    }
+  },
+  {
+    "review_key": "cm_exam_04_ANG_19|d1ba995f-1f94-48cc-98ab-04e130ef992f",
+    "similarity": 0.877,
+    "generated_question": {
+      "question_id": "cm_exam_04_ANG_19",
+      "question_text": "Which of these words is a verb ?",
+      "exam_type": "CM",
+      "category": "ANG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "d1ba995f-1f94-48cc-98ab-04e130ef992f",
+      "question_text": "Which of these is a verb?"
+    }
+  },
+  {
+    "review_key": "cm_exam_04_LOG_05|73e1fbdb-43d8-4f31-9eac-d46849e0563c",
+    "similarity": 0.908,
+    "generated_question": {
+      "question_id": "cm_exam_04_LOG_05",
+      "question_text": "Un train parcourt 120 km en 2 heures. Quelle est sa vitesse moyenne ?",
+      "exam_type": "CM",
+      "category": "LOG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "73e1fbdb-43d8-4f31-9eac-d46849e0563c",
+      "question_text": "Une voiture parcourt 240 km en 3 heures. Quelle est sa vitesse moyenne ?"
+    }
+  },
+  {
+    "review_key": "cm_exam_04_LOG_10|cebec45b-070f-4b3c-a764-dfe04d32d502",
+    "similarity": 0.864,
+    "generated_question": {
+      "question_id": "cm_exam_04_LOG_10",
+      "question_text": "Complétez la suite logique : 1, 4, 9, 16, ?",
+      "exam_type": "CM",
+      "category": "LOG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "cebec45b-070f-4b3c-a764-dfe04d32d502",
+      "question_text": "Complétez la séquence : 1, 4, 9, 16, ?"
+    }
+  },
+  {
+    "review_key": "cm_exam_05_LOG_01|df6c84bc-77b1-4df9-ad26-3b8138a987e3",
+    "similarity": 0.912,
+    "generated_question": {
+      "question_id": "cm_exam_05_LOG_01",
+      "question_text": "Complétez la suite : 1, 2, 4, 8, ?",
+      "exam_type": "CM",
+      "category": "LOG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "df6c84bc-77b1-4df9-ad26-3b8138a987e3",
+      "question_text": "Complétez la suite: 10, 7, 4, 1, ?"
+    }
+  },
+  {
+    "review_key": "cm_exam_05_LOG_15|88cea099-6ba4-43f5-8532-b4ae2a71167d",
+    "similarity": 0.862,
+    "generated_question": {
+      "question_id": "cm_exam_05_LOG_15",
+      "question_text": "Complétez : 1, 4, 9, 16, ?",
+      "exam_type": "CM",
+      "category": "LOG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "88cea099-6ba4-43f5-8532-b4ae2a71167d",
+      "question_text": "5- Complétez : 1, 2, 4, 8, 16, ?"
+    }
+  },
+  {
+    "review_key": "cm_exam_06_CG_13|c4538685-039a-41a4-9dde-181ba7402f3e",
+    "similarity": 0.912,
+    "generated_question": {
+      "question_id": "cm_exam_06_CG_13",
+      "question_text": "Quel pays a organisé la Coupe du Monde de football 2018 ?",
+      "exam_type": "CM",
+      "category": "CG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "c4538685-039a-41a4-9dde-181ba7402f3e",
+      "question_text": "Quel pays a remporté la Coupe du Monde de football 2018 ?"
+    }
+  },
+  {
+    "review_key": "cm_exam_06_CG_15|9a0e763c-2a3d-406e-8db2-202a4dd7bec9",
+    "similarity": 0.86,
+    "generated_question": {
+      "question_id": "cm_exam_06_CG_15",
+      "question_text": "Lequel de ces philosophes est grec ancien ?",
+      "exam_type": "CM",
+      "category": "CG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "9a0e763c-2a3d-406e-8db2-202a4dd7bec9",
+      "question_text": "Lequel de ces philosophes est un stoïcien ?"
+    }
+  },
+  {
+    "review_key": "cm_exam_06_ANG_18|f8ec3df2-0c78-4f03-8cb0-b694495c4d68",
+    "similarity": 0.857,
+    "generated_question": {
+      "question_id": "cm_exam_06_ANG_18",
+      "question_text": "I ……………… to Paris last summer.",
+      "exam_type": "CM",
+      "category": "ANG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "f8ec3df2-0c78-4f03-8cb0-b694495c4d68",
+      "question_text": "We …………….. to Italy last summer."
+    }
+  },
+  {
+    "review_key": "cm_exam_06_LOG_02|17d52d7e-4f10-4e82-9934-1a08d18ee337",
+    "similarity": 0.868,
+    "generated_question": {
+      "question_id": "cm_exam_06_LOG_02",
+      "question_text": "Si x – 7 = 12, alors x = ?",
+      "exam_type": "CM",
+      "category": "LOG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "17d52d7e-4f10-4e82-9934-1a08d18ee337",
+      "question_text": "Si 3x + 5 = 20, alors x = ?"
+    }
+  },
+  {
+    "review_key": "cm_exam_06_LOG_03|698071e1-c56b-4d83-a7a0-99e20de92365",
+    "similarity": 0.919,
+    "generated_question": {
+      "question_id": "cm_exam_06_LOG_03",
+      "question_text": "Une voiture parcourt 120 km en 2 heures. Vitesse moyenne ?",
+      "exam_type": "CM",
+      "category": "LOG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "698071e1-c56b-4d83-a7a0-99e20de92365",
+      "question_text": "Une voiture parcourt 180 km en 3 h. Vitesse moyenne ?"
+    }
+  },
+  {
+    "review_key": "cm_exam_06_LOG_11|f14f5d71-0c46-4603-a899-be370c20ac3b",
+    "similarity": 0.88,
+    "generated_question": {
+      "question_id": "cm_exam_06_LOG_11",
+      "question_text": "Prix initial 120 000 FCFA, remise 20%. Prix final ?",
+      "exam_type": "CM",
+      "category": "LOG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "f14f5d71-0c46-4603-a899-be370c20ac3b",
+      "question_text": "Prix initial : 1 500 €, remise 20 %. Prix final ?"
+    }
+  },
+  {
+    "review_key": "cm_exam_07_CG_01|30a9abb7-76f2-4006-add1-7d550a3064cc",
+    "similarity": 0.869,
+    "generated_question": {
+      "question_id": "cm_exam_07_CG_01",
+      "question_text": "La Chine est le premier producteur mondial de",
+      "exam_type": "CM",
+      "category": "CG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "30a9abb7-76f2-4006-add1-7d550a3064cc",
+      "question_text": "La Côte d’Ivoire est le premier producteur mondial de:"
+    }
+  },
+  {
+    "review_key": "cm_exam_07_LOG_01|279ac0aa-ce99-47c2-9067-7ff3caeae740",
+    "similarity": 0.862,
+    "generated_question": {
+      "question_id": "cm_exam_07_LOG_01",
+      "question_text": "Complétez : 3, 6, 12, 24, ?",
+      "exam_type": "CM",
+      "category": "LOG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "279ac0aa-ce99-47c2-9067-7ff3caeae740",
+      "question_text": "Complétez : 2, 6, 12, 20, 30, ?"
+    }
+  },
+  {
+    "review_key": "cm_exam_07_LOG_10|b1100ba5-a567-4f63-b9d9-9cba3c5ac866",
+    "similarity": 0.862,
+    "generated_question": {
+      "question_id": "cm_exam_07_LOG_10",
+      "question_text": "Complétez : 7, 14, 28, 56, ?",
+      "exam_type": "CM",
+      "category": "LOG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "b1100ba5-a567-4f63-b9d9-9cba3c5ac866",
+      "question_text": "Complétez la série : 7, 14, 28, 56, ?"
+    }
+  },
+  {
+    "review_key": "cm_exam_07_LOG_12|31403667-c174-4dd6-a3d9-965901d1e4bb",
+    "similarity": 0.852,
+    "generated_question": {
+      "question_id": "cm_exam_07_LOG_12",
+      "question_text": "Volume cube de 5 cm d’arête",
+      "exam_type": "CM",
+      "category": "LOG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "31403667-c174-4dd6-a3d9-965901d1e4bb",
+      "question_text": "Volume d’un cube de 7 cm d’arête :"
+    }
+  },
+  {
+    "review_key": "cm_exam_08_CG_06|19b36077-46ce-4ff9-8e4d-034bb2a4b799",
+    "similarity": 0.902,
+    "generated_question": {
+      "question_id": "cm_exam_08_CG_06",
+      "question_text": "Quel écrivain africain a reçu le Prix Nobel de littérature ?",
+      "exam_type": "CM",
+      "category": "CG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "19b36077-46ce-4ff9-8e4d-034bb2a4b799",
+      "question_text": "Quel écrivain ouest-africain a reçu le prix Nobel de littérature en 1986?"
+    }
+  },
+  {
+    "review_key": "cm_exam_08_CG_16|0d691bb6-a0d0-4007-a956-c392d26f0efb",
+    "similarity": 0.894,
+    "generated_question": {
+      "question_id": "cm_exam_08_CG_16",
+      "question_text": "Quelle est la formule chimique de la glace ?",
+      "exam_type": "CM",
+      "category": "CG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "0d691bb6-a0d0-4007-a956-c392d26f0efb",
+      "question_text": "Quelle est la formule chimique de l'eau ?"
+    }
+  },
+  {
+    "review_key": "cm_exam_08_ANG_20|e6d4a807-a78c-4b2a-8c59-24f484d20780",
+    "similarity": 0.882,
+    "generated_question": {
+      "question_id": "cm_exam_08_ANG_20",
+      "question_text": "Which religion believes in karma and reincarnation?",
+      "exam_type": "CM",
+      "category": "ANG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "e6d4a807-a78c-4b2a-8c59-24f484d20780",
+      "question_text": "Which religion believes in reincarnation ?"
+    }
+  },
+  {
+    "review_key": "cm_exam_08_LOG_02|279ac0aa-ce99-47c2-9067-7ff3caeae740",
+    "similarity": 0.862,
+    "generated_question": {
+      "question_id": "cm_exam_08_LOG_02",
+      "question_text": "Complétez : 3, 6, 12, 24, ?",
+      "exam_type": "CM",
+      "category": "LOG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "279ac0aa-ce99-47c2-9067-7ff3caeae740",
+      "question_text": "Complétez : 2, 6, 12, 20, 30, ?"
+    }
+  },
+  {
+    "review_key": "cm_exam_09_LOG_18|d7360853-99e0-401d-9385-64528ad4ba45",
+    "similarity": 0.892,
+    "generated_question": {
+      "question_id": "cm_exam_09_LOG_18",
+      "question_text": "Somme des angles d’un hexagone ?",
+      "exam_type": "CM",
+      "category": "LOG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "d7360853-99e0-401d-9385-64528ad4ba45",
+      "question_text": "Somme des angles d’un pentagone :"
+    }
+  },
+  {
+    "review_key": "cm_exam_10_CG_01|229b511b-a6de-41e9-9a1d-c393c5714246",
+    "similarity": 0.882,
+    "generated_question": {
+      "question_id": "cm_exam_10_CG_01",
+      "question_text": "Quelle planète est la plus proche du Soleil ?",
+      "exam_type": "CM",
+      "category": "CG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "229b511b-a6de-41e9-9a1d-c393c5714246",
+      "question_text": "Quelle est la planète la plus proche du Soleil ?"
+    }
+  },
+  {
+    "review_key": "cm_exam_10_ANG_10|f8ec3df2-0c78-4f03-8cb0-b694495c4d68",
+    "similarity": 0.86,
+    "generated_question": {
+      "question_id": "cm_exam_10_ANG_10",
+      "question_text": "I ……………… to Germany last summer.",
+      "exam_type": "CM",
+      "category": "ANG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "f8ec3df2-0c78-4f03-8cb0-b694495c4d68",
+      "question_text": "We …………….. to Italy last summer."
+    }
+  },
+  {
+    "review_key": "cm_exam_10_ANG_20|e6d4a807-a78c-4b2a-8c59-24f484d20780",
+    "similarity": 0.882,
+    "generated_question": {
+      "question_id": "cm_exam_10_ANG_20",
+      "question_text": "Which religion believes in karma and reincarnation?",
+      "exam_type": "CM",
+      "category": "ANG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "e6d4a807-a78c-4b2a-8c59-24f484d20780",
+      "question_text": "Which religion believes in reincarnation ?"
+    }
+  },
+  {
+    "review_key": "cm_exam_11_CG_03|bccc3468-5d85-4ad9-b44d-01538ea50a82",
+    "similarity": 0.862,
+    "generated_question": {
+      "question_id": "cm_exam_11_CG_03",
+      "question_text": "Quelle est la principale fonction de l’hémoglobine dans le sang ?",
+      "exam_type": "CM",
+      "category": "CG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "bccc3468-5d85-4ad9-b44d-01538ea50a82",
+      "question_text": "Quelle est la principale fonction de l’humus dans le sol ?"
+    }
+  },
+  {
+    "review_key": "cm_exam_11_ANG_20|e6d4a807-a78c-4b2a-8c59-24f484d20780",
+    "similarity": 0.903,
+    "generated_question": {
+      "question_id": "cm_exam_11_ANG_20",
+      "question_text": "Which religion believes in reincarnation and karma?",
+      "exam_type": "CM",
+      "category": "ANG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "e6d4a807-a78c-4b2a-8c59-24f484d20780",
+      "question_text": "Which religion believes in reincarnation ?"
+    }
+  },
+  {
+    "review_key": "cm_exam_11_LOG_01|17d52d7e-4f10-4e82-9934-1a08d18ee337",
+    "similarity": 0.875,
+    "generated_question": {
+      "question_id": "cm_exam_11_LOG_01",
+      "question_text": "Si 3x + 5 = 20, x = ?",
+      "exam_type": "CM",
+      "category": "LOG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "17d52d7e-4f10-4e82-9934-1a08d18ee337",
+      "question_text": "Si 3x + 5 = 20, alors x = ?"
+    }
+  },
+  {
+    "review_key": "cm_exam_11_LOG_08|81a93726-3ca9-44e7-82c5-43515d1917d7",
+    "similarity": 0.866,
+    "generated_question": {
+      "question_id": "cm_exam_11_LOG_08",
+      "question_text": "Tous les dauphins sont des mammifères. Certains mammifères sont des chiens. Certains dauphins sont-ils des chiens ?",
+      "exam_type": "CM",
+      "category": "LOG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "81a93726-3ca9-44e7-82c5-43515d1917d7",
+      "question_text": "Tous les chats sont des mammifères. Certains mammifères sont des chiens. Tous les chats sont-ils des chiens ?"
+    }
+  },
+  {
+    "review_key": "cm_exam_11_LOG_18|d7360853-99e0-401d-9385-64528ad4ba45",
+    "similarity": 0.892,
+    "generated_question": {
+      "question_id": "cm_exam_11_LOG_18",
+      "question_text": "Somme des angles d’un décagone ?",
+      "exam_type": "CM",
+      "category": "LOG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "d7360853-99e0-401d-9385-64528ad4ba45",
+      "question_text": "Somme des angles d’un pentagone :"
+    }
+  },
+  {
+    "review_key": "cm_exam_12_ANG_16|f8ec3df2-0c78-4f03-8cb0-b694495c4d68",
+    "similarity": 0.894,
+    "generated_question": {
+      "question_id": "cm_exam_12_ANG_16",
+      "question_text": "We ……………… to Paris last summer.",
+      "exam_type": "CM",
+      "category": "ANG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "f8ec3df2-0c78-4f03-8cb0-b694495c4d68",
+      "question_text": "We …………….. to Italy last summer."
+    }
+  },
+  {
+    "review_key": "cm_exam_12_LOG_10|1afa2e8b-92da-43ed-afc8-7c4f71658fe5",
+    "similarity": 0.885,
+    "generated_question": {
+      "question_id": "cm_exam_12_LOG_10",
+      "question_text": "Complétez : 5, 10, 20, 40, …",
+      "exam_type": "CM",
+      "category": "LOG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "1afa2e8b-92da-43ed-afc8-7c4f71658fe5",
+      "question_text": "1- Complétez : 5, 10, 20, 40, ?"
+    }
+  },
+  {
+    "review_key": "cm_exam_12_LOG_14|a202c041-ab86-471a-8aec-b8b1e4c69602",
+    "similarity": 0.902,
+    "generated_question": {
+      "question_id": "cm_exam_12_LOG_14",
+      "question_text": "Quel nombre complète la série : 7, 14, 28, 56, …",
+      "exam_type": "CM",
+      "category": "LOG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "a202c041-ab86-471a-8aec-b8b1e4c69602",
+      "question_text": "Quel nombre complète la série : 1, 1, 2, 3, 5, ... ?"
+    }
+  },
+  {
+    "review_key": "cm_exam_12_LOG_18|beec508c-7554-47d7-b19f-991a24b4b4af",
+    "similarity": 0.877,
+    "generated_question": {
+      "question_id": "cm_exam_12_LOG_18",
+      "question_text": "Complétez : 1, 4, 9, 16, 25, …",
+      "exam_type": "CM",
+      "category": "LOG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "beec508c-7554-47d7-b19f-991a24b4b4af",
+      "question_text": "Complétez la série : 1, 4, 9, 16, 25, ..."
+    }
+  },
+  {
+    "review_key": "cm_exam_13_LOG_02|88ba8eea-2bc9-4665-ad77-42bef5c613c8",
+    "similarity": 0.917,
+    "generated_question": {
+      "question_id": "cm_exam_13_LOG_02",
+      "question_text": "Complétez la série : 3, 7, 13, 21, ?",
+      "exam_type": "CM",
+      "category": "LOG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "88ba8eea-2bc9-4665-ad77-42bef5c613c8",
+      "question_text": "Complétez la série : 3, 6, 10, 15, ?"
+    }
+  },
+  {
+    "review_key": "cm_exam_14_CG_17|a93a50b2-164d-4aa6-94c9-5985ad52596e",
+    "similarity": 0.909,
+    "generated_question": {
+      "question_id": "cm_exam_14_CG_17",
+      "question_text": "Lequel de ces éléments est un métal alcalino-terreux ?",
+      "exam_type": "CM",
+      "category": "CG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "a93a50b2-164d-4aa6-94c9-5985ad52596e",
+      "question_text": "Lequel de ces éléments est un métal alcalin ?"
+    }
+  },
+  {
+    "review_key": "cm_exam_14_LOG_15|9e08a66d-94c4-4111-ba61-5f423b705f0d",
+    "similarity": 0.857,
+    "generated_question": {
+      "question_id": "cm_exam_14_LOG_15",
+      "question_text": "Quel nombre complète la suite : 2, 6, 12, 20, 30, …",
+      "exam_type": "CM",
+      "category": "LOG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "9e08a66d-94c4-4111-ba61-5f423b705f0d",
+      "question_text": "Quel nombre complète cette suite logique : 2, 6, 12, 20, 30, ... ?"
+    }
+  },
+  {
+    "review_key": "cm_exam_15_CG_05|dbf73c2a-383a-44c1-9cd4-627e7b224bb3",
+    "similarity": 0.853,
+    "generated_question": {
+      "question_id": "cm_exam_15_CG_05",
+      "question_text": "Quelle est la capitale du Burundi ?",
+      "exam_type": "CM",
+      "category": "CG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "dbf73c2a-383a-44c1-9cd4-627e7b224bb3",
+      "question_text": "Quelle est la capitale du Canada?"
+    }
+  },
+  {
+    "review_key": "cm_exam_15_ANG_15|f09c8266-3a3b-44e6-adc1-f0e65a537714",
+    "similarity": 0.865,
+    "generated_question": {
+      "question_id": "cm_exam_15_ANG_15",
+      "question_text": "Identify the idiom: “Bite the bullet”",
+      "exam_type": "CM",
+      "category": "ANG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "f09c8266-3a3b-44e6-adc1-f0e65a537714",
+      "question_text": "Identify the idiom: “Kick the bucket”"
+    }
+  },
+  {
+    "review_key": "cm_exam_15_ANG_19|ff76afa7-3d7a-4f52-92cd-a7a2dfff5aa0",
+    "similarity": 0.852,
+    "generated_question": {
+      "question_id": "cm_exam_15_ANG_19",
+      "question_text": "Which sentence is passive?",
+      "exam_type": "CM",
+      "category": "ANG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "ff76afa7-3d7a-4f52-92cd-a7a2dfff5aa0",
+      "question_text": "Which sentence is in passive voice?"
+    }
+  },
+  {
+    "review_key": "cm_exam_15_LOG_07|0823ac38-e676-4f8d-a459-5b9e580a3131",
+    "similarity": 0.857,
+    "generated_question": {
+      "question_id": "cm_exam_15_LOG_07",
+      "question_text": "Un train parcourt 120 km en 2 h. À quelle vitesse moyenne ?",
+      "exam_type": "CM",
+      "category": "LOG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "0823ac38-e676-4f8d-a459-5b9e580a3131",
+      "question_text": "Un train parcourt 450 km en 4 h 30. Quelle est sa vitesse moyenne ?"
+    }
+  },
+  {
+    "review_key": "cm_exam_15_LOG_10|d4ebf0d1-a001-4738-8eb6-f256aed5a64d",
+    "similarity": 0.853,
+    "generated_question": {
+      "question_id": "cm_exam_15_LOG_10",
+      "question_text": "Combien de faces a un dodécaèdre ?",
+      "exam_type": "CM",
+      "category": "LOG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "d4ebf0d1-a001-4738-8eb6-f256aed5a64d",
+      "question_text": "Combien de côtés a un dodécagone ?"
+    }
+  },
+  {
+    "review_key": "cm_exam_15_LOG_12|beec508c-7554-47d7-b19f-991a24b4b4af",
+    "similarity": 0.877,
+    "generated_question": {
+      "question_id": "cm_exam_15_LOG_12",
+      "question_text": "Complétez : 1, 4, 9, 16, 25, …",
+      "exam_type": "CM",
+      "category": "LOG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "beec508c-7554-47d7-b19f-991a24b4b4af",
+      "question_text": "Complétez la série : 1, 4, 9, 16, 25, ..."
+    }
+  },
+  {
+    "review_key": "cm_exam_15_LOG_13|e1443e6b-29ee-457f-9b91-ff3db7cce9a6",
+    "similarity": 0.882,
+    "generated_question": {
+      "question_id": "cm_exam_15_LOG_13",
+      "question_text": "Trouvez le nombre manquant : 5, 10, 20, 40, …",
+      "exam_type": "CM",
+      "category": "LOG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "e1443e6b-29ee-457f-9b91-ff3db7cce9a6",
+      "question_text": "Trouver le nombre manquant : 5, 10, 20, ? , 80"
+    }
+  },
+  {
+    "review_key": "cm_exam_16_CG_17|b6597420-2a10-4823-90f7-f4fd834ae423",
+    "similarity": 0.851,
+    "generated_question": {
+      "question_id": "cm_exam_16_CG_17",
+      "question_text": "Quel est l’élément chimique de symbole Na ?",
+      "exam_type": "CM",
+      "category": "CG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "b6597420-2a10-4823-90f7-f4fd834ae423",
+      "question_text": "Quel est l'élément chimique dont le symbole est O ?"
+    }
+  },
+  {
+    "review_key": "cm_exam_16_CG_18|5e994f7a-faa9-49b0-a586-aa581e068ee6",
+    "similarity": 0.904,
+    "generated_question": {
+      "question_id": "cm_exam_16_CG_18",
+      "question_text": "Quel est le plus grand désert du monde en superficie ?",
+      "exam_type": "CM",
+      "category": "CG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "5e994f7a-faa9-49b0-a586-aa581e068ee6",
+      "question_text": "Quel est le plus grand désert froid du monde par superficie ?"
+    }
+  },
+  {
+    "review_key": "cm_exam_16_CG_19|7e936b99-ab53-498b-a177-2e9956c8cfbb",
+    "similarity": 0.897,
+    "generated_question": {
+      "question_id": "cm_exam_16_CG_19",
+      "question_text": "Quel pays a accueilli les Jeux Olympiques de 2016 ?",
+      "exam_type": "CM",
+      "category": "CG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "7e936b99-ab53-498b-a177-2e9956c8cfbb",
+      "question_text": "Quel pays a accueilli les Jeux Olympiques d’été de 2024?"
+    }
+  },
+  {
+    "review_key": "cm_exam_16_ANG_01|7f375e71-9422-4150-95c8-390d5b4301cd",
+    "similarity": 0.879,
+    "generated_question": {
+      "question_id": "cm_exam_16_ANG_01",
+      "question_text": "Complete: I would rather ……………… at home tonight.",
+      "exam_type": "CM",
+      "category": "ANG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "7f375e71-9422-4150-95c8-390d5b4301cd",
+      "question_text": "I would rather …………… at home tonight."
+    }
+  },
+  {
+    "review_key": "cm_exam_16_LOG_01|115630da-bb06-4af9-8f07-d86c628fc2e6",
+    "similarity": 0.909,
+    "generated_question": {
+      "question_id": "cm_exam_16_LOG_01",
+      "question_text": "Complétez la suite : 1, 2, 6, 24, …",
+      "exam_type": "CM",
+      "category": "LOG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "115630da-bb06-4af9-8f07-d86c628fc2e6",
+      "question_text": "Complétez la suite : 10, 20, 30, 40, ..."
+    }
+  },
+  {
+    "review_key": "cm_exam_16_LOG_07|0823ac38-e676-4f8d-a459-5b9e580a3131",
+    "similarity": 0.91,
+    "generated_question": {
+      "question_id": "cm_exam_16_LOG_07",
+      "question_text": "Si un train parcourt 150 km en 3 h, quelle est sa vitesse moyenne ?",
+      "exam_type": "CM",
+      "category": "LOG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "0823ac38-e676-4f8d-a459-5b9e580a3131",
+      "question_text": "Un train parcourt 450 km en 4 h 30. Quelle est sa vitesse moyenne ?"
+    }
+  },
+  {
+    "review_key": "cm_exam_16_LOG_13|279ac0aa-ce99-47c2-9067-7ff3caeae740",
+    "similarity": 0.867,
+    "generated_question": {
+      "question_id": "cm_exam_16_LOG_13",
+      "question_text": "Complétez : 2, 6, 12, 20, …",
+      "exam_type": "CM",
+      "category": "LOG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "279ac0aa-ce99-47c2-9067-7ff3caeae740",
+      "question_text": "Complétez : 2, 6, 12, 20, 30, ?"
+    }
+  },
+  {
+    "review_key": "cm_exam_18_CG_20|31ead825-6320-453e-a2b7-3ffde4e98466",
+    "similarity": 0.885,
+    "generated_question": {
+      "question_id": "cm_exam_18_CG_20",
+      "question_text": "Qui est le président actuel du Sénat de Côte d’Ivoire ?",
+      "exam_type": "CM",
+      "category": "CG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "31ead825-6320-453e-a2b7-3ffde4e98466",
+      "question_text": "Qui est le président actuel de la Côte d'Ivoire ?"
+    }
+  },
+  {
+    "review_key": "cm_exam_19_CG_11|fa9adef6-0aac-4d08-82be-2ce569a82dab",
+    "similarity": 0.904,
+    "generated_question": {
+      "question_id": "cm_exam_19_CG_11",
+      "question_text": "La Côte d’Ivoire est membre de quelle organisation économique régionale ?",
+      "exam_type": "CM",
+      "category": "CG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "fa9adef6-0aac-4d08-82be-2ce569a82dab",
+      "question_text": "La Côte d'Ivoire est membre de quelle organisation régionale ?"
+    }
+  },
+  {
+    "review_key": "cm_exam_19_LOG_05|893154a6-b7b7-4138-881b-d2a8afb7880d",
+    "similarity": 0.867,
+    "generated_question": {
+      "question_id": "cm_exam_19_LOG_05",
+      "question_text": "Un rectangle a une largeur de 3/2 m et une longueur de 5/2 m. Quelle est sa surface ?",
+      "exam_type": "CM",
+      "category": "LOG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "893154a6-b7b7-4138-881b-d2a8afb7880d",
+      "question_text": "Un rectangle a une aire de 72 m² et une longueur de 12 m. Quelle est sa largeur ?"
+    }
+  },
+  {
+    "review_key": "cm_exam_19_LOG_09|7a78dd5c-3e0a-4e9d-a078-0a2dcf90de0b",
+    "similarity": 0.851,
+    "generated_question": {
+      "question_id": "cm_exam_19_LOG_09",
+      "question_text": "Complétez la suite logique : 2, 6, 12, 20, …",
+      "exam_type": "CM",
+      "category": "LOG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "7a78dd5c-3e0a-4e9d-a078-0a2dcf90de0b",
+      "question_text": "Complétez la suite: B2, D6, H12, N20, ..."
+    }
+  },
+  {
+    "review_key": "cm_exam_19_LOG_16|8b3bf1e8-a342-4804-893a-b7afdbdc3295",
+    "similarity": 0.876,
+    "generated_question": {
+      "question_id": "cm_exam_19_LOG_16",
+      "question_text": "Une suite : 1, 4, 9, 16, … Quel est le prochain nombre ?",
+      "exam_type": "CM",
+      "category": "LOG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "8b3bf1e8-a342-4804-893a-b7afdbdc3295",
+      "question_text": "Dans la suite : 1, 3, 7, 15, ..., quel est le prochain nombre ?"
+    }
+  },
+  {
+    "review_key": "cm_exam_03_CG_15|077993cf-940a-434a-9b43-fcbf540895f6",
+    "similarity": 0.909,
+    "generated_question": {
+      "question_id": "cm_exam_03_CG_15",
+      "question_text": "Qui est le réalisateur du film Les trois derniers lascards ?",
+      "exam_type": "CM",
+      "category": "CG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "077993cf-940a-434a-9b43-fcbf540895f6",
+      "question_text": "Qui est le réalisateur du film Les Trois Lascars ?"
+    }
+  },
+  {
+    "review_key": "cm_exam_03_LOG_02|78d0c3c4-12f3-411e-b7f0-b2b4ff8a470f",
+    "similarity": 0.896,
+    "generated_question": {
+      "question_id": "cm_exam_03_LOG_02",
+      "question_text": "Complétez la suite : 3, 5, 11, ?",
+      "exam_type": "CM",
+      "category": "LOG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "78d0c3c4-12f3-411e-b7f0-b2b4ff8a470f",
+      "question_text": "Complétez la suite: 3, 7, 15, 31, ?"
+    }
+  },
+  {
+    "review_key": "cm_exam_03_LOG_10|8715a45e-8d78-40b3-abe4-a04102fad9f7",
+    "similarity": 0.855,
+    "generated_question": {
+      "question_id": "cm_exam_03_LOG_10",
+      "question_text": "Il a fallu 4h30 pour obtenir 1800 litres d’eau. Débit du ruisseau ?",
+      "exam_type": "CM",
+      "category": "LOG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "8715a45e-8d78-40b3-abe4-a04102fad9f7",
+      "question_text": "Il a fallu 04 h 30 mn pour obtenir 1800 litres d’eau. Quel était le débit du ruisseau"
+    }
+  },
+  {
+    "review_key": "cm_exam_05_LOG_16|7a5ec52d-81b3-4d74-9bde-e1675f68b4db",
+    "similarity": 0.884,
+    "generated_question": {
+      "question_id": "cm_exam_05_LOG_16",
+      "question_text": "Quel est le résultat de (8 ÷ 2) × (2 + 2) ?",
+      "exam_type": "CM",
+      "category": "LOG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "7a5ec52d-81b3-4d74-9bde-e1675f68b4db",
+      "question_text": "Quel est le résultat de (5 + 3) × (7 - 2) ?"
+    }
+  },
+  {
+    "review_key": "cm_exam_06_LOG_12|31403667-c174-4dd6-a3d9-965901d1e4bb",
+    "similarity": 0.852,
+    "generated_question": {
+      "question_id": "cm_exam_06_LOG_12",
+      "question_text": "Volume cube de 8 cm d’arête",
+      "exam_type": "CM",
+      "category": "LOG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "31403667-c174-4dd6-a3d9-965901d1e4bb",
+      "question_text": "Volume d’un cube de 7 cm d’arête :"
+    }
+  },
+  {
+    "review_key": "cm_exam_06_LOG_16|17d52d7e-4f10-4e82-9934-1a08d18ee337",
+    "similarity": 0.852,
+    "generated_question": {
+      "question_id": "cm_exam_06_LOG_16",
+      "question_text": "Si -4 + x = 10, alors x = ?",
+      "exam_type": "CM",
+      "category": "LOG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "17d52d7e-4f10-4e82-9934-1a08d18ee337",
+      "question_text": "Si 3x + 5 = 20, alors x = ?"
+    }
+  },
+  {
+    "review_key": "cm_exam_12_LOG_06|7c48b3af-dadc-4170-95ad-cedfee9e80d0",
+    "similarity": 0.897,
+    "generated_question": {
+      "question_id": "cm_exam_12_LOG_06",
+      "question_text": "Complétez la suite : 1, 1, 2, 3, 5, 8, …",
+      "exam_type": "CM",
+      "category": "LOG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "7c48b3af-dadc-4170-95ad-cedfee9e80d0",
+      "question_text": "Complétez la suite: 1, 1, 2, 3, 5, ?"
+    }
+  },
+  {
+    "review_key": "cm_exam_12_LOG_12|17d52d7e-4f10-4e82-9934-1a08d18ee337",
+    "similarity": 0.852,
+    "generated_question": {
+      "question_id": "cm_exam_12_LOG_12",
+      "question_text": "Si 2x + 3 = 11, alors x = ?",
+      "exam_type": "CM",
+      "category": "LOG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "17d52d7e-4f10-4e82-9934-1a08d18ee337",
+      "question_text": "Si 3x + 5 = 20, alors x = ?"
+    }
+  },
+  {
+    "review_key": "cm_exam_15_LOG_04|e8f0d9f9-3b7b-45db-bf9f-8188be34314b",
+    "similarity": 0.854,
+    "generated_question": {
+      "question_id": "cm_exam_15_LOG_04",
+      "question_text": "Complétez la suite alphabétique : A, C, F, J, …",
+      "exam_type": "CM",
+      "category": "LOG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "e8f0d9f9-3b7b-45db-bf9f-8188be34314b",
+      "question_text": "Complétez la suite de lettres : A, C, F, J, ..."
+    }
+  },
+  {
+    "review_key": "cm_exam_16_LOG_06|24f6e210-d7e3-4e25-8d5b-eb5657325993",
+    "similarity": 0.863,
+    "generated_question": {
+      "question_id": "cm_exam_16_LOG_06",
+      "question_text": "Trouvez le nombre manquant : 2, 5, 10, 17, 26, …",
+      "exam_type": "CM",
+      "category": "LOG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "24f6e210-d7e3-4e25-8d5b-eb5657325993",
+      "question_text": "Trouver le nombre manquant : 5, 11, 17, 23, ?"
+    }
+  },
+  {
+    "review_key": "cm_exam_19_CG_16|6add280d-aed1-4e1e-8111-01d11d450b70",
+    "similarity": 0.874,
+    "generated_question": {
+      "question_id": "cm_exam_19_CG_16",
+      "question_text": "Qui est l’auteur du roman « Une si longue nuit » ?",
+      "exam_type": "CM",
+      "category": "CG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "6add280d-aed1-4e1e-8111-01d11d450b70",
+      "question_text": "Qui est l’autrice du roman « Une si longue lettre » ?"
+    }
+  },
+  {
+    "review_key": "cm_exam_19_LOG_11|8715a45e-8d78-40b3-abe4-a04102fad9f7",
+    "similarity": 0.908,
+    "generated_question": {
+      "question_id": "cm_exam_19_LOG_11",
+      "question_text": "Il a fallu 4 h 30 min pour obtenir 1800 litres d’eau. Quel était le débit du ruisseau (litres/min) ?",
+      "exam_type": "CM",
+      "category": "LOG",
+      "test_type": "examen_blanc"
+    },
+    "existing_question": {
+      "question_id": "8715a45e-8d78-40b3-abe4-a04102fad9f7",
+      "question_text": "Il a fallu 04 h 30 mn pour obtenir 1800 litres d’eau. Quel était le débit du ruisseau"
+    }
+  }
+]
