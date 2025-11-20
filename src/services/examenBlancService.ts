@@ -61,20 +61,40 @@ class ExamenBlancService {
     try {
       console.log('🔄 ExamenBlancService: Loading exam blanc data from database...');
       
-      // Get all exam blanc questions from database
-      const { data: questions, error } = await supabase
-        .from('questions')
-        .select('*')
-        .eq('test_type', 'examen_blanc')
-        .order('exam_type', { ascending: true })
-        .order('category', { ascending: true });
+      const pageSize = 1000;
+      let start = 0;
+      const questions: any[] = [];
 
-      if (error) {
-        console.error('Error loading exam blanc questions from database:', error);
-        throw error;
+      while (true) {
+        const end = start + pageSize - 1;
+        const { data, error } = await supabase
+          .from('questions')
+          .select('*')
+          .eq('test_type', 'examen_blanc')
+          .not('test_number', 'is', null)
+          .order('exam_type', { ascending: true })
+          .order('test_number', { ascending: true })
+          .order('category', { ascending: true })
+          .order('created_at', { ascending: true })
+          .range(start, end);
+
+        if (error) {
+          console.error('Error loading exam blanc questions from database:', error);
+          throw error;
+        }
+
+        if (data && data.length > 0) {
+          questions.push(...data);
+        }
+
+        if (!data || data.length < pageSize) {
+          break;
+        }
+
+        start += pageSize;
       }
 
-      if (!questions || questions.length === 0) {
+      if (questions.length === 0) {
         console.warn('⚠️ No exam blanc questions found in database');
         return {
           generated_at: new Date().toISOString(),
@@ -84,72 +104,83 @@ class ExamenBlancService {
 
       console.log(`✅ Loaded ${questions.length} exam blanc questions from database`);
 
-      // Group questions by exam type and create exam structures
       const examTypes: { [key: string]: ExamenBlanc[] } = {};
-      
-      // Generate 10 exams for each exam type (CM, CMS, CS)
-      const examTypesList: ('CM' | 'CMS' | 'CS')[] = ['CM', 'CMS', 'CS'];
-      
-      for (const examType of examTypesList) {
-        const typeQuestions = questions.filter(q => q.exam_type === examType);
-        
-        if (typeQuestions.length === 0) {
-          console.warn(`⚠️ No questions found for exam type: ${examType}`);
-          examTypes[examType] = [];
+      const subjects: ('ANG' | 'CG' | 'LOG')[] = ['ANG', 'CG', 'LOG'];
+
+      interface SubjectBuckets {
+        [category: string]: ExamenBlancQuestion[];
+      }
+
+      const groupedByType: Record<string, Map<number, SubjectBuckets>> = {};
+
+      for (const row of questions) {
+        const examType = row.exam_type as 'CM' | 'CMS' | 'CS' | undefined;
+        const testNumber = row.test_number as number | null;
+        const category = row.category as 'ANG' | 'CG' | 'LOG';
+
+        if (!examType || !testNumber || !subjects.includes(category)) {
           continue;
         }
 
-        const exams: ExamenBlanc[] = [];
-        
-        // Create 10 exams for this exam type
-        for (let examNumber = 1; examNumber <= 10; examNumber++) {
-          const examQuestions: ExamenBlancQuestion[] = [];
-          
-          // Get 20 questions per subject (ANG, CG, LOG)
-          const subjects: ('ANG' | 'CG' | 'LOG')[] = ['ANG', 'CG', 'LOG'];
-          
-          for (const subject of subjects) {
-            const subjectQuestions = typeQuestions.filter(q => q.category === subject);
-            
-            if (subjectQuestions.length >= 20) {
-              // Use seeded randomization to ensure each exam gets different questions
-              const seed = examNumber * 1000 + subject.charCodeAt(0) * 100 + examType.charCodeAt(0);
-              const shuffled = this.seededShuffle([...subjectQuestions], seed);
-              const selectedQuestions = shuffled.slice(0, 20);
-              
-              // Convert to ExamenBlancQuestion format
-              const convertedQuestions = selectedQuestions.map((q, index) => ({
-                id: q.id,
-                question_text: q.question_text,
-                answer1: q.answer1,
-                answer2: q.answer2,
-                answer3: q.answer3,
-                correct: q.correct,
-                explanation: q.explanation || '',
-                category: q.category as 'ANG' | 'CG' | 'LOG',
-                difficulty: q.difficulty as 'EASY' | 'MED' | 'HARD',
-                question_order: index + 1,
-                subject_order: subjects.indexOf(subject) + 1
-              }));
-              
-              examQuestions.push(...convertedQuestions);
-            }
-          }
-          
-          if (examQuestions.length > 0) {
-            exams.push({
-              id: `${examType}-${examNumber}`,
-              exam_number: examNumber,
-              exam_type: examType,
-              total_questions: examQuestions.length,
-              questions_per_subject: 20,
-              questions: examQuestions
-            });
-          }
+        if (!groupedByType[examType]) {
+          groupedByType[examType] = new Map();
         }
-        
+
+        if (!groupedByType[examType].has(testNumber)) {
+          groupedByType[examType].set(testNumber, {
+            ANG: [],
+            CG: [],
+            LOG: []
+          });
+        }
+
+        const buckets = groupedByType[examType].get(testNumber)!;
+        const questionOrder =
+          typeof row.question_number === 'number'
+            ? row.question_number
+            : buckets[category].length + 1;
+
+        buckets[category].push({
+          id: row.id,
+          question_text: row.question_text,
+          answer1: row.answer1,
+          answer2: row.answer2,
+          answer3: row.answer3,
+          correct: row.correct,
+          explanation: row.explanation || '',
+          category,
+          difficulty: (row.difficulty as 'EASY' | 'MED' | 'HARD') || 'MED',
+          question_order: questionOrder,
+          subject_order: subjects.indexOf(category) + 1
+        });
+      }
+
+      for (const [examType, examMap] of Object.entries(groupedByType)) {
+        const exams: ExamenBlanc[] = [];
+        const sortedExamNumbers = Array.from(examMap.keys()).sort((a, b) => a - b);
+
+        for (const examNumber of sortedExamNumbers) {
+          const buckets = examMap.get(examNumber)!;
+          const examQuestions: ExamenBlancQuestion[] = [];
+
+          for (const subject of subjects) {
+            const subjectQuestions = buckets[subject];
+            subjectQuestions.sort((a, b) => a.question_order - b.question_order);
+            examQuestions.push(...subjectQuestions);
+          }
+
+          exams.push({
+            id: `${examType}-${examNumber}`,
+            exam_number: examNumber,
+            exam_type: examType as 'CM' | 'CMS' | 'CS',
+            total_questions: examQuestions.length,
+            questions_per_subject: 20,
+            questions: examQuestions
+          });
+        }
+
         examTypes[examType] = exams;
-        console.log(`✅ Generated ${exams.length} exams for ${examType}`);
+        console.log(`✅ Loaded ${exams.length} exams for ${examType}`);
       }
 
       const result = {
@@ -164,22 +195,6 @@ class ExamenBlancService {
       console.error('Error loading examens blancs data from database:', error);
       throw error;
     }
-  }
-
-  /**
-   * Seeded shuffle function for deterministic randomization
-   */
-  private seededShuffle<T>(array: T[], seed: number): T[] {
-    const shuffled = [...array];
-    let currentSeed = seed;
-    
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      currentSeed = (currentSeed * 9301 + 49297) % 233280;
-      const j = Math.floor((currentSeed / 233280) * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
-    
-    return shuffled;
   }
 
   /**

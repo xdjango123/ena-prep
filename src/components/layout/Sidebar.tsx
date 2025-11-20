@@ -118,14 +118,14 @@ export const Sidebar: React.FC = () => {
     },
     {
       id: 'practice',
-      label: 'Pratique',
+      label: 'Quiz Rapide',
       icon: <BookCopy className="w-5 h-5" />,
-      path: '/dashboard/practice',
+      path: '/dashboard/quiz',
       requiresSubscription: true
     },
     {
       id: 'matieres',
-      label: 'Matières',
+      label: 'Test Pratiques',
       icon: <GraduationCap className="w-5 h-5" />,
       action: () => setMatiereOpen(!isMatiereOpen),
       requiresSubscription: true
@@ -146,7 +146,7 @@ export const Sidebar: React.FC = () => {
     },
     {
       id: 'forum',
-      label: 'Forum',
+      label: 'Information Importantes',
       icon: <MessageSquare className="w-5 h-5" />,
       path: '/dashboard/forum',
       requiresSubscription: true

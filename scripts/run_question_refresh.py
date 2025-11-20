@@ -164,6 +164,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Bypass all interactive prompts.",
     )
+    parser.add_argument(
+        "--categories",
+        nargs="+",
+        help="Filter audit by specific categories (e.g. ANG LOG CG).",
+    )
     return parser.parse_args()
 
 
@@ -172,47 +177,61 @@ def main() -> None:
     auto_generation = args.yes_all or args.yes_generation
     auto_insert = args.yes_all or args.yes_insert
 
-    if not args.skip_audit:
-        audit_cmd = [sys.executable, "scripts/collect_replacement_candidates.py"]
+    def build_audit_command(*, allow_generation: bool) -> List[str]:
+        cmd = [sys.executable, "scripts/collect_replacement_candidates.py"]
         if args.audit_limit is not None:
-            audit_cmd.extend(["--limit", str(args.audit_limit)])
+            cmd.extend(["--limit", str(args.audit_limit)])
         if args.audit_input:
-            audit_cmd.extend(["--input", args.audit_input])
+            cmd.extend(["--input", args.audit_input])
         if args.audit_resume:
-            audit_cmd.append("--resume")
-        if args.audit_dry_run_generation:
-            audit_cmd.append("--dry-run-generation")
+            cmd.append("--resume")
         if args.audit_flagged_only:
-            audit_cmd.append("--flagged-only")
+            cmd.append("--flagged-only")
         if args.audit_gemini_model:
-            audit_cmd.extend(["--audit-gemini-model", args.audit_gemini_model])
+            cmd.extend(["--audit-gemini-model", args.audit_gemini_model])
         if args.audit_max_retries is not None:
-            audit_cmd.extend(["--max-retries", str(args.audit_max_retries)])
+            cmd.extend(["--max-retries", str(args.audit_max_retries)])
         if args.audit_sleep is not None:
-            audit_cmd.extend(["--sleep", str(args.audit_sleep)])
+            cmd.extend(["--sleep", str(args.audit_sleep)])
         if args.audit_english_threshold is not None:
-            audit_cmd.extend(
+            cmd.extend(
                 ["--english-threshold", str(args.audit_english_threshold)]
             )
         if args.audit_french_threshold is not None:
-            audit_cmd.extend(
+            cmd.extend(
                 ["--french-threshold", str(args.audit_french_threshold)]
             )
-        run_step(
-            audit_cmd,
-            "collect_replacement_candidates.py (audit + generation)",
-        )
+        if not allow_generation or args.audit_dry_run_generation:
+            cmd.append("--dry-run-generation")
+        if args.categories:
+            cmd.append("--categories")
+            cmd.extend(args.categories)
+        return cmd
+
+    if not args.skip_audit:
+        dry_cmd = build_audit_command(allow_generation=False)
+        run_step(dry_cmd, "collect_replacement_candidates.py (audit only)")
         summary_path = PROJECT_ROOT / "diagnostics_output/realtime_summary.json"
         print_audit_summary(summary_path)
-        if args.skip_process:
-            auto_proceed = True
-        else:
-            auto_proceed = auto_generation
+        proceed_generation = prompt_user(
+            "Generate replacements for flagged questions?",
+            default=False,
+            auto_confirm=auto_generation,
+        )
+        if not proceed_generation:
+            print(">>> Stopping after audit.")
+            return
+
+        gen_cmd = build_audit_command(allow_generation=True)
+        run_step(gen_cmd, "collect_replacement_candidates.py (audit + generation)")
+
+        summary_path = PROJECT_ROOT / "diagnostics_output/realtime_summary.json"
+        print_audit_summary(summary_path)
         if not args.skip_process:
             if not prompt_user(
                 "Proceed to validation of generated questions?",
                 default=False,
-                auto_confirm=auto_proceed,
+                auto_confirm=auto_generation,
             ):
                 print(">>> Aborting before validation step.")
                 return

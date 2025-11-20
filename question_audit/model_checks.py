@@ -280,9 +280,9 @@ Retourne un JSON:
 }}
 """
 
-CORRECT_ANSWER_PROMPT = """
-Tu es correcteur. Vérifie si la réponse officielle (lettre {correct_letter}) est correcte.
-Explique brièvement ton raisonnement.
+SPELLING_PROMPT = """
+Tu es un correcteur orthographique strict. Vérifie s'il y a des fautes d'orthographe
+dans la question ou les options. Ignore les noms propres peu communs.
 
 Question:
 {question_text}
@@ -290,18 +290,60 @@ Question:
 Options:
 {answers}
 
-Explication fournie:
-{explanation}
+Réponds avec JSON:
+{{
+  "should_flag": true/false,
+  "reason": "liste des fautes trouvées",
+  "confidence": 0-1
+}}
+"""
+
+CATEGORY_CHECK_PROMPT = """
+Tu es classificateur de questions d'examen pour l'ENA.
+Vérifie si cette question appartient bien à la catégorie indiquée : {category}.
+
+Règles :
+- ANG : Doit être en anglais (compréhension ou expression).
+- CG : Culture Générale (histoire, géo, politique, actualité), doit être en français.
+- LOG : Logique (suites, maths, raisonnement), pas de questions d'histoire ou de langue.
+
+Question:
+{question_text}
+
+Options:
+{answers}
 
 Réponds avec JSON:
 {{
-  "official_letter": "{correct_letter}",
-  "correct_letter": "A" | "B" | "C" | "D",
-  "agrees_with_official": true/false,
+  "should_flag": true/false,
+  "reason": "explication brève",
   "confidence": 0-1,
-  "reason": "justification concise"
+  "suggested_category": "ANG" | "CG" | "LOG" | "AUTRE"
 }}
 """
+
+
+def evaluate_spelling(validators: ModelValidators, record: Dict[str, Any]) -> ValidationResult:
+    prompt = SPELLING_PROMPT.format(
+        question_text=record.get("question_text") or "",
+        answers=_answers_text(record),
+    )
+    payload = _build_payload(record)
+    result = validators.validate_with_gemini("spelling_quality", prompt, payload)
+    parsed = _extract_json_object(result.raw)
+    return _interpret_flag_result(result, parsed)
+
+
+def evaluate_category_consistency(validators: ModelValidators, record: Dict[str, Any]) -> ValidationResult:
+    prompt = CATEGORY_CHECK_PROMPT.format(
+        category=(record.get("category") or "").upper(),
+        question_text=record.get("question_text") or "",
+        answers=_answers_text(record),
+    )
+    payload = _build_payload(record)
+    result = validators.validate_with_gemini("category_consistency", prompt, payload)
+    parsed = _extract_json_object(result.raw)
+    return _interpret_flag_result(result, parsed)
 
 
 def _interpret_flag_result(result: ValidationResult, parsed: Optional[Dict[str, Any]]) -> ValidationResult:
@@ -423,6 +465,16 @@ LLM_TASK_METADATA = {
         "error_label": "correct_answer_llm_error",
         "message": "Réponse officielle suspecte.",
     },
+    "spelling_quality": {
+        "label": "spelling_quality_issue",
+        "error_label": "spelling_quality_llm_error",
+        "message": "Fautes d'orthographe détectées.",
+    },
+    "category_consistency": {
+        "label": "category_consistency_issue",
+        "error_label": "category_consistency_llm_error",
+        "message": "Question hors catégorie.",
+    },
 }
 
 
@@ -438,6 +490,8 @@ def run_llm_checks(
         ("category_language", evaluate_category_language),
         ("explanation_quality", evaluate_explanation),
         ("correct_answer", evaluate_correct_answer),
+        ("spelling_quality", evaluate_spelling),
+        ("category_consistency", evaluate_category_consistency),
     ]
 
     for task_name, evaluator in task_evaluators:

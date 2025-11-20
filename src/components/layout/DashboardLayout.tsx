@@ -54,7 +54,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
           </div>
 
           {/* Main Content */}
-          <main className="px-3 xs:px-4 sm:px-6 lg:px-8">
+          <main className="w-full">
             {children}
           </main>
 

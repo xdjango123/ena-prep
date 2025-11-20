@@ -37,9 +37,6 @@ export const RandomPracticeTest: React.FC<RandomPracticeTestProps> = ({ onExit }
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Generate unique test number for this session
-  const testNumber = Math.floor(Date.now() / 1000) % 10000;
-
   // Load random questions from all subjects
   useEffect(() => {
     const loadRandomQuestions = async () => {
@@ -55,20 +52,21 @@ export const RandomPracticeTest: React.FC<RandomPracticeTestProps> = ({ onExit }
           | 'CS'
           | undefined;
         const allQuestions: Question[] = [];
-        
-        // Get 5 questions from each subject
         const subjects: ('ANG' | 'CG' | 'LOG')[] = ['ANG', 'CG', 'LOG'];
-        
+
+        // Get 5 questions from each subject
         for (const subject of subjects) {
           try {
             console.log(`📚 Loading questions for ${subject} with exam type: ${selectedExamType || 'default'}`);
+
             const subjectQuestions = await QuestionService.getRandomQuestions(
               subject,
               5,
               undefined,
-              testNumber,
+              undefined,
               effectiveExamType,
-              ['practice_test', 'quiz_series']
+              ['practice_test'],
+              true
             );
             console.log(`✅ Loaded ${subjectQuestions.length} questions for ${subject} (exam_type: ${selectedExamType})`);
             

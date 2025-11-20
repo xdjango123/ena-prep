@@ -81,16 +81,30 @@ export default function EnglishTestPage() {
       const testTypes: ('practice_test' | 'examen_blanc')[] =
         config.testType === 'practice' ? ['practice_test'] : ['examen_blanc'];
 
-      const seed = Math.floor(Date.now() / 1000);
+      const availableNumbers = await QuestionService.getAvailableTestNumbers(
+        'ANG',
+        testTypes[0],
+        effectiveExamType
+      );
+
+      if (!availableNumbers.length) {
+        throw new Error(
+          'Aucun test disponible dans la base de données pour ce type. Ajoutez plus de questions.'
+        );
+      }
+
+      const selectedTestNumber =
+        availableNumbers[Math.floor(Math.random() * availableNumbers.length)];
 
       const dbQuestions = await QuestionService.getRandomQuestions(
         'ANG',
         config.questionCount,
         undefined,
-        seed,
+        selectedTestNumber,
         effectiveExamType,
         testTypes
       );
+      console.log(`✅ Chargement du test #${selectedTestNumber} (${testTypes[0]}) avec ${dbQuestions.length} questions.`);
 
       if (!dbQuestions || dbQuestions.length === 0) {
         throw new Error(

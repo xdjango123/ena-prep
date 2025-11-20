@@ -19,7 +19,7 @@ import SubjectsPage from './pages/SubjectsPage';
 import ReviewsPage from './pages/ReviewsPage';
 import PricingPage from './pages/PricingPage';
 import FAQPage from './pages/FAQPage';
-import PracticePage from './pages/PracticePage';
+import QuizPage from './pages/QuizPage';
 import ForumPage from './pages/ForumPage';
 import TutorPage from './pages/TutorPage';
 import ProfilePage from './pages/ProfilePage';
@@ -60,7 +60,8 @@ function App() {
 
               <Route path="/dashboard" element={<ExamLayout><Outlet /></ExamLayout>}>
                 <Route index element={<DashboardPage />} />
-                <Route path="practice" element={<PracticePage />} />
+                <Route path="quiz" element={<QuizPage />} />
+                <Route path="quiz/start" element={<QuickQuizPage />} />
                 <Route path="random-practice" element={<RandomPracticeTest onExit={() => window.history.back()} />} />
                 
                 {/* Subject Pages */}

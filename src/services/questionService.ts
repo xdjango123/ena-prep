@@ -15,6 +15,9 @@ export interface Question {
   passage_id?: string; // Reference to passage if question is based on a text
   created_at: string;
   test_type?: string;
+  test_number?: number | null;
+  question_number?: number | null;
+  question_order?: number;
   is3Option?: boolean; // Flag to indicate this is a 3-option question
 }
 
@@ -61,7 +64,8 @@ export class QuestionService {
     subCategory?: string,
     testNumber?: number,
     examType?: 'CM' | 'CMS' | 'CS',
-    testTypes?: ('quiz_series' | 'practice_test' | 'examen_blanc')[]
+    testTypes?: ('quiz_series' | 'practice_test' | 'examen_blanc')[],
+    requireUnassignedPractice: boolean = false
   ): Promise<Question[]> {
     try {
       let query = supabase
@@ -86,6 +90,26 @@ export class QuestionService {
         query = query.eq('exam_type', examType);
       }
 
+      if (requireUnassignedPractice) {
+        query = query.is('test_number', null);
+      }
+
+      const usingAssignedSet = typeof testNumber === 'number';
+
+      if (usingAssignedSet) {
+        query = query.eq('test_number', testNumber);
+
+        const { data, error } = await query
+          .order('created_at', { ascending: true });
+
+        if (error) {
+          console.error('Error fetching assigned questions:', error);
+          return [];
+        }
+
+        return (data || []).slice(0, limit);
+      }
+
       const { data, error } = await query
         .limit(limit * 3) // Get more questions to ensure we have enough for randomization
         .order('created_at', { ascending: false });
@@ -100,17 +124,17 @@ export class QuestionService {
       // Create a proper seed for randomization
       let seed: number;
       
-      if (testNumber !== undefined) {
-        // For practice tests: use test number to ensure different questions per test
-        seed = testNumber * 1000 + category.charCodeAt(0) * 100 + (category.charCodeAt(1) || 0) * 10 + (category.charCodeAt(2) || 0);
-        console.log(`🎯 Practice test mode: Using test number ${testNumber} as seed for ${category} (seed: ${seed})`);
-      } else {
-        // For daily quizzes: use date to ensure questions change daily
-        const today = new Date();
-        const dateSeed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
-        seed = dateSeed + category.charCodeAt(0) * 100 + (category.charCodeAt(1) || 0) * 10 + (category.charCodeAt(2) || 0);
-        console.log(`📅 Daily quiz mode: Using date ${today.toDateString()} (${dateSeed}) as seed for ${category} (seed: ${seed})`);
-      }
+      // For daily quizzes: use date to ensure questions change daily
+      const today = new Date();
+      const dateSeed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+      seed =
+        dateSeed +
+        category.charCodeAt(0) * 100 +
+        (category.charCodeAt(1) || 0) * 10 +
+        (category.charCodeAt(2) || 0);
+      console.log(
+        `📅 Daily quiz mode: Using date ${today.toDateString()} (${dateSeed}) as seed for ${category} (seed: ${seed})`
+      );
       
       // Fisher-Yates shuffle with seeded randomization
       const shuffled = [...questions];
@@ -128,6 +152,44 @@ export class QuestionService {
       return result;
     } catch (error) {
       console.error('❌ Error in getRandomQuestions:', error);
+      return [];
+    }
+  }
+
+  static async getAvailableTestNumbers(
+    category: 'ANG' | 'CG' | 'LOG',
+    testType: 'practice_test' | 'examen_blanc',
+    examType?: 'CM' | 'CMS' | 'CS'
+  ): Promise<number[]> {
+    try {
+      let query = supabase
+        .from('questions')
+        .select('test_number')
+        .eq('category', category)
+        .eq('test_type', testType)
+        .not('test_number', 'is', null);
+
+      if (examType) {
+        query = query.eq('exam_type', examType);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('Error fetching available test numbers:', error);
+        return [];
+      }
+
+      const counts = new Map<number, number>();
+      (data || []).forEach(row => {
+        if (typeof row.test_number === 'number') {
+          counts.set(row.test_number, (counts.get(row.test_number) || 0) + 1);
+        }
+      });
+
+      return Array.from(counts.keys()).sort((a, b) => a - b);
+    } catch (error) {
+      console.error('❌ Error in getAvailableTestNumbers:', error);
       return [];
     }
   }
@@ -640,6 +702,7 @@ export class QuestionService {
         .eq('category', category)
         .eq('test_type', 'examen_blanc')
         .eq('exam_type', examType)
+        .eq('test_number', examNumber)
         .order('created_at', { ascending: true });
 
       if (error) {
@@ -652,101 +715,37 @@ export class QuestionService {
         return [];
       }
 
-      const convertedQuestions = data.map(q => this.convertTo3OptionsForExamBlanc(q));
+      const convertedQuestions = data.map((q, index) => {
+        const base = this.convertTo3OptionsForExamBlanc(q);
+        const existingOrder =
+          (base as any).question_order ??
+          (base as any).question_number ??
+          index + 1;
+        return {
+          ...base,
+          question_order: existingOrder
+        };
+      });
 
-      const hardQuestions = convertedQuestions.filter(q => q.difficulty === 'HARD');
-      const medQuestions = convertedQuestions.filter(q => q.difficulty === 'MED');
-      const easyQuestions = convertedQuestions.filter(q => q.difficulty === 'EASY');
-
-      const maxHard = Math.min(hardQuestions.length, Math.floor(limit * 0.8));
-      const remainingAfterHard = limit - maxHard;
-      const maxMed = Math.min(medQuestions.length, Math.floor(remainingAfterHard * 0.6));
-      const maxEasy = Math.min(
-        easyQuestions.length,
-        limit - maxHard - maxMed
-      );
-
-      const baseSeed =
-        examNumber * 1000 +
-        category.charCodeAt(0) * 100 +
-        examType.charCodeAt(0);
-
-      const takeSlice = (
-        pool: Question[],
-        count: number,
-        seedOffset: number
-      ) => {
-        if (count <= 0 || pool.length === 0) {
-          return [];
-        }
-
-        const shuffled = this.shuffleArrayWithSeed(pool, baseSeed + seedOffset);
-        const startIndex = ((examNumber - 1) * count) % shuffled.length;
-
-        const selection: Question[] = [];
-        for (let i = 0; i < shuffled.length && selection.length < Math.min(count, pool.length); i++) {
-          const index = (startIndex + i) % shuffled.length;
-          const candidate = shuffled[index];
-          if (!selection.some(item => item.id === candidate.id)) {
-            selection.push(candidate);
+      const ordered = convertedQuestions
+        .sort((a, b) => {
+          const orderA = (a as any).question_order ?? 0;
+          const orderB = (b as any).question_order ?? 0;
+          if (orderA !== orderB) {
+            return orderA - orderB;
           }
-          if (selection.length === count) {
-            break;
-          }
-        }
-
-        if (selection.length < count) {
-          console.warn(
-            `⚠️ Requested ${count} questions but only ${selection.length} available for ${category} (${examType}) in difficulty slice`
-          );
-        }
-
-        return selection;
-      };
-
-      const selectedQuestions = [
-        ...takeSlice(hardQuestions, maxHard, 1),
-        ...takeSlice(medQuestions, maxMed, 2),
-        ...takeSlice(easyQuestions, maxEasy, 3)
-      ];
-
-      if (selectedQuestions.length < limit) {
-        // Fill the remaining slots from any difficulty without duplicates
-        const remainingPool = convertedQuestions.filter(
-          q => !selectedQuestions.some(selected => selected.id === q.id)
-        );
-        const filler = takeSlice(
-          remainingPool,
-          Math.min(limit - selectedQuestions.length, remainingPool.length),
-          4
-        );
-        selectedQuestions.push(...filler);
-      }
+          return a.id.localeCompare(b.id);
+        })
+        .slice(0, limit);
 
       console.log(
-        `✅ Selected ${selectedQuestions.length} exam blanc questions for ${category} (exam ${examNumber}, ${examType})`
+        `✅ Selected ${ordered.length} exam blanc questions for ${category} (exam ${examNumber}, ${examType})`
       );
-      return selectedQuestions.slice(0, Math.min(limit, selectedQuestions.length));
+      return ordered;
     } catch (error) {
       console.error('Error in getExamBlancQuestions:', error);
       return [];
     }
   }
 
-  /**
-   * Shuffles an array with a seed for deterministic randomization
-   */
-  private static shuffleArrayWithSeed<T>(array: T[], seed: number): T[] {
-    const shuffled = [...array];
-    let currentSeed = seed;
-    
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      // Generate a pseudo-random number based on the seed
-      currentSeed = (currentSeed * 9301 + 49297) % 233280;
-      const j = Math.floor((currentSeed / 233280) * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
-    
-    return shuffled;
-  }
 }

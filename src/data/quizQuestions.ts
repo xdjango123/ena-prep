@@ -47,9 +47,10 @@ export const getQuestionsBySubject = async (subject: string, examType?: 'CM' | '
     // Get questions from database with proper seeding
     // - For practice tests: pass testNumber and examType to ensure different questions per test
     // - For daily quizzes: don't pass testNumber so it uses daily date seeding, but still filter by examType
+    const limit = testNumber !== undefined ? 15 : 10;
     const dbQuestions = await QuestionService.getRandomQuestions(
       category,
-      10,
+      limit,
       undefined,
       testNumber,
       examType,

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { BrainCircuit, Target, Shield, Zap, BookOpen, Clock, Play, BarChart, Trophy, ChevronsRight, ArrowLeft } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { BrainCircuit, Shield, Zap, BookOpen, Clock, BarChart, ChevronsRight, ArrowLeft } from 'lucide-react';
 import { QuizSeries } from '../components/quiz/QuizSeries';
 import { QuizReview } from '../components/quiz/QuizReview';
 import { QuizCards } from '../components/quiz/QuizCards';
@@ -10,12 +10,8 @@ import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
 import { TestResultService } from '../services/testResultService';
 import { UserAttemptService } from '../services/userAttemptService';
 import { QuestionService } from '../services/questionService';
-import {
-    TestDetails,
-    ActionButton,
-    TestListItem,
-    FilterPill,
-} from './subjects/SubjectComponents';
+import { practiceTestService } from '../services/practiceTestService';
+import { TestDetails, TestListItem, FilterPill } from './subjects/SubjectComponents';
 import { SubjectHeader } from '../components/SubjectHeader';
 
 const getQuizState = (subject: string) => {
@@ -30,17 +26,17 @@ const clearQuizState = (subject: string) => {
     localStorage.removeItem(`quizState_Logique`);
 }
 
-const practiceTests = [
-    { id: 'p1', name: 'Test Pratique 1', questions: 10, time: 15, topic: 'Deductive Reasoning' },
-    { id: 'p2', name: 'Test Pratique 2', questions: 10, time: 15, topic: 'Inductive Reasoning' },
-    { id: 'p3', name: 'Test Pratique 3', questions: 10, time: 15, topic: 'Abstract Reasoning' },
-    { id: 'p4', name: 'Test Pratique 4', questions: 10, time: 15, topic: 'Deductive Reasoning' },
-    { id: 'p5', name: 'Test Pratique 5', questions: 10, time: 15, topic: 'Inductive Reasoning' },
-    { id: 'p6', name: 'Test Pratique 6', questions: 10, time: 15, topic: 'Abstract Reasoning' },
-    { id: 'p7', name: 'Test Pratique 7', questions: 10, time: 15, topic: 'Deductive Reasoning' },
-    { id: 'p8', name: 'Test Pratique 8', questions: 10, time: 15, topic: 'Inductive Reasoning' },
-    { id: 'p9', name: 'Test Pratique 9', questions: 10, time: 15, topic: 'Abstract Reasoning' },
-    { id: 'p10', name: 'Test Pratique 10', questions: 10, time: 15, topic: 'Deductive Reasoning' },
+const DEFAULT_PRACTICE_TESTS = [
+    { id: 'p1', name: 'Test Pratique 1', questions: 15, time: 10, topic: 'Deductive Reasoning' },
+    { id: 'p2', name: 'Test Pratique 2', questions: 15, time: 10, topic: 'Inductive Reasoning' },
+    { id: 'p3', name: 'Test Pratique 3', questions: 15, time: 10, topic: 'Abstract Reasoning' },
+    { id: 'p4', name: 'Test Pratique 4', questions: 15, time: 10, topic: 'Deductive Reasoning' },
+    { id: 'p5', name: 'Test Pratique 5', questions: 15, time: 10, topic: 'Inductive Reasoning' },
+    { id: 'p6', name: 'Test Pratique 6', questions: 15, time: 10, topic: 'Abstract Reasoning' },
+    { id: 'p7', name: 'Test Pratique 7', questions: 15, time: 10, topic: 'Deductive Reasoning' },
+    { id: 'p8', name: 'Test Pratique 8', questions: 15, time: 10, topic: 'Inductive Reasoning' },
+    { id: 'p9', name: 'Test Pratique 9', questions: 15, time: 10, topic: 'Abstract Reasoning' },
+    { id: 'p10', name: 'Test Pratique 10', questions: 15, time: 10, topic: 'Deductive Reasoning' },
 ];
 
 const topics = ['All', 'Deductive Reasoning', 'Inductive Reasoning', 'Abstract Reasoning'];
@@ -53,8 +49,8 @@ const lastTest = { name: 'Test Pratique 1', completed: 5, total: 20 };
 
 export default function LogicPage() {
 	const { profile, user, selectedExamType } = useSupabaseAuth();
+	const [searchParams, setSearchParams] = useSearchParams();
 	const [view, setView] = useState<'main' | 'summary' | 'quiz' | 'review' | 'learn' | 'results'>('main');
-	const [activeSection, setActiveSection] = useState<'practice' | 'quiz' | null>('quiz');
 	const [selectedTest, setSelectedTest] = useState<TestDetails | null>(null);
 	const [lastAnswers, setLastAnswers] = useState<Map<number, string | number>>(new Map());
 	const [activeTopic, setActiveTopic] = useState('All');
@@ -64,6 +60,8 @@ export default function LogicPage() {
 	const [isLoadingQuestions, setIsLoadingQuestions] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [isReviewMode, setIsReviewMode] = useState(false);
+	const [practiceTests, setPracticeTests] = useState(DEFAULT_PRACTICE_TESTS);
+	const effectiveExamType = (selectedExamType || profile?.plan_name || 'CM') as 'CM' | 'CMS' | 'CS';
 
 	// Statistics state
 	const [statistics, setStatistics] = useState({
@@ -85,7 +83,7 @@ export default function LogicPage() {
                 const allowedNumbers = practiceTests.map(t => parseInt(t.id.replace('p', '')));
                 
                 // Get test results from test_results table (consistent with other pages)
-                const attempts = await TestResultService.getTestResultsByCategory(user.id, 'LOG', 'practice', selectedExamType || 'CM'); // Practice tests now include exam_type
+                const attempts = await TestResultService.getTestResultsByCategory(user.id, 'LOG', 'practice', effectiveExamType); // Practice tests now include exam_type
                 const filteredAttempts = attempts.filter(attempt => 
                     attempt.test_number && 
                     allowedNumbers.includes(attempt.test_number)
@@ -117,7 +115,7 @@ export default function LogicPage() {
         };
 
 		loadTestResults();
-	}, [user?.id, selectedExamType]);
+	}, [user?.id, effectiveExamType, practiceTests]);
 
     // Scroll to top when component mounts
     useEffect(() => {
@@ -140,11 +138,11 @@ export default function LogicPage() {
 					'LOG',
 					'practice',
 					allowedNumbers,
-					selectedExamType || 'CM' // Practice tests now include exam_type
+					effectiveExamType // Practice tests now include exam_type
 				);
 				
 				// Get test count for LOG category from test_results table
-				const attempts = await TestResultService.getTestResultsByCategory(user.id, 'LOG', 'practice', selectedExamType || undefined);
+				const attempts = await TestResultService.getTestResultsByCategory(user.id, 'LOG', 'practice', effectiveExamType);
 				const filteredAttempts = attempts.filter(attempt => 
 					attempt.test_number && 
 					allowedNumbers.includes(attempt.test_number)
@@ -168,7 +166,7 @@ export default function LogicPage() {
 		};
 
 		fetchStatistics();
-	}, [user?.id, selectedExamType]);
+	}, [user?.id, effectiveExamType, practiceTests]);
 
 	// Refresh statistics when returning to main view
 	useEffect(() => {
@@ -176,6 +174,30 @@ export default function LogicPage() {
 			refreshStatistics();
 		}
 	}, [view, user?.id]);
+
+	useEffect(() => {
+		let isMounted = true;
+		practiceTestService
+			.getPracticeTestsByCategory(effectiveExamType, 'LOG')
+			.then(summaries => {
+				if (!isMounted) return;
+				setPracticeTests(prev =>
+					prev.map(test => {
+						const testNumber = parseInt(test.id.replace('p', ''));
+						const summary = summaries.find(s => s.test_number === testNumber);
+						return summary
+							? { ...test, questions: summary.question_count, time: 10 }
+							: test;
+					})
+				);
+			})
+			.catch(error => {
+				console.error('Error loading LOG practice tests metadata:', error);
+			});
+		return () => {
+			isMounted = false;
+		};
+	}, [effectiveExamType]);
 
 	// Function to refresh statistics (same logic as fetchStatistics)
 	const refreshStatistics = async () => {
@@ -243,7 +265,7 @@ export default function LogicPage() {
 				console.log('LogicPage: Profile:', profile);
 				console.log('LogicPage: Exam type:', profile?.plan_name);
 				
-				const loadedQuestions = await getQuestionsBySubject('logique', selectedExamType || 'CM');
+				const loadedQuestions = await getQuestionsBySubject('logique', effectiveExamType);
 				console.log('LogicPage: Questions loaded:', loadedQuestions.length);
 				
 				if (loadedQuestions.length === 0) {
@@ -263,7 +285,7 @@ export default function LogicPage() {
 		loadQuestions();
 	}, [selectedExamType]);
 
-	const loadQuestionsForTest = async (testNumber: number) => {
+	const loadQuestionsForTest = useCallback(async (testNumber: number) => {
 		setIsLoadingQuestions(true);
 		setError(null);
 		try {
@@ -272,7 +294,7 @@ export default function LogicPage() {
 			console.log('LogicPage: Exam type:', profile?.plan_name);
 			
 			// Use the same method as other pages for consistency
-			const loadedQuestions = await getQuestionsBySubject('logique', selectedExamType || 'CM', testNumber);
+			const loadedQuestions = await getQuestionsBySubject('logique', effectiveExamType, testNumber);
 			console.log(`LogicPage: Test pratique ${testNumber} questions loaded:`, loadedQuestions.length);
 			
 			if (loadedQuestions.length === 0) {
@@ -281,24 +303,35 @@ export default function LogicPage() {
 				return;
 			}
 			
-			setQuestions(loadedQuestions);
+			setQuestions(loadedQuestions.slice(0, 15));
 		} catch (error) {
 			console.error('LogicPage: Error loading test pratique questions:', error);
 			setError('Erreur lors du chargement des questions du test.');
 		} finally {
 			setIsLoadingQuestions(false);
 		}
-	};
+	}, [profile, selectedExamType]);
 
 	// Handle start test pratique
-	const handleStart = async (test: TestDetails) => {
-		// Load questions for this specific test to ensure randomization
+	const handleStart = useCallback(async (test: TestDetails) => {
 		await loadQuestionsForTest(parseInt(test.id.replace('p', '')));
 		setSelectedTest(test);
 		setView('quiz');
-		// Scroll to top when starting test
 		window.scrollTo({ top: 0, behavior: 'smooth' });
-	};
+	}, [loadQuestionsForTest]);
+
+	useEffect(() => {
+		const practiceParam = searchParams.get('practiceTest');
+		if (practiceParam) {
+			const targetTest = practiceTests.find(test => test.id === `p${practiceParam}`);
+			if (targetTest) {
+				void handleStart(targetTest);
+			}
+			const next = new URLSearchParams(searchParams);
+			next.delete('practiceTest');
+			setSearchParams(next, { replace: true });
+		}
+	}, [handleStart, practiceTests, searchParams, setSearchParams]);
 
 	// Handle review test pratique
 	const handleReview = async (test: TestDetails) => {
@@ -358,24 +391,12 @@ export default function LogicPage() {
 		}
 	};
 
-    const handleSectionToggle = (section: 'practice' | 'quiz') => {
-        setActiveSection(prev => (prev === section ? null : section));
-        // Scroll to top when switching sections
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-
-    const startQuiz = () => {
-        setView('quiz');
-        // Scroll to top when starting quiz
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-
     const filteredPracticeTests = activeTopic === 'All' 
         ? practiceTests 
         : practiceTests.filter(test => test.topic === activeTopic);
 
     if (view === 'learn') {
-        return <QuizCards subject="Logique" subjectColor="yellow" onExit={() => { setView('main'); setActiveSection('quiz'); }} />
+        return <QuizCards subject="Logique" subjectColor="yellow" onExit={() => { setView('main'); }} />
     }
 
     if (view === 'quiz' && selectedTest) {
@@ -398,7 +419,6 @@ export default function LogicPage() {
                 duration={selectedTest.time * 60}
                 onExit={() => { 
                     setView('main'); 
-                    setActiveSection('practice'); 
                     setIsReviewMode(false);
                 }}
                 onFinish={async (answers, timeSpent) => {
@@ -428,7 +448,7 @@ export default function LogicPage() {
 								'LOG',
 								score,
 								parseInt(selectedTest.id.replace('p', '')), // Extract test number from id
-								selectedExamType || 'CM' // Include exam_type for practice tests
+								effectiveExamType // Include exam_type for practice tests
 							);
 							
 							await UserAttemptService.saveUserAttempt(
@@ -473,7 +493,6 @@ export default function LogicPage() {
                 onReview={() => setView('review')}
                 onExit={() => {
                     setView('main');
-                    setActiveSection('practice');
                 }}
             />
         );
@@ -498,10 +517,16 @@ export default function LogicPage() {
                     <p className="text-lg mb-2">Nombre de questions: {selectedTest.questions}</p>
                     <p className="text-lg mb-6">Temps alloué: {selectedTest.time} minutes</p>
                     <div className="flex justify-center gap-4">
-                        <button onClick={() => { setView('main'); setActiveSection(null); }} className="px-6 py-2 rounded-lg bg-gray-200 hover:bg-gray-300">
+                        <button onClick={() => { setView('main'); }} className="px-6 py-2 rounded-lg bg-gray-200 hover:bg-gray-300">
                             Retour
                         </button>
-                        <button onClick={startQuiz} className="px-6 py-2 rounded-lg bg-yellow-500 text-white hover:bg-yellow-600">
+                        <button
+                            onClick={() => {
+                                setView('quiz');
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                            }}
+                            className="px-6 py-2 rounded-lg bg-yellow-500 text-white hover:bg-yellow-600"
+                        >
                             Commencer
                         </button>
                     </div>
@@ -522,59 +547,32 @@ export default function LogicPage() {
 				gradientTo="to-yellow-600"
 			/>
 
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3 lg:gap-4">
-				<ActionButton icon={Trophy} title="Quiz" color="yellow" active={activeSection === 'quiz'} onClick={() => handleSectionToggle('quiz')} />
-				<ActionButton icon={Target} title="Test Pratique" color="yellow" active={activeSection === 'practice'} onClick={() => handleSectionToggle('practice')} />
+			<div className="bg-white rounded-xl shadow-sm border p-3 sm:p-4 lg:p-6">
+				<h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">Tests pratiques</h2>
+				<div className="flex flex-wrap gap-1.5 sm:gap-2 mb-4">
+					{topics.map(topic => (
+						<FilterPill
+							key={topic}
+							topic={topic}
+							activeTopic={activeTopic}
+							setActiveTopic={setActiveTopic}
+							color="yellow"
+						/>
+					))}
+				</div>
+				<div className="space-y-1.5 sm:space-y-2 lg:space-y-3">
+					{filteredPracticeTests.map(test => (
+						<TestListItem
+							key={test.id}
+							test={test}
+							onStart={() => handleStart(test)}
+							onReview={() => handleReview(test)}
+							color="yellow"
+							result={testResults[test.id]}
+						/>
+					))}
+				</div>
 			</div>
-
-			{activeSection === 'practice' && (
-				<div className="space-y-2 sm:space-y-3 lg:space-y-6">
-					<div className="bg-white rounded-xl shadow-sm border p-2 sm:p-3 lg:p-6">
-						<h2 className="text-base sm:text-lg lg:text-xl font-bold mb-2 sm:mb-3 lg:mb-4">Practice by Topic</h2>
-						<div className="flex flex-wrap gap-1.5 sm:gap-2 mb-3 sm:mb-4 lg:mb-6">
-							{topics.map(topic => (
-								<FilterPill key={topic} topic={topic} activeTopic={activeTopic} setActiveTopic={setActiveTopic} color="yellow" />
-							))}
-						</div>
-						
-						<div className="space-y-1.5 sm:space-y-2 lg:space-y-3">
-							{filteredPracticeTests.map(test => (
-								<TestListItem 
-									key={test.id} 
-									test={test} 
-									onStart={() => handleStart(test)} 
-									onReview={() => handleReview(test)}
-									color="yellow"
-									result={testResults[test.id]}
-								/>
-							))}
-						</div>
-					</div>
-
-				</div>
-			)}
-
-			{activeSection === 'quiz' && (
-				<div className="bg-white rounded-xl shadow-sm border p-3 sm:p-4 lg:p-8 mt-4 text-center">
-					<Trophy className="w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 text-yellow-500 mx-auto mb-3 sm:mb-4" />
-					<h2 className="text-lg sm:text-xl lg:text-2xl font-bold mb-2 sm:mb-3">Apprenez avec des quiz interactifs</h2>
-					<p className="text-gray-600 max-w-2xl mx-auto mb-4 sm:mb-6 text-xs sm:text-sm lg:text-base">
-						Nos quiz d'apprentissage sont conçus pour vous aider à maîtriser les concepts une question à la fois. Obtenez des commentaires immédiats, retournez les cartes pour voir les explications et apprenez à votre propre rythme.
-					</p>
-					<div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4 sm:mb-6">
-						<p className="text-yellow-700 text-xs sm:text-sm font-medium">
-							📅 <strong>Quiz hebdomadaire :</strong> Les questions changent chaque semaine pour vous offrir une variété constante de contenu d'apprentissage.
-						</p>
-					</div>
-					<button 
-						onClick={() => setView('learn')}
-						className="inline-flex items-center gap-2 px-4 sm:px-6 lg:px-8 py-2 sm:py-3 rounded-lg bg-yellow-500 text-white font-semibold hover:bg-yellow-600 transition-colors text-sm sm:text-base"
-					>
-						<Play className="w-4 h-4 sm:w-5 sm:h-5" />
-						Commencer l'apprentissage
-					</button>
-				</div>
-			)}
 		</div>
 	);
 } 
