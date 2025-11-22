@@ -209,24 +209,91 @@ def main() -> None:
         return cmd
 
     if not args.skip_audit:
-        dry_cmd = build_audit_command(allow_generation=False)
-        run_step(dry_cmd, "collect_replacement_candidates.py (audit only)")
-        summary_path = PROJECT_ROOT / "diagnostics_output/realtime_summary.json"
-        print_audit_summary(summary_path)
-        proceed_generation = prompt_user(
-            "Generate replacements for flagged questions?",
-            default=False,
-            auto_confirm=auto_generation,
-        )
-        if not proceed_generation:
-            print(">>> Stopping after audit.")
-            return
+        # Check if a valid manifest already exists to allow resuming
+        manifest_path = PROJECT_ROOT / "diagnostics_output/replacements_manifest.json"
+        replacements_path = PROJECT_ROOT / "ai_validated_questions/replacements_raw.json"
+        resume_mode = False
+        skip_generation = False
+        
+        # 1. Check if we already have generated replacements (generation done)
+        if replacements_path.exists() and not args.yes_all:
+            try:
+                with replacements_path.open("r", encoding="utf-8") as f:
+                    raw_data = json.load(f)
+                    raw_count = len(raw_data) if isinstance(raw_data, list) else 0
+                    if raw_count > 0:
+                        print(f"\n>>> Found existing generated replacements ({raw_count} questions).")
+                        if prompt_user("Skip generation and proceed to validation/insertion?", default=True):
+                             resume_mode = True
+                             skip_generation = True
+            except Exception:
+                pass
 
-        gen_cmd = build_audit_command(allow_generation=True)
-        run_step(gen_cmd, "collect_replacement_candidates.py (audit + generation)")
+        # 2. If not skipping generation, check if we have an audit manifest (audit done)
+        if not skip_generation and manifest_path.exists() and not args.yes_all:
+            try:
+                with manifest_path.open("r", encoding="utf-8") as f:
+                    mdata = json.load(f)
+                    count = mdata.get('total_questions', 0)
+                    if count > 0:
+                        print(f"\n>>> Found existing audit manifest with {count} flagged questions.")
+                        if prompt_user("Resume generation from this manifest (skip re-audit)?", default=True):
+                             resume_mode = True
+            except Exception:
+                pass # If read fails, just proceed with standard flow
 
-        summary_path = PROJECT_ROOT / "diagnostics_output/realtime_summary.json"
-        print_audit_summary(summary_path)
+        if not resume_mode:
+            dry_cmd = build_audit_command(allow_generation=False)
+            run_step(dry_cmd, "collect_replacement_candidates.py (audit only)")
+        
+        # If audit only (dry-run-generation), the output is replacements_manifest.json
+        # If generation enabled, the output updates realtime_summary.json
+        
+        # Try printing manifest stats first if available
+        if manifest_path.exists() and not skip_generation:
+             if not resume_mode: # Only print if we didn't just see it above
+                print(f">>> Found audit manifest at {manifest_path}")
+                try:
+                    with manifest_path.open("r", encoding="utf-8") as f:
+                        mdata = json.load(f)
+                        print(f"Total flagged questions: {mdata.get('total_questions', 0)}")
+                        if mdata.get('summary_by_pool'):
+                            print("Summary by pool:")
+                            for k, v in mdata['summary_by_pool'].items():
+                                print(f"  - {k}: {v}")
+                except Exception as e:
+                    print(f">>> Error reading manifest: {e}")
+        
+        if not skip_generation:
+            proceed_generation = prompt_user(
+                "Generate replacements for flagged questions?",
+                default=False,
+                auto_confirm=auto_generation,
+            )
+            if not proceed_generation:
+                print(">>> Stopping after audit.")
+                return
+
+            # Use generate_replacements.py for the actual generation step
+            gen_cmd = [sys.executable, "scripts/generate_replacements.py"]
+            if args.audit_limit:
+                gen_cmd.extend(["--limit", str(args.audit_limit)])
+            if args.audit_gemini_model:
+                 gen_cmd.extend(["--gemini-model", args.audit_gemini_model])
+            if args.audit_max_retries:
+                 gen_cmd.extend(["--max-retries", str(args.audit_max_retries)])
+            if args.audit_sleep:
+                 gen_cmd.extend(["--sleep", str(args.audit_sleep)])
+            if args.audit_english_threshold:
+                 gen_cmd.extend(["--english-threshold", str(args.audit_english_threshold)])
+            if args.audit_french_threshold:
+                 gen_cmd.extend(["--french-threshold", str(args.audit_french_threshold)])
+            
+            run_step(gen_cmd, "generate_replacements.py (generation)")
+
+            summary_path = PROJECT_ROOT / "diagnostics_output/realtime_summary.json"
+            print_audit_summary(summary_path)
+
         if not args.skip_process:
             if not prompt_user(
                 "Proceed to validation of generated questions?",
@@ -257,19 +324,44 @@ def main() -> None:
         ]
         if args.process_limit is not None:
             dry_cmd.extend(["--limit", str(args.process_limit)])
-        run_step(dry_cmd, "process_generated_questions.py (dry-run)")
+        
+        # Check if validation cache already exists
+        ready_path = PROJECT_ROOT / "ai_validated_questions/ready_for_insert.json"
+        skip_validation = False
+        if ready_path.exists() and not args.yes_all:
+             if prompt_user("Found ready-to-insert cache. Skip validation (dry-run)?", default=True):
+                 skip_validation = True
+
+        if not skip_validation:
+            run_step(dry_cmd, "process_generated_questions.py (dry-run)")
+        else:
+            print(">>> Skipping validation (dry-run) as requested.")
 
         if not args.dry_run:
+            # If dry-run produced a ready_for_insert.json, use it for the apply step
+            # to avoid re-validating everything.
+            ready_path = PROJECT_ROOT / "ai_validated_questions/ready_for_insert.json"
+            input_arg = "ai_validated_questions/replacements_raw.json"
+            extra_args = []
+            
+            if ready_path.exists():
+                print(f">>> Using validated cache: {ready_path}")
+                input_arg = "ai_validated_questions/ready_for_insert.json"
+                extra_args = ["--use-ready-cache"]
+
             live_cmd = [
                 sys.executable,
                 "scripts/process_generated_questions.py",
                 "--input",
-                "ai_validated_questions/replacements_raw.json",
+                input_arg,
                 "--insert",
                 "--delete-originals",
             ]
+            live_cmd.extend(extra_args)
+            
             if args.process_limit is not None:
                 live_cmd.extend(["--limit", str(args.process_limit)])
+            
             if not prompt_user(
                 "Ready to insert validated questions and delete originals?",
                 default=False,

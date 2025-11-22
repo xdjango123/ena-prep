@@ -65,8 +65,8 @@ class GenerationConfig:
     max_retries: int = 2
     sleep_seconds: float = 1.0
     dry_run: bool = False
-    temperature: float = 0.0
-    max_output_tokens: int = 1200
+    temperature: float = 1.0
+    max_output_tokens: int = 16000
 
 
 def _get_openai_client() -> OpenAI:
@@ -316,16 +316,15 @@ def generate_replacement_for_target(
 
         response: Optional[object] = None
         try:
-            response = openai_client.responses.create(
+            response = openai_client.chat.completions.create(
                 model=config.openai_model,
-                max_output_tokens=config.max_output_tokens,
-                temperature=config.temperature,
-                input=[
+                max_completion_tokens=config.max_output_tokens,
+                messages=[
                     {"role": "system", "content": SYSTEM_PROMPT},
                     {"role": "user", "content": prompt},
                 ],
             )
-            message = _extract_response_text(response)
+            message = (response.choices[0].message.content or "").strip()
             if not message:
                 raise ValueError("Empty response from OpenAI.")
             candidate_payload = extract_json_object(message)
@@ -445,7 +444,10 @@ Réponds UNIQUEMENT avec du JSON:
 """
             validation = gemini_model.generate_content(validation_prompt)
             validation_text = validation.text.strip()
-            validation_payload = json.loads(validation_text)
+            validation_payload = extract_json_object(validation_text)
+            if validation_payload is None:
+                 validation_payload = json.loads(validation_text)
+
             checks = [
                 validation_payload.get("approved"),
                 validation_payload.get("difficulty_ok"),

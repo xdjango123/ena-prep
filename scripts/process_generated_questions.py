@@ -17,6 +17,7 @@ import json
 import os
 import re
 import sys
+import time
 from dataclasses import dataclass
 from difflib import SequenceMatcher
 from pathlib import Path
@@ -172,7 +173,19 @@ class GeneratedQuestionProcessor:
             print(f"Loaded {len(generated)} generated entries.")
             for idx, entry in enumerate(generated, start=1):
                 print(f"[{idx}/{len(generated)}] Validating {entry.question_id}…")
-                self._process_generated(entry)
+                try:
+                    self._process_generated(entry)
+                    time.sleep(0.1)  # slight pause to respect rate limits
+                except Exception as exc:
+                    print(f"⚠️ Error processing {entry.question_id}: {exc}")
+                    self._add_potential_error(
+                        "process_exception",
+                        {"question_id": entry.question_id},
+                        extras={"error": str(exc)},
+                    )
+                
+                if idx % 50 == 0:
+                    self.validators.flush_cache()
 
         if self.manual_review_entries:
             MANUAL_REVIEW_DIR.mkdir(parents=True, exist_ok=True)
@@ -361,11 +374,31 @@ class GeneratedQuestionProcessor:
         with self.input_path.open("r", encoding="utf-8") as handle:
             data = json.load(handle)
 
+        # Load manifest to filter only relevant flagged questions
+        manifest_path = self.cwd / "diagnostics_output/replacements_manifest.json"
+        valid_ids = set()
+        if manifest_path.exists():
+            try:
+                with manifest_path.open("r", encoding="utf-8") as f:
+                    manifest_data = json.load(f)
+                    questions = manifest_data.get("questions", [])
+                    valid_ids = {str(q.get("question_id")) for q in questions if q.get("question_id")}
+                print(f"Filtering based on manifest: {len(valid_ids)} flagged IDs.")
+            except Exception as e:
+                print(f"⚠️ Could not load manifest for filtering: {e}")
+
         generated: List[GeneratedQuestion] = []
         for item in data:
             question_id = item.get("question_id") or item.get("id") or "generated"
-            if question_id in self.ingested_ids:
+            str_id = str(question_id)
+            
+            # Filter: skip if we have a manifest and this ID isn't in it
+            if valid_ids and str_id not in valid_ids:
                 continue
+
+            if str_id in self.ingested_ids:
+                continue
+            
             question_data = (
                 item.get("question_data")
                 or item.get("generated")
@@ -381,11 +414,21 @@ class GeneratedQuestionProcessor:
                     raw=item,
                     normalized_text=normalized,
                     signature=token_signature(question_text),
-                    question_id=str(question_id),
+                    question_id=str_id,
                 )
             )
-        self.stats["loaded"] = len(generated)
-        return generated
+        # Deduplicate: keep only the latest entry for each question_id
+        deduplicated_map: Dict[str, GeneratedQuestion] = {}
+        for g in generated:
+            deduplicated_map[g.question_id] = g
+        
+        unique_generated = list(deduplicated_map.values())
+        
+        if len(unique_generated) < len(generated):
+            print(f"Deduplication removed {len(generated) - len(unique_generated)} duplicate entries.")
+
+        self.stats["loaded"] = len(unique_generated)
+        return unique_generated
 
     def _llm_validate_question(self, payload: Dict[str, Any], generated: GeneratedQuestion) -> bool:
         issues, details = run_llm_checks(payload, self.validators)
@@ -483,6 +526,18 @@ class GeneratedQuestionProcessor:
         )
         final_explanation = question_data.get("explanation") or raw.get("final_explanation")
 
+        # Preserve original fields from raw input if available
+        # This ensures fields like test_number, question_pool, usage_count are kept
+        original_fields = {
+            "test_number": raw.get("test_number"),
+            "question_pool": raw.get("question_pool"),
+            "usage_count": raw.get("usage_count", 0),
+            "last_used": raw.get("last_used"),
+            "passage_id": raw.get("passage_id"),
+            "unique_hash": raw.get("unique_hash"), # Note: unique_hash might need regeneration if text changes
+            "ai_generated": True, # Mark as AI generated since we replaced content
+        }
+
         payload = {
             "question_text": question_text.strip(),
             "answer1": (answer1 or "").strip(),
@@ -496,6 +551,7 @@ class GeneratedQuestionProcessor:
             "exam_type": question_data.get("exam_type") or raw.get("exam_type"),
             "test_type": question_data.get("test_type") or raw.get("test_type"),
             "sub_category": question_data.get("sub_category") or raw.get("sub_category"),
+            **original_fields, # Merge original fields
         }
 
         # Skip if any core fields missing

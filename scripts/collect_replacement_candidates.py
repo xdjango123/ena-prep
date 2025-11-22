@@ -23,6 +23,11 @@ try:
 except Exception:  # pragma: no cover
     OpenAI = None  # type: ignore
 
+try:
+    import google.generativeai as genai
+except Exception:
+    genai = None
+
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
@@ -35,7 +40,7 @@ from question_audit.db import (  # type: ignore
 )
 from question_audit.language import detect_language_scores  # type: ignore
 from question_audit.logging_utils import info, warn  # type: ignore
-from question_audit.text_utils import normalize_text  # type: ignore
+from question_audit.text_utils import normalize_text, token_signature, flatten_options  # type: ignore
 
 DEFAULT_DUPLICATE_REPORT = "diagnostics_output/cross_exam_duplicates.json"
 DEFAULT_SCORES_GLOB = "diagnostics_output/refresh_easy_scores_*.json"
@@ -106,9 +111,50 @@ def parse_args() -> argparse.Namespace:
         help="Seconds to pause between OpenAI classification calls (default: 0.8)",
     )
     parser.add_argument(
-        "--categories",
-        nargs="+",
-        help="Filter audit by specific categories (e.g. ANG LOG CG).",
+        "--dry-run-generation",
+        action="store_true",
+        help="Prepare prompts without calling OpenAI (dry run).",
+    )
+    parser.add_argument(
+        "--max-retries",
+        type=int,
+        default=2,
+        help="Maximum retries per question when generation fails (default: 2 → 3 attempts).",
+    )
+    parser.add_argument(
+        "--audit-gemini-model",
+        default="gemini-2.0-flash",
+        help="Gemini model name used to confirm violations before regeneration.",
+    )
+    parser.add_argument(
+        "--audit-gpt-model",
+        default="gpt-4o-mini",
+        help="GPT model name used to confirm Gemini flags.",
+    )
+    parser.add_argument(
+        "--model-cache",
+        default="diagnostics_output/model_validation_cache.json",
+        help="Path to shared model validation cache.",
+    )
+    parser.add_argument(
+        "--flagged-only",
+        action="store_true",
+        help="Restrict the audit to IDs from --input instead of scanning the full catalogue.",
+    )
+    parser.add_argument(
+        "--input",
+        default="diagnostics_output/flag_summary.json",
+        help="Path to flag_summary.json (default: diagnostics_output/flag_summary.json)",
+    )
+    parser.add_argument(
+        "--limit",
+        type=int,
+        help="Process at most N questions from the flag summary.",
+    )
+    parser.add_argument(
+        "--resume",
+        action="store_true",
+        help="Resume from existing outputs instead of starting fresh.",
     )
     return parser.parse_args()
 
@@ -210,17 +256,18 @@ def classify_question_categories(
     sleep_seconds: float,
     confidence_threshold: float = 0.55,
 ) -> Dict[str, Dict[str, object]]:
-    if OpenAI is None:
-        warn("openai package not available; skipping category classification.")
+    if genai is None:
+        warn("google-generativeai package not available; skipping category classification.")
         return {}
 
-    api_key = os.getenv("OPENAI_API_KEY")
+    api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
-        warn("OPENAI_API_KEY not set; skipping category classification.")
+        warn("GEMINI_API_KEY not set; skipping category classification.")
         return {}
 
-    client = OpenAI()
-    model_name = os.getenv("OPENAI_MODEL", "gpt-5")
+    genai.configure(api_key=api_key)
+    model_name = "gemini-2.0-flash"  # Using standard efficient model
+    model = genai.GenerativeModel(model_name)
 
     process_rows = rows if limit is None else rows[:limit]
 
@@ -233,42 +280,58 @@ def classify_question_categories(
             f"{chr(65 + i)}) {opt}" for i, opt in enumerate(options) if opt.strip()
         )
         prompt = f"""
-Tu es examinateur pour l'ENA Côte d'Ivoire. Détermine la catégorie la plus adaptée pour cette question :
-- ANG (anglais, compréhension ou expression)
-- CG (culture générale, connaissances sur la Côte d'Ivoire et le monde, ....)
-- LOG (raisonnement logique, calculs, puzzles, suites, matrices...)
+Tu es examinateur pour l'ENA Côte d'Ivoire. Ta mission est de vérifier la cohérence de la catégorie d'une question.
 
-Question : {question_text}
+Catégories possibles :
+- ANG : La question porte sur la langue anglaise (vocabulaire, grammaire, compréhension).
+- CG : Culture Générale. Peut inclure histoire, géographie, politique, MAIS AUSSI des questions de logique verbale, d'orthographe française, ou de mathématiques élémentaires SI elles sont posées en français.
+- LOG : Logique pure (suites numériques, matrices, puzzles visuels).
+
+Règles strictes pour signaler une erreur de catégorie :
+1. Si la catégorie est 'CG' mais que la question est ENTIÈREMENT en anglais, suggère 'ANG'.
+2. Si la catégorie est 'CG' mais que la question est une suite numérique complexe ou un puzzle visuel sans texte, suggère 'LOG'.
+3. Si la catégorie est 'CG' et que la question porte sur la langue française (orthographe, grammaire) ou des mathématiques simples en français, C'EST CORRECT, ne change rien.
+4. Si la catégorie est 'CG' et que la question est de la logique verbale (intrus, synonymes, analogies) en français, C'EST CORRECT, ne change rien.
+
+Question ({row.get('category')}): {question_text}
 Options :
 {options_block}
 
-Réponds uniquement avec du JSON :
+Réponds uniquement avec ce JSON :
 {{
-  "category": "ANG" | "CG" | "LOG",
+  "category": "la catégorie la plus appropriée (ANG, CG, ou LOG)",
   "confidence": nombre entre 0.0 et 1.0,
-  "reason": "une explication brève en français"
+  "reason": "brève justification si changement proposé"
 }}
 """
         try:
-            response = client.responses.create(
-                model=model_name,
-                max_output_tokens=400,
-                input=[
-                    {"role": "system", "content": "Tu es un classificateur de questions d'examen."},
-                    {"role": "user", "content": prompt},
-                ],
-                response_format={"type": "json_object"},
+            response = model.generate_content(
+                prompt,
+                generation_config=genai.types.GenerationConfig(
+                    response_mime_type="application/json",
+                ),
             )
-            message = (getattr(response, "output_text", "") or "").strip()
-            result = json.loads(message)
-            category = result.get("category")
-            confidence = float(result.get("confidence", 0.0))
-            if category in {"ANG", "CG", "LOG"} and confidence >= confidence_threshold:
-                results[question_id] = {
-                    "recommended_category": category,
-                    "confidence": confidence,
-                    "reason": result.get("reason"),
-                }
+            message = response.text.strip()
+            
+            # Debug logging for failed JSON
+            def log_failure(qid: str, raw_msg: str, reason: str):
+                debug_path = Path("diagnostics_output/llm_failures.log")
+                with debug_path.open("a", encoding="utf-8") as f:
+                    f.write(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] QID: {qid} | Error: {reason}\nRaw Response:\n{raw_msg}\n{'-'*40}\n")
+
+            try:
+                result = json.loads(message)
+                category = result.get("category")
+                confidence = float(result.get("confidence", 0.0))
+                if category in {"ANG", "CG", "LOG"} and confidence >= confidence_threshold:
+                    results[question_id] = {
+                        "recommended_category": category,
+                        "confidence": confidence,
+                        "reason": result.get("reason"),
+                    }
+            except json.JSONDecodeError as json_err:
+                log_failure(question_id, message, str(json_err))
+                warn(f"Category classification failed for {question_id}: {json_err}")
         except Exception as exc:
             warn(f"Category classification failed for {question_id}: {exc}")
         time.sleep(max(sleep_seconds, 0.0))
@@ -350,12 +413,13 @@ def main() -> None:
         return
 
     duplicate_path = Path(args.duplicate_report)
-    if not duplicate_path.exists():
-        warn(f"Duplicate report not found: {duplicate_path}")
-        return
-    duplicate_report = load_json(duplicate_path)
-    duplicate_ids = collect_duplicate_ids(duplicate_report, args.duplicate_threshold)
-    info(f"Duplicates flagged (similarity >= {args.duplicate_threshold:.2f}): {len(duplicate_ids)}")
+    duplicate_ids = set()
+    if duplicate_path.exists():
+        duplicate_report = load_json(duplicate_path)
+        duplicate_ids = collect_duplicate_ids(duplicate_report, args.duplicate_threshold)
+        info(f"Duplicates flagged (similarity >= {args.duplicate_threshold:.2f}): {len(duplicate_ids)}")
+    else:
+        warn(f"Duplicate report not found: {duplicate_path} - skipping pre-computed duplicate check.")
 
     scores_path: Optional[Path]
     if args.scores_file:
@@ -412,9 +476,35 @@ def main() -> None:
     )
     info(f"Wrong-category questions flagged: {len(wrong_category_ids)}")
 
+    # Strict duplicate check (Question + Answers)
+    strict_duplicate_ids = set()
+    signatures: Dict[str, str] = {}
+    for row in rows:
+        qid = str(row.get("id"))
+        text = row.get("question_text") or ""
+        answers = flatten_options([
+            row.get("answer1") or "",
+            row.get("answer2") or "",
+            row.get("answer3") or "",
+            row.get("answer4") or "",
+        ])
+        full_text = f"{text} {answers}"
+        sig = token_signature(full_text)
+        if not sig:
+            continue
+        if sig in signatures:
+            strict_duplicate_ids.add(qid)
+        else:
+            signatures[sig] = qid
+    
+    if strict_duplicate_ids:
+        info(f"Strict duplicates flagged (identical text+options): {len(strict_duplicate_ids)}")
+
     reasons_map: Dict[str, Set[str]] = defaultdict(set)
     for qid in duplicate_ids:
         reasons_map[qid].add("duplicate")
+    for qid in strict_duplicate_ids:
+        reasons_map[qid].add("strict_duplicate")
     for qid in easy_ids:
         reasons_map[qid].add("too_easy")
     for qid in wrong_category_ids:

@@ -399,6 +399,34 @@ def evaluate_explanation(validators: ModelValidators, record: Dict[str, Any]) ->
     return _interpret_flag_result(result, parsed)
 
 
+
+CORRECT_ANSWER_PROMPT = """
+Tu valides la réponse officielle d'un QCM.
+
+Question:
+{question_text}
+
+Options:
+{answers}
+
+Explication:
+{explanation}
+
+Réponse officielle indiquée : {correct_letter}
+
+Tâche :
+1. Résous la question toi-même.
+2. Compare ta solution avec la lettre officielle.
+3. Vérifie si l'explication justifie correctement cette réponse.
+
+Réponds UNIQUEMENT avec JSON:
+{{
+  "agrees_with_official": true/false,
+  "reason": "Pourquoi la réponse est correcte ou incorrecte",
+  "confidence": 0-1
+}}
+"""
+
 def evaluate_correct_answer(validators: ModelValidators, record: Dict[str, Any]) -> ValidationResult:
     prompt = CORRECT_ANSWER_PROMPT.format(
         question_text=record.get("question_text") or "",
