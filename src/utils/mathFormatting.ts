@@ -11,7 +11,9 @@ const MATRIX_REGEX = /(?:\[[^[\]]+\]){2,}/g;
 const LATEX_SPECIAL_CHAR_REGEX = /([&_{}%$#])/g;
 const DELIMITER_REGEX = /\$\$|\$|\\\(|\\\)|\\\[|\\\]/;
 const MATRIX_PLACEHOLDER_REGEX = /__MATRIX_(\d+)__/g;
-const CANDIDATE_REGEX = /([A-Za-z0-9+\-/*=^(){}\[\]\\ ]+)/g;
+// High-confidence inline math: single-letter variables or numbers combined with operators/carets.
+const INLINE_MATH_REGEX =
+  /\b(?:[A-Za-z]|\d+)(?:\s*\^\s*[-]?(?:\d+(?:\/\d+)?|[A-Za-z]))?(?:\s*[\+\-\*\/=]\s*(?:[A-Za-z]|\d+)(?:\s*\^\s*[-]?(?:\d+(?:\/\d+)?|[A-Za-z]))?)+|\b(?:[A-Za-z]|\d+)\s*\^\s*[-]?(?:\d+(?:\/\d+)?|[A-Za-z])/g;
 const EXPONENT_REGEX =
   /(\b(?:[A-Za-z]\w*|\d+)|\([^()]+\))\s*\^\s*(-?(?:\d+(?:\/\d+)?)|\(?[A-Za-z0-9+\-/*]+\)?)/g;
 
@@ -46,22 +48,22 @@ const parseMatrixToLatex = (raw: string): string | null => {
 
 const hasMathDelimiters = (text: string): boolean => DELIMITER_REGEX.test(text);
 
-const wrapCandidateInMath = (candidate: string): string => {
-  const leadingWhitespace = candidate.match(/^\s*/)?.[0] ?? '';
-  const trailingWhitespace = candidate.match(/\s*$/)?.[0] ?? '';
-  const trimmed = candidate.trim();
+const wrapInlineMath = (text: string): string => {
+  return text.replace(INLINE_MATH_REGEX, match => {
+    const trimmed = match.trim();
+    if (!trimmed) {
+      return match;
+    }
 
-  if (!trimmed) {
-    return candidate;
-  }
+    // Guard: require at least one operator or caret to avoid wrapping plain words.
+    const hasOperator = /[\+\-\*\/=]/.test(trimmed);
+    const hasCaret = /\^/.test(trimmed);
+    if (!hasOperator && !hasCaret) {
+      return match;
+    }
 
-  const containsMathChar = trimmed.includes('^') || trimmed.includes('=');
-
-  if (!containsMathChar) {
-    return candidate;
-  }
-
-  return `${leadingWhitespace}$${trimmed}$${trailingWhitespace}`;
+    return `$${trimmed}$`;
+  });
 };
 
 /**
@@ -116,9 +118,8 @@ export const normalizeMathText = (input: string): string => {
     return `${base}^{${cleanedExponent}}`;
   });
 
-  normalized = normalized.replace(CANDIDATE_REGEX, candidate =>
-    wrapCandidateInMath(candidate)
-  );
+  // Wrap only high-confidence inline math snippets; avoid wrapping full sentences.
+  normalized = wrapInlineMath(normalized);
 
   normalized = normalized.replace(MATRIX_PLACEHOLDER_REGEX, (_, index) => {
     const resolved = matrixPlaceholders[Number(index)];
