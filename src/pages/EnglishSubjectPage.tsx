@@ -3,7 +3,6 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { Languages, Shield, Zap, BookOpen, Clock, BarChart, ChevronsRight, ArrowLeft } from 'lucide-react';
 import { QuizSeries } from '../components/quiz/QuizSeries';
 import { QuizReview } from '../components/quiz/QuizReview';
-import { QuizCards } from '../components/quiz/QuizCards';
 import { QuizResult } from '../components/quiz/QuizResult';
 import { getQuestionsBySubject, Question } from '../data/quizQuestions';
 import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
@@ -51,7 +50,7 @@ export default function EnglishSubjectPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [view, setView] = useState<'main' | 'summary' | 'quiz' | 'review' | 'learn' | 'results'>('main');
   const [selectedTest, setSelectedTest] = useState<TestDetails | null>(null);
-  const [lastAnswers, setLastAnswers] = useState<Map<number, string | number>>(new Map());
+  const [lastAnswers, setLastAnswers] = useState<Map<string, string | number>>(new Map());
   const [activeTopic, setActiveTopic] = useState('All');
   const [testResults, setTestResults] = useState<Record<string, { score: number; timeSpent: number }>>({});
   const [lastResult, setLastResult] = useState<{ score: number, correctAnswers: number, totalQuestions: number, timeSpent: number } | null>(null);
@@ -127,7 +126,7 @@ export default function EnglishSubjectPage() {
   useEffect(() => {
     let isMounted = true;
     practiceTestService
-      .getPracticeTestsByCategory(effectiveExamType, 'ANG')
+      .getPracticeTestsBySubject(effectiveExamType, 'ANG')
       .then(summaries => {
         if (!isMounted) return;
         setPracticeTests(prev =>
@@ -307,7 +306,12 @@ export default function EnglishSubjectPage() {
       const testData = await UserAttemptService.getTestDataForReview(user.id, 'ANG', testNumber);
       if (testData) {
         setQuestions(testData.questions);
-        setLastAnswers(testData.userAnswers);
+        // V2: Preserve string keys (question UUIDs) for QuizReview compatibility
+        const answersMap = new Map<string, string | number>();
+        testData.userAnswers.forEach((value, key) => {
+          answersMap.set(String(key), value);
+        });
+        setLastAnswers(answersMap);
         setLastResult({
           score: testData.score,
           correctAnswers: testData.correctAnswers,
@@ -350,9 +354,7 @@ export default function EnglishSubjectPage() {
     ? practiceTests 
     : practiceTests.filter(test => test.topic === activeTopic);
 
-  if (view === 'learn') {
-    return <QuizCards subject="English" subjectColor="green" onExit={() => { setView('main'); }} />
-  }
+  // 'learn' view removed - QuizCards no longer exists
 
   if (view === 'quiz' && selectedTest) {
     if (isLoadingQuestions) {
@@ -400,9 +402,16 @@ export default function EnglishSubjectPage() {
                 parseInt(selectedTest.id.replace('p', '')),
                 effectiveExamType // Include exam_type for practice tests
               );
+              // V2: Convert answers to [string | number, number][] format
+              const userAnswersV2: [string | number, number][] = [];
+              answers.forEach((value, key) => {
+                const answerIndex = typeof value === 'number' ? value : parseInt(String(value), 10) || 0;
+                userAnswersV2.push([key, answerIndex]);
+              });
+              
               const testData = {
                 questions: questions,
-                userAnswers: Array.from(answers.entries()),
+                userAnswers: userAnswersV2,
                 correctAnswers: correctAnswers,
                 totalQuestions: questions.length,
                 timeSpent: timeSpent

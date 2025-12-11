@@ -1,134 +1,203 @@
+/**
+ * Quiz Questions Data V2 - Bridge between QuestionService and UI components
+ * 
+ * Converts V2 database schema to the component-expected format
+ */
+
+import { QuestionService } from '../services/questionService';
+import type { QuestionV2, Subject, ExamType, TestType } from '../types/questions';
+import { formatExponents } from '../utils/mathFormatting';
+
+// Question format expected by UI components
 export interface Question {
-  id: number;
+  id: string;  // V2: Keep as string (UUID) for exam_answers tracking
   type: 'multiple-choice' | 'true-false' | 'fill-blank' | 'matching';
   question: string;
   options?: string[];
   correctAnswer: number | string;
   explanation: string;
   difficulty: 'easy' | 'medium' | 'hard';
+  subject: string;  // V2: Include subject for category tracking
 }
 
-// Import the QuestionService
-import { QuestionService } from '../services/questionService';
-import { formatExponents } from '../utils/mathFormatting';
+/**
+ * Map subject string to V2 Subject type
+ */
+const mapSubject = (subject: string): Subject | null => {
+  switch (subject) {
+    case 'culture-generale':
+      return 'CG';
+    case 'english':
+      return 'ANG';
+    case 'logique':
+      return 'LOG';
+    default:
+      return null;
+  }
+};
 
-export const getQuestionsBySubject = async (subject: string, examType?: 'CM' | 'CMS' | 'CS', testNumber?: number): Promise<Question[]> => {
-  try {
-    let category: 'ANG' | 'CG' | 'LOG';
-    
-    switch (subject) {
-      case 'culture-generale':
-        category = 'CG';
-        break;
-      case 'english':
-        category = 'ANG';
-        break;
-      case 'logique':
-        category = 'LOG';
-        break;
-      default:
-        return [];
-    }
-    
-    // Log the mode we're in with clear indicators
-    if (testNumber !== undefined) {
-      console.log(`🎯 PRACTICE TEST MODE: Loading questions for ${category}, test #${testNumber}`);
-      console.log(`   → This will ensure different questions from other practice tests`);
-      console.log(`   → Exam type: ${examType || 'ALL'}`);
-    } else {
-      console.log(`📅 DAILY QUIZ MODE: Loading questions for ${category}`);
-      console.log(`   → Questions will change daily, same questions throughout the day`);
-      console.log(`   → Exam type: ${examType || 'ALL'}`);
-    }
-    
-    const testTypesToFetch: ('quiz_series' | 'practice_test' | 'examen_blanc')[] =
-      testNumber !== undefined ? ['practice_test'] : ['quiz_series'];
-    
-    // Get questions from database with proper seeding
-    // - For practice tests: pass testNumber and examType to ensure different questions per test
-    // - For daily quizzes: don't pass testNumber so it uses daily date seeding, but still filter by examType
-    const limit = testNumber !== undefined ? 15 : 10;
-    const dbQuestions = await QuestionService.getRandomQuestions(
-      category,
-      limit,
-      undefined,
-      testNumber,
-      examType,
-      testTypesToFetch
+/**
+ * Quiz type for free quiz vs quick quiz separation
+ */
+export type QuizType = 'free_quiz' | 'quick_quiz';
+
+/**
+ * Map V2 test types based on context
+ */
+const mapTestTypes = (testNumber?: number, quizType?: QuizType): TestType[] => {
+  // For practice tests, use 'practice'
+  if (testNumber !== undefined) {
+    return ['practice'];
+  }
+  // For specific quiz type, use that type only
+  if (quizType) {
+    return [quizType];
+  }
+  // Fallback: both quiz types (legacy behavior)
+  return ['free_quiz', 'quick_quiz'];
+};
+
+/**
+ * Convert V2 QuestionV2 to UI Question format
+ */
+const convertToUIQuestion = (dbQ: QuestionV2, index: number): Question => {
+  // V2: options is already an array
+  const options = dbQ.options || [];
+  const validOptions = options.filter(opt => opt && opt.trim() !== '');
+  
+  // Determine question type
+  let type: 'multiple-choice' | 'true-false' = 'multiple-choice';
+  let correctAnswer: number | string = dbQ.correct_index;
+  
+  if (validOptions.length === 2) {
+    // Check if it's true/false
+    const isTrueFalse = validOptions.some(opt => 
+      opt.toLowerCase() === 'true' || opt.toLowerCase() === 'false' ||
+      opt.toLowerCase() === 'vrai' || opt.toLowerCase() === 'faux'
     );
-    
-    if (!dbQuestions || dbQuestions.length === 0) {
-      console.warn(`⚠️ No questions returned for ${category}`);
+    if (isTrueFalse) {
+      type = 'true-false';
+      correctAnswer = validOptions[dbQ.correct_index]?.toLowerCase() === 'true' || 
+                     validOptions[dbQ.correct_index]?.toLowerCase() === 'vrai' 
+                     ? 'true' : 'false';
+    }
+  }
+  
+  // Format text for LOG questions (handle exponents)
+  const formattedQuestion = dbQ.subject === 'LOG' 
+    ? formatExponents(dbQ.text) 
+    : dbQ.text;
+  const formattedOptions = dbQ.subject === 'LOG'
+    ? validOptions.map(opt => formatExponents(opt))
+    : validOptions;
+  
+  // V2: difficulty is uppercase, convert to lowercase for UI
+  const difficulty = (dbQ.difficulty?.toLowerCase() || 'medium') as 'easy' | 'medium' | 'hard';
+  
+  // Fallback explanation
+  const explanation = dbQ.explanation || 
+    `La réponse correcte est ${formattedOptions[dbQ.correct_index] || 'N/A'}.`;
+  
+  return {
+    id: dbQ.id,  // V2: Keep UUID for exam_answers tracking
+    type,
+    question: formattedQuestion,
+    options: formattedOptions,
+    correctAnswer,
+    explanation: dbQ.subject === 'LOG' ? formatExponents(explanation) : explanation,
+    difficulty,
+    subject: dbQ.subject  // V2: Include subject for category tracking
+  };
+};
+
+/**
+ * Get questions by subject, converting V2 format to UI format
+ * @param quizType - 'free_quiz' for homepage, 'quick_quiz' for dashboard
+ */
+export const getQuestionsBySubject = async (
+  subject: string, 
+  examType?: ExamType, 
+  testNumber?: number,
+  quizType?: QuizType
+): Promise<Question[]> => {
+  try {
+    const mappedSubject = mapSubject(subject);
+    if (!mappedSubject) {
+      console.warn(`Unknown subject: ${subject}`);
       return [];
     }
     
-    // Log the results with clear mode indication
+    // Log the mode
     if (testNumber !== undefined) {
-      console.log(`✅ PRACTICE TEST: Successfully fetched ${dbQuestions.length} questions for ${category} (test #${testNumber})`);
+      console.log(`🎯 PRACTICE TEST MODE: Loading V2 questions for ${mappedSubject}, test #${testNumber}`);
+      console.log(`   → Exam type: ${examType || 'ALL'}`);
     } else {
-      console.log(`✅ DAILY QUIZ: Successfully fetched ${dbQuestions.length} questions for ${category} (daily rotation)`);
+      console.log(`📅 QUIZ MODE: Loading V2 questions for ${mappedSubject}`);
+      console.log(`   → Exam type: ${examType || 'ALL'}, Quiz type: ${quizType || 'ALL'}`);
     }
     
-    // Convert database questions to the expected format
-    return dbQuestions.map((dbQ, index) => {
-      // Determine type
-      let type: 'multiple-choice' | 'true-false' = 'multiple-choice';
-      let options: string[] | undefined = undefined;
-      let correctAnswer: number | string = 0;
-      
-      // Check if we have 4 valid answers (multiple choice)
-      const allAnswers = [dbQ.answer1, dbQ.answer2, dbQ.answer3, dbQ.answer4];
-      const validAnswers = allAnswers.filter(answer => answer && answer !== 'null' && answer !== null);
-      
-      if (validAnswers.length >= 4) {
-        type = 'multiple-choice';
-        options = validAnswers;
-        
-        // Convert letter to index
-        correctAnswer = dbQ.correct === 'A' ? 0 :
-                        dbQ.correct === 'B' ? 1 :
-                        dbQ.correct === 'C' ? 2 :
-                        dbQ.correct === 'D' ? 3 : 0;
-      } else if (validAnswers.length === 2) {
-        type = 'true-false';
-        options = validAnswers;
-        correctAnswer = dbQ.correct?.toLowerCase() === 'true' ? 'true' : 'false';
-      } else {
-        // Fallback: use available answers as multiple choice
-        type = 'multiple-choice';
-        options = validAnswers;
-        
-        // Find the correct answer by matching the original letter position
-        let correctIndex = 0;
-        if (dbQ.correct === 'A' && allAnswers[0] && allAnswers[0] !== 'null') {
-          correctIndex = validAnswers.indexOf(allAnswers[0]);
-        } else if (dbQ.correct === 'B' && allAnswers[1] && allAnswers[1] !== 'null') {
-          correctIndex = validAnswers.indexOf(allAnswers[1]);
-        } else if (dbQ.correct === 'C' && allAnswers[2] && allAnswers[2] !== 'null') {
-          correctIndex = validAnswers.indexOf(allAnswers[2]);
-        } else if (dbQ.correct === 'D' && allAnswers[3] && allAnswers[3] !== 'null') {
-          correctIndex = validAnswers.indexOf(allAnswers[3]);
-        }
-        
-        correctAnswer = correctIndex >= 0 ? correctIndex : 0;
-      }
-      
-      const formattedQuestion = formatExponents(dbQ.question_text);
-      const formattedOptions = options?.map(option => formatExponents(option));
-      const fallbackExplanation = (dbQ as any).explanation || `La réponse correcte est ${formattedOptions?.[correctAnswer as number] || correctAnswer}.`;
-
-      return {
-        id: parseInt(dbQ.id.replace(/-/g, '').substring(0, 8), 16) || index + 1, // Convert UUID to number
-        type,
-        question: formattedQuestion,
-        options: formattedOptions,
-        correctAnswer,
-        explanation: formatExponents(fallbackExplanation),
-        difficulty: dbQ.difficulty || 'medium'
-      };
-    });
+    const testTypes = mapTestTypes(testNumber, quizType);
+    const limit = testNumber !== undefined ? 15 : 10;
+    
+    // V2: Call the updated QuestionService
+    const dbQuestions = await QuestionService.getRandomQuestions(
+      mappedSubject,
+      limit,
+      examType,
+      testTypes,
+      testNumber
+    );
+    
+    if (!dbQuestions || dbQuestions.length === 0) {
+      console.warn(`⚠️ No V2 questions returned for ${mappedSubject}`);
+      return [];
+    }
+    
+    console.log(`✅ Successfully fetched ${dbQuestions.length} V2 questions for ${mappedSubject}`);
+    
+    // Convert to UI format
+    return dbQuestions.map((q, index) => convertToUIQuestion(q, index));
   } catch (error) {
     console.error('❌ Error in getQuestionsBySubject:', error);
+    return [];
+  }
+};
+
+/**
+ * Get questions for practice tests by test number
+ */
+export const getQuestionsForPracticeTest = async (
+  subject: string,
+  testNumber: number,
+  examType?: ExamType
+): Promise<Question[]> => {
+  return getQuestionsBySubject(subject, examType, testNumber);
+};
+
+/**
+ * Get questions for daily quiz (no test number)
+ */
+export const getQuestionsForDailyQuiz = async (
+  subject: string,
+  examType?: ExamType,
+  limit: number = 10
+): Promise<Question[]> => {
+  try {
+    const mappedSubject = mapSubject(subject);
+    if (!mappedSubject) {
+      return [];
+    }
+    
+    const dbQuestions = await QuestionService.getRandomQuestions(
+      mappedSubject,
+      limit,
+      examType,
+      ['free_quiz', 'quick_quiz']
+    );
+    
+    return dbQuestions.map((q, index) => convertToUIQuestion(q, index));
+  } catch (error) {
+    console.error('Error in getQuestionsForDailyQuiz:', error);
     return [];
   }
 };

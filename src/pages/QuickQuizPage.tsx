@@ -6,7 +6,9 @@ import { Clock, CheckCircle, XCircle, Lock, Award, Star, Crown, ArrowLeft, Arrow
 import { motion } from 'framer-motion';
 import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
 import { VisitorService } from '../services/visitorService';
-import { getQuestionsBySubject, Question as BaseQuestion } from '../data/quizQuestions';
+import { TestResultService } from '../services/testResultService';
+import { ExamSessionService } from '../services/examSessionService';
+import { getQuestionsBySubject, Question as BaseQuestion, QuizType } from '../data/quizQuestions';
 import MathText from '../components/common/MathText';
 
 // Remove the hardcoded quizData array and replace with dynamic fetching
@@ -20,9 +22,8 @@ const examTypes: { value: ExamType; label: string }[] = [
   { value: 'CS', label: 'Cour Supérieur (CS)' },
 ];
 
-interface Question extends BaseQuestion {
-  subject: string;
-}
+// V2: BaseQuestion now includes id: string and subject: string
+type Question = BaseQuestion;
 
 const QuickQuizPage: React.FC = () => {
   const { user, selectedExamType, profile } = useSupabaseAuth();
@@ -40,6 +41,8 @@ const QuickQuizPage: React.FC = () => {
   const [timeLeft, setTimeLeft] = useState(600); // 10 minutes in seconds
   const [quizStarted, setQuizStarted] = useState(false);
   const [visitorId, setVisitorId] = useState<string | null>(null);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [questionStartTimes, setQuestionStartTimes] = useState<Map<number, number>>(new Map());
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,13 +53,15 @@ const QuickQuizPage: React.FC = () => {
   }, [selectedExamType, profile?.plan_name, urlExamType]);
 
   useEffect(() => {
-    // Track visitor when component mounts
+    // Track visitor when component mounts (for anonymous users)
     const trackVisitor = async () => {
-      const id = await VisitorService.trackVisitor();
-      setVisitorId(id);
+      if (!user) {
+        const id = await VisitorService.getOrCreateVisitor();
+        setVisitorId(id);
+      }
     };
     trackVisitor();
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     if (examType && quizState === 'intro') {
@@ -65,11 +70,27 @@ const QuickQuizPage: React.FC = () => {
   }, [examType, quizState]);
 
   useEffect(() => {
-    if (isDashboardQuiz && autoStart && quizState === 'intro' && !loading && questions.length > 0) {
-      setQuizState('inProgress');
-      setQuizStarted(true);
-    }
-  }, [autoStart, isDashboardQuiz, quizState, loading, questions.length]);
+    const autoStartQuiz = async () => {
+      if (isDashboardQuiz && autoStart && quizState === 'intro' && !loading && questions.length > 0) {
+        // Start exam session for tracking
+        const newSessionId = await ExamSessionService.startSession({
+          userId: user?.id || null,
+          visitorId: !user ? visitorId : null,
+          testType: 'quick_quiz',
+          examType: examType,
+          totalQuestions: questions.length,
+        });
+        setSessionId(newSessionId);
+        
+        // Start timing for first question
+        setQuestionStartTimes(new Map([[0, Date.now()]]));
+        
+        setQuizState('inProgress');
+        setQuizStarted(true);
+      }
+    };
+    autoStartQuiz();
+  }, [autoStart, isDashboardQuiz, quizState, loading, questions.length, user, visitorId, examType]);
 
   useEffect(() => {
     if (quizStarted && timeLeft > 0 && quizState === 'inProgress') {
@@ -87,12 +108,14 @@ const QuickQuizPage: React.FC = () => {
     setError(null);
     try {
       const effectiveExamType = examType as ExamType;
-      console.log('Loading questions for exam type:', effectiveExamType);
+      // Determine quiz type: dashboard = quick_quiz, homepage = free_quiz
+      const quizType: QuizType = isDashboardQuiz ? 'quick_quiz' : 'free_quiz';
+      console.log('Loading questions for exam type:', effectiveExamType, 'quiz type:', quizType);
       
-      // Fetch questions for each subject based on exam type
-      const cgQuestions = await getQuestionsBySubject('culture-generale', effectiveExamType);
-      const logicQuestions = await getQuestionsBySubject('logique', effectiveExamType);
-      const englishQuestions = await getQuestionsBySubject('english', effectiveExamType);
+      // Fetch questions for each subject based on exam type and quiz type
+      const cgQuestions = await getQuestionsBySubject('culture-generale', effectiveExamType, undefined, quizType);
+      const logicQuestions = await getQuestionsBySubject('logique', effectiveExamType, undefined, quizType);
+      const englishQuestions = await getQuestionsBySubject('english', effectiveExamType, undefined, quizType);
 
       console.log('Questions loaded:', {
         cg: cgQuestions.length,
@@ -162,6 +185,19 @@ const QuickQuizPage: React.FC = () => {
     }
 
     if (latestQuestions.length > 0) {
+      // Start exam session for tracking
+      const newSessionId = await ExamSessionService.startSession({
+        userId: user?.id || null,
+        visitorId: !user ? visitorId : null,
+        testType: isDashboardQuiz ? 'quick_quiz' : 'free_quiz',
+        examType: examType,
+        totalQuestions: latestQuestions.length,
+      });
+      setSessionId(newSessionId);
+      
+      // Start timing for first question
+      setQuestionStartTimes(new Map([[0, Date.now()]]));
+      
       setQuizState('inProgress');
       setQuizStarted(true);
     }
@@ -175,7 +211,12 @@ const QuickQuizPage: React.FC = () => {
 
   const handleNextQuestion = () => {
     if (currentQuestion < questions.length - 1) {
-      setCurrentQuestion(currentQuestion + 1);
+      const nextQuestion = currentQuestion + 1;
+      // Track timing for next question
+      if (!questionStartTimes.has(nextQuestion)) {
+        setQuestionStartTimes(prev => new Map(prev).set(nextQuestion, Date.now()));
+      }
+      setCurrentQuestion(nextQuestion);
     } else {
       handleFinishQuiz();
     }
@@ -192,11 +233,91 @@ const QuickQuizPage: React.FC = () => {
     setQuizStarted(false);
 
     const score = calculateScore();
+    const quizEndTime = Date.now();
+    const quizStartTime = questionStartTimes.get(0) || quizEndTime;
+    const totalTimeSeconds = Math.round((quizEndTime - quizStartTime) / 1000);
 
-    // For visitors coming from the public site, keep tracking via the visitor record
-    if (!user && visitorId) {
-      // Update visitor record for anonymous users
-      await VisitorService.updateQuizResult(visitorId, score.percentage);
+    // Record all answers to exam_answers table
+    if (sessionId && questions.length > 0) {
+      const answers = questions.map((question, index) => {
+        const startTime = questionStartTimes.get(index);
+        const nextStartTime = questionStartTimes.get(index + 1) || quizEndTime;
+        const timeSpentMs = startTime ? nextStartTime - startTime : null;
+        
+        // Determine correct index
+        let correctIdx: number;
+        if (question.type === 'true-false') {
+          correctIdx = String(question.correctAnswer).toLowerCase() === 'vrai' ? 0 : 1;
+        } else {
+          correctIdx = typeof question.correctAnswer === 'number' ? question.correctAnswer : 0;
+        }
+        
+        return {
+          questionId: String(question.id),  // Convert to string for DB compatibility
+          selectedOptionIndex: userAnswers[index],
+          correctIndex: correctIdx,
+          timeSpentMs: timeSpentMs || undefined,
+        };
+      });
+
+      await ExamSessionService.recordAnswersBatch({
+        sessionId,
+        answers,
+      });
+
+      // Complete the session
+      await ExamSessionService.completeSession({
+        sessionId,
+        correctAnswers: score.correct,
+        totalQuestions: score.total,
+        timeSpentSeconds: totalTimeSeconds,
+      });
+    }
+
+    // Save results for logged-in users
+    if (user && examType) {
+      // Calculate scores by category
+      const categoryScores = {
+        'ANG': { correct: 0, total: 0 },
+        'CG': { correct: 0, total: 0 },
+        'LOG': { correct: 0, total: 0 }
+      };
+
+      questions.forEach((question, index) => {
+        const userAnswer = userAnswers[index];
+        if (userAnswer === null) return; // Skip unanswered if any (though logic usually forces answers? or treats null as wrong)
+        
+        let isCorrect = false;
+        if (question.type === 'multiple-choice' && typeof question.correctAnswer === 'number') {
+          isCorrect = userAnswer === question.correctAnswer;
+        } else if (question.type === 'true-false') {
+          const correctAnswerIndex = String(question.correctAnswer).toLowerCase() === 'vrai' ? 0 : 1;
+          isCorrect = userAnswer === correctAnswerIndex;
+        } else {
+          isCorrect = userAnswer === question.correctAnswer;
+        }
+
+        // V2: Subjects are already in correct format: 'CG', 'ANG', 'LOG'
+        const catKey = (question.subject || 'CG') as 'ANG' | 'CG' | 'LOG';
+        categoryScores[catKey].total++;
+        if (isCorrect) categoryScores[catKey].correct++;
+      });
+
+      // Save each category result
+      for (const [cat, stats] of Object.entries(categoryScores)) {
+        if (stats.total > 0) {
+          const catScore = Math.round((stats.correct / stats.total) * 100);
+          // V2: Use 'quick_quiz' test_type
+          await TestResultService.saveTestResult(
+            user.id,
+            'quick_quiz',
+            cat as 'ANG' | 'CG' | 'LOG',
+            catScore,
+            undefined, // No specific test number for quick quiz
+            examType
+          );
+        }
+      }
     }
   };
 

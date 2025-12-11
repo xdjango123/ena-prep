@@ -10,7 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "20": "^3.1.9",
     "@hookform/resolvers": "^5.1.1",
+    "@modelcontextprotocol/server-filesystem": "^2025.11.25",
     "@supabase/supabase-js": "^2.53.0",
     "clsx": "^2.1.0",
     "dotenv": "^17.2.1",

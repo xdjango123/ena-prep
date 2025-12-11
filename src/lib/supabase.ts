@@ -1,30 +1,48 @@
 import { createClient } from '@supabase/supabase-js'
 
-// Question interface for test data
+// Import V2 types
+import type { 
+  QuestionV2, 
+  Subject, 
+  ExamType, 
+  Difficulty, 
+  TestType,
+  TestData,
+  Passage
+} from '../types/questions'
+
+// Re-export V2 types for backward compatibility
+export type { QuestionV2, Subject, ExamType, Difficulty, TestType, TestData, Passage }
+
+// Legacy Question type - DEPRECATED, use QuestionV2 instead
+// Keeping for any remaining legacy code during migration
+/** @deprecated Use QuestionV2 instead */
 export interface Question {
-  id: number
-  type: 'multiple-choice' | 'true-false' | 'fill-blank' | 'matching'
-  question: string
-  options?: string[]
-  correctAnswer: string | number
+  id: string
+  text: string
+  options: string[]
+  correct_index: number
   explanation?: string
-  difficulty: 'easy' | 'medium' | 'hard'
+  subject: Subject
+  exam_type: ExamType
+  difficulty: Difficulty
+  test_type: TestType
+  test_number: number | null
 }
 
+// Legacy snapshot type - DEPRECATED
+// This was used for storing question state, now use QuestionV2 directly
+/** @deprecated Use QuestionV2 instead */
 export interface ExamQuestionSnapshotRow {
   id: string
   order: number
-  question_text: string
-  answer1: string
-  answer2: string
-  answer3: string
-  answer4: string
-  correct: string
+  text: string // Updated from question_text
+  options: string[] // Updated from answer1-4
+  correct_index: number // Updated from correct
   explanation: string
-  category: string
+  subject: string // Updated from category
   difficulty: string
-  type?: string
-  is3Option?: boolean
+  test_type?: string
 }
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
@@ -71,11 +89,12 @@ export interface Visitor {
 export interface TestResult {
   id: string
   user_id: string
-  test_type: 'quick' | 'practice' | 'exam'
-  category: 'ANG' | 'CG' | 'LOG'
+  test_type: TestType // V2: 'free_quiz' | 'quick_quiz' | 'practice' | 'exam_blanc'
+  category: Subject // V2: 'ANG' | 'CG' | 'LOG'
   test_number: number | null
   score: number
   created_at: string
+  exam_type?: ExamType // V2: 'CM' | 'CMS' | 'CS'
 }
 
 export interface EmailLog {
@@ -86,33 +105,20 @@ export interface EmailLog {
   status: string | null
 }
 
-export interface Passage {
-  id: string
-  title: string | null
-  content: string
-  category: 'ANG' | 'CG' | 'LOG' | null
-  sub_category: string | null
-  difficulty_level: 'easy' | 'medium' | 'hard' | null
-  created_at: string | null
-}
+// Passage is now imported from '../types/questions'
+// Re-exported above for backward compatibility
 
 export interface UserAttempt {
   id: number
   user_id: string
-  test_type: string | null
-  category: string | null
+  test_type: TestType | null // V2 test types
+  category: Subject | null // V2 subject types
   sub_category: string | null
   test_number: number | null
   score: number | null
-  test_data: {
-    questions: (Question | ExamQuestionSnapshotRow)[]
-    userAnswers: [string | number, string | number][]
-    correctAnswers: number
-    totalQuestions: number
-    timeSpent: number
-    exam_type?: 'CM' | 'CMS' | 'CS'
-  } | null
+  test_data: TestData | null // V2 TestData type
   created_at: string
+  exam_type?: ExamType // V2 exam types
 }
 
 export interface UserPlan {

@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import MathText from '../common/MathText';
 
 interface Question {
-  id: number;
+  id: string;  // V2: UUID string for exam_answers tracking
   type: 'multiple-choice' | 'true-false' | 'fill-blank' | 'matching';
   question: string;
   options?: string[];
@@ -23,7 +23,7 @@ interface QuizResultProps {
   onExit: () => void;
   subjectColor: string;
   questions?: Question[];
-  userAnswers?: Map<number, string | number>;
+  userAnswers?: Map<string, string | number>;
 }
 
 export const QuizResult: React.FC<QuizResultProps> = ({
@@ -200,11 +200,11 @@ export const QuizResult: React.FC<QuizResultProps> = ({
                   return userAnswer === question.correctAnswer;
                 })();
 
-                const getCorrectAnswerText = () => {
+                const getCorrectAnswerText = (): string => {
                   if (question.type === 'multiple-choice' && typeof question.correctAnswer === 'number') {
-                    return question.options?.[question.correctAnswer];
+                    return question.options?.[question.correctAnswer] ?? 'N/A';
                   }
-                  return question.correctAnswer;
+                  return String(question.correctAnswer ?? 'N/A');
                 };
 
                 return (

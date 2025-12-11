@@ -29,7 +29,6 @@ export interface FAQType {
   answer: string;
   category: 'exam' | 'platform' | 'subscription';
 }
-
 export interface EvaluationQuestion {
   id: string;
   subject: 'anglais' | 'cultureGenerale' | 'logique';

@@ -1,21 +1,27 @@
 /**
- * Service for managing Examens Blancs
- * Now pulls data directly from Supabase database with test_type = 'examen_blanc'
+ * Examen Blanc Service V2 - Uses questions_v2 table
+ * 
+ * Schema changes:
+ * - text (was question_text)
+ * - options[] array (was answer1, answer2, answer3)
+ * - correct_index (was correct: 'A'|'B'|'C')
+ * - subject (was category)
+ * - test_type = 'exam_blanc' (unchanged)
  */
 
 import { supabase } from '../lib/supabase';
 import { formatExponents } from '../utils/mathFormatting';
+import type { Subject, ExamType, Difficulty, QuestionV2 } from '../types/questions';
 
+// V2 Question type for Examen Blanc (simplified from QuestionV2)
 export interface ExamenBlancQuestion {
   id: string;
-  question_text: string;
-  answer1: string;
-  answer2: string;
-  answer3: string;
-  correct: string;
+  text: string;
+  options: string[];
+  correct_index: number;
   explanation: string;
-  category: 'ANG' | 'CG' | 'LOG';
-  difficulty: 'EASY' | 'MED' | 'HARD';
+  subject: Subject;
+  difficulty: Difficulty;
   question_order: number;
   subject_order: number;
 }
@@ -23,7 +29,7 @@ export interface ExamenBlancQuestion {
 export interface ExamenBlanc {
   id: string;
   exam_number: number;
-  exam_type: 'CM' | 'CMS' | 'CS';
+  exam_type: ExamType;
   total_questions: number;
   questions_per_subject: number;
   questions: ExamenBlancQuestion[];
@@ -59,7 +65,7 @@ class ExamenBlancService {
 
   private async fetchExamensDataFromDB(): Promise<ExamenBlancData> {
     try {
-      console.log('🔄 ExamenBlancService: Loading exam blanc data from database...');
+      console.log('🔄 ExamenBlancService: Loading exam blanc data from database (V2)...');
       
       const pageSize = 1000;
       let start = 0;
@@ -68,13 +74,13 @@ class ExamenBlancService {
       while (true) {
         const end = start + pageSize - 1;
         const { data, error } = await supabase
-          .from('questions')
+          .from('questions_v2')  // V2: Changed from 'questions'
           .select('*')
-          .eq('test_type', 'examen_blanc')
+          .eq('test_type', 'exam_blanc')  // Same in V2
           .not('test_number', 'is', null)
           .order('exam_type', { ascending: true })
           .order('test_number', { ascending: true })
-          .order('category', { ascending: true })
+          .order('subject', { ascending: true })  // V2: 'subject' instead of 'category'
           .order('created_at', { ascending: true })
           .range(start, end);
 
@@ -102,23 +108,23 @@ class ExamenBlancService {
         };
       }
 
-      console.log(`✅ Loaded ${questions.length} exam blanc questions from database`);
+      console.log(`✅ Loaded ${questions.length} exam blanc questions from database (V2)`);
 
       const examTypes: { [key: string]: ExamenBlanc[] } = {};
-      const subjects: ('ANG' | 'CG' | 'LOG')[] = ['ANG', 'CG', 'LOG'];
+      const subjects: Subject[] = ['ANG', 'CG', 'LOG'];
 
       interface SubjectBuckets {
-        [category: string]: ExamenBlancQuestion[];
+        [subject: string]: ExamenBlancQuestion[];
       }
 
       const groupedByType: Record<string, Map<number, SubjectBuckets>> = {};
 
       for (const row of questions) {
-        const examType = row.exam_type as 'CM' | 'CMS' | 'CS' | undefined;
+        const examType = row.exam_type as ExamType | undefined;
         const testNumber = row.test_number as number | null;
-        const category = row.category as 'ANG' | 'CG' | 'LOG';
+        const subject = row.subject as Subject;  // V2: 'subject' instead of 'category'
 
-        if (!examType || !testNumber || !subjects.includes(category)) {
+        if (!examType || !testNumber || !subjects.includes(subject)) {
           continue;
         }
 
@@ -135,23 +141,19 @@ class ExamenBlancService {
         }
 
         const buckets = groupedByType[examType].get(testNumber)!;
-        const questionOrder =
-          typeof row.question_number === 'number'
-            ? row.question_number
-            : buckets[category].length + 1;
+        const questionOrder = buckets[subject].length + 1;
 
-        buckets[category].push({
+        // V2: Map to ExamenBlancQuestion format
+        buckets[subject].push({
           id: row.id,
-          question_text: row.question_text,
-          answer1: row.answer1,
-          answer2: row.answer2,
-          answer3: row.answer3,
-          correct: row.correct,
+          text: row.text,  // V2: 'text' instead of 'question_text'
+          options: row.options,  // V2: options[] array instead of answer1-3
+          correct_index: row.correct_index,  // V2: correct_index instead of correct
           explanation: row.explanation || '',
-          category,
-          difficulty: (row.difficulty as 'EASY' | 'MED' | 'HARD') || 'MED',
+          subject,
+          difficulty: (row.difficulty as Difficulty) || 'MEDIUM',
           question_order: questionOrder,
-          subject_order: subjects.indexOf(category) + 1
+          subject_order: subjects.indexOf(subject) + 1
         });
       }
 
@@ -172,7 +174,7 @@ class ExamenBlancService {
           exams.push({
             id: `${examType}-${examNumber}`,
             exam_number: examNumber,
-            exam_type: examType as 'CM' | 'CMS' | 'CS',
+            exam_type: examType as ExamType,
             total_questions: examQuestions.length,
             questions_per_subject: 20,
             questions: examQuestions
@@ -188,7 +190,7 @@ class ExamenBlancService {
         exam_types: examTypes
       };
 
-      console.log('✅ ExamenBlancService: Successfully loaded exam blanc data from database');
+      console.log('✅ ExamenBlancService: Successfully loaded exam blanc data (V2)');
       return result;
       
     } catch (error) {
@@ -200,7 +202,7 @@ class ExamenBlancService {
   /**
    * Get all available examens blancs for a specific exam type
    */
-  async getExamensBlancs(examType: 'CM' | 'CMS' | 'CS'): Promise<ExamenBlanc[]> {
+  async getExamensBlancs(examType: ExamType): Promise<ExamenBlanc[]> {
     const data = await this.loadExamensData();
     return data.exam_types[examType] || [];
   }
@@ -208,7 +210,7 @@ class ExamenBlancService {
   /**
    * Get a specific examen blanc by number and exam type
    */
-  async getExamenBlanc(examType: 'CM' | 'CMS' | 'CS', examNumber: number): Promise<ExamenBlanc | null> {
+  async getExamenBlanc(examType: ExamType, examNumber: number): Promise<ExamenBlanc | null> {
     const examens = await this.getExamensBlancs(examType);
     return examens.find(examen => examen.exam_number === examNumber) || null;
   }
@@ -217,7 +219,7 @@ class ExamenBlancService {
    * Get questions for a specific examen blanc, organized by subject
    */
   async getExamenBlancQuestions(
-    examType: 'CM' | 'CMS' | 'CS', 
+    examType: ExamType, 
     examNumber: number
   ): Promise<{
     ANG: ExamenBlancQuestion[];
@@ -236,12 +238,12 @@ class ExamenBlancService {
     };
 
     examen.questions.forEach(question => {
-      questions[question.category].push(question);
+      questions[question.subject].push(question);
     });
 
-    // Sort by question_order within each category
-    Object.keys(questions).forEach(category => {
-      questions[category as keyof typeof questions].sort((a, b) => a.question_order - b.question_order);
+    // Sort by question_order within each subject
+    Object.keys(questions).forEach(subject => {
+      questions[subject as Subject].sort((a, b) => a.question_order - b.question_order);
     });
 
     return questions;
@@ -251,9 +253,9 @@ class ExamenBlancService {
    * Get a random set of questions for a specific subject from an examen blanc
    */
   async getRandomSubjectQuestions(
-    examType: 'CM' | 'CMS' | 'CS',
+    examType: ExamType,
     examNumber: number,
-    category: 'ANG' | 'CG' | 'LOG',
+    subject: Subject,
     count: number = 20
   ): Promise<ExamenBlancQuestion[]> {
     const examen = await this.getExamenBlanc(examType, examNumber);
@@ -261,7 +263,7 @@ class ExamenBlancService {
       throw new Error(`Examen Blanc #${examNumber} not found for ${examType}`);
     }
 
-    const subjectQuestions = examen.questions.filter(q => q.category === category);
+    const subjectQuestions = examen.questions.filter(q => q.subject === subject);
     
     if (subjectQuestions.length <= count) {
       return subjectQuestions;
@@ -276,16 +278,16 @@ class ExamenBlancService {
    * Format question text for display (handles exponents in LOG questions)
    */
   formatQuestionText(question: ExamenBlancQuestion): string {
-    return question.category === 'LOG'
-      ? formatExponents(question.question_text)
-      : question.question_text;
+    return question.subject === 'LOG'
+      ? formatExponents(question.text)
+      : question.text;
   }
 
   /**
    * Format answer text for display (handles exponents in LOG questions)
    */
-  formatAnswerText(answer: string, category: 'ANG' | 'CG' | 'LOG'): string {
-    return category === 'LOG' ? formatExponents(answer) : answer;
+  formatAnswerText(answer: string, subject: Subject): string {
+    return subject === 'LOG' ? formatExponents(answer) : answer;
   }
 
   /**
@@ -295,7 +297,7 @@ class ExamenBlancService {
     [examType: string]: {
       total_examens: number;
       total_questions: number;
-      questions_by_category: { [category: string]: number };
+      questions_by_subject: { [subject: string]: number };
     };
   }> {
     const data = await this.loadExamensData();
@@ -303,22 +305,30 @@ class ExamenBlancService {
 
     Object.keys(data.exam_types).forEach(examType => {
       const examens = data.exam_types[examType];
-      const questionsByCategory: { [key: string]: number } = {};
+      const questionsBySubject: { [key: string]: number } = {};
 
       examens.forEach(examen => {
         examen.questions.forEach(question => {
-          questionsByCategory[question.category] = (questionsByCategory[question.category] || 0) + 1;
+          questionsBySubject[question.subject] = (questionsBySubject[question.subject] || 0) + 1;
         });
       });
 
       stats[examType] = {
         total_examens: examens.length,
         total_questions: examens.reduce((sum, examen) => sum + examen.total_questions, 0),
-        questions_by_category: questionsByCategory
+        questions_by_subject: questionsBySubject
       };
     });
 
     return stats;
+  }
+
+  /**
+   * Clear cache to force reload from database
+   */
+  clearCache(): void {
+    this.examensData = null;
+    this.loadPromise = null;
   }
 }
 

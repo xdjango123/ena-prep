@@ -1,48 +1,43 @@
-import { supabase, Passage, UserAttempt } from '../lib/supabase';
+/**
+ * Question Service V2 - Uses questions_v2 table with new schema
+ * 
+ * Schema changes from V1:
+ * - text (was question_text)
+ * - options[] array (was answer1, answer2, answer3, answer4)
+ * - correct_index number (was correct: 'A'|'B'|'C'|'D')
+ * - subject (was category)
+ * - difficulty: 'EASY'|'MEDIUM'|'HARD' (was lowercase)
+ * - test_type: 'free_quiz'|'quick_quiz'|'practice'|'exam_blanc'
+ */
 
-export interface Question {
-  id: string;
-  category: 'ANG' | 'CG' | 'LOG';
-  sub_category: string;
-  question_text: string;
-  answer1: string;
-  answer2: string;
-  answer3: string;
-  answer4: string;
-  correct: 'A' | 'B' | 'C' | 'D';
-  difficulty: 'easy' | 'medium' | 'hard';
-  exam_type?: 'CM' | 'CMS' | 'CS';
-  passage_id?: string; // Reference to passage if question is based on a text
-  created_at: string;
-  test_type?: string;
-  test_number?: number | null;
-  question_number?: number | null;
-  question_order?: number;
-  is3Option?: boolean; // Flag to indicate this is a 3-option question
-}
+import { supabase } from '../lib/supabase';
+import type {
+  QuestionV2,
+  Subject,
+  ExamType,
+  Difficulty,
+  TestType,
+  Passage,
+  QuestionWithPassage,
+  QuestionStats
+} from '../types/questions';
 
-export interface QuestionWithPassage {
-  question: Question;
-  passage?: Passage;
-}
+// Re-export types for convenience
+export type { QuestionV2, Subject, ExamType, Difficulty, TestType };
 
 export class QuestionService {
-  static async getQuestionsByCategory(
-    category: 'ANG' | 'CG' | 'LOG',
-    subCategory?: string,
+  /**
+   * Get questions by subject with optional filters
+   */
+  static async getQuestionsBySubject(
+    subject: Subject,
     limit: number = 10
-  ): Promise<Question[]> {
+  ): Promise<QuestionV2[]> {
     try {
-      let query = supabase
-        .from('questions')
+      const { data, error } = await supabase
+        .from('questions_v2')
         .select('*')
-        .eq('category', category);
-
-      if (subCategory) {
-        query = query.eq('sub_category', subCategory);
-      }
-
-      const { data, error } = await query
+        .eq('subject', subject)
         .limit(limit)
         .order('created_at', { ascending: false });
 
@@ -51,32 +46,30 @@ export class QuestionService {
         return [];
       }
 
-      return data || [];
+      return (data || []) as QuestionV2[];
     } catch (error) {
-      console.error('Error in getQuestionsByCategory:', error);
+      console.error('Error in getQuestionsBySubject:', error);
       return [];
     }
   }
 
+  /**
+   * Get random questions for quizzes with flexible filtering
+   */
   static async getRandomQuestions(
-    category: 'ANG' | 'CG' | 'LOG',
+    subject: Subject,
     limit: number = 10,
-    subCategory?: string,
-    testNumber?: number,
-    examType?: 'CM' | 'CMS' | 'CS',
-    testTypes?: ('quiz_series' | 'practice_test' | 'examen_blanc')[],
-    requireUnassignedPractice: boolean = false
-  ): Promise<Question[]> {
+    examType?: ExamType,
+    testTypes?: TestType[],
+    testNumber?: number
+  ): Promise<QuestionV2[]> {
     try {
       let query = supabase
-        .from('questions')
+        .from('questions_v2')
         .select('*')
-        .eq('category', category);
+        .eq('subject', subject);
 
-      if (subCategory) {
-        query = query.eq('sub_category', subCategory);
-      }
-
+      // Filter by test types
       if (testTypes && testTypes.length > 0) {
         if (testTypes.length === 1) {
           query = query.eq('test_type', testTypes[0]);
@@ -85,33 +78,28 @@ export class QuestionService {
         }
       }
 
-      // Add exam_type filter if provided
+      // Filter by exam type
       if (examType) {
         query = query.eq('exam_type', examType);
       }
 
-      if (requireUnassignedPractice) {
-        query = query.is('test_number', null);
-      }
-
-      const usingAssignedSet = typeof testNumber === 'number';
-
-      if (usingAssignedSet) {
+      // If test_number provided, get exact set
+      if (typeof testNumber === 'number') {
         query = query.eq('test_number', testNumber);
 
-        const { data, error } = await query
-          .order('created_at', { ascending: true });
+        const { data, error } = await query.order('created_at', { ascending: true });
 
         if (error) {
           console.error('Error fetching assigned questions:', error);
           return [];
         }
 
-        return (data || []).slice(0, limit);
+        return ((data || []) as QuestionV2[]).slice(0, limit);
       }
 
+      // Otherwise, fetch more and randomize
       const { data, error } = await query
-        .limit(limit * 3) // Get more questions to ensure we have enough for randomization
+        .limit(limit * 3)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -119,36 +107,25 @@ export class QuestionService {
         return [];
       }
 
-      const questions = data || [];
-      
-      // Create a proper seed for randomization
-      let seed: number;
-      
-      // For daily quizzes: use date to ensure questions change daily
+      const questions = (data || []) as QuestionV2[];
+
+      // Create seed for daily randomization
       const today = new Date();
       const dateSeed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
-      seed =
-        dateSeed +
-        category.charCodeAt(0) * 100 +
-        (category.charCodeAt(1) || 0) * 10 +
-        (category.charCodeAt(2) || 0);
-      console.log(
-        `📅 Daily quiz mode: Using date ${today.toDateString()} (${dateSeed}) as seed for ${category} (seed: ${seed})`
-      );
-      
+      let seed = dateSeed + subject.charCodeAt(0) * 100 + (subject.charCodeAt(1) || 0) * 10;
+
+      console.log(`📅 Daily quiz: Using date ${today.toDateString()} as seed for ${subject}`);
+
       // Fisher-Yates shuffle with seeded randomization
       const shuffled = [...questions];
       for (let i = shuffled.length - 1; i > 0; i--) {
-        // Generate a pseudo-random number based on the seed
         seed = (seed * 9301 + 49297) % 233280;
         const j = Math.floor((seed / 233280) * (i + 1));
         [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
       }
-      
-      // Take the first 'limit' questions
+
       const result = shuffled.slice(0, limit);
-      
-      console.log(`✅ Fetched ${result.length} questions for ${category} with seed ${seed}`);
+      console.log(`✅ Fetched ${result.length} questions for ${subject}`);
       return result;
     } catch (error) {
       console.error('❌ Error in getRandomQuestions:', error);
@@ -156,16 +133,19 @@ export class QuestionService {
     }
   }
 
+  /**
+   * Get available test numbers for a subject and test type
+   */
   static async getAvailableTestNumbers(
-    category: 'ANG' | 'CG' | 'LOG',
-    testType: 'practice_test' | 'examen_blanc',
-    examType?: 'CM' | 'CMS' | 'CS'
+    subject: Subject,
+    testType: 'practice' | 'exam_blanc',
+    examType?: ExamType
   ): Promise<number[]> {
     try {
       let query = supabase
-        .from('questions')
+        .from('questions_v2')
         .select('test_number')
-        .eq('category', category)
+        .eq('subject', subject)
         .eq('test_type', testType)
         .not('test_number', 'is', null);
 
@@ -180,33 +160,35 @@ export class QuestionService {
         return [];
       }
 
-      const counts = new Map<number, number>();
+      // Get unique test numbers
+      const testNumbers = new Set<number>();
       (data || []).forEach(row => {
         if (typeof row.test_number === 'number') {
-          counts.set(row.test_number, (counts.get(row.test_number) || 0) + 1);
+          testNumbers.add(row.test_number);
         }
       });
 
-      return Array.from(counts.keys()).sort((a, b) => a - b);
+      return Array.from(testNumbers).sort((a, b) => a - b);
     } catch (error) {
       console.error('❌ Error in getAvailableTestNumbers:', error);
       return [];
     }
   }
 
+  /**
+   * Get questions by test type
+   */
   static async getQuestionsByTestType(
-    category: 'ANG' | 'CG' | 'LOG',
-    testType: 'quiz_series' | 'practice_test' | 'examen_blanc',
+    subject: Subject,
+    testType: TestType,
     limit: number = 10
-  ): Promise<Question[]> {
+  ): Promise<QuestionV2[]> {
     try {
-      let query = supabase
-        .from('questions')
+      const { data, error } = await supabase
+        .from('questions_v2')
         .select('*')
-        .eq('category', category)
-        .eq('test_type', testType);
-
-      const { data, error } = await query
+        .eq('subject', subject)
+        .eq('test_type', testType)
         .limit(limit)
         .order('created_at', { ascending: false });
 
@@ -215,23 +197,26 @@ export class QuestionService {
         return [];
       }
 
-      return data || [];
+      return (data || []) as QuestionV2[];
     } catch (error) {
       console.error('Error in getQuestionsByTestType:', error);
       return [];
     }
   }
 
+  /**
+   * Get questions by difficulty
+   */
   static async getQuestionsByDifficulty(
-    category: 'ANG' | 'CG' | 'LOG',
-    difficulty: 'easy' | 'medium' | 'hard',
+    subject: Subject,
+    difficulty: Difficulty,
     limit: number = 10
-  ): Promise<Question[]> {
+  ): Promise<QuestionV2[]> {
     try {
       const { data, error } = await supabase
-        .from('questions')
+        .from('questions_v2')
         .select('*')
-        .eq('category', category)
+        .eq('subject', subject)
         .eq('difficulty', difficulty)
         .limit(limit)
         .order('created_at', { ascending: false });
@@ -241,48 +226,20 @@ export class QuestionService {
         return [];
       }
 
-      return data || [];
+      return (data || []) as QuestionV2[];
     } catch (error) {
       console.error('Error in getQuestionsByDifficulty:', error);
       return [];
     }
   }
 
-  static async getRandomQuestionsFromPool(
-    category: 'ANG' | 'CG' | 'LOG',
-    pool: string,
-    limit: number = 10
-  ): Promise<Question[]> {
+  /**
+   * Get a single question by ID
+   */
+  static async getQuestionById(id: string): Promise<QuestionV2 | null> {
     try {
       const { data, error } = await supabase
-        .from('questions')
-        .select('*')
-        .eq('category', category)
-        .eq('question_pool', pool)
-        .limit(limit * 2) // Get more questions for randomization
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching questions from pool:', error);
-        return [];
-      }
-
-      const questions = data || [];
-      
-      // Simple shuffle
-      const shuffled = questions.sort(() => Math.random() - 0.5);
-      
-      return shuffled.slice(0, limit);
-    } catch (error) {
-      console.error('❌ Error in getRandomQuestionsFromPool:', error);
-      return [];
-    }
-  }
-
-  static async getQuestionById(id: string): Promise<Question | null> {
-    try {
-      const { data, error } = await supabase
-        .from('questions')
+        .from('questions_v2')
         .select('*')
         .eq('id', id)
         .single();
@@ -292,30 +249,32 @@ export class QuestionService {
         return null;
       }
 
-      return data;
+      return data as QuestionV2;
     } catch (error) {
       console.error('Error in getQuestionById:', error);
       return null;
     }
   }
 
+  /**
+   * Get questions with their associated passages (for reading comprehension)
+   */
   static async getQuestionsWithPassages(
-    category: 'ANG' | 'CG' | 'LOG',
+    subject: Subject,
     limit: number = 10
   ): Promise<QuestionWithPassage[]> {
     try {
       const { data, error } = await supabase
-        .from('questions')
+        .from('questions_v2')
         .select(`
           *,
           passages (
             id,
             title,
-            content,
-            category
+            content
           )
         `)
-        .eq('category', category)
+        .eq('subject', subject)
         .not('passage_id', 'is', null)
         .limit(limit)
         .order('created_at', { ascending: false });
@@ -328,20 +287,21 @@ export class QuestionService {
       return (data || []).map(item => ({
         question: {
           id: item.id,
-          category: item.category,
-          sub_category: item.sub_category,
-          question_text: item.question_text,
-          answer1: item.answer1,
-          answer2: item.answer2,
-          answer3: item.answer3,
-          answer4: item.answer4,
-          correct: item.correct,
-          difficulty: item.difficulty,
+          text: item.text,
+          options: item.options,
+          correct_index: item.correct_index,
+          explanation: item.explanation,
+          subject: item.subject,
           exam_type: item.exam_type,
+          difficulty: item.difficulty,
+          test_type: item.test_type,
+          test_number: item.test_number,
           passage_id: item.passage_id,
+          is_ai_generated: item.is_ai_generated,
+          metadata: item.metadata,
           created_at: item.created_at
-        },
-        passage: item.passages
+        } as QuestionV2,
+        passage: item.passages as Passage | undefined
       }));
     } catch (error) {
       console.error('Error in getQuestionsWithPassages:', error);
@@ -349,17 +309,20 @@ export class QuestionService {
     }
   }
 
+  /**
+   * Search questions by text content
+   */
   static async searchQuestions(
-    category: 'ANG' | 'CG' | 'LOG',
+    subject: Subject,
     searchTerm: string,
     limit: number = 10
-  ): Promise<Question[]> {
+  ): Promise<QuestionV2[]> {
     try {
       const { data, error } = await supabase
-        .from('questions')
+        .from('questions_v2')
         .select('*')
-        .eq('category', category)
-        .textSearch('question_text', searchTerm)
+        .eq('subject', subject)
+        .textSearch('text', searchTerm)
         .limit(limit)
         .order('created_at', { ascending: false });
 
@@ -368,55 +331,92 @@ export class QuestionService {
         return [];
       }
 
-      return data || [];
+      return (data || []) as QuestionV2[];
     } catch (error) {
       console.error('Error in searchQuestions:', error);
       return [];
     }
   }
 
-  static async getQuestionStats(category: 'ANG' | 'CG' | 'LOG'): Promise<{
-    total: number;
-    byDifficulty: { easy: number; medium: number; hard: number };
-    byTestType: { quiz_series: number; practice_test: number; examen_blanc: number };
-  }> {
+  /**
+   * Get question statistics for a subject
+   */
+  static async getQuestionStats(subject: Subject): Promise<QuestionStats> {
     try {
       const { data, error } = await supabase
-        .from('questions')
-        .select('difficulty, test_type')
-        .eq('category', category);
+        .from('questions_v2')
+        .select('difficulty, test_type, exam_type')
+        .eq('subject', subject);
 
       if (error) {
         console.error('Error fetching question stats:', error);
-        return { total: 0, byDifficulty: { easy: 0, medium: 0, hard: 0 }, byTestType: { quiz_series: 0, practice_test: 0, examen_blanc: 0 } };
+        return {
+          total: 0,
+          bySubject: { ANG: 0, CG: 0, LOG: 0 },
+          byExamType: { CM: 0, CMS: 0, CS: 0 },
+          byTestType: { free_quiz: 0, quick_quiz: 0, practice: 0, exam_blanc: 0 },
+          byDifficulty: { EASY: 0, MEDIUM: 0, HARD: 0 }
+        };
       }
 
       const questions = data || [];
       const total = questions.length;
-      
-      const byDifficulty = questions.reduce((acc, q) => {
-        acc[q.difficulty as keyof typeof acc]++;
-        return acc;
-      }, { easy: 0, medium: 0, hard: 0 });
-      
-      const byTestType = questions.reduce((acc, q) => {
-        if (q.test_type) {
-          acc[q.test_type as keyof typeof acc]++;
-        }
-        return acc;
-      }, { quiz_series: 0, practice_test: 0, examen_blanc: 0 });
 
-      return { total, byDifficulty, byTestType };
+      const byDifficulty = questions.reduce(
+        (acc, q) => {
+          const diff = q.difficulty as Difficulty;
+          if (diff in acc) acc[diff]++;
+          return acc;
+        },
+        { EASY: 0, MEDIUM: 0, HARD: 0 } as Record<Difficulty, number>
+      );
+
+      const byTestType = questions.reduce(
+        (acc, q) => {
+          const tt = q.test_type as TestType;
+          if (tt in acc) acc[tt]++;
+          return acc;
+        },
+        { free_quiz: 0, quick_quiz: 0, practice: 0, exam_blanc: 0 } as Record<TestType, number>
+      );
+
+      const byExamType = questions.reduce(
+        (acc, q) => {
+          const et = q.exam_type as ExamType;
+          if (et in acc) acc[et]++;
+          return acc;
+        },
+        { CM: 0, CMS: 0, CS: 0 } as Record<ExamType, number>
+      );
+
+      return {
+        total,
+        bySubject: { ANG: subject === 'ANG' ? total : 0, CG: subject === 'CG' ? total : 0, LOG: subject === 'LOG' ? total : 0 },
+        byExamType,
+        byTestType,
+        byDifficulty
+      };
     } catch (error) {
       console.error('Error in getQuestionStats:', error);
-      return { total: 0, byDifficulty: { easy: 0, medium: 0, hard: 0 }, byTestType: { quiz_series: 0, practice_test: 0, examen_blanc: 0 } };
+      return {
+        total: 0,
+        bySubject: { ANG: 0, CG: 0, LOG: 0 },
+        byExamType: { CM: 0, CMS: 0, CS: 0 },
+        byTestType: { free_quiz: 0, quick_quiz: 0, practice: 0, exam_blanc: 0 },
+        byDifficulty: { EASY: 0, MEDIUM: 0, HARD: 0 }
+      };
     }
   }
 
-  static async createQuestion(question: Omit<Question, 'id' | 'created_at'>): Promise<Question | null> {
+  /**
+   * Create a new question
+   */
+  static async createQuestion(
+    question: Omit<QuestionV2, 'id' | 'created_at'>
+  ): Promise<QuestionV2 | null> {
     try {
       const { data, error } = await supabase
-        .from('questions')
+        .from('questions_v2')
         .insert([question])
         .select()
         .single();
@@ -426,17 +426,23 @@ export class QuestionService {
         return null;
       }
 
-      return data;
+      return data as QuestionV2;
     } catch (error) {
       console.error('Error in createQuestion:', error);
       return null;
     }
   }
 
-  static async updateQuestion(id: string, updates: Partial<Question>): Promise<Question | null> {
+  /**
+   * Update an existing question
+   */
+  static async updateQuestion(
+    id: string,
+    updates: Partial<QuestionV2>
+  ): Promise<QuestionV2 | null> {
     try {
       const { data, error } = await supabase
-        .from('questions')
+        .from('questions_v2')
         .update(updates)
         .eq('id', id)
         .select()
@@ -447,17 +453,20 @@ export class QuestionService {
         return null;
       }
 
-      return data;
+      return data as QuestionV2;
     } catch (error) {
       console.error('Error in updateQuestion:', error);
       return null;
     }
   }
 
+  /**
+   * Delete a question
+   */
   static async deleteQuestion(id: string): Promise<boolean> {
     try {
       const { error } = await supabase
-        .from('questions')
+        .from('questions_v2')
         .delete()
         .eq('id', id);
 
@@ -474,233 +483,24 @@ export class QuestionService {
   }
 
   /**
-   * Get exam-specific questions with flexible distribution based on available data
-   * Uses examId for deterministic randomization to ensure each exam has different questions
-   */
-  static async getExamQuestions(
-    category: 'ANG' | 'CG' | 'LOG',
-    examId: string,
-    examType: 'CM' | 'CMS' | 'CS',
-    limit: number = 20
-  ): Promise<Question[]> {
-    try {
-      console.log(`🎯 Loading exam questions for ${category} - Exam ${examId} (${examType})`);
-
-      // Get all available questions for this category and test_type
-      const { data: allQuestions, error: allError } = await supabase
-        .from('questions')
-        .select('*')
-        .eq('category', category)
-        .eq('test_type', 'examen_blanc')
-        .limit(limit * 3); // Get more for randomization
-
-      if (allError) {
-        console.error('Error fetching questions:', allError);
-        throw allError;
-      }
-
-      if (!allQuestions || allQuestions.length === 0) {
-        console.log(`   No questions found for ${category}`);
-        return [];
-      }
-
-      // Separate by difficulty
-      const hardQuestions = allQuestions.filter(q => q.difficulty === 'HARD');
-      const medQuestions = allQuestions.filter(q => q.difficulty === 'MED');
-      const easyQuestions = allQuestions.filter(q => q.difficulty === 'EASY');
-
-      console.log(`   Available: ${hardQuestions.length} HARD, ${medQuestions.length} MED, ${easyQuestions.length} EASY`);
-
-      // Flexible distribution: prioritize HARD, then MED, then EASY
-      const selectedQuestions = [];
-      
-      // Try to get as many HARD as possible (up to 80% of limit)
-      const maxHard = Math.min(hardQuestions.length, Math.floor(limit * 0.8));
-      const maxMed = Math.min(medQuestions.length, limit - maxHard);
-      const maxEasy = Math.min(easyQuestions.length, limit - maxHard - maxMed);
-
-      console.log(`   Will select: ${maxHard} HARD, ${maxMed} MED, ${maxEasy} EASY`);
-
-      // Create seeded random function using examId
-      const seed = parseInt(examId) * 1000 + category.charCodeAt(0) * 100 + examType.charCodeAt(0);
-      console.log(`   Using seed: ${seed} for deterministic randomization`);
-
-      // Seeded shuffle function
-      const seededShuffle = (array: any[], seed: number) => {
-        const shuffled = [...array];
-        let currentSeed = seed;
-        
-        for (let i = shuffled.length - 1; i > 0; i--) {
-          // Linear congruential generator for seeded randomness
-          currentSeed = (currentSeed * 1664525 + 1013904223) % Math.pow(2, 32);
-          const randomValue = currentSeed / Math.pow(2, 32);
-          const j = Math.floor(randomValue * (i + 1));
-          [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-        }
-        
-        return shuffled;
-      };
-
-      // Select questions
-      if (maxHard > 0) {
-        const selectedHard = seededShuffle(hardQuestions, seed).slice(0, maxHard);
-        selectedQuestions.push(...selectedHard);
-      }
-      
-      if (maxMed > 0) {
-        const selectedMed = seededShuffle(medQuestions, seed + 1).slice(0, maxMed);
-        selectedQuestions.push(...selectedMed);
-      }
-      
-      if (maxEasy > 0) {
-        const selectedEasy = seededShuffle(easyQuestions, seed + 2).slice(0, maxEasy);
-        selectedQuestions.push(...selectedEasy);
-      }
-
-      // Final shuffle of combined questions
-      const finalQuestions = seededShuffle(selectedQuestions, seed + 3);
-
-      console.log(`✅ Successfully selected ${finalQuestions.length} questions for exam ${examId}`);
-      console.log(`   Final distribution: ${maxHard} HARD, ${maxMed} MED, ${maxEasy} EASY`);
-
-      return finalQuestions;
-
-    } catch (error) {
-      console.error(`❌ Error loading exam questions for ${category}:`, error);
-      
-      // Fallback to regular questions if exam-specific fails
-      console.log(`   Falling back to regular question selection...`);
-      return await this.getQuestionsByCategory(category, undefined, limit);
-    }
-  }
-
-  /**
-   * Fallback method for exams when getExamQuestions fails
-   */
-  static async getExamQuestionsFallback(
-    category: 'ANG' | 'CG' | 'LOG',
-    examType: 'CM' | 'CMS' | 'CS',
-    limit: number = 20
-  ): Promise<Question[]> {
-    try {
-      console.log(`🔄 Using fallback method for ${category} questions`);
-      
-      const { data, error } = await supabase
-        .from('questions')
-        .select('*')
-        .eq('category', category)
-        .eq('test_type', 'examen_blanc')
-        .limit(limit * 2)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Error in fallback method:', error);
-        return [];
-      }
-
-      // Simple randomization for fallback
-      const shuffled = (data || []).sort(() => Math.random() - 0.5);
-      return shuffled.slice(0, limit);
-
-    } catch (error) {
-      console.error('Error in getExamQuestionsFallback:', error);
-      return [];
-    }
-  }
-
-
-  /**
-   * Converts a 4-option question to 3-option format for exam blanc only
-   * Ensures the correct answer is always included
-   */
-  static convertTo3OptionsForExamBlanc(question: Question): Question {
-    try {
-      // Only convert if this is an exam blanc question
-      if (question.test_type !== 'examen_blanc') {
-        return question;
-      }
-
-      // Get all options
-      const options = [
-        question.answer1,
-        question.answer2,
-        question.answer3,
-        question.answer4
-      ].filter(opt => opt && opt.trim()); // Filter out empty options
-
-      if (options.length < 3) {
-        // If less than 3 valid options, return original question
-        return question;
-      }
-
-      // Get correct answer
-      const correctLetter = question.correct;
-      const correctIndex = correctLetter.charCodeAt(0) - 'A'.charCodeAt(0); // A=0, B=1, C=2, D=3
-      const correctAnswer = options[correctIndex] || options[0];
-
-      // Create list of incorrect options
-      const incorrectOptions = options.filter((_, i) => i !== correctIndex);
-
-      // Select 2 additional options randomly
-      const selectedIncorrect = this.shuffleArray([...incorrectOptions]).slice(0, 2);
-
-      // Combine correct answer with selected incorrect options
-      const finalOptions = [correctAnswer, ...selectedIncorrect];
-
-      // Shuffle to randomize order
-      const shuffledOptions = this.shuffleArray(finalOptions);
-
-      // Find new correct answer position
-      const newCorrectIndex = shuffledOptions.indexOf(correctAnswer);
-      const newCorrectLetter = String.fromCharCode('A'.charCodeAt(0) + newCorrectIndex);
-
-      // Return converted question
-      return {
-        ...question,
-        answer1: shuffledOptions[0] || '',
-        answer2: shuffledOptions[1] || '',
-        answer3: shuffledOptions[2] || '',
-        answer4: '', // Clear answer4 for 3-option questions
-        correct: newCorrectLetter as 'A' | 'B' | 'C',
-        is3Option: true // Flag to indicate this is a 3-option question
-      };
-    } catch (error) {
-      console.error('Error converting question to 3 options:', error);
-      return question;
-    }
-  }
-
-  /**
-   * Shuffles an array using Fisher-Yates algorithm
-   */
-  private static shuffleArray<T>(array: T[]): T[] {
-    const shuffled = [...array];
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
-    return shuffled;
-  }
-
-  /**
-   * Get exam blanc questions with 3-option format pulled directly from Supabase
-   * Ensures each exam number receives a distinct slice of the pool per subject
+   * Get exam blanc questions for a specific test number
+   * Questions already have 3 options in V2 schema
    */
   static async getExamBlancQuestions(
-    category: 'ANG' | 'CG' | 'LOG',
+    subject: Subject,
     examId: string,
-    examType: 'CM' | 'CMS' | 'CS',
+    examType: ExamType,
     limit: number = 20
-  ): Promise<Question[]> {
+  ): Promise<QuestionV2[]> {
     try {
       const examNumber = parseInt(examId, 10) || 1;
-      console.log(`🎯 Loading exam blanc questions for ${category} - Exam ${examNumber} (${examType})`);
+      console.log(`🎯 Loading exam blanc questions for ${subject} - Exam ${examNumber} (${examType})`);
 
       const { data, error } = await supabase
-        .from('questions')
+        .from('questions_v2')
         .select('*')
-        .eq('category', category)
-        .eq('test_type', 'examen_blanc')
+        .eq('subject', subject)
+        .eq('test_type', 'exam_blanc')
         .eq('exam_type', examType)
         .eq('test_number', examNumber)
         .order('created_at', { ascending: true });
@@ -711,41 +511,30 @@ export class QuestionService {
       }
 
       if (!data || data.length === 0) {
-        console.warn(`⚠️ No examen blanc questions found for ${category} (${examType})`);
+        console.warn(`⚠️ No exam blanc questions found for ${subject} (${examType})`);
         return [];
       }
 
-      const convertedQuestions = data.map((q, index) => {
-        const base = this.convertTo3OptionsForExamBlanc(q);
-        const existingOrder =
-          (base as any).question_order ??
-          (base as any).question_number ??
-          index + 1;
-        return {
-          ...base,
-          question_order: existingOrder
-        };
-      });
+      const questions = (data as QuestionV2[]).slice(0, limit);
 
-      const ordered = convertedQuestions
-        .sort((a, b) => {
-          const orderA = (a as any).question_order ?? 0;
-          const orderB = (b as any).question_order ?? 0;
-          if (orderA !== orderB) {
-            return orderA - orderB;
-          }
-          return a.id.localeCompare(b.id);
-        })
-        .slice(0, limit);
-
-      console.log(
-        `✅ Selected ${ordered.length} exam blanc questions for ${category} (exam ${examNumber}, ${examType})`
-      );
-      return ordered;
+      console.log(`✅ Selected ${questions.length} exam blanc questions for ${subject} (exam ${examNumber}, ${examType})`);
+      return questions;
     } catch (error) {
       console.error('Error in getExamBlancQuestions:', error);
       return [];
     }
+  }
+
+  /**
+   * Helper: Shuffle array (Fisher-Yates)
+   */
+  private static shuffleArray<T>(array: T[]): T[] {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
   }
 
 }

@@ -1,0 +1,33 @@
+{
+  "metadata": {
+    "exam_type": "CS",
+    "total_questions": 1,
+    "generated_at": "2025-12-10T01:47:53.218223",
+    "status": "failed",
+    "reason": "LLM failed to process these questions"
+  },
+  "questions": [
+    {
+      "id": "",
+      "text": "Minutes entre 6h15 et 9h50 ?",
+      "options": [
+        "215",
+        "225",
+        "235"
+      ],
+      "correct_index": 0,
+      "correct_text": "",
+      "explanation": "",
+      "subject": "LOG",
+      "difficulty": "MEDIUM",
+      "test_type": "exam",
+      "exam_type": "CS",
+      "test_number": 4,
+      "question_number": 52,
+      "llm_confidence": null,
+      "validation_status": "failed",
+      "validation_notes": null,
+      "openai_disagreement": null
+    }
+  ]
+}

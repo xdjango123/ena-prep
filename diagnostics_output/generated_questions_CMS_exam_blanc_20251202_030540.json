@@ -1,0 +1,171 @@
+{
+  "generated_at": "2025-12-02T03:05:40.038937",
+  "params": {
+    "exam_type": "CMS",
+    "test_type": "exam_blanc",
+    "subjects": [
+      "LOG"
+    ],
+    "topic": null
+  },
+  "summary": {
+    "generated": 10,
+    "failed": 0,
+    "by_subject": {
+      "LOG": 10
+    }
+  },
+  "questions": [
+    {
+      "text": "Un agriculteur ivoirien compte le nombre de plants de cacao qu'il a semés chaque jour sur une nouvelle parcelle. Les quantités journalières suivent une logique particulière :\n\nJour 1 : 7 plants\nJour 2 : 12 plants\nJour 3 : 19 plants\nJour 4 : 28 plants\n\nCombien de plants l'agriculteur sèmera-t-il le Jour 5, en respectant la même logique ?",
+      "options": [
+        "37 plants",
+        "39 plants",
+        "41 plants"
+      ],
+      "correct_index": 1,
+      "explanation": "Pour résoudre ce problème de séquence logique, nous allons analyser les différences entre les nombres de plants semés chaque jour consécutif :\n\n1.  **Différence entre Jour 2 et Jour 1 :** 12 - 7 = 5 plants.\n2.  **Différence entre Jour 3 et Jour 2 :** 19 - 12 = 7 plants.\n3.  **Différence entre Jour 4 et Jour 3 :** 28 - 19 = 9 plants.\n\nNous observons une progression dans ces différences : 5, 7, 9. Cette suite de différences est elle-même une progression arithmétique où chaque terme augmente de 2 par rapport au précédent (5 + 2 = 7, 7 + 2 = 9).\n\nPour trouver le nombre de plants semés le Jour 5, nous devons d'abord déterminer la prochaine différence dans cette suite.\n\n4.  **Prochaine différence (entre Jour 5 et Jour 4) :** La différence précédente était 9. En ajoutant 2, nous obtenons 9 + 2 = 11 plants.\n\nEnfin, nous ajoutons cette différence au nombre de plants du Jour 4 pour obtenir le nombre de plants du Jour 5 :\n\n5.  **Nombre de plants le Jour 5 :** Nombre de plants du Jour 4 + 11 = 28 + 11 = 39 plants.\n\nLa logique est une progression arithmétique d'ordre 2.",
+      "subject": "LOG",
+      "exam_type": "CMS",
+      "test_type": "exam_blanc",
+      "difficulty": "HARD",
+      "test_number": null
+    },
+    {
+      "text": "Un opérateur logique ⊕ est défini de la manière suivante : pour tout couple de nombres entiers (a, b), a ⊕ b = a² - b². En s'appuyant sur cette définition, si 5 ⊕ 3 = 16 et 7 ⊕ 2 = 45, quelle est la valeur de 9 ⊕ 4 ?",
+      "options": [
+        "65",
+        "97",
+        "169"
+      ],
+      "correct_index": 0,
+      "explanation": "L'opérateur ⊕ est défini par a ⊕ b = a² - b². C'est l'identité remarquable (a - b)(a + b).\n\nVérifions les exemples donnés :\n- Pour 5 ⊕ 3 : 5² - 3² = 25 - 9 = 16. L'exemple est correct.\n- Pour 7 ⊕ 2 : 7² - 2² = 49 - 4 = 45. L'exemple est correct.\n\nAppliquons maintenant la règle pour calculer 9 ⊕ 4 :\n9 ⊕ 4 = 9² - 4²\n9 ⊕ 4 = 81 - 16\n9 ⊕ 4 = 65.\n\nLa valeur correcte est donc 65.",
+      "subject": "LOG",
+      "exam_type": "CMS",
+      "test_type": "exam_blanc",
+      "difficulty": "HARD",
+      "test_number": null
+    },
+    {
+      "text": "Dans une coopérative de femmes d'Abidjan spécialisée dans la confection de colliers traditionnels, la quantité de graines de palmier utilisée pour chaque nouveau modèle suit une logique progressive. Si les cinq premiers modèles ont nécessité respectivement 3, 7, 15, 31 et 63 graines, combien de graines seront nécessaires pour le sixième modèle, en suivant la même logique ?",
+      "options": [
+        "127",
+        "125",
+        "129"
+      ],
+      "correct_index": 0,
+      "explanation": "La séquence donnée est 3, 7, 15, 31, 63. Pour trouver le prochain terme, il faut identifier la règle de progression. Observons les relations entre les termes consécutifs :\n\n- De 3 à 7 : 7 = 3 × 2 + 1\n- De 7 à 15 : 15 = 7 × 2 + 1\n- De 15 à 31 : 31 = 15 × 2 + 1\n- De 31 à 63 : 63 = 31 × 2 + 1\n\nLa règle est donc que chaque terme est obtenu en multipliant le terme précédent par 2, puis en ajoutant 1. (Autrement dit, si N représente un terme, le terme suivant est 2N + 1).\n\nEn appliquant cette règle au dernier terme connu (63) pour trouver le sixième modèle :\n\n63 × 2 + 1 = 126 + 1 = 127.\n\nLe sixième modèle nécessitera 127 graines.",
+      "subject": "LOG",
+      "exam_type": "CMS",
+      "test_type": "exam_blanc",
+      "difficulty": "HARD",
+      "test_number": null
+    },
+    {
+      "text": "Un cultivateur de cacao en Côte d'Ivoire organise ses récoltes de fèves dans des paniers, dont le contenu est numéroté selon une logique précise. Observez le tableau ci-dessous, qui présente le nombre de fèves dans trois paniers consécutifs pour différentes rangées. Chaque rangée suit la même règle pour déterminer le contenu du troisième panier à partir des deux premiers. Quel nombre doit logiquement remplacer le point d'interrogation dans la dernière rangée ?\n\n| Panier 1 | Panier 2 | Panier 3 |\n|----------|----------|----------|\n|    2     |    3     |    7     |\n|    4     |    1     |    9     |\n|    5     |    ?     |   13     |",
+      "options": [
+        "2",
+        "3",
+        "4"
+      ],
+      "correct_index": 1,
+      "explanation": "L'énigme repose sur une règle arithmétique constante appliquée à chaque rangée du tableau. Pour trouver le nombre de fèves dans le troisième panier (Panier 3), il faut multiplier par deux le nombre de fèves du premier panier (Panier 1), puis ajouter le nombre de fèves du second panier (Panier 2).\n\nDéduction de la règle:\n- Pour la première rangée: (Panier 1 × 2) + Panier 2 = (2 × 2) + 3 = 4 + 3 = 7. La règle est confirmée.\n- Pour la deuxième rangée: (Panier 1 × 2) + Panier 2 = (4 × 2) + 1 = 8 + 1 = 9. La règle est de nouveau confirmée.\n\nApplication de la règle à la troisième rangée:\n- Pour la troisième rangée, la formule est (Panier 1 × 2) + Panier 2 = Panier 3.\n- En substituant les valeurs connues: (5 × 2) + ? = 13.\n- Cela donne 10 + ? = 13.\n- Par conséquent, ? = 13 - 10 = 3.\n\nLe nombre qui doit logiquement remplacer le point d'interrogation est 3.",
+      "subject": "LOG",
+      "exam_type": "CMS",
+      "test_type": "exam_blanc",
+      "difficulty": "HARD",
+      "test_number": null
+    },
+    {
+      "text": "Lors d'un recensement des habitants du village de Gbapleu, la population a évolué de manière particulière. Si les chiffres des cinq dernières années étaient 3, 5, 9, 17, 33 milliers d'habitants, quelle serait la population estimée pour l'année suivante, en suivant la même logique ?",
+      "options": [
+        "35 milliers",
+        "65 milliers",
+        "67 milliers"
+      ],
+      "correct_index": 1,
+      "explanation": "Pour résoudre cette question, il faut identifier la règle logique qui gouverne la progression de la séquence numérique donnée. Analysons les relations entre les termes consécutifs :\n\n1.  De 3 à 5 : On peut observer que (3 multiplié par 2) moins 1 donne 5. (3 * 2 - 1 = 5)\n2.  De 5 à 9 : En appliquant la même logique, (5 multiplié par 2) moins 1 donne 9. (5 * 2 - 1 = 9)\n3.  De 9 à 17 : De même, (9 multiplié par 2) moins 1 donne 17. (9 * 2 - 1 = 17)\n4.  De 17 à 33 : Encore une fois, (17 multiplié par 2) moins 1 donne 33. (17 * 2 - 1 = 33)\n\nLa règle de progression identifiée est donc : chaque terme est obtenu en multipliant le terme précédent par 2, puis en soustrayant 1.\n\nPour trouver la population estimée pour l'année suivante, nous appliquons cette règle au dernier terme connu de la séquence, qui est 33 milliers d'habitants :\n\n(33 * 2) - 1 = 66 - 1 = 65.\n\nLa population estimée pour l'année suivante serait donc de 65 milliers d'habitants.",
+      "subject": "LOG",
+      "exam_type": "CMS",
+      "test_type": "exam_blanc",
+      "difficulty": "HARD",
+      "test_number": null
+    },
+    {
+      "text": "Lors d'un séminaire à Yamoussoukro, quatre participants – Mme Koné, M. Kouadio, Dr. Yao et Pr. Brou – sont assis autour d'une table ronde. On sait que :\n1. Mme Koné n'est pas assise à côté de Dr. Yao.\n2. M. Kouadio est assis en face de Pr. Brou.\n3. Dr. Yao est assis immédiatement à droite de M. Kouadio.\nQui est assis immédiatement à gauche de Mme Koné ?",
+      "options": [
+        "M. Kouadio",
+        "Pr. Brou",
+        "Dr. Yao"
+      ],
+      "correct_index": 1,
+      "explanation": "Pour résoudre ce problème, nous allons déduire la disposition des participants autour de la table ronde. Numérotons les sièges de 1 à 4 dans le sens des aiguilles d'une montre.\n\n1.  **D'après l'information 2 : M. Kouadio est assis en face de Pr. Brou.**\n    Si nous plaçons M. Kouadio au siège 1, alors Pr. Brou doit être au siège 3 (en face).\n    La disposition partielle est :\n    Siège 1 : M. Kouadio\n    Siège 2 : ?\n    Siège 3 : Pr. Brou\n    Siège 4 : ?\n\n2.  **D'après l'information 3 : Dr. Yao est assis immédiatement à droite de M. Kouadio.**\n    Si M. Kouadio est au siège 1, son côté droit (dans le sens des aiguilles d'une montre) est le siège 2. Donc, Dr. Yao est au siège 2.\n    La disposition devient :\n    Siège 1 : M. Kouadio\n    Siège 2 : Dr. Yao\n    Siège 3 : Pr. Brou\n    Siège 4 : ?\n\n3.  **Il ne reste qu'un siège (le 4) et une personne (Mme Koné).**\n    Mme Koné doit donc être au siège 4.\n    La disposition complète est :\n    Siège 1 : M. Kouadio\n    Siège 2 : Dr. Yao\n    Siège 3 : Pr. Brou\n    Siège 4 : Mme Koné\n\n4.  **Vérifions l'information 1 : Mme Koné n'est pas assise à côté de Dr. Yao.**\n    Mme Koné est au siège 4. Ses voisins sont les sièges 3 (Pr. Brou) et 1 (M. Kouadio). Dr. Yao est au siège 2. Mme Koné n'est donc pas assise à côté de Dr. Yao. Cette disposition est cohérente avec toutes les informations données.\n\n5.  **La question est : Qui est assis immédiatement à gauche de Mme Koné ?**\n    Mme Koné est au siège 4. Le siège à sa gauche (dans le sens inverse des aiguilles d'une montre) est le siège 3.\n    La personne assise au siège 3 est Pr. Brou.",
+      "subject": "LOG",
+      "exam_type": "CMS",
+      "test_type": "exam_blanc",
+      "difficulty": "HARD",
+      "test_number": null
+    },
+    {
+      "text": "Lors d'une étude sur l'évolution du niveau de l'eau dans une lagune ivoirienne, des données ont été relevées à intervalles réguliers. Les mesures successives sont les suivantes (en centimètres) : 2, 3, 5, 9, 17.\nQuelle sera la prochaine mesure (en centimètres) si la logique de cette séquence est maintenue ?",
+      "options": [
+        "33",
+        "35",
+        "37"
+      ],
+      "correct_index": 0,
+      "explanation": "Il s'agit d'une séquence où la différence entre deux termes consécutifs double à chaque étape :\n- De 2 à 3 : l'ajout est de +1\n- De 3 à 5 : l'ajout est de +2 (le double de 1)\n- De 5 à 9 : l'ajout est de +4 (le double de 2)\n- De 9 à 17 : l'ajout est de +8 (le double de 4)\n\nPour trouver le terme suivant, nous devons continuer cette progression en ajoutant le double de la dernière différence. Le double de 8 est 16.\n\nDonc, la prochaine mesure sera 17 + 16 = 33.\nLa séquence complète est donc : 2, 3, 5, 9, 17, 33.",
+      "subject": "LOG",
+      "exam_type": "CMS",
+      "test_type": "exam_blanc",
+      "difficulty": "HARD",
+      "test_number": null
+    },
+    {
+      "text": "Madame Akissi, commerçante au marché de Treichville, est réputée pour sa méthode organisée de vente de pagnes. Chaque mois, elle ajuste son stock selon une logique bien particulière. En janvier, elle a vendu 5 pagnes. En février, 12 pagnes. En mars, 23 pagnes. En avril, 38 pagnes. Si cette progression continue, combien de pagnes Madame Akissi devrait-elle vendre en mai ?",
+      "options": [
+        "55",
+        "57",
+        "59"
+      ],
+      "correct_index": 1,
+      "explanation": "Pour résoudre cette énigme, il faut identifier la logique de la séquence des ventes :\n\n1.  **Identifier la séquence des ventes :** 5, 12, 23, 38, ...\n\n2.  **Calculer les différences entre les termes consécutifs (premier niveau de différences) :**\n    *   Février - Janvier : 12 - 5 = 7\n    *   Mars - Février : 23 - 12 = 11\n    *   Avril - Mars : 38 - 23 = 15\n    Le premier niveau de différences est donc : 7, 11, 15.\n\n3.  **Calculer les différences entre ces premières différences (deuxième niveau de différences) :**\n    *   Deuxième différence - Première différence : 11 - 7 = 4\n    *   Troisième différence - Deuxième différence : 15 - 11 = 4\n    On observe que le deuxième niveau de différences est constant et égal à 4. Cela indique une progression arithmétique de second ordre.\n\n4.  **Prévoir la prochaine différence du premier niveau :**\n    Pour trouver la prochaine différence (qui correspondra à l'augmentation de mai par rapport à avril), on ajoute 4 à la dernière différence connue : 15 + 4 = 19.\n\n5.  **Calculer les ventes de mai :**\n    Pour trouver le terme suivant dans la séquence des ventes (les ventes de mai), on ajoute cette nouvelle différence au dernier terme connu (les ventes d'avril) : 38 + 19 = 57.\n\nDonc, Madame Akissi devrait vendre 57 pagnes en mai si la logique de progression est maintenue.",
+      "subject": "LOG",
+      "exam_type": "CMS",
+      "test_type": "exam_blanc",
+      "difficulty": "HARD",
+      "test_number": null
+    },
+    {
+      "text": "Trois amis ivoiriens, Adama, Bintou et Charles, vivent dans des villes différentes (Grand-Bassam, Korhogo, Yamoussoukro) et exercent des professions distinctes (Artiste, Cuisinier, Jardinier).\nEn vous basant sur les indices suivants, déterminez la profession de Bintou et sa ville de résidence :\n1. Le cuisinier n'habite pas à Grand-Bassam.\n2. Charles est un artiste.\n3. Bintou ne vient pas de Korhogo.\n4. La personne de Yamoussoukro est le jardinier.",
+      "options": [
+        "Bintou est Jardinier et vient de Yamoussoukro.",
+        "Bintou est Cuisinier et vient de Korhogo.",
+        "Bintou est Artiste et vient de Grand-Bassam."
+      ],
+      "correct_index": 0,
+      "explanation": "Pour résoudre ce problème de déduction logique, nous allons établir les associations entre personnes, professions et villes étape par étape :\n\n**1. Identifier les informations de base :**\n*   Personnes : Adama, Bintou, Charles\n*   Professions : Artiste, Cuisinier, Jardinier\n*   Villes : Grand-Bassam, Korhogo, Yamoussoukro\n\n**2. Appliquer l'indice 2 : Charles est un artiste.**\n*   Nous associons directement : Charles → Artiste.\n*   Par conséquent, Adama et Bintou doivent être le Cuisinier et le Jardinier.\n\n**3. Appliquer l'indice 4 : La personne de Yamoussoukro est le jardinier.**\n*   Nous associons : Jardinier → Yamoussoukro.\n*   Puisque Charles est l'Artiste, il ne peut pas être de Yamoussoukro.\n\n**4. Appliquer l'indice 1 : Le cuisinier n'habite pas à Grand-Bassam.**\n*   Nous savons que le Cuisinier n'est pas de Grand-Bassam.\n*   Nous savons aussi, d'après l'indice 4, que le Jardinier est de Yamoussoukro, donc le Cuisinier n'est pas de Yamoussoukro.\n*   Par élimination, la seule ville restante pour le Cuisinier est Korhogo.\n*   Donc : Cuisinier → Korhogo.\n\n**5. Synthétiser les associations profession-ville :**\n*   Jardinier → Yamoussoukro (de l'indice 4)\n*   Cuisinier → Korhogo (de l'étape 4)\n*   Par élimination, la dernière profession (Artiste) doit être associée à la dernière ville restante (Grand-Bassam).\n*   Donc : Artiste → Grand-Bassam.\n\n**6. Associer les personnes aux professions et villes :**\n*   Charles est l'Artiste (indice 2), donc Charles vient de Grand-Bassam (de l'étape 5).\n*   Il reste Adama et Bintou, qui sont le Cuisinier et le Jardinier, et leurs villes sont Korhogo et Yamoussoukro.\n\n**7. Appliquer l'indice 3 : Bintou ne vient pas de Korhogo.**\n*   Puisque nous avons établi que le Cuisinier est de Korhogo (étape 4), Bintou ne peut pas être le Cuisinier.\n*   Par conséquent, Bintou doit être le Jardinier.\n\n**8. Déduire la ville de Bintou :**\n*   Si Bintou est le Jardinier (étape 7), et que le Jardinier est de Yamoussoukro (étape 3), alors Bintou vient de Yamoussoukro.\n\n**Conclusion :**\nBintou est Jardinier et vient de Yamoussoukro. L'option A est la seule correcte.",
+      "subject": "LOG",
+      "exam_type": "CMS",
+      "test_type": "exam_blanc",
+      "difficulty": "HARD",
+      "test_number": null
+    },
+    {
+      "text": "Observez attentivement la suite logique suivante, où chaque triplet combine un nombre, un symbole inspiré des motifs africains, et un autre nombre :\n\n(3, ▲, 7)\n(5, ■, 11)\n(7, ▲, 15)\n(9, ■, 19)\n(11, ▲, 23)\n\nQuel serait le prochain élément de cette suite ?",
+      "options": [
+        "(13, ■, 27)",
+        "(13, ▲, 27)",
+        "(12, ■, 26)"
+      ],
+      "correct_index": 0,
+      "explanation": "Pour résoudre cette suite, nous devons analyser la progression de chaque composante du triplet indépendamment :\n\n1.  **Le premier nombre** : La séquence des premiers nombres est 3, 5, 7, 9, 11. Il s'agit d'une suite arithmétique où chaque terme est obtenu en ajoutant 2 au terme précédent (3+2=5, 5+2=7, etc.). Le prochain nombre sera donc 11 + 2 = 13.\n\n2.  **Le symbole central** : La séquence des symboles est ▲, ■, ▲, ■, ▲. Le symbole alterne de manière régulière entre ▲ et ■. Puisque le dernier symbole était ▲, le prochain symbole sera ■.\n\n3.  **Le troisième nombre** : La séquence des troisièmes nombres est 7, 11, 15, 19, 23. Il s'agit également d'une suite arithmétique où chaque terme est obtenu en ajoutant 4 au terme précédent (7+4=11, 11+4=15, etc.). Le prochain nombre sera donc 23 + 4 = 27.\n\nEn combinant ces trois progressions, le prochain élément de la suite est (13, ■, 27).",
+      "subject": "LOG",
+      "exam_type": "CMS",
+      "test_type": "exam_blanc",
+      "difficulty": "HARD",
+      "test_number": null
+    }
+  ],
+  "failed": []
+}

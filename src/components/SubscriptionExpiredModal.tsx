@@ -101,13 +101,6 @@ export const SubscriptionExpiredModal: React.FC<SubscriptionExpiredModalProps> =
             </button>
           </div>
 
-          {/* Testing Mode Notice */}
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-            <div className="text-xs text-yellow-800">
-              <strong>Mode Test :</strong> Les dates d'expiration sont temporairement ignorées 
-              pour permettre les tests. En production, cette fonctionnalité sera activée.
-            </div>
-          </div>
         </div>
       </div>
     </div>

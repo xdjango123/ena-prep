@@ -5,19 +5,20 @@ import { QuestionService } from '../../services/questionService';
 import MathText from '../common/MathText';
 import { formatExponents } from '../../utils/mathFormatting';
 import { ExamResultService } from '../../services/examResultService';
+import { ExamSessionService } from '../../services/examSessionService';
 import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
 
+// Internal question format for SecureExamInterface
 interface Question {
   id: string;
   type: 'multiple-choice' | 'true-false';
   question: string;
   options?: string[];
-  correctAnswer: number | string;
+  correctAnswer: number;  // V2: Always numeric index
   explanation?: string;
   difficulty: string;
-  category: 'ANG' | 'CG' | 'LOG';
+  subject: 'ANG' | 'CG' | 'LOG';  // V2: Renamed from category
   exam_type?: string;
-  is3Option?: boolean; // Flag to indicate this is a 3-option question
 }
 
 interface SecureExamInterfaceProps {
@@ -45,7 +46,9 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
   const [showMobileDrawer, setShowMobileDrawer] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'info' | 'warning' } | null>(null);
   const [showReview, setShowReview] = useState(false);
-  const [warningDismissed, setWarningDismissed] = useState(false);  
+  const [warningDismissed, setWarningDismissed] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [questionStartTimes, setQuestionStartTimes] = useState<Map<number, number>>(new Map());
   const examStartTime = useRef<Date>(new Date());
   const autoSaveInterval = useRef<NodeJS.Timeout | null>(null);
   const toastTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -156,77 +159,41 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
               20
             );
             
-            console.log(`🔍 Converting ${subjectQuestions.length} questions for ${subject}`);
+            console.log(`🔍 Converting ${subjectQuestions.length} V2 questions for ${subject}`);
             
+            // V2: Questions already have the correct structure
             const convertedQuestions = subjectQuestions.map((dbQ, index) => {
-              console.log(`🔍 Question ${index + 1}:`, {
+              console.log(`🔍 V2 Question ${index + 1}:`, {
                 id: dbQ.id,
-                question_text: dbQ.question_text,
-                answer1: dbQ.answer1,
-                answer2: dbQ.answer2,
-                answer3: dbQ.answer3,
-                correct: dbQ.correct,
-                is3Option: dbQ.is3Option
+                text: dbQ.text,
+                options: dbQ.options,
+                correct_index: dbQ.correct_index,
+                subject: dbQ.subject
               });
               
-              let type: 'multiple-choice' | 'true-false' = 'multiple-choice';
-              let options: string[] | undefined = undefined;
-              let correctAnswer: number | string = 0;
+              // V2: Format options for display (handle math exponents)
+              const formattedOptions = dbQ.options?.map(option => formatExponents(option)) || [];
               
-              // Check if this is a 3-option question (exam blanc)
-              if (dbQ.is3Option) {
-                // 3-option format for exam blanc
-                if (dbQ.answer1 && dbQ.answer2 && dbQ.answer3) {
-                  type = 'multiple-choice';
-                  options = [dbQ.answer1, dbQ.answer2, dbQ.answer3];
-                  
-                  // Convert letter to index (A=0, B=1, C=2)
-                  correctAnswer = dbQ.correct === 'A' ? 0 :
-                                  dbQ.correct === 'B' ? 1 :
-                                  dbQ.correct === 'C' ? 2 : 0;
-                }
-              } else {
-                // 4-option format for other question types
-                if (dbQ.answer1 && dbQ.answer2 && dbQ.answer3 && dbQ.answer4) {
-                  type = 'multiple-choice';
-                  options = [dbQ.answer1, dbQ.answer2, dbQ.answer3, dbQ.answer4];
-                  
-                  // Convert letter to index (A=0, B=1, C=2, D=3)
-                  correctAnswer = dbQ.correct === 'A' ? 0 :
-                                  dbQ.correct === 'B' ? 1 :
-                                  dbQ.correct === 'C' ? 2 :
-                                  dbQ.correct === 'D' ? 3 : 0;
-                } else if (dbQ.answer1 && dbQ.answer2 && !dbQ.answer3 && !dbQ.answer4) {
-                  type = 'true-false';
-                  options = [dbQ.answer1, dbQ.answer2];
-                  correctAnswer = dbQ.correct?.toLowerCase() === 'true' ? 'true' : 'false';
-                }
-              }
-              
-              const formattedOptions = options?.map(option => formatExponents(option));
-
-              const convertedQuestion = {
+              const convertedQuestion: Question = {
                 id: dbQ.id,
-                type,
-                question: formatExponents(dbQ.question_text),
+                type: 'multiple-choice',  // V2: All questions are multiple choice
+                question: formatExponents(dbQ.text),
                 options: formattedOptions,
-                correctAnswer,
+                correctAnswer: dbQ.correct_index,  // V2: Already numeric
                 explanation: formatExponents(
-                  (dbQ as any).explanation ||
-                    `La réponse correcte est ${formattedOptions?.[correctAnswer as number] || correctAnswer}.`
+                  dbQ.explanation ||
+                    `La réponse correcte est ${formattedOptions[dbQ.correct_index] || ''}.`
                 ),
-                difficulty: dbQ.difficulty || 'medium',
-                category: dbQ.category,
-                exam_type: dbQ.exam_type,
-                is3Option: dbQ.is3Option || false
+                difficulty: dbQ.difficulty || 'MEDIUM',
+                subject: dbQ.subject,  // V2: Use subject instead of category
+                exam_type: dbQ.exam_type
               };
               
-              console.log(`✅ Converted question ${index + 1}:`, {
+              console.log(`✅ Converted V2 question ${index + 1}:`, {
                 id: convertedQuestion.id,
-                question: convertedQuestion.question,
-                options: convertedQuestion.options,
-                correctAnswer: convertedQuestion.correctAnswer,
-                is3Option: convertedQuestion.is3Option
+                question: convertedQuestion.question.substring(0, 50) + '...',
+                optionsCount: convertedQuestion.options?.length,
+                correctAnswer: convertedQuestion.correctAnswer
               });
               
               return convertedQuestion;
@@ -253,6 +220,28 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
 
     loadExamQuestions();
   }, [examId]);
+
+  // Start exam session when questions are loaded
+  useEffect(() => {
+    const startExamSession = async () => {
+      if (questions.length > 0 && !sessionId && !isCompleted && user) {
+        const userExamType = selectedExamType || profile?.plan_name || 'CM';
+        const newSessionId = await ExamSessionService.startSession({
+          userId: user.id,
+          testType: 'exam_blanc',
+          examType: userExamType as 'CM' | 'CMS' | 'CS',
+          testNumber: parseInt(examId || '1', 10),
+          totalQuestions: questions.length,
+        });
+        setSessionId(newSessionId);
+        
+        // Start timing for first question
+        setQuestionStartTimes(new Map([[0, Date.now()]]));
+        console.log('📝 Started exam session:', newSessionId);
+      }
+    };
+    startExamSession();
+  }, [questions.length, sessionId, isCompleted, user, selectedExamType, profile?.plan_name, examId]);
 
   // Auto-save answers every 30 seconds
   useEffect(() => {
@@ -349,7 +338,12 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
     }
     
     if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex(prev => prev + 1);
+      const nextIndex = currentQuestionIndex + 1;
+      // Track timing for next question
+      if (!questionStartTimes.has(nextIndex)) {
+        setQuestionStartTimes(prev => new Map(prev).set(nextIndex, Date.now()));
+      }
+      setCurrentQuestionIndex(nextIndex);
       setSelectedAnswer(null);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
@@ -360,7 +354,8 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
 
   const handlePreviousQuestion = () => {
     if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex(prev => prev - 1);
+      const prevIndex = currentQuestionIndex - 1;
+      setCurrentQuestionIndex(prevIndex);
       setSelectedAnswer(null);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -412,10 +407,10 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
           isCorrect = userAnswer === q.correctAnswer;
         }
         
-        if (q.category === 'ANG' || q.category === 'CG' || q.category === 'LOG') {
-          subjectTotals[q.category]++;
+        if (q.subject === 'ANG' || q.subject === 'CG' || q.subject === 'LOG') {
+          subjectTotals[q.subject]++;
           if (isCorrect) {
-            subjectScores[q.category]++;
+            subjectScores[q.subject]++;
           }
         }
       });
@@ -432,85 +427,32 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
       console.log(`💾 Saving to database: user=${user.id}, examType=${userExamType}, examNumber=${examId}, score=${overallScore}`);
       
       try {
-        const normalizeAnswerToLetter = (
-          question: Question,
-          answer: string | number | null | undefined
-        ): string | null => {
-          if (answer === null || answer === undefined) {
-            return null;
-          }
+        // V2: Create question snapshot in V2 format
+        const questionsSnapshot = questions.map((q, index) => ({
+          id: q.id,
+          order: index,
+          text: q.question,  // V2: 'text' instead of 'question_text'
+          options: q.options || [],  // V2: options[] array
+          correct_index: q.correctAnswer,  // V2: numeric index
+          explanation: q.explanation ?? '',
+          subject: q.subject,  // V2: 'subject' instead of 'category'
+          difficulty: (q.difficulty?.toUpperCase() || 'MEDIUM') as 'EASY' | 'MEDIUM' | 'HARD',
+          test_type: 'exam_blanc' as const
+        }));
 
-          if (question.type === 'multiple-choice') {
-            if (typeof answer === 'number') {
-              return String.fromCharCode(65 + answer);
-            }
-
-            if (typeof answer === 'string') {
-              if (answer.length === 1 && /[A-D]/i.test(answer)) {
-                return answer.toUpperCase();
-              }
-
-              const numericValue = Number(answer);
-              if (!Number.isNaN(numericValue) && numericValue >= 0 && numericValue <= 3) {
-                return String.fromCharCode(65 + numericValue);
-              }
-
-              return answer.toUpperCase();
-            }
-
-            return String(answer).toUpperCase();
-          }
-
-          const normalized = String(answer).toLowerCase();
-          if (normalized === 'true') return 'A';
-          if (normalized === 'false') return 'B';
-          if (normalized.length === 1) return normalized.toUpperCase();
-          return normalized;
-        };
-
-        const questionsSnapshot = questions.map((q, index) => {
-          const options = q.type === 'multiple-choice'
-            ? q.options || []
-            : ['Vrai', 'Faux'];
-
-          const paddedOptions = [...options];
-          while (paddedOptions.length < 4) {
-            paddedOptions.push('');
-          }
-
-          const correctLetter =
-            q.type === 'multiple-choice' && typeof q.correctAnswer === 'number'
-              ? String.fromCharCode(65 + q.correctAnswer)
-              : normalizeAnswerToLetter(q, q.correctAnswer) || 'A';
-
-          return {
-            id: q.id,
-            order: index,
-            question_text: q.question,
-            answer1: paddedOptions[0] || '',
-            answer2: paddedOptions[1] || '',
-            answer3: paddedOptions[2] || '',
-            answer4: paddedOptions[3] || '',
-            correct: correctLetter,
-            explanation: q.explanation ?? '',
-            category: q.category,
-            difficulty: q.difficulty,
-            type: q.type,
-            is3Option: q.is3Option ?? false
-          };
-        });
-
-        const questionsById = new Map(questions.map(q => [q.id, q]));
-
-        // Convert userAnswers to Map<string, string> for the service
-        const userAnswersString = new Map<string, string>();
+        // V2: Convert userAnswers to Map<string, number> (indices)
+        const userAnswersNumeric = new Map<string, number>();
         userAnswers.forEach((value, key) => {
-          const question = questionsById.get(key);
-          if (!question) return;
-          const normalized = normalizeAnswerToLetter(question, value);
-          if (normalized) {
-            userAnswersString.set(key, normalized);
+          // Convert letter answers to numeric index if needed
+          let answerIndex: number;
+          if (typeof value === 'number') {
+            answerIndex = value;
+          } else if (typeof value === 'string' && value.length === 1 && /[A-D]/i.test(value)) {
+            answerIndex = value.toUpperCase().charCodeAt(0) - 65;
+          } else {
+            answerIndex = parseInt(String(value), 10) || 0;
           }
+          userAnswersNumeric.set(key, answerIndex);
         });
 
         const saveResult = await ExamResultService.saveExamResult(
@@ -519,11 +461,58 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
           parseInt(examId || '1'),
           overallScore,
           subjectPercentages,
-          userAnswersString,
+          userAnswersNumeric,
           questionsSnapshot
         );
         
         console.log(`💾 Save result: ${saveResult ? 'SUCCESS' : 'FAILED'}`);
+
+        // Save to exam_sessions and exam_answers for granular tracking
+        if (sessionId) {
+          const examEndTime = Date.now();
+          const examStart = questionStartTimes.get(0) || examEndTime;
+          const totalTimeSeconds = Math.round((examEndTime - examStart) / 1000);
+
+          // Record all answers with timing
+          const answersData = questions.map((q, index) => {
+            const userAnswer = userAnswers.get(q.id);
+            const startTime = questionStartTimes.get(index);
+            const nextStartTime = questionStartTimes.get(index + 1) || examEndTime;
+            const timeSpentMs = startTime ? nextStartTime - startTime : null;
+            
+            // Determine selected option index
+            let selectedIdx: number | null = null;
+            if (userAnswer !== undefined && userAnswer !== null) {
+              if (typeof userAnswer === 'number') {
+                selectedIdx = userAnswer;
+              } else if (typeof userAnswer === 'string' && userAnswer.length === 1 && /[A-D]/i.test(userAnswer)) {
+                selectedIdx = userAnswer.toUpperCase().charCodeAt(0) - 65;
+              }
+            }
+            
+            return {
+              questionId: q.id,
+              selectedOptionIndex: selectedIdx,
+              correctIndex: q.correctAnswer,
+              timeSpentMs: timeSpentMs || undefined,
+            };
+          });
+
+          await ExamSessionService.recordAnswersBatch({
+            sessionId,
+            answers: answersData,
+          });
+
+          // Complete the session
+          await ExamSessionService.completeSession({
+            sessionId,
+            correctAnswers,
+            totalQuestions: questions.length,
+            timeSpentSeconds: totalTimeSeconds,
+          });
+
+          console.log(`📊 Exam session ${sessionId} completed with tracking`);
+        }
       } catch (error) {
         console.error('❌ Error in handleFinishExam:', error);
       }
@@ -543,8 +532,8 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
     const currentQuestion = questions[currentQuestionIndex];
     if (!currentQuestion) return { section: '', range: '', color: 'blue' };
     
-    const angCount = questions.filter(q => q.category === 'ANG').length;
-    const cgCount = questions.filter(q => q.category === 'CG').length;
+    const angCount = questions.filter(q => q.subject === 'ANG').length;
+    const cgCount = questions.filter(q => q.subject === 'CG').length;
     
     if (currentQuestionIndex < angCount) {
       return { 
@@ -569,8 +558,8 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
 
   // Group questions by subject for sidebar
   const getQuestionsBySubject = () => {
-    const angCount = questions.filter(q => q.category === 'ANG').length;
-    const cgCount = questions.filter(q => q.category === 'CG').length;
+    const angCount = questions.filter(q => q.subject === 'ANG').length;
+    const cgCount = questions.filter(q => q.subject === 'CG').length;
     
     return {
       anglais: questions.slice(0, angCount),
@@ -588,7 +577,7 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
   const getSubjectScores = () => {
     const subjects = ['ANG', 'CG', 'LOG'];
     return subjects.map(subject => {
-      const subjectQuestions = questions.filter(q => q.category === subject);
+      const subjectQuestions = questions.filter(q => q.subject === subject);
       const subjectCorrect = subjectQuestions.reduce((count, q) => {
         const userAnswer = userAnswers.get(q.id);
         if (q.type === 'multiple-choice' && typeof q.correctAnswer === 'number') {
@@ -791,11 +780,11 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
                           </div>
                           <div className="flex items-center gap-2">
                             <span className={`px-2 py-1 rounded text-xs font-medium ${
-                              question.category === 'ANG' ? 'bg-green-100 text-green-800' :
-                              question.category === 'CG' ? 'bg-blue-100 text-blue-800' :
+                              question.subject === 'ANG' ? 'bg-green-100 text-green-800' :
+                              question.subject === 'CG' ? 'bg-blue-100 text-blue-800' :
                               'bg-yellow-100 text-yellow-800'
                             }`}>
-                              {question.category}
+                              {question.subject}
                             </span>
                             <span className="text-sm text-gray-500">
                               {question.type === 'multiple-choice' ? 'Choix Multiple' : 'Vrai/Faux'}
@@ -848,9 +837,9 @@ export const SecureExamInterface: React.FC<SecureExamInterfaceProps> = ({ onExit
                           })}
                           
                           {question.type === 'true-false' && ['Vrai', 'Faux'].map((option, optionIndex) => {
-                            const answerValue = optionIndex === 0 ? 'true' : 'false';
-                            const isUserAnswer = userAnswer === answerValue;
-                            const isCorrectAnswer = question.correctAnswer === answerValue;
+                            // V2: Compare indices, not string values
+                            const isUserAnswer = userAnswer === optionIndex;
+                            const isCorrectAnswer = question.correctAnswer === optionIndex;
                             
                             let optionClass = 'answer-review-option flex items-start gap-3 rounded-lg border-2 p-3 transition-colors ';
                             if (isCorrectAnswer) {

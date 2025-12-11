@@ -3,7 +3,7 @@ import { Check, X, ArrowLeft } from 'lucide-react';
 
 // Assuming Question interface is available from a shared types file
 interface Question {
-  id: number;
+  id: string;  // V2: UUID string for exam_answers tracking
   type: 'multiple-choice' | 'true-false' | 'fill-blank' | 'matching';
   question: string;
   options?: string[];
@@ -13,7 +13,7 @@ interface Question {
 
 interface QuizReviewProps {
   questions: Question[];
-  userAnswers: Map<number, string | number>;
+  userAnswers: Map<string, string | number>;
   onBack: () => void;
 }
 

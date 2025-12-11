@@ -34,13 +34,19 @@ const ResetPasswordPage: React.FC = () => {
   useEffect(() => {
     const validateToken = async () => {
       try {
-        // Parse URL parameters to check for Supabase token
-        const params = new URLSearchParams(location.search);
-        const accessToken = params.get('access_token');
-        const refreshToken = params.get('refresh_token');
-        const type = params.get('type');
+        // Parse URL parameters - Supabase can send tokens in hash fragment OR query params
+        // Hash fragment is the default for email links (e.g., #access_token=xxx&type=recovery)
+        const hashParams = new URLSearchParams(location.hash.replace('#', ''));
+        const queryParams = new URLSearchParams(location.search);
+        
+        // Try hash fragment first (Supabase default), then fallback to query params
+        const accessToken = hashParams.get('access_token') || queryParams.get('access_token');
+        const refreshToken = hashParams.get('refresh_token') || queryParams.get('refresh_token');
+        const type = hashParams.get('type') || queryParams.get('type');
 
         console.log('🔍 Validating password reset tokens...');
+        console.log('Hash params:', location.hash);
+        console.log('Type:', type, 'Has access token:', !!accessToken);
 
         // If we have tokens, we're coming from a Supabase redirect (password reset email)
         if (type === 'recovery' && accessToken) {
@@ -104,7 +110,21 @@ const ResetPasswordPage: React.FC = () => {
     };
 
     validateToken();
-  }, [location.search]);
+
+    // Also listen for Supabase auth state changes (backup method)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('🔔 Auth state change:', event);
+      if (event === 'PASSWORD_RECOVERY') {
+        console.log('✅ PASSWORD_RECOVERY event detected');
+        setIsValidToken(true);
+        setIsLoading(false);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [location.search, location.hash]);
 
   // Function to translate Supabase error messages to French
   const translateError = (errorMessage: string): string => {

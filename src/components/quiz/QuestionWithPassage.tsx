@@ -1,6 +1,6 @@
 import React from 'react';
 import MathText from '../common/MathText';
-import { QuestionWithPassage } from '../../services/questionService';
+import type { QuestionWithPassage } from '../../types/questions';
 
 interface QuestionWithPassageProps {
   questionWithPassage: QuestionWithPassage;
@@ -19,8 +19,8 @@ export const QuestionWithPassageComponent: React.FC<QuestionWithPassageProps> = 
 }) => {
   const { question, passage } = questionWithPassage;
 
-  // Convert string answer to index (A=0, B=1, C=2, D=3)
-  const correctAnswerIndex = question.correct.charCodeAt(0) - 65; // 'A' = 65
+  // V2: correct_index is already a number
+  const correctAnswerIndex = question.correct_index;
 
   const getAnswerClass = (optionIndex: number) => {
     if (!showCorrectAnswer) {
@@ -89,21 +89,17 @@ export const QuestionWithPassageComponent: React.FC<QuestionWithPassageProps> = 
           <h4 className="text-lg font-semibold text-neutral-900 mb-2">
             Question
           </h4>
+          {/* V2: 'text' instead of 'question_text' */}
           <MathText
-            text={question.question_text}
+            text={question.text}
             block
             className="text-neutral-700 text-base"
           />
         </div>
 
-        {/* Answer Options */}
+        {/* Answer Options - V2: Use options[] array */}
         <div className="space-y-3">
-          {[
-            { key: 'A', text: question.answer1 },
-            { key: 'B', text: question.answer2 },
-            { key: 'C', text: question.answer3 },
-            { key: 'D', text: question.answer4 }
-          ].map((option, index) => (
+          {question.options.map((optionText, index) => (
             <button
               key={index}
               onClick={() => !isReviewMode && onAnswerSelect(index)}
@@ -116,10 +112,10 @@ export const QuestionWithPassageComponent: React.FC<QuestionWithPassageProps> = 
                 <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center text-sm font-medium ${
                   getOptionClass(index)
                 }`}>
-                  {option.key}
+                  {String.fromCharCode(65 + index)}  {/* A, B, C, D */}
                 </div>
                 <span className={showCorrectAnswer && index === correctAnswerIndex ? 'font-medium' : ''}>
-                  <MathText text={option.text} />
+                  <MathText text={optionText} />
                 </span>
                 {showCorrectAnswer && (
                   <>
@@ -140,12 +136,12 @@ export const QuestionWithPassageComponent: React.FC<QuestionWithPassageProps> = 
           ))}
         </div>
 
-        {/* Explanation (shown in review mode) */}
+        {/* Explanation (shown in review mode) - V2: Use explanation and correct_index */}
         {showCorrectAnswer && (
           <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <h5 className="font-semibold text-blue-900 mb-2">Explication</h5>
             <p className="text-blue-800 text-sm">
-              Réponse correcte: <MathText text={question.correct} />
+              {question.explanation || `Réponse correcte: ${String.fromCharCode(65 + correctAnswerIndex)}`}
             </p>
           </div>
         )}

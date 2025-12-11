@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Outlet, Navigate, useLocation } from 'react-router-dom';
 import { SupabaseAuthProvider } from './contexts/SupabaseAuthContext';
 import { SidebarProvider } from './contexts/SidebarContext';
 import LoginPage from './pages/LoginPage';
@@ -28,8 +28,6 @@ import TestSubscriptionPage from './pages/TestSubscriptionPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import QuickQuizPage from './pages/QuickQuizPage';
 import ScrollToTop from './components/ScrollToTop';
-import { RandomPracticeTest } from './components/quiz/RandomPracticeTest';
-import { ExamInterface } from './components/quiz/ExamInterface';
 import { SecureExamInterface } from './components/quiz/SecureExamInterface';
 
 // A placeholder for pages that are not yet implemented
@@ -39,6 +37,18 @@ const PlaceholderPage: React.FC<{ title: string }> = ({ title }) => (
     <p>This page is under construction.</p>
   </div>
 );
+
+const NotFound = () => {
+  const location = useLocation();
+  // Check if path has double slashes and redirect if so
+  if (location.pathname.match(/\/{2,}/)) {
+    const cleanPath = location.pathname.replace(/\/+/g, '/');
+    return <Navigate to={`${cleanPath}${location.search}${location.hash}`} replace />;
+  }
+  
+  // Otherwise redirect to home
+  return <Navigate to="/" replace />;
+};
 
 function App() {
   return (
@@ -62,7 +72,6 @@ function App() {
                 <Route index element={<DashboardPage />} />
                 <Route path="quiz" element={<QuizPage />} />
                 <Route path="quiz/start" element={<QuickQuizPage />} />
-                <Route path="random-practice" element={<RandomPracticeTest onExit={() => window.history.back()} />} />
                 
                 {/* Subject Pages */}
                 <Route path="subject/general-knowledge" element={<GeneralKnowledgePage />} />
@@ -71,7 +80,7 @@ function App() {
                 
                 {/* Exam Pages */}
                 <Route path="exams" element={<ExamPage />} />
-                <Route path="exam/:examId" element={<ExamInterface onExit={() => window.history.back()} />} />
+                <Route path="exam/:examId" element={<SecureExamInterface onExit={() => window.history.back()} />} />
                 <Route path="secure-exam/:examId" element={<SecureExamInterface onExit={() => window.history.back()} />} />
                 <Route path="exam-review/:examId" element={<ExamReviewPage />} />
 
@@ -88,6 +97,9 @@ function App() {
                 <Route path="billing" element={<PlaceholderPage title="Abonnement" />} />
                 <Route path="analytics" element={<PlaceholderPage title="Analytics" />} />
               </Route>
+
+              {/* Catch all - handles 404s and double slashes */}
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </SidebarProvider>
         </Router>

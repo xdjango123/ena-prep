@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import MathText from '../common/MathText';
 
 interface Question {
-  id: number;
+  id: string;  // V2: UUID string for exam_answers tracking
   type: 'multiple-choice' | 'true-false' | 'fill-blank' | 'matching';
   question: string;
   options?: string[];
@@ -25,7 +25,7 @@ interface QuizSeriesProps {
   questions: Question[];
   duration: number; // Duration in seconds
   onExit: () => void;
-  onFinish: (answers: Map<number, string | number>, timeSpent: number) => void;
+  onFinish: (answers: Map<string, string | number>, timeSpent: number) => void;
 }
 
 const getQuizState = (subject: string) => {
@@ -65,8 +65,8 @@ export const QuizSeries: React.FC<QuizSeriesProps> = ({
   const [selectedAnswer, setSelectedAnswer] = useState<string | number | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [correctAnswers, setCorrectAnswers] = useState(0);
-  const [answeredQuestions, setAnsweredQuestions] = useState<Set<number>>(new Set());
-  const [userAnswers, setUserAnswers] = useState<Map<number, string | number>>(new Map());
+  const [answeredQuestions, setAnsweredQuestions] = useState<Set<string>>(new Set());
+  const [userAnswers, setUserAnswers] = useState<Map<string, string | number>>(new Map());
   const [timeRemaining, setTimeRemaining] = useState(duration);
   const [isCompleted, setIsCompleted] = useState(false);
 

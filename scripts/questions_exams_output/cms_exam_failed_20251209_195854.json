@@ -1,0 +1,187 @@
+{
+  "metadata": {
+    "exam_type": "CMS",
+    "total_questions": 8,
+    "generated_at": "2025-12-09T19:58:54.544026",
+    "status": "failed",
+    "reason": "LLM failed to process these questions"
+  },
+  "questions": [
+    {
+      "id": "",
+      "text": "🔺 + 🔺 + ◼️ = 40 ; si ◼️ = 2×🔺 − 4, trouver 🔺.",
+      "options": [
+        "12",
+        "8",
+        "11"
+      ],
+      "correct_index": 0,
+      "correct_text": "",
+      "explanation": "",
+      "subject": "LOG",
+      "difficulty": "MEDIUM",
+      "test_type": "exam",
+      "exam_type": "CMS",
+      "test_number": 1,
+      "question_number": 53,
+      "llm_confidence": null,
+      "validation_status": "failed",
+      "validation_notes": null,
+      "openai_disagreement": null
+    },
+    {
+      "id": "",
+      "text": "🔺 × 2 → ◼️ ; ◼️ ÷ 2 → 🔷 ; 🔺 → ?",
+      "options": [
+        "🔷",
+        "🔷 ×2",
+        "🔷 ÷2"
+      ],
+      "correct_index": 0,
+      "correct_text": "",
+      "explanation": "",
+      "subject": "LOG",
+      "difficulty": "MEDIUM",
+      "test_type": "exam",
+      "exam_type": "CMS",
+      "test_number": 3,
+      "question_number": 50,
+      "llm_confidence": null,
+      "validation_status": "failed",
+      "validation_notes": null,
+      "openai_disagreement": null
+    },
+    {
+      "id": "",
+      "text": "Quelle est la valeur de 🔺 et ◼️ ?",
+      "options": [
+        "🔺 = 6 ; ◼️ = 5",
+        "🔺 = 7 ; ◼️ = 4",
+        "🔺 = 5 ; ◼️ = 6"
+      ],
+      "correct_index": 0,
+      "correct_text": "",
+      "explanation": "",
+      "subject": "LOG",
+      "difficulty": "MEDIUM",
+      "test_type": "exam",
+      "exam_type": "CMS",
+      "test_number": 3,
+      "question_number": 55,
+      "llm_confidence": null,
+      "validation_status": "failed",
+      "validation_notes": null,
+      "openai_disagreement": null
+    },
+    {
+      "id": "",
+      "text": "Nombre choisi : (x + 1) × 24 ÷ 8 = 24 ; x = ?",
+      "options": [
+        "7",
+        "8",
+        "6"
+      ],
+      "correct_index": 0,
+      "correct_text": "",
+      "explanation": "",
+      "subject": "LOG",
+      "difficulty": "MEDIUM",
+      "test_type": "exam",
+      "exam_type": "CMS",
+      "test_number": 5,
+      "question_number": 59,
+      "llm_confidence": null,
+      "validation_status": "failed",
+      "validation_notes": null,
+      "openai_disagreement": null
+    },
+    {
+      "id": "",
+      "text": "Une montre avance de 5 min par heure. Combien de temps faut-il pour qu’elle affiche 2h de plus que l’heure réelle ?",
+      "options": [
+        "24 h",
+        "20 h",
+        "25 h"
+      ],
+      "correct_index": 0,
+      "correct_text": "",
+      "explanation": "",
+      "subject": "LOG",
+      "difficulty": "MEDIUM",
+      "test_type": "exam",
+      "exam_type": "CMS",
+      "test_number": 6,
+      "question_number": 46,
+      "llm_confidence": null,
+      "validation_status": "failed",
+      "validation_notes": null,
+      "openai_disagreement": null
+    },
+    {
+      "id": "",
+      "text": "Marc est moins riche que Pierre Qui est le plus jeune ?",
+      "options": [
+        "Pierre",
+        "Jacques",
+        "Marc"
+      ],
+      "correct_index": 0,
+      "correct_text": "",
+      "explanation": "",
+      "subject": "LOG",
+      "difficulty": "MEDIUM",
+      "test_type": "exam",
+      "exam_type": "CMS",
+      "test_number": 11,
+      "question_number": 46,
+      "llm_confidence": null,
+      "validation_status": "failed",
+      "validation_notes": null,
+      "openai_disagreement": null
+    },
+    {
+      "id": "",
+      "text": "C est moins riche que A Qui est le plus jeune ?",
+      "options": [
+        "A",
+        "B",
+        "C"
+      ],
+      "correct_index": 0,
+      "correct_text": "",
+      "explanation": "",
+      "subject": "LOG",
+      "difficulty": "MEDIUM",
+      "test_type": "exam",
+      "exam_type": "CMS",
+      "test_number": 12,
+      "question_number": 46,
+      "llm_confidence": null,
+      "validation_status": "failed",
+      "validation_notes": null,
+      "openai_disagreement": null
+    },
+    {
+      "id": "",
+      "text": "Un portefeuille contient uniquement des billets de 5 €, 10 € et 20 €. Le total fait 200 € avec 20 billets. Combien y a-t-il de billets de 20 € ?",
+      "options": [
+        "4",
+        "6",
+        "8"
+      ],
+      "correct_index": 0,
+      "correct_text": "",
+      "explanation": "",
+      "subject": "LOG",
+      "difficulty": "MEDIUM",
+      "test_type": "exam",
+      "exam_type": "CMS",
+      "test_number": 14,
+      "question_number": 51,
+      "llm_confidence": null,
+      "validation_status": "failed",
+      "validation_notes": null,
+      "openai_disagreement": null
+    }
+  ]
+}

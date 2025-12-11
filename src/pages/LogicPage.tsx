@@ -3,7 +3,6 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { BrainCircuit, Shield, Zap, BookOpen, Clock, BarChart, ChevronsRight, ArrowLeft } from 'lucide-react';
 import { QuizSeries } from '../components/quiz/QuizSeries';
 import { QuizReview } from '../components/quiz/QuizReview';
-import { QuizCards } from '../components/quiz/QuizCards';
 import { QuizResult } from '../components/quiz/QuizResult';
 import { getQuestionsBySubject, Question } from '../data/quizQuestions';
 import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
@@ -52,7 +51,7 @@ export default function LogicPage() {
 	const [searchParams, setSearchParams] = useSearchParams();
 	const [view, setView] = useState<'main' | 'summary' | 'quiz' | 'review' | 'learn' | 'results'>('main');
 	const [selectedTest, setSelectedTest] = useState<TestDetails | null>(null);
-	const [lastAnswers, setLastAnswers] = useState<Map<number, string | number>>(new Map());
+	const [lastAnswers, setLastAnswers] = useState<Map<string, string | number>>(new Map());
 	const [activeTopic, setActiveTopic] = useState('All');
 	const [testResults, setTestResults] = useState<Record<string, { score: number; timeSpent: number }>>({});
 	const [lastResult, setLastResult] = useState<{ score: number, correctAnswers: number, totalQuestions: number, timeSpent: number } | null>(null);
@@ -395,9 +394,7 @@ export default function LogicPage() {
         ? practiceTests 
         : practiceTests.filter(test => test.topic === activeTopic);
 
-    if (view === 'learn') {
-        return <QuizCards subject="Logique" subjectColor="yellow" onExit={() => { setView('main'); }} />
-    }
+    // 'learn' view removed - QuizCards no longer exists
 
     if (view === 'quiz' && selectedTest) {
         if (isLoadingQuestions) {
