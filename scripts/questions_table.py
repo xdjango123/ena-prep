@@ -329,7 +329,7 @@ OPTION_LENGTH_RATIO_LOW = 0.5   # correct answer <0.5x shorter than avg = flag
 # Duplicate detection thresholds (slightly relaxed to be less strict)
 TEXT_OPTIONS_SIMILARITY_THRESHOLD = 80  # Text + Options fuzzy match (reject >= 80%)
 CORRECT_ANSWER_SIMILARITY_THRESHOLD = 90  # Same correct answer text (reject >= 90%)
-LLM_DUPLICATE_THRESHOLD = 0.7  # LLM semantic duplicate score (flag >= 0.7)
+LLM_DUPLICATE_THRESHOLD = 0.9  # LLM semantic duplicate score (flag >= 0.9)
 
 # LLM Model settings
 GEMINI_MODEL = 'gemini-2.0-flash'  # Fast model for validations
@@ -469,6 +469,19 @@ class QuestionValidator:
         self.ingested_questions: List[Dict[str, Any]] = []  # All successfully ingested questions
         self.ingested_by_file: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
         self.correct_answers_by_file: Dict[str, List[str]] = defaultdict(list)
+        
+        # Persistent validation cache to avoid re-validating the same questions across runs
+        # Keyed by "source_table:source_id" -> {status, issues, cleaned_text}
+        self.validation_cache_path: Path = OUTPUT_DIR / "validation_cache.json"
+        self.validation_cache: Dict[str, Dict[str, Any]] = {}
+        try:
+            if self.validation_cache_path.exists():
+                with open(self.validation_cache_path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    if isinstance(data, dict):
+                        self.validation_cache = data
+        except Exception as e:
+            logger.warning(f"Could not load validation cache: {e}")
         
         # LLM models
         self.gemini_flash = genai.GenerativeModel(GEMINI_MODEL)
@@ -775,13 +788,16 @@ Si la question est claire et bien formulée, répondez avec is_clear: true et is
     # =========================================================================
     async def check_content_restrictions(self, question: Dict[str, Any]) -> Tuple[bool, List[str]]:
         """
-        LLM check: Reject questions about:
-        - President of Côte d'Ivoire or any political figures
+        LLM check: Reject questions about a restricted set of topics:
         - Books or authors
-        - Soccer teams, CAN, football federation
-        - Questions too simple for an educated Ivorian student (5x3, premier président, 7+1, etc.)
+        - Soccer teams, CAN, football (club, sélection, fédération, entraîneur)
+        - Questions too simple for an educated Ivorian student (2+2, premier président, 7+1, etc.)
+        - Specific sensitive topics around Côte d'Ivoire:
+          * Président de la Côte d'Ivoire
+          * Équipe nationale de Côte d'Ivoire (Les Éléphants)
+          * Sélectionneur / entraîneur actuel de l'équipe de Côte d'Ivoire
         
-        Also: If subject = CG or LOG, only accept French content.
+        Also: If subject = CG or LOG, only accept French content (no English words).
         """
         issues = []
         text = question.get('text', '')
@@ -795,15 +811,18 @@ OPTIONS: {json.dumps(options, ensure_ascii=False)}
 SUJET DÉCLARÉ: {subject}
 
 CONTENU INTERDIT - REJETER SI:
-1. Question sur le président de la Côte d'Ivoire ou tout dirigeant politique africain
-2. Question sur un livre ou un auteur spécifique
-3. Question sur une équipe de football, la CAN, la fédération de football, un entraîneur
-4. Question TRIVIALE trop simple pour un étudiant ivoirien éduqué:
-   - Calculs basiques (5x3, 2+2)
+1. Question sur un livre, un roman, un auteur ou un écrivain spécifique
+2. Question sur une équipe de football (club ou sélection), la CAN, la fédération de football,
+   un joueur célèbre ou un entraîneur
+3. Question TRIVIALE trop simple pour un étudiant ivoirien éduqué:
+   - Calculs basiques (5x3, 2+2, 7+1, etc.)
    - "Qui était le premier président de la Côte d'Ivoire?"
    - "Qui a remporté la CAN?"
    - "Capitale de la France?"
-5. Question de culture pop ou célébrités
+4. Question SPECIFIQUE sur:
+   - le président de la Côte d'Ivoire (actuel ou passé)
+   - l'équipe nationale de Côte d'Ivoire (Les Éléphants)
+   - l'entraîneur / sélectionneur actuel de l'équipe de Côte d'Ivoire
 
 RÈGLE DE LANGUE:
 - Si SUJET = CG ou LOG: La question ET les options doivent être en FRANÇAIS UNIQUEMENT
@@ -812,7 +831,7 @@ RÈGLE DE LANGUE:
 Répondez en JSON:
 {{
     "is_allowed": true/false,
-    "violation_type": "none"|"political"|"book_author"|"soccer"|"trivial"|"language"|"celebrity",
+    "violation_type": "none"|"book_author"|"soccer"|"trivial"|"language"|"ci_politics",
     "reason": "explication courte",
     "detected_content": "contenu problématique trouvé"
 }}"""
@@ -1265,6 +1284,7 @@ Répondez en JSON:
         correct_text = question.get('correct_text', '')
         
         if not explanation or len(explanation.strip()) < 10:
+            # In softer mode, we still record the issue but don't necessarily block
             issues.append("EXPLANATION: Missing or too short explanation")
             self.stats['10_explanation']['failed'] += 1
             return False, issues
@@ -1346,8 +1366,35 @@ Répondez en JSON:
         9. Category validation (LLM) - BLOCKING
         10. Explanation quality (LLM) - BLOCKING
         """
-        all_issues = []
-        cleaned_text = None
+        all_issues: List[str] = []
+        cleaned_text: Optional[str] = None
+        
+        # =====================================================================
+        # CACHE CHECK: reuse previous successful validation when possible
+        # =====================================================================
+        cache_key = None
+        source_table = question.get('source_table')
+        source_id = question.get('source_id')
+        if source_table and source_id:
+            cache_key = f"{source_table}:{source_id}"
+            cached = self.validation_cache.get(cache_key)
+            if cached:
+                cached_issues = cached.get('issues', [])
+                cached_cleaned = cached.get('cleaned_text')
+                status = cached.get('status')
+                # Reuse previous decision (accepted or rejected) without re-running checks
+                if status == 'accepted':
+                    return ValidationResult(
+                        passed=True,
+                        issues=list(cached_issues),
+                        cleaned_text=cached_cleaned,
+                    )
+                if status == 'rejected':
+                    return ValidationResult(
+                        passed=False,
+                        issues=list(cached_issues),
+                        cleaned_text=cached_cleaned,
+                    )
         
         # =====================================================================
         # PHASE 1: Non-LLM structural checks (fast, fail early)
@@ -1357,6 +1404,16 @@ Répondez en JSON:
         passed, issues = self.check_structural_integrity(question)
         all_issues.extend(issues)
         if not passed:
+            # Cache rejection for this source if we have a key
+            if cache_key:
+                try:
+                    self.validation_cache[cache_key] = {
+                        "status": "rejected",
+                        "issues": all_issues,
+                        "cleaned_text": question.get("text", ""),
+                    }
+                except Exception as e:
+                    logger.warning(f"Could not update validation cache for {cache_key}: {e}")
             return ValidationResult(passed=False, issues=all_issues)
         
         # Checkpoint 2: Prefix detection (non-blocking)
@@ -1385,13 +1442,20 @@ Répondez en JSON:
         passed, issues = self.check_fuzzy_duplicate(question, output_filename)
         all_issues.extend(issues)
         if not passed:
+            if cache_key:
+                try:
+                    self.validation_cache[cache_key] = {
+                        "status": "rejected",
+                        "issues": all_issues,
+                        "cleaned_text": cleaned_text if cleaned_text is not None else question.get("text", ""),
+                    }
+                except Exception as e:
+                    logger.warning(f"Could not update validation cache for {cache_key}: {e}")
             return ValidationResult(passed=False, issues=all_issues, cleaned_text=cleaned_text)
         
-        # Checkpoint 8: Same correct answer check
-        passed, issues = self.check_same_correct_answer(question, output_filename)
+        # Checkpoint 8: Same correct answer check (now warning-only, non-blocking)
+        _, issues = self.check_same_correct_answer(question, output_filename)
         all_issues.extend(issues)
-        if not passed:
-            return ValidationResult(passed=False, issues=all_issues, cleaned_text=cleaned_text)
         
         # =====================================================================
         # PHASE 2: LLM checks (run in parallel for efficiency)
@@ -1414,6 +1478,14 @@ Répondez en JSON:
                 'clarity', 'content_restrictions', 'answer_validation',
                 'semantic_duplicate', 'category', 'explanation'
             ]
+            # Checks that remain BLOCKING (cause rejection) when they fail
+            # clarity and explanation are downgraded to warnings only (non-blocking)
+            blocking_checks = {
+                'content_restrictions',
+                'answer_validation',
+                'semantic_duplicate',
+                'category',
+            }
             
             for i, result in enumerate(results):
                 if isinstance(result, Exception):
@@ -1423,9 +1495,17 @@ Répondez en JSON:
                 passed, issues = result
                 all_issues.extend(issues)
                 
-                # These checks are blocking
-                if not passed and check_names[i] in ['clarity', 'content_restrictions', 'answer_validation', 
-                                                       'semantic_duplicate', 'category', 'explanation']:
+                # These checks are blocking only if in blocking_checks
+                if not passed and check_names[i] in blocking_checks:
+                    if cache_key:
+                        try:
+                            self.validation_cache[cache_key] = {
+                                "status": "rejected",
+                                "issues": all_issues,
+                                "cleaned_text": cleaned_text if cleaned_text is not None else question.get("text", ""),
+                            }
+                        except Exception as e:
+                            logger.warning(f"Could not update validation cache for {cache_key}: {e}")
                     return ValidationResult(passed=False, issues=all_issues, cleaned_text=cleaned_text)
                     
         except Exception as e:
@@ -1433,8 +1513,17 @@ Répondez en JSON:
             all_issues.append(f"VALIDATION_ERROR: {str(e)}")
         
         # =====================================================================
-        # All checks passed
+        # All checks passed -> update cache and return
         # =====================================================================
+        if cache_key:
+            try:
+                self.validation_cache[cache_key] = {
+                    "status": "accepted",
+                    "issues": all_issues,
+                    "cleaned_text": cleaned_text if cleaned_text is not None else question.get("text", ""),
+                }
+            except Exception as e:
+                logger.warning(f"Could not update validation cache for {cache_key}: {e}")
         
         return ValidationResult(
             passed=True,
@@ -1896,38 +1985,37 @@ class QuestionIngestionEngine:
             logger.info("-> No gaps to fill from legacy tables.")
             return []
         
-        logger.info(f"\n#pulling questions from questions table...#")
-        legacy_test_types = CATEGORY_TO_LEGACY_TEST_TYPES.get(internal_test_type, [])
-        legacy_rows = DataFetcher.fetch_from_legacy_questions(legacy_test_types, exam_type)
-        logger.info(f"-> Fetched {len(legacy_rows)} questions from legacy table")
-        
         logger.info(f"\n#pulling questions from questions_v2 table...#")
         v2_test_types = CATEGORY_TO_V2_TEST_TYPES.get(internal_test_type, [])
         v2_rows = DataFetcher.fetch_from_questions_v2(v2_test_types, exam_type)
         logger.info(f"-> Fetched {len(v2_rows)} questions from questions_v2 table")
         
+        logger.info(f"\n#pulling questions from questions table...#")
+        legacy_test_types = CATEGORY_TO_LEGACY_TEST_TYPES.get(internal_test_type, [])
+        legacy_rows = DataFetcher.fetch_from_legacy_questions(legacy_test_types, exam_type)
+        logger.info(f"-> Fetched {len(legacy_rows)} questions from legacy table")
+        
         logger.info(f"\n#converting row format to new format for questions_final#")
         converted_questions: List[Dict[str, Any]] = []
         
-        # Convert legacy rows
-        for row in legacy_rows:
-            converted = RowConverter.from_legacy_questions(row, internal_test_type)
-            if converted:
-                converted_questions.append(converted)
-        
-        logger.info(
-            f"-> Converted {len([q for q in converted_questions if q['source_table'] == 'questions'])} legacy questions"
-        )
-        
-        # Convert V2 rows
+        # Convert V2 rows FIRST (preferred source)
         v2_converted_count = 0
         for row in v2_rows:
             converted = RowConverter.from_questions_v2(row, internal_test_type)
             if converted:
                 converted_questions.append(converted)
                 v2_converted_count += 1
-        
         logger.info(f"-> Converted {v2_converted_count} V2 questions")
+        
+        # Convert legacy rows AFTER V2
+        legacy_converted_count = 0
+        for row in legacy_rows:
+            converted = RowConverter.from_legacy_questions(row, internal_test_type)
+            if converted:
+                converted_questions.append(converted)
+                legacy_converted_count += 1
+        
+        logger.info(f"-> Converted {legacy_converted_count} legacy questions")
         
         if not converted_questions:
             logger.info("-> No questions available in legacy tables to fill gaps.")
@@ -2500,6 +2588,14 @@ class QuestionIngestionEngine:
         logger.info(f"\n{'=' * 60}")
         logger.info("###please verify the json produced###")
         logger.info(f"{'=' * 60}")
+        
+        # Persist validation cache to disk so future runs can reuse results
+        try:
+            with open(self.validator.validation_cache_path, "w", encoding="utf-8") as f:
+                json.dump(self.validator.validation_cache, f, indent=2, ensure_ascii=False)
+            logger.info(f"\n-> Validation cache saved to {self.validator.validation_cache_path}")
+        except Exception as e:
+            logger.warning(f"Could not save validation cache: {e}")
     
     def run(self, test_type: str, exam_type: str, dry_run: bool = False):
         """
