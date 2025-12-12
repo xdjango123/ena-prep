@@ -62,32 +62,34 @@ All questions must pass ALL 10 checkpoints before being accepted:
    - NO trivial questions (5x3, premier président, etc.)
    - CG/LOG must be French only
 
-5. CORRECT ANSWER VALIDATION (LLM - Gemini Pro)
+5. CORRECT ANSWER VALIDATION (DUAL MODEL - OpenAI + Gemini)
    - Verify marked correct answer is actually correct
-   - Only flag if LLM confidence >= 70%
+   - Uses BOTH OpenAI and Gemini as judges
+   - Only flag if BOTH models agree answer is wrong with confidence >= 70%
 
 6. TEXT+OPTIONS DUPLICATE (NO LLM)
    - Fuzzy similarity on text + options
-   - Threshold: >= 75% similarity = REJECTED
+   - Threshold: >= 80% similarity = REJECTED
 
-7. SEMANTIC DUPLICATE (LLM - Gemini)
+7. SEMANTIC DUPLICATE (LLM - OpenAI)
    - Ask LLM to compare against recent questions
-   - Score 0-1, threshold >= 0.6 = FLAGGED
+   - Score 0-1, threshold >= 0.8 = FLAGGED
 
 8. SAME CORRECT ANSWER (NO LLM)
    - Similarity score on correct answer text
-   - Threshold: >= 85% similarity = REJECTED
+   - Threshold: >= 90% similarity = REJECTED
 
-9. CATEGORY VALIDATION (LLM - Gemini + OpenAI)
+9. CATEGORY VALIDATION (DUAL MODEL - OpenAI + Gemini)
    - CG: French only, culture générale, history, geography
    - LOG: French only, logic/math/organization, NO culture générale
    - ANG: English grammar/vocabulary only
-   - Flag if EITHER model detects mismatch
+   - Flag if EITHER model detects mismatch (strict)
 
-10. EXPLANATION QUALITY (LLM - Gemini)
-    - Must be in French
+10. EXPLANATION QUALITY (LLM - OpenAI)
+    - MUST ALWAYS be in French - NO EXCEPTIONS (CG, LOG, and ANG alike)
     - Must explain WHY the answer is correct
     - Must be relevant and useful
+    - French explanations strictly required for Ivorian student audience
 
 ================================================================================
 TEST TYPE MAPPING
@@ -329,12 +331,16 @@ OPTION_LENGTH_RATIO_LOW = 0.5   # correct answer <0.5x shorter than avg = flag
 # Duplicate detection thresholds (slightly relaxed to be less strict)
 TEXT_OPTIONS_SIMILARITY_THRESHOLD = 80  # Text + Options fuzzy match (reject >= 80%)
 CORRECT_ANSWER_SIMILARITY_THRESHOLD = 90  # Same correct answer text (reject >= 90%)
-LLM_DUPLICATE_THRESHOLD = 0.9  # LLM semantic duplicate score (flag >= 0.9)
+LLM_DUPLICATE_THRESHOLD = 0.8  # LLM semantic duplicate score (flag >= 0.8)
 
 # LLM Model settings
-GEMINI_MODEL = 'gemini-2.0-flash'  # Fast model for validations
-GEMINI_MODEL_ACCURATE = 'gemini-2.5-pro'  # High accuracy model for complex checks
+GEMINI_MODEL = 'gemini-1.5'  # Fast model for validations
+GEMINI_MODEL_ACCURATE = 'gemini-2.5-flash'  # High accuracy model for complex checks
 GPT_MODEL = 'gpt-4o'  # For dual model verification
+
+# Validation cache revision: bump this whenever validation logic changes in a way
+# that should invalidate previous cached decisions (e.g., updated category rules).
+VALIDATION_CACHE_REVISION = "v2_category_ang_allows_comprehension"
 
 # Retry configuration
 MAX_RETRIES = 3
@@ -461,7 +467,12 @@ class QuestionValidator:
     10. Explanation quality check (LLM - Gemini)
     """
     
-    def __init__(self):
+    def __init__(self, llm_mode: str = "full"):
+        # LLM mode controls how many expensive checks we run.
+        # "full" (default): current behavior, all LLM checkpoints enabled
+        # "off": skip all LLM checkpoints, only run fast structural/duplicate checks
+        self.llm_mode = (llm_mode or "full").lower()
+        
         self.seen_hashes: Set[str] = set()
         self.stats = defaultdict(lambda: {'passed': 0, 'failed': 0, 'cleaned': 0, 'flagged': 0})
         
@@ -483,12 +494,40 @@ class QuestionValidator:
         except Exception as e:
             logger.warning(f"Could not load validation cache: {e}")
         
-        # LLM models
-        self.gemini_flash = genai.GenerativeModel(GEMINI_MODEL)
-        self.gemini_pro = genai.GenerativeModel(GEMINI_MODEL_ACCURATE)
+        # LLM models (only needed when LLM checks are enabled)
+        if self.llm_mode != "off":
+            self.gemini_flash = genai.GenerativeModel(GEMINI_MODEL)
+            self.gemini_pro = genai.GenerativeModel(GEMINI_MODEL_ACCURATE)
+        else:
+            self.gemini_flash = None
+            self.gemini_pro = None
         
         # Semaphore to limit concurrent LLM calls
         self.llm_semaphore = asyncio.Semaphore(MAX_CONCURRENT_LLM_CALLS)
+        
+        # Counter for incremental cache saves
+        self._validations_since_last_save = 0
+        self._cache_save_interval = 10  # Save cache every N validations
+    
+    def save_validation_cache(self, force: bool = False):
+        """
+        Save the validation cache to disk.
+        
+        Args:
+            force: If True, save immediately. If False, only save if we've hit the interval.
+        """
+        self._validations_since_last_save += 1
+        
+        if not force and self._validations_since_last_save < self._cache_save_interval:
+            return
+        
+        try:
+            with open(self.validation_cache_path, "w", encoding="utf-8") as f:
+                json.dump(self.validation_cache, f, indent=2, ensure_ascii=False)
+            self._validations_since_last_save = 0
+            logger.debug(f"Validation cache saved ({len(self.validation_cache)} entries)")
+        except Exception as e:
+            logger.warning(f"Could not save validation cache: {e}")
     
     # =========================================================================
     # CHECKPOINT 1: Structural Integrity (NO LLM)
@@ -620,97 +659,7 @@ class QuestionValidator:
             
         return passed, issues, cleaned_text if cleaned_text != original_text else None
     
-    # =========================================================================
-    # LANGUAGE NORMALIZATION FOR ANG QUESTIONS (LLM - Gemini)
-    # =========================================================================
-    async def translate_ang_question_to_french(self, question: Dict[str, Any]) -> Tuple[Dict[str, Any], List[str]]:
-        """
-        For subject = 'ANG', if the question text and/or explanation are in English,
-        auto-translate them to FRENCH while keeping options as-is.
-        
-        This is intended for legacy data where ANG questions were authored fully
-        in English but should now appear in French in questions_final.
-        
-        The LLM is responsible for:
-        - Detecting whether text/explanation are primarily English vs French
-        - Returning French versions only when needed
-        
-        Returns:
-            (possibly updated question dict, translation_notes)
-        """
-        notes: List[str] = []
-        
-        subject = question.get('subject', 'CG')
-        if subject != 'ANG':
-            return question, notes
-        
-        text = question.get('text', '') or ''
-        explanation = question.get('explanation', '') or ''
-        
-        # If both fields are empty or very short, nothing to translate
-        if not text.strip() and not explanation.strip():
-            return question, notes
-        
-        prompt = f"""Tu es un traducteur français spécialisé dans des questions d'examen.
-
-Pour les questions de type ANG, le CONTENU porte sur l'anglais (grammaire, vocabulaire),
-mais le TEXTE de la question et l'EXPLICATION doivent être en FRANÇAIS dans la base finale.
-
-Analyse le texte de la question et l'explication ci-dessous et:
-- Si le texte est principalement en anglais, traduis-le fidèlement en FRANÇAIS.
-- Si l'explication est principalement en anglais, traduis-la fidèlement en FRANÇAIS.
-- Si l'un des deux est déjà en français, garde-le tel quel.
-
-IMPORTANT:
-- Préserve le sens exact de la question et la correspondance avec les options.
-- La traduction peut utiliser des guillemets autour des mots anglais si nécessaire (ex: "book").
-
-QUESTION_ORIGINALE:
-{text}
-
-EXPLICATION_ORIGINALE:
-{explanation}
-
-Réponds STRICTEMENT en JSON:
-{{
-  "text_fr": "texte de la question en français (ou texte original si déjà en français)",
-  "explanation_fr": "explication en français (ou explication originale si déjà en français)",
-  "did_translate_text": true/false,
-  "did_translate_explanation": true/false
-}}"""
-        try:
-            async def _translate():
-                return await self._call_llm_with_semaphore(
-                    self.gemini_flash.generate_content_async(
-                        prompt,
-                        generation_config={'temperature': 0.1}
-                    )
-                )
-            
-            response = await retry_async(_translate)
-            match = re.search(r'\{[^{}]*\}', response.text, re.DOTALL)
-            if match:
-                result = json.loads(match.group())
-                text_fr = result.get('text_fr', text)
-                expl_fr = result.get('explanation_fr', explanation)
-                did_text = bool(result.get('did_translate_text', False))
-                did_expl = bool(result.get('did_translate_explanation', False))
-                
-                if did_text and text_fr:
-                    question = dict(question)
-                    question['text'] = text_fr
-                    notes.append("LANGUAGE: Question text auto-translated EN->FR for ANG")
-                if did_expl and expl_fr:
-                    if question is not None:
-                        question = dict(question)
-                    question['explanation'] = expl_fr
-                    notes.append("LANGUAGE: Explanation auto-translated EN->FR for ANG")
-        except json.JSONDecodeError as e:
-            logger.warning(f"JSON parse error in ANG translation: {e}")
-        except Exception as e:
-            logger.warning(f"ANG translation error: {type(e).__name__}: {e}")
-        
-        return question, notes
+    # (ANG translation helper removed – we no longer auto-translate English ANG questions)
     
     # =========================================================================
     # SEMAPHORE-WRAPPED LLM CALL HELPER
@@ -722,6 +671,88 @@ Réponds STRICTEMENT en JSON:
         """
         async with self.llm_semaphore:
             return await coro
+    
+    async def _call_openai_json(self, prompt: str, temperature: float = 0.1) -> Dict[str, Any]:
+        """
+        Helper to call OpenAI chat.completions with JSON response_format.
+        Used as the primary LLM backend.
+        """
+        if not (HAS_OPENAI and openai_client):
+            raise RuntimeError("OpenAI client is not configured")
+        
+        async def _req():
+            return await self._call_llm_with_semaphore(
+                openai_client.chat.completions.create(
+                    model=GPT_MODEL,
+                    messages=[{"role": "user", "content": prompt}],
+                    response_format={"type": "json_object"},
+                    temperature=temperature,
+                )
+            )
+        
+        response = await retry_async(_req)
+        content = response.choices[0].message.content
+        return json.loads(content)
+    
+    async def _call_gemini_json(self, prompt: str, use_pro: bool = False) -> Dict[str, Any]:
+        """
+        Helper to call Gemini with JSON response.
+        Used as a secondary judge for dual-model verification.
+        
+        Args:
+            prompt: The prompt to send
+            use_pro: If True, use the more accurate Gemini Pro model
+        """
+        model = self.gemini_pro if use_pro else self.gemini_flash
+        
+        async def _req():
+            async with self.llm_semaphore:
+                # Gemini's generate_content is synchronous, run in executor
+                loop = asyncio.get_event_loop()
+                response = await loop.run_in_executor(
+                    None,
+                    lambda: model.generate_content(
+                        prompt,
+                        generation_config=genai.types.GenerationConfig(
+                            response_mime_type="application/json",
+                            temperature=0.1
+                        )
+                    )
+                )
+                return response
+        
+        response = await retry_async(_req)
+        content = response.text
+        return json.loads(content)
+    
+    async def _dual_model_judge(self, prompt: str, check_name: str) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+        """
+        Run the same prompt through both OpenAI and Gemini for dual-model verification.
+        Returns results from both models.
+        
+        Args:
+            prompt: The prompt to send to both models
+            check_name: Name of the check (for logging)
+            
+        Returns:
+            Tuple of (openai_result, gemini_result)
+        """
+        openai_result = None
+        gemini_result = None
+        
+        try:
+            openai_result = await self._call_openai_json(prompt)
+        except Exception as e:
+            logger.warning(f"OpenAI failed for {check_name}: {e}")
+            openai_result = {}
+        
+        try:
+            gemini_result = await self._call_gemini_json(prompt, use_pro=True)
+        except Exception as e:
+            logger.warning(f"Gemini failed for {check_name}: {e}")
+            gemini_result = {}
+        
+        return openai_result, gemini_result
     
     # =========================================================================
     # CHECKPOINT 3: Text Content Quality - Clarity (LLM - Gemini)
@@ -758,22 +789,11 @@ Répondez en JSON:
 Si la question est claire et bien formulée, répondez avec is_clear: true et issues: []."""
 
         try:
-            async def _check():
-                return await self._call_llm_with_semaphore(
-                    self.gemini_flash.generate_content_async(
-                        prompt,
-                        generation_config={'temperature': 0.1}
-                    )
-                )
-            
-            response = await retry_async(_check)
-            match = re.search(r'\{[^{}]*\}', response.text, re.DOTALL)
-            if match:
-                result = json.loads(match.group())
-                if not result.get('is_clear', True):
-                    issues.append(f"CLARITY: {result.get('reason', 'Question unclear')}")
-                    for issue in result.get('issues', []):
-                        issues.append(f"CLARITY: {issue}")
+            result = await self._call_openai_json(prompt, temperature=0.1)
+            if not result.get('is_clear', True):
+                issues.append(f"CLARITY: {result.get('reason', 'Question unclear')}")
+                for issue in result.get('issues', []):
+                    issues.append(f"CLARITY: {issue}")
         except json.JSONDecodeError as e:
             logger.warning(f"JSON parse error in clarity check: {e}")
         except Exception as e:
@@ -837,25 +857,14 @@ Répondez en JSON:
 }}"""
 
         try:
-            async def _check():
-                return await self._call_llm_with_semaphore(
-                    self.gemini_pro.generate_content_async(
-                        prompt,
-                        generation_config={'temperature': 0.1}
-                    )
-                )
-            
-            response = await retry_async(_check)
-            match = re.search(r'\{[^{}]*\}', response.text, re.DOTALL)
-            if match:
-                result = json.loads(match.group())
-                if not result.get('is_allowed', True):
-                    violation = result.get('violation_type', 'unknown')
-                    reason = result.get('reason', 'Content restricted')
-                    detected = result.get('detected_content', '')
-                    issues.append(f"CONTENT_RESTRICTION: [{violation}] {reason}")
-                    if detected:
-                        issues.append(f"CONTENT_RESTRICTION: Detected: {detected[:100]}")
+            result = await self._call_openai_json(prompt, temperature=0.1)
+            if not result.get('is_allowed', True):
+                violation = result.get('violation_type', 'unknown')
+                reason = result.get('reason', 'Content restricted')
+                detected = result.get('detected_content', '')
+                issues.append(f"CONTENT_RESTRICTION: [{violation}] {reason}")
+                if detected:
+                    issues.append(f"CONTENT_RESTRICTION: Detected: {detected[:100]}")
         except json.JSONDecodeError as e:
             logger.warning(f"JSON parse error in content restriction check: {e}")
         except Exception as e:
@@ -866,11 +875,12 @@ Répondez en JSON:
         return passed, issues
     
     # =========================================================================
-    # CHECKPOINT 5: Correct Answer Validation (LLM - Gemini)
+    # CHECKPOINT 5: Correct Answer Validation (DUAL MODEL - OpenAI + Gemini)
     # =========================================================================
     async def check_correct_answer(self, question: Dict[str, Any]) -> Tuple[bool, List[str]]:
         """
-        LLM check: Verify the marked correct answer is actually correct.
+        DUAL MODEL check: Verify the marked correct answer is actually correct.
+        Uses both OpenAI and Gemini as judges - flags only if BOTH agree the answer is wrong.
         """
         issues = []
         text = question.get('text', '')
@@ -903,31 +913,40 @@ Répondez en JSON:
 }}"""
 
         try:
-            async def _check():
-                return await self._call_llm_with_semaphore(
-                    self.gemini_pro.generate_content_async(
-                        prompt,
-                        generation_config={'temperature': 0.1}
-                    )
-                )
+            # Use dual-model verification for answer correctness
+            openai_result, gemini_result = await self._dual_model_judge(prompt, "answer_validation")
             
-            response = await retry_async(_check)
-            match = re.search(r'\{[^{}]*\}', response.text, re.DOTALL)
-            if match:
-                result = json.loads(match.group())
-                if not result.get('marked_answer_is_correct', True):
-                    actual = result.get('actual_correct_option', '?')
-                    confidence = result.get('confidence', 0)
-                    reason = result.get('reason', 'Answer verification failed')
-                    if confidence >= 0.7:  # Only flag if LLM is reasonably confident
-                        issues.append(f"WRONG_ANSWER: Marked option {correct_index + 1}, should be option {actual}")
-                        issues.append(f"WRONG_ANSWER: {reason}")
+            openai_wrong = not openai_result.get('marked_answer_is_correct', True)
+            openai_confidence = openai_result.get('confidence', 0)
+            
+            gemini_wrong = not gemini_result.get('marked_answer_is_correct', True)
+            gemini_confidence = gemini_result.get('confidence', 0)
+            
+            # Flag only if BOTH models agree the answer is wrong with high confidence
+            if openai_wrong and gemini_wrong and openai_confidence >= 0.7 and gemini_confidence >= 0.7:
+                openai_actual = openai_result.get('actual_correct_option', '?')
+                gemini_actual = gemini_result.get('actual_correct_option', '?')
+                openai_reason = openai_result.get('reason', 'Answer verification failed')
+                gemini_reason = gemini_result.get('reason', 'Answer verification failed')
+                
+                issues.append(f"WRONG_ANSWER: Marked option {correct_index + 1}, OpenAI suggests option {openai_actual}, Gemini suggests option {gemini_actual}")
+                issues.append(f"WRONG_ANSWER (OpenAI): {openai_reason}")
+                issues.append(f"WRONG_ANSWER (Gemini): {gemini_reason}")
+            elif openai_wrong and openai_confidence >= 0.7:
+                # Only OpenAI flagged - add as warning but don't fail
+                issues.append(f"ANSWER_WARNING: OpenAI suggests answer may be wrong (Gemini disagrees)")
+            elif gemini_wrong and gemini_confidence >= 0.7:
+                # Only Gemini flagged - add as warning but don't fail
+                issues.append(f"ANSWER_WARNING: Gemini suggests answer may be wrong (OpenAI disagrees)")
+                
         except json.JSONDecodeError as e:
             logger.warning(f"JSON parse error in answer validation: {e}")
         except Exception as e:
             logger.warning(f"Answer validation error: {type(e).__name__}: {e}")
         
-        passed = len(issues) == 0
+        # Only fail if both models agreed (issues contain "WRONG_ANSWER:" not just warnings)
+        has_definite_wrong = any("WRONG_ANSWER:" in issue and "WARNING" not in issue for issue in issues)
+        passed = not has_definite_wrong
         self.stats['5_answer_validation']['passed' if passed else 'failed'] += 1
         return passed, issues
     
@@ -1063,34 +1082,23 @@ Répondez en JSON:
 Score >= 0.6 = duplicate sémantique à rejeter."""
 
             try:
-                async def _check():
-                    return await self._call_llm_with_semaphore(
-                        self.gemini_flash.generate_content_async(
-                            prompt,
-                            generation_config={'temperature': 0.1}
-                        )
-                    )
+                result = await self._call_openai_json(prompt, temperature=0.1)
+                batch_similarity = result.get('highest_similarity', 0)
                 
-                response = await retry_async(_check)
-                match = re.search(r'\{[^{}]*\}', response.text, re.DOTALL)
-                if match:
-                    result = json.loads(match.group())
-                    batch_similarity = result.get('highest_similarity', 0)
+                if batch_similarity > highest_score:
+                    highest_score = batch_similarity
+                
+                if batch_similarity >= LLM_DUPLICATE_THRESHOLD or result.get('is_semantic_duplicate', False):
+                    duplicate_found = True
+                    duplicate_match = result.get('most_similar_to', 'unknown')
+                    duplicate_reason = result.get('reason', 'Semantic duplicate detected')
+                    similar_text = result.get('similar_question_text', '')
                     
-                    if batch_similarity > highest_score:
-                        highest_score = batch_similarity
-                    
-                    if batch_similarity >= LLM_DUPLICATE_THRESHOLD or result.get('is_semantic_duplicate', False):
-                        duplicate_found = True
-                        duplicate_match = result.get('most_similar_to', 'unknown')
-                        duplicate_reason = result.get('reason', 'Semantic duplicate detected')
-                        similar_text = result.get('similar_question_text', '')
-                        
-                        issues.append(f"SEMANTIC_DUPLICATE: Score {batch_similarity:.2f} with {duplicate_match} (batch {batch_idx + 1})")
-                        issues.append(f"SEMANTIC_DUPLICATE: {duplicate_reason}")
-                        if similar_text:
-                            issues.append(f"SEMANTIC_DUPLICATE: Similar: '{similar_text[:100]}...'")
-                        break
+                    issues.append(f"SEMANTIC_DUPLICATE: Score {batch_similarity:.2f} with {duplicate_match} (batch {batch_idx + 1})")
+                    issues.append(f"SEMANTIC_DUPLICATE: {duplicate_reason}")
+                    if similar_text:
+                        issues.append(f"SEMANTIC_DUPLICATE: Similar: '{similar_text[:100]}...'")
+                    break
                         
             except json.JSONDecodeError as e:
                 logger.warning(f"JSON parse error in semantic duplicate check (batch {batch_idx + 1}): {e}")
@@ -1157,17 +1165,18 @@ Score >= 0.6 = duplicate sémantique à rejeter."""
         return passed, issues
     
     # =========================================================================
-    # CHECKPOINT 9: Category/Subject Validation (LLM - Gemini + OpenAI)
+    # CHECKPOINT 9: Category/Subject Validation (DUAL MODEL - OpenAI + Gemini)
     # =========================================================================
     async def check_category_validation(self, question: Dict[str, Any]) -> Tuple[bool, List[str]]:
         """
         DUAL MODEL check: Validate question matches its declared subject.
+        Uses both OpenAI and Gemini - flags if EITHER model detects a mismatch.
         
         Rules:
         - CG/LOG: Must be French only (no English)
         - CG: Culture générale, history, geography, aptitude verbale. NOT logic/math/English
         - LOG: Aptitude Numérique et Organisation. Logic, math, organization. NOT CG
-        - ANG: English grammar, vocabulary only. NOT CG or logic
+        - ANG: English questions (grammar, vocabulary, OR reading comprehension of texts in English). NOT CG or logic
         """
         issues = []
         
@@ -1188,8 +1197,8 @@ DÉFINITIONS DES CATÉGORIES:
 - LOG (Logique): Aptitude Numérique et Organisation. Questions de logique, mathématiques, séquences, raisonnement.
   DOIT ÊTRE EN FRANÇAIS. PAS de culture générale.
   
-- ANG (Anglais): Grammaire anglaise, vocabulaire anglais UNIQUEMENT.
-  PAS de culture générale ni de logique.
+- ANG (Anglais): Questions d'anglais (grammaire, vocabulaire, OU compréhension de lecture de textes en anglais).
+  Le texte et les options doivent être en anglais. PAS de culture générale ni de logique.
 
 VÉRIFICATIONS:
 1. La langue correspond-elle à la catégorie? (CG/LOG = français, ANG = anglais)
@@ -1205,101 +1214,84 @@ Répondez en JSON:
     "reason": "explication"
 }}"""
 
-        gemini_result = None
-        openai_result = None
-        
-        # Gemini check
         try:
-            async def _gemini_check():
-                return await self._call_llm_with_semaphore(
-                    self.gemini_pro.generate_content_async(
-                        prompt,
-                        generation_config={'temperature': 0.1}
-                    )
-                )
+            # Use dual-model verification for category validation
+            openai_result, gemini_result = await self._dual_model_judge(prompt, "category_validation")
             
-            response = await retry_async(_gemini_check)
-            match = re.search(r'\{[^{}]*\}', response.text, re.DOTALL)
-            if match:
-                gemini_result = json.loads(match.group())
-        except Exception as e:
-            logger.warning(f"Gemini category check error: {e}")
-        
-        # OpenAI check (if available)
-        if HAS_OPENAI and openai_client:
-            try:
-                async def _openai_check():
-                    return await self._call_llm_with_semaphore(
-                        openai_client.chat.completions.create(
-                            model=GPT_MODEL,
-                            messages=[{"role": "user", "content": prompt}],
-                            response_format={"type": "json_object"}
-                        )
-                    )
+            openai_mismatch = not openai_result.get('category_match', True) or not openai_result.get('language_correct', True)
+            gemini_mismatch = not gemini_result.get('category_match', True) or not gemini_result.get('language_correct', True)
+            
+            # Flag if EITHER model detects a mismatch (more strict for category)
+            if openai_mismatch or gemini_mismatch:
+                if openai_mismatch:
+                    detected = openai_result.get('detected_category', subject)
+                    reason = openai_result.get('reason', 'Category mismatch')
+                    issues.append(f"CATEGORY_MISMATCH (OpenAI): Declared {subject}, detected {detected}")
+                    issues.append(f"CATEGORY_MISMATCH (OpenAI): {reason}")
+                    for issue in openai_result.get('issues', []):
+                        issues.append(f"CATEGORY_MISMATCH (OpenAI): {issue}")
                 
-                response = await retry_async(_openai_check)
-                content = response.choices[0].message.content
-                match = re.search(r'\{[^{}]*\}', content, re.DOTALL)
-                if match:
-                    openai_result = json.loads(match.group())
-            except Exception as e:
-                logger.warning(f"OpenAI category check error: {e}")
+                if gemini_mismatch:
+                    detected = gemini_result.get('detected_category', subject)
+                    reason = gemini_result.get('reason', 'Category mismatch')
+                    issues.append(f"CATEGORY_MISMATCH (Gemini): Declared {subject}, detected {detected}")
+                    issues.append(f"CATEGORY_MISMATCH (Gemini): {reason}")
+                    for issue in gemini_result.get('issues', []):
+                        issues.append(f"CATEGORY_MISMATCH (Gemini): {issue}")
+                        
+        except Exception as e:
+            logger.warning(f"Category validation check error: {e}")
+            self.stats['9_category']['passed'] += 1
+            return True, issues
         
-        # Evaluate results - flag if EITHER model detects issues
-        should_flag = False
-        
-        if gemini_result:
-            if not gemini_result.get('category_match', True) or not gemini_result.get('language_correct', True):
-                should_flag = True
-                detected = gemini_result.get('detected_category', subject)
-                reason = gemini_result.get('reason', 'Category mismatch')
-                issues.append(f"CATEGORY_MISMATCH: [Gemini] Declared {subject}, detected {detected}")
-                issues.append(f"CATEGORY_MISMATCH: {reason}")
-                for issue in gemini_result.get('issues', []):
-                    issues.append(f"CATEGORY_MISMATCH: {issue}")
-        
-        if openai_result and not should_flag:
-            if not openai_result.get('category_match', True) or not openai_result.get('language_correct', True):
-                should_flag = True
-                detected = openai_result.get('detected_category', subject)
-                reason = openai_result.get('reason', 'Category mismatch')
-                issues.append(f"CATEGORY_MISMATCH: [OpenAI] Declared {subject}, detected {detected}")
-                issues.append(f"CATEGORY_MISMATCH: {reason}")
-        
-        passed = not should_flag
+        passed = len(issues) == 0
         self.stats['9_category']['passed' if passed else 'failed'] += 1
         return passed, issues
     
     # =========================================================================
-    # CHECKPOINT 10: Explanation Quality Check (LLM - Gemini)
+    # CHECKPOINT 10: Explanation Quality Check (LLM - OpenAI)
     # =========================================================================
     async def check_explanation_quality(self, question: Dict[str, Any]) -> Tuple[bool, List[str]]:
         """
-        LLM check: Explanation should be in French and address why the correct answer is correct.
+        LLM check: Explanation MUST ALWAYS be in French and address why the correct answer is correct.
+        
+        STRICT RULE: ALL explanations must be in French - NO EXCEPTIONS.
+        This applies to CG, LOG, and ANG questions alike.
+        The target audience (Ivorian students) requires French explanations.
         """
         issues = []
         
         text = question.get('text', '')
         explanation = question.get('explanation', '')
         correct_text = question.get('correct_text', '')
+        subject = question.get('subject', 'CG')
         
         if not explanation or len(explanation.strip()) < 10:
-            # In softer mode, we still record the issue but don't necessarily block
             issues.append("EXPLANATION: Missing or too short explanation")
             self.stats['10_explanation']['failed'] += 1
             return False, issues
         
-        prompt = f"""Évaluez la qualité de cette EXPLICATION de réponse.
+        prompt = f"""Évaluez la qualité de cette EXPLICATION de réponse et proposez une version finale en français.
 
 QUESTION: {text}
+CATÉGORIE: {subject}
 RÉPONSE CORRECTE: {correct_text}
 EXPLICATION: {explanation}
 
-CRITÈRES:
-1. L'explication est-elle en FRANÇAIS?
+RÈGLE STRICTE ET OBLIGATOIRE:
+L'explication DOIT TOUJOURS être en FRANÇAIS - SANS EXCEPTION.
+Cela s'applique à TOUTES les catégories: CG, LOG, et ANG.
+Même si la question est en anglais (ANG), l'explication DOIT être en français.
+
+CRITÈRES D'ÉVALUATION:
+1. L'explication est-elle entièrement en FRANÇAIS? (OBLIGATOIRE - pas d'anglais)
 2. L'explication explique-t-elle POURQUOI la réponse est correcte?
 3. L'explication est-elle pertinente et utile?
 4. L'explication est-elle claire et bien écrite?
+
+Si l'explication contient des phrases en anglais ou est majoritairement en anglais,
+marquez is_french comme false ET fournissez une nouvelle version traduite en français
+dans le champ output_explanation.
 
 Répondez en JSON:
 {{
@@ -1308,38 +1300,37 @@ Répondez en JSON:
     "is_relevant": true/false,
     "quality_score": 0.0-1.0,
     "issues": ["liste des problèmes"],
-    "reason": "explication courte"
+    "reason": "explication courte",
+    "output_explanation": "explication FINALE à utiliser (toujours en français, peut être identique ou réécrite)"
 }}"""
 
         try:
-            async def _check():
-                return await self._call_llm_with_semaphore(
-                    self.gemini_flash.generate_content_async(
-                        prompt,
-                        generation_config={'temperature': 0.1}
-                    )
-                )
+            result = await self._call_openai_json(prompt, temperature=0.1)
             
-            response = await retry_async(_check)
-            match = re.search(r'\{[^{}]*\}', response.text, re.DOTALL)
-            if match:
-                result = json.loads(match.group())
+            # Optionally replace the explanation with the LLM's French version
+            # (used especially for ANG questions that originally have English explanations).
+            new_expl = result.get('output_explanation')
+            if isinstance(new_expl, str) and new_expl.strip():
+                if new_expl.strip() != explanation.strip():
+                    question['explanation'] = new_expl.strip()
+                    issues.append("EXPLANATION: Auto-translated/rewritten in French for consistency")
+                    explanation = question['explanation']
+            
+            if not result.get('is_french', True):
+                issues.append(f"EXPLANATION: NOT IN FRENCH - All explanations must be in French regardless of subject ({subject})")
+            if not result.get('explains_answer', True):
+                issues.append("EXPLANATION: Does not explain why the answer is correct")
+            if not result.get('is_relevant', True):
+                issues.append("EXPLANATION: Not relevant to the question")
+            
+            quality = result.get('quality_score', 1.0)
+            if quality < 0.5:
+                issues.append(f"EXPLANATION: Low quality score ({quality:.2f})")
                 
-                if not result.get('is_french', True):
-                    issues.append("EXPLANATION: Not in French")
-                if not result.get('explains_answer', True):
-                    issues.append("EXPLANATION: Does not explain why the answer is correct")
-                if not result.get('is_relevant', True):
-                    issues.append("EXPLANATION: Not relevant to the question")
-                
-                quality = result.get('quality_score', 1.0)
-                if quality < 0.5:
-                    issues.append(f"EXPLANATION: Low quality score ({quality:.2f})")
+            for issue in result.get('issues', []):
+                if issue not in str(issues):
+                    issues.append(f"EXPLANATION: {issue}")
                     
-                for issue in result.get('issues', []):
-                    if issue not in str(issues):
-                        issues.append(f"EXPLANATION: {issue}")
-                        
         except json.JSONDecodeError as e:
             logger.warning(f"JSON parse error in explanation check: {e}")
         except Exception as e:
@@ -1378,7 +1369,8 @@ Répondez en JSON:
         if source_table and source_id:
             cache_key = f"{source_table}:{source_id}"
             cached = self.validation_cache.get(cache_key)
-            if cached:
+            # Only trust cache entries that match the current revision; ignore older ones
+            if cached and cached.get('revision') == VALIDATION_CACHE_REVISION:
                 cached_issues = cached.get('issues', [])
                 cached_cleaned = cached.get('cleaned_text')
                 status = cached.get('status')
@@ -1408,10 +1400,12 @@ Répondez en JSON:
             if cache_key:
                 try:
                     self.validation_cache[cache_key] = {
+                        "revision": VALIDATION_CACHE_REVISION,
                         "status": "rejected",
                         "issues": all_issues,
                         "cleaned_text": question.get("text", ""),
                     }
+                    self.save_validation_cache()  # Incremental save
                 except Exception as e:
                     logger.warning(f"Could not update validation cache for {cache_key}: {e}")
             return ValidationResult(passed=False, issues=all_issues)
@@ -1425,19 +1419,6 @@ Répondez en JSON:
             question = dict(question)
             question['text'] = cleaned
         
-        # ANG LANGUAGE NORMALIZATION:
-        # For subject = 'ANG', if question text and/or explanation are in English,
-        # translate them to French (options remain unchanged).
-        if question.get('subject') == 'ANG':
-            try:
-                question, translation_notes = await self.translate_ang_question_to_french(question)
-                if translation_notes:
-                    all_issues.extend(translation_notes)
-                    # After translation, consider the cleaned_text to be the latest text
-                    cleaned_text = question.get('text', cleaned_text)
-            except Exception as e:
-                logger.warning(f"ANG normalization step failed: {e}")
-        
         # Checkpoint 6: Fuzzy duplicate check
         passed, issues = self.check_fuzzy_duplicate(question, output_filename)
         all_issues.extend(issues)
@@ -1445,10 +1426,12 @@ Répondez en JSON:
             if cache_key:
                 try:
                     self.validation_cache[cache_key] = {
+                        "revision": VALIDATION_CACHE_REVISION,
                         "status": "rejected",
                         "issues": all_issues,
                         "cleaned_text": cleaned_text if cleaned_text is not None else question.get("text", ""),
                     }
+                    self.save_validation_cache()  # Incremental save
                 except Exception as e:
                     logger.warning(f"Could not update validation cache for {cache_key}: {e}")
             return ValidationResult(passed=False, issues=all_issues, cleaned_text=cleaned_text)
@@ -1461,22 +1444,61 @@ Répondez en JSON:
         # PHASE 2: LLM checks (run in parallel for efficiency)
         # =====================================================================
         
-        try:
-            # Run LLM checks in parallel
-            results = await asyncio.gather(
+        llm_mode = getattr(self, 'llm_mode', 'full')
+        # If LLM checks are disabled, skip Phase 2 entirely (much faster/cheaper)
+        if llm_mode == 'off':
+            if cache_key:
+                try:
+                    self.validation_cache[cache_key] = {
+                        "revision": VALIDATION_CACHE_REVISION,
+                        "status": "accepted",
+                        "issues": all_issues,
+                        "cleaned_text": cleaned_text if cleaned_text is not None else question.get("text", ""),
+                    }
+                    self.save_validation_cache()  # Incremental save
+                except Exception as e:
+                    logger.warning(f"Could not update validation cache for {cache_key}: {e}")
+            return ValidationResult(
+                passed=True,
+                issues=all_issues,
+                cleaned_text=cleaned_text
+            )
+        
+        # Decide which LLM checkpoints to run based on mode
+        if llm_mode == 'minimal':
+            # Minimal mode: keep only answer validation + category validation,
+            # plus explanation translation (non-blocking) to enforce French explanations.
+            llm_tasks = [
+                self.check_correct_answer(question),
+                self.check_category_validation(question),
+                self.check_explanation_quality(question),
+            ]
+            check_names = [
+                'answer_validation',
+                'category',
+                'explanation',
+            ]
+            blocking_checks = {
+                'answer_validation',
+                'category',
+            }
+        else:
+            # Full mode: run all LLM-based checkpoints
+            llm_tasks = [
                 self.check_text_quality_clarity(question),
                 self.check_content_restrictions(question),
                 self.check_correct_answer(question),
                 self.check_semantic_duplicate(question, output_filename),
                 self.check_category_validation(question),
                 self.check_explanation_quality(question),
-                return_exceptions=True
-            )
-            
-            # Process results
+            ]
             check_names = [
-                'clarity', 'content_restrictions', 'answer_validation',
-                'semantic_duplicate', 'category', 'explanation'
+                'clarity',
+                'content_restrictions',
+                'answer_validation',
+                'semantic_duplicate',
+                'category',
+                'explanation',
             ]
             # Checks that remain BLOCKING (cause rejection) when they fail
             # clarity and explanation are downgraded to warnings only (non-blocking)
@@ -1486,6 +1508,10 @@ Répondez en JSON:
                 'semantic_duplicate',
                 'category',
             }
+
+        try:
+            # Run selected LLM checks in parallel
+            results = await asyncio.gather(*llm_tasks, return_exceptions=True)
             
             for i, result in enumerate(results):
                 if isinstance(result, Exception):
@@ -1500,10 +1526,12 @@ Répondez en JSON:
                     if cache_key:
                         try:
                             self.validation_cache[cache_key] = {
+                                "revision": VALIDATION_CACHE_REVISION,
                                 "status": "rejected",
                                 "issues": all_issues,
                                 "cleaned_text": cleaned_text if cleaned_text is not None else question.get("text", ""),
                             }
+                            self.save_validation_cache()  # Incremental save
                         except Exception as e:
                             logger.warning(f"Could not update validation cache for {cache_key}: {e}")
                     return ValidationResult(passed=False, issues=all_issues, cleaned_text=cleaned_text)
@@ -1518,10 +1546,12 @@ Répondez en JSON:
         if cache_key:
             try:
                 self.validation_cache[cache_key] = {
+                    "revision": VALIDATION_CACHE_REVISION,
                     "status": "accepted",
                     "issues": all_issues,
                     "cleaned_text": cleaned_text if cleaned_text is not None else question.get("text", ""),
                 }
+                self.save_validation_cache()  # Incremental save
             except Exception as e:
                 logger.warning(f"Could not update validation cache for {cache_key}: {e}")
         
@@ -1773,8 +1803,10 @@ class QuestionIngestionEngine:
     Uses async/await for LLM-based validation checks.
     """
     
-    def __init__(self):
-        self.validator = QuestionValidator()
+    def __init__(self, llm_mode: str = "full"):
+        # Pass LLM mode down to the validator so we can optionally disable
+        # expensive LLM-based checkpoints for faster/cheaper runs.
+        self.validator = QuestionValidator(llm_mode=llm_mode)
         self.results = defaultdict(list)  # {filename: [questions]}
         self.failed_questions = defaultdict(list)  # {filename: [failed_questions]}
     
@@ -2371,6 +2403,15 @@ class QuestionIngestionEngine:
         logger.info(" 10. Explanation quality (LLM - French, addresses answer)")
         logger.info("")
         
+        llm_mode = getattr(self.validator, 'llm_mode', 'full')
+        logger.info(f"LLM validation mode: {llm_mode}")
+        if llm_mode == 'off':
+            logger.info("-> LLM-based checkpoints (3-5, 7, 9, 10) are DISABLED. Only fast non-LLM checks will run.")
+        elif llm_mode == 'minimal':
+            logger.info("-> Minimal LLM mode: runs ONLY answer validation + category validation,")
+            logger.info("   plus non-blocking explanation translation to French when needed.")
+        logger.info("")
+        
         # Decide processing mode based on test_type
         is_strict_mode = internal_test_type in ['exam', 'practice']
         
@@ -2589,13 +2630,9 @@ class QuestionIngestionEngine:
         logger.info("###please verify the json produced###")
         logger.info(f"{'=' * 60}")
         
-        # Persist validation cache to disk so future runs can reuse results
-        try:
-            with open(self.validator.validation_cache_path, "w", encoding="utf-8") as f:
-                json.dump(self.validator.validation_cache, f, indent=2, ensure_ascii=False)
-            logger.info(f"\n-> Validation cache saved to {self.validator.validation_cache_path}")
-        except Exception as e:
-            logger.warning(f"Could not save validation cache: {e}")
+        # Final cache save (force=True to ensure all entries are persisted)
+        self.validator.save_validation_cache(force=True)
+        logger.info(f"\n-> Validation cache saved to {self.validator.validation_cache_path} ({len(self.validator.validation_cache)} entries)")
     
     def run(self, test_type: str, exam_type: str, dry_run: bool = False):
         """
@@ -2660,10 +2697,22 @@ Test Type Configurations:
         action='store_true',
         help='Run validation only, do not write output files'
     )
+    parser.add_argument(
+        '--llm-mode',
+        type=str,
+        choices=['full', 'minimal', 'off'],
+        default='full',
+        help=(
+            'LLM validation mode: '
+            '"full" (all LLM checkpoints), '
+            '"minimal" (only correct-answer + category checks, plus French translation of explanations), '
+            '"off" (only non-LLM checks, much faster/cheaper)'
+        ),
+    )
     
     args = parser.parse_args()
     
-    engine = QuestionIngestionEngine()
+    engine = QuestionIngestionEngine(llm_mode=args.llm_mode)
     engine.run(test_type=args.test_type, exam_type=args.exam_type, dry_run=args.dry_run)
 
 

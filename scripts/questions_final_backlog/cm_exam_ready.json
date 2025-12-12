@@ -1,0 +1,1619 @@
+{
+  "generated_at": "2025-12-11T02:22:32.757994",
+  "test_type": "exam",
+  "exam_type": "CM",
+  "gap_summary": {
+    "exam_type": "CM",
+    "cli_test_type": "exam",
+    "internal_test_type": "exam",
+    "total_existing": 1142,
+    "existing_unassigned": 0,
+    "by_subject": {
+      "ANG": {
+        "expected": 400,
+        "existing": 375,
+        "missing": 25
+      },
+      "CG": {
+        "expected": 400,
+        "existing": 396,
+        "missing": 4
+      },
+      "LOG": {
+        "expected": 400,
+        "existing": 371,
+        "missing": 29
+      }
+    },
+    "total_missing": 58
+  },
+  "count": 58,
+  "by_subject": {
+    "ANG": 25,
+    "CG": 4,
+    "LOG": 29
+  },
+  "validation_checkpoints": [
+    "1_structural",
+    "2_prefix",
+    "3_clarity",
+    "4_content_restrictions",
+    "5_answer_validation",
+    "6_fuzzy_duplicate",
+    "7_semantic_duplicate",
+    "8_same_answer",
+    "9_category",
+    "10_explanation"
+  ],
+  "questions": [
+    {
+      "id": "",
+      "text": "De nombreux agriculteurs ivoiriens utilisent désormais des drones pour surveiller leurs plantations de cacao. Traduisez la phrase suivante en anglais : 'Grâce aux drones, ils peuvent détecter plus rapidement les maladies et améliorer leur rendement.'",
+      "options": [
+        "Thanks to drones, they can detect diseases faster and improve their yield.",
+        "Due to the drones, they will detect illnesses faster and improve yields.",
+        "Because of drones, they are detecting illness faster and their yield improves."
+      ],
+      "correct_index": 0,
+      "correct_text": "Thanks to drones, they can detect diseases faster and improve their yield.",
+      "explanation": "The correct translation uses 'Thanks to' (or 'Due to', but option B has a tense issue), 'can detect' (present ability), and 'improve their yield'. Option B incorrectly uses 'will detect', which implies a future certainty not present in the original French. Option C uses 'are detecting' which implies a continuous action, and also the grammar is wrong 'their yield improves' instead of 'improve their yield'",
+      "subject": "ANG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 9,
+      "question_number": 5,
+      "source_table": "questions_v2",
+      "source_id": "7f1ca463-d3d4-4536-8ecb-d8d7d4ce7807",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": [
+        "LANGUAGE: Question text auto-translated EN->FR for ANG",
+        "EXPLANATION: Not in French",
+        "EXPLANATION: L'explication n'est pas en français",
+        "EXPLANATION: L'explication pourrait être plus détaillée"
+      ]
+    },
+    {
+      "id": "",
+      "text": "Fill the blanks with suitable articles: _____ honesty is a virtue, but _____ honesty of the witness was questioned.",
+      "options": [
+        "No article; the",
+        "The; an",
+        "An; a"
+      ],
+      "correct_index": 0,
+      "correct_text": "No article; the",
+      "explanation": "La question demande de compléter les deux blancs avec les articles anglais appropriés. On n’emploie pas d’article devant un nom abstrait pris au sens général: “Ø honesty is a virtue”, tandis que l’on met l’article défini pour une référence précise: “the honesty of the witness”. “The honesty is a virtue” est fautif au générique, “an/a honesty” est incorrect car honesty est indénombrable ici, et laisser vide au second blanc ne convient pas puisqu’il s’agit d’une honnêteté déterminée.",
+      "subject": "ANG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 9,
+      "question_number": 11,
+      "source_table": "questions_v2",
+      "source_id": "cd482915-fc4f-4926-90bb-d054c1ebb436",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": [
+        "CLARITY: Les options fournies ne correspondent pas correctement aux règles grammaticales de l'usage des articles en anglais. De plus, il y a plusieurs réponses possibles parmi les options, ce qui rend la question ambiguë.",
+        "CLARITY: Options qui ne correspondent pas à la question",
+        "CLARITY: Question avec plusieurs réponses possibles parmi les options",
+        "EXPLANATION: L'explication pourrait être plus détaillée sur l'usage des articles en anglais"
+      ]
+    },
+    {
+      "id": "",
+      "text": "Choisissez le meilleur ordre des adjectifs : Elle portait une robe ____.",
+      "options": [
+        "beautiful red silk",
+        "red silk beautiful",
+        "silk beautiful red"
+      ],
+      "correct_index": 0,
+      "correct_text": "beautiful red silk",
+      "explanation": "La question demande de choisir l’ordre naturel des adjectifs en anglais devant un nom. L’ordre standard est opinion > taille > âge > forme > couleur > origine > matière > usage ; donc beautiful (opinion) précède red (couleur), qui précède silk (matière) : beautiful red silk dress (A). Les autres options brisent cet ordre (B met l’opinion en dernier, C place la matière avant l’opinion et la couleur), et D est vide.",
+      "subject": "ANG",
+      "difficulty": "MEDIUM",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 9,
+      "question_number": 13,
+      "source_table": "questions_v2",
+      "source_id": "ac717f0c-032d-45f2-8607-2f21f294e3a5",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": [
+        "LANGUAGE: Question text auto-translated EN->FR for ANG",
+        "EXPLANATION: L'explication pourrait inclure un exemple supplémentaire pour renforcer la compréhension.",
+        "EXPLANATION: L'explication pourrait mentionner que l'ordre des adjectifs est une règle générale et qu'il peut y avoir des exceptions."
+      ]
+    },
+    {
+      "id": "",
+      "text": "Le projet est _____ de s'effondrer à moins que le financement ne soit assuré.",
+      "options": [
+        "on the verge of",
+        "at the brink",
+        "by the edge"
+      ],
+      "correct_index": 0,
+      "correct_text": "on the verge of",
+      "explanation": "La question demande de compléter la phrase avec la locution idiomatique anglaise correcte indiquant que le projet est sur le point de s’effondrer si le financement n’est pas obtenu. \nA est correct car “on the verge of collapse” est l’expression idiomatique et grammaticale standard pour “sur le point de s’effondrer”. \nB est mal formé (on dit “on the brink of”), C n’est pas idiomatique (“by the edge”), et D est vide.",
+      "subject": "ANG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 10,
+      "question_number": 12,
+      "source_table": "questions_v2",
+      "source_id": "c66f9925-5ca3-4bc5-87b9-3e170163661c",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": [
+        "LANGUAGE: Question text auto-translated EN->FR for ANG",
+        "CLARITY: Les options proposées ne sont pas toutes des expressions correctes en anglais pour compléter la phrase. 'On the verge of' et 'at the brink' sont correctes, mais 'by the edge' ne l'est pas. De plus, il y a deux réponses possibles parmi les options correctes.",
+        "CLARITY: Options qui ne correspondent pas à la question",
+        "CLARITY: Question avec plusieurs réponses possibles parmi les options",
+        "EXPLANATION: Manque de détails sur les options B, C et D",
+        "EXPLANATION: Absence d'une explication plus approfondie sur pourquoi A est correct"
+      ]
+    },
+    {
+      "id": "",
+      "text": "Votre amie, Aminata, vient de recevoir son baccalauréat et souhaite étudier à l'étranger. Elle vous demande conseil. Quelle est la MEILLEURE façon de répondre si vous lui conseillez d'améliorer son anglais avant de partir ?",
+      "options": [
+        "\"You should consider to improve your English skills first.\"",
+        "\"Improving your English skills beforehand is what you should consider.\"",
+        "\"Consider improving your English skills first.\""
+      ],
+      "correct_index": 2,
+      "correct_text": "\"Consider improving your English skills first.\"",
+      "explanation": "The correct answer is \"Consider improving your English skills first.\" This uses the gerund \"improving\" correctly after the verb \"consider.\" \"Consider to improve\" is grammatically incorrect. While \"Improving your English skills beforehand is what you should consider\" is grammatically correct, it's stylistically less direct and less natural in spoken conversation in this context.",
+      "subject": "ANG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 10,
+      "question_number": 13,
+      "source_table": "questions_v2",
+      "source_id": "376847de-d09f-4a9d-bcca-32adee9e4367",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": [
+        "LANGUAGE: Question text auto-translated EN->FR for ANG",
+        "LANGUAGE: Explanation auto-translated EN->FR for ANG",
+        "CLARITY: La question demande la meilleure façon de répondre à Aminata, mais les options fournies sont des phrases en anglais qui ne précisent pas clairement le contexte de la réponse. De plus, plusieurs options pourraient être considérées comme correctes, ce qui rend la question ambiguë.",
+        "CLARITY: Question ambiguë ou confuse",
+        "CLARITY: Options qui ne correspondent pas à la question",
+        "CLARITY: Question avec plusieurs réponses possibles parmi les options",
+        "EXPLANATION: La traduction de la réponse correcte en français est incorrecte",
+        "EXPLANATION: L'explication pourrait être plus concise"
+      ]
+    },
+    {
+      "id": "",
+      "text": "Un jeune entrepreneur ivoirien souhaite présenter sa solution innovante de banque mobile à un investisseur international. Laquelle des phrases suivantes traduit correctement son idée commerciale, 'Faciliter l'accès aux services bancaires pour les populations rurales,' en anglais ?",
+      "options": [
+        "To ease access to banking services for rural populations.",
+        "Easing access to banking services to the rural populations.",
+        "For easing banking services access for rural populations."
+      ],
+      "correct_index": 0,
+      "correct_text": "To ease access to banking services for rural populations.",
+      "explanation": "The correct translation is 'To ease access to banking services for rural populations.' This uses the infinitive form 'to ease' which accurately conveys the purpose of facilitating access. The other options have grammatical errors or awkward phrasing.",
+      "subject": "ANG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 10,
+      "question_number": 19,
+      "source_table": "questions_v2",
+      "source_id": "21a23482-5fc6-4cfd-b251-348344b4f9df",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": [
+        "LANGUAGE: Question text auto-translated EN->FR for ANG",
+        "EXPLANATION: L'explication pourrait être plus détaillée en expliquant pourquoi les autres options sont incorrectes."
+      ]
+    },
+    {
+      "id": "",
+      "text": "Une ONG locale à Abidjan, 'Espoir pour Enfants', postule pour une subvention auprès d'une organisation internationale. Complétez la phrase suivante dans leur demande pour exprimer au mieux leur besoin : \"En raison du nombre croissant d'enfants des rues, 'Espoir pour Enfants' a besoin de _______ ressources pour fournir un abri et une éducation adéquats.\"",
+      "options": [
+        "significant",
+        "significantly",
+        "significance"
+      ],
+      "correct_index": 0,
+      "correct_text": "significant",
+      "explanation": "The correct answer is 'significant'. 'Significant' is an adjective that modifies the noun 'resources'. 'Significantly' is an adverb, and 'significance' is a noun. The sentence requires an adjective to describe the resources needed.",
+      "subject": "ANG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 14,
+      "question_number": 10,
+      "source_table": "questions_v2",
+      "source_id": "946fc605-a81f-4377-b6ea-0f00cd0a9ab8",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": [
+        "LANGUAGE: Question text auto-translated EN->FR for ANG",
+        "CLARITY: Les options fournies ne sont pas toutes des adjectifs ou adverbes appropriés pour compléter la phrase. 'Significant' est correct, mais 'significantly' et 'significance' ne conviennent pas grammaticalement. De plus, la question pourrait être perçue comme ayant plusieurs réponses possibles si l'on ne se concentre pas uniquement sur la grammaire.",
+        "CLARITY: Options qui ne correspondent pas à la question",
+        "CLARITY: Question avec plusieurs réponses possibles parmi les options",
+        "EXPLANATION: Not in French",
+        "EXPLANATION: L'explication n'est pas en français",
+        "EXPLANATION: Le contexte de la phrase n'est pas expliqué"
+      ]
+    },
+    {
+      "id": "",
+      "text": "Un journal local à Abidjan a rapporté que le prix des fèves de cacao ____ significativement cette année en raison de conditions météorologiques favorables.",
+      "options": [
+        "has increased",
+        "is increasing",
+        "increased"
+      ],
+      "correct_index": 0,
+      "correct_text": "has increased",
+      "explanation": "The correct answer is 'has increased'. 'Has increased' implies that the price has risen and continues to be at a higher level. 'Is increasing' would suggest the price is still rising at the time of speaking, and 'increased' (simple past) would suggest the price rose but doesn't necessarily reflect the current situation; 'has increased' is the best option to convey that the price rise is a current state resulting from past actions and reported upon.",
+      "subject": "ANG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 14,
+      "question_number": 17,
+      "source_table": "questions_v2",
+      "source_id": "3ffe1596-21b9-46e5-a3cd-3ee2770ba73c",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": [
+        "LANGUAGE: Question text auto-translated EN->FR for ANG",
+        "LANGUAGE: Explanation auto-translated EN->FR for ANG",
+        "CLARITY: La question est ambiguë car elle ne précise pas clairement le temps verbal attendu. Les options 'has increased', 'is increasing', et 'increased' peuvent toutes être correctes selon le contexte temporel implicite, ce qui rend la question confuse et ouverte à plusieurs interprétations.",
+        "CLARITY: Question ambiguë ou confuse",
+        "CLARITY: Question avec plusieurs réponses possibles parmi les options",
+        "EXPLANATION: La question est en français mais la réponse est en anglais",
+        "EXPLANATION: L'explication pourrait inclure une traduction ou une explication en français pour plus de clarté"
+      ]
+    },
+    {
+      "id": "",
+      "text": "Le rapport a été retourné parce qu'il contenait plusieurs graves ..... dans les données.",
+      "options": [
+        "discrepancies",
+        "differences",
+        "changes"
+      ],
+      "correct_index": 0,
+      "correct_text": "discrepancies",
+      "explanation": "La question demande de compléter la phrase en anglais avec le terme qui justifie le renvoi du rapport à cause de problèmes dans les données. Discrepancies signifie « incohérences/écarts anormaux », collocation idiomatique avec serious, ce qui explique que le rapport ait été retourné. Differences et changes sont plus neutres (simple variation ou modification) et n’impliquent pas d’erreur, et l’option D est vide.",
+      "subject": "ANG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 15,
+      "question_number": 17,
+      "source_table": "questions_v2",
+      "source_id": "9dfbf148-6317-4321-8c7b-e22e821e85b5",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": [
+        "LANGUAGE: Question text auto-translated EN->FR for ANG",
+        "CLARITY: La question est ambiguë car les termes 'discrepancies', 'differences' et 'changes' peuvent tous être utilisés pour décrire des variations dans les données, mais seul 'discrepancies' est généralement utilisé pour indiquer des erreurs ou des incohérences graves. Les options ne sont pas suffisamment distinctes pour qu'une seule réponse soit clairement correcte.",
+        "CLARITY: Question ambiguë ou confuse",
+        "CLARITY: Options qui ne correspondent pas à la question",
+        "CLARITY: Question avec plusieurs réponses possibles parmi les options",
+        "EXPLANATION: L'explication pourrait être plus détaillée sur pourquoi 'discrepancies' est préféré à 'differences' et 'changes'."
+      ]
+    },
+    {
+      "id": "",
+      "text": "Lors de négociations, elle refuse de _____; la qualité compte plus que la vitesse.",
+      "options": [
+        "cut corners",
+        "break even",
+        "draw the line"
+      ],
+      "correct_index": 0,
+      "correct_text": "cut corners",
+      "explanation": "La question demande de choisir l’expression idiomatique qui complète correctement la phrase. Cut corners signifie « bâcler/prendre des raccourcis au détriment de la qualité », ce qui correspond à l’idée qu’elle refuse cela puisque « la qualité compte plus que la vitesse ». Break even (rentrer dans ses frais) est financier et hors contexte, draw the line (fixer une limite) ne renvoie pas aux raccourcis de qualité, et l’option D est vide.",
+      "subject": "ANG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 15,
+      "question_number": 20,
+      "source_table": "questions_v2",
+      "source_id": "aa97d873-9278-4827-912e-0327310696a1",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": [
+        "LANGUAGE: Question text auto-translated EN->FR for ANG",
+        "CLARITY: La phrase 'elle refuse de _____; la qualité compte plus que la vitesse' est ambiguë car elle pourrait correspondre à plusieurs expressions idiomatiques. 'Cut corners' semble être la meilleure option, mais 'draw the line' pourrait aussi être interprété comme pertinent dans un contexte différent. 'Break even' ne semble pas correspondre au contexte donné.",
+        "CLARITY: Question ambiguë ou confuse",
+        "CLARITY: Options qui ne correspondent pas à la question",
+        "CLARITY: Question avec plusieurs réponses possibles parmi les options",
+        "EXPLANATION: L'option D est mentionnée mais non précisée"
+      ]
+    },
+    {
+      "id": "",
+      "text": "Le comptable a été félicité pour son ____ attention aux détails.",
+      "options": [
+        "meticulous",
+        "negligent",
+        "impulsive"
+      ],
+      "correct_index": 0,
+      "correct_text": "meticulous",
+      "explanation": "La question demande l’adjectif qui complète « was praised for his ____ attention to detail » avec une connotation positive de soin extrême. Meticulous signifie « minutieux », donc « meticulous attention to detail » est l’expression naturelle qui justifie l’éloge. Negligent veut dire « négligent » (contraire du soin), impulsive signifie « impulsif » (agir sans réflexion), et [vide] n’est pas un choix lexical valide.",
+      "subject": "ANG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 17,
+      "question_number": 4,
+      "source_table": "questions_v2",
+      "source_id": "00536b0e-587c-45b9-a48f-23fcd5d53140",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": [
+        "LANGUAGE: Question text auto-translated EN->FR for ANG",
+        "EXPLANATION: manque de détails sur les autres options"
+      ]
+    },
+    {
+      "id": "",
+      "text": "Sa promotion dépend ..... de l'approbation du conseil.",
+      "options": [
+        "on",
+        "to",
+        "with"
+      ],
+      "correct_index": 0,
+      "correct_text": "on",
+      "explanation": "La question teste la préposition qui complète l’expression « contingent … » au sens de « dépendre de ». L’expression figée est « contingent on » : « Her promotion is contingent on the board’s approval » signifie que sa promotion dépend de l’approbation du conseil. « To » et « with » ne s’emploient pas avec « contingent » dans ce sens, et l’absence de préposition est incorrecte.",
+      "subject": "ANG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 17,
+      "question_number": 18,
+      "source_table": "questions_v2",
+      "source_id": "20c1df5e-c198-408f-b046-1b464893087c",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": [
+        "LANGUAGE: Question text auto-translated EN->FR for ANG",
+        "CLARITY: La question est incomplète car il manque une partie de la phrase avant 'de l'approbation du conseil'. De plus, les options proposées ('on', 'to', 'with') ne correspondent pas à la structure de la phrase en français, ce qui rend la question confuse et ambiguë.",
+        "CLARITY: Question incomplète",
+        "CLARITY: Options qui ne correspondent pas à la question",
+        "CLARITY: Question avec plusieurs réponses possibles parmi les options",
+        "EXPLANATION: L'explication utilise des termes en anglais sans traduction",
+        "EXPLANATION: L'explication pourrait être plus concise"
+      ]
+    },
+    {
+      "id": "",
+      "text": "Le festival annuel de la mangue à Abidjan est une célébration vibrante. Cependant, les vendeurs se sont plaints que de nombreux clients ont essayé de marchander ____ agressivement cette année, rendant difficile pour eux de réaliser un profit.",
+      "options": [
+        "much",
+        "so",
+        "too"
+      ],
+      "correct_index": 2,
+      "correct_text": "too",
+      "explanation": "\"Too\" is the correct adverb to use here because it modifies \"aggressively\" to indicate an excessive degree of bargaining. \"Much\" typically modifies nouns, and \"so\" requires a \"that\" clause to show consequence, which is absent in the sentence. Therefore, \"too aggressively\" accurately describes the excessive nature of the bargaining, creating a negative impact on the vendors' profits.",
+      "subject": "ANG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 18,
+      "question_number": 17,
+      "source_table": "questions_v2",
+      "source_id": "24e3d692-659f-435e-9015-8cf9ab3ce89d",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": [
+        "LANGUAGE: Question text auto-translated EN->FR for ANG",
+        "LANGUAGE: Explanation auto-translated EN->FR for ANG",
+        "EXPLANATION: L'explication pourrait être simplifiée pour une meilleure clarté"
+      ]
+    },
+    {
+      "id": "",
+      "text": "En Côte d'Ivoire, beaucoup de gens apprécient l'attiéké, un accompagnement populaire fait à partir de manioc fermenté. Traduisez la phrase suivante en anglais, en mettant l'accent sur le plaisir et la typicité : 'Beaucoup d'Ivoiriens aiment l'attiéké, un accompagnement populaire fait à partir du manioc fermenté.'",
+      "options": [
+        "Many Ivorians enjoy attiéké, a popular side dish made from fermented cassava.",
+        "Plenty of Ivorian people are liking attiéké, a side dish that is popular and is made from the fermented cassava.",
+        "Lots of Ivorian persons like attiéké, a common accompaniment made of fermented cassava."
+      ],
+      "correct_index": 0,
+      "correct_text": "Many Ivorians enjoy attiéké, a popular side dish made from fermented cassava.",
+      "explanation": "The best translation maintains the sentence structure and accurately reflects the meaning. 'Many Ivorians enjoy attiéké, a popular side dish made from fermented cassava' is the most natural and accurate English translation. 'Plenty of Ivorian people are liking' uses an unnatural phrasing and 'Lots of Ivorian persons' sounds awkward.",
+      "subject": "ANG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 18,
+      "question_number": 19,
+      "source_table": "questions_v2",
+      "source_id": "06d97cba-f770-4969-9792-b0fdcefedc7e",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": [
+        "LANGUAGE: Question text auto-translated EN->FR for ANG",
+        "CLARITY: La question demande de traduire une phrase en mettant l'accent sur le plaisir et la typicité, mais les options fournies ne mettent pas clairement en avant ces aspects. De plus, plusieurs options pourraient être considérées comme correctes, ce qui rend la question ambiguë.",
+        "CLARITY: Question ambiguë ou confuse",
+        "CLARITY: Options qui ne correspondent pas à la question",
+        "CLARITY: Question avec plusieurs réponses possibles parmi les options",
+        "EXPLANATION: L'explication pourrait être plus détaillée sur l'importance de la structure de la phrase et du choix des mots pour refléter le plaisir et la typicité."
+      ]
+    },
+    {
+      "id": "",
+      "text": "Le plat ivoirien populaire, 'Attiéké', __________ avec du poisson grillé ou du poulet.",
+      "options": [
+        "is often served",
+        "often serves",
+        "often serving"
+      ],
+      "correct_index": 0,
+      "correct_text": "is often served",
+      "explanation": "The correct answer is 'is often served'. 'Attiéké' is the subject, and it is being served (passive voice), so we need the passive form 'is served'. 'Often' is an adverb of frequency and is correctly placed before the main verb in this case.",
+      "subject": "ANG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 18,
+      "question_number": 20,
+      "source_table": "questions_v2",
+      "source_id": "44de7cab-0bae-4369-8e77-63da70d1ca33",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": [
+        "LANGUAGE: Question text auto-translated EN->FR for ANG",
+        "EXPLANATION: Not in French",
+        "EXPLANATION: L'explication n'est pas en français",
+        "EXPLANATION: Manque de détails sur la construction passive en anglais"
+      ]
+    },
+    {
+      "id": "",
+      "text": "Kouadio, un étudiant d'Abidjan, rêve d'étudier à l'étranger. Il remplit sa demande d'inscription à l'université. Complétez la phrase suivante dans sa déclaration personnelle : 'Ayant grandi en Côte d'Ivoire, je suis particulièrement intéressé par les universités qui __________ un engagement fort envers le développement international et l'agriculture durable.'",
+      "options": [
+        "demonstrates",
+        "demonstrate",
+        "demonstrating"
+      ],
+      "correct_index": 1,
+      "correct_text": "demonstrate",
+      "explanation": "The correct answer is 'demonstrate'. The subject 'universities' is plural, therefore the verb must be in the plural form. 'Demonstrates' is singular, and 'demonstrating' requires an auxiliary verb.",
+      "subject": "ANG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 19,
+      "question_number": 18,
+      "source_table": "questions_v2",
+      "source_id": "af43ac01-d05a-4feb-ba7d-081f0307a5e8",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": [
+        "LANGUAGE: Question text auto-translated EN->FR for ANG",
+        "LANGUAGE: Explanation auto-translated EN->FR for ANG",
+        "EXPLANATION: L'explication pourrait inclure une justification du choix du mot 'démontrent' au-delà de la simple concordance sujet-verbe."
+      ]
+    },
+    {
+      "id": "",
+      "text": "Votre oncle Kouassi prévoit un voyage à Londres. Il vous demande de l'aider à traduire cette phrase en anglais : 'Il a l'intention d'acheter des souvenirs pour toute la famille au marché de Cocody.' Laquelle des traductions suivantes est la plus précise ?",
+      "options": [
+        "He is planning to buy souvenirs for the whole family at the Cocody market.",
+        "He intends to buy souvenirs to all the family in Cocody's market.",
+        "He intends buying souvenirs for the entire family in the Cocody market."
+      ],
+      "correct_index": 0,
+      "correct_text": "He is planning to buy souvenirs for the whole family at the Cocody market.",
+      "explanation": "Option A is the most accurate and natural translation. 'Is planning to buy' is correct, 'for the whole family' is standard, and 'at the Cocody market' is the proper prepositional phrase. Option B uses 'to' instead of 'for', which is grammatically incorrect in this context. Option C uses 'intends buying' which, while grammatically acceptable, is less common and sounds slightly less natural than 'is planning to buy', the more natural tense to use in this scenario.",
+      "subject": "ANG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 19,
+      "question_number": 19,
+      "source_table": "questions_v2",
+      "source_id": "6a0de3ce-6bd0-4d28-b5ce-d2804df56feb",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": [
+        "LANGUAGE: Question text auto-translated EN->FR for ANG",
+        "LANGUAGE: Explanation auto-translated EN->FR for ANG",
+        "EXPLANATION: L'explication pourrait inclure une comparaison plus détaillée des options B et C pour renforcer la compréhension."
+      ]
+    },
+    {
+      "id": "",
+      "text": "Ses résultats récents étaient médiocres, donc l'entraîneur lui a dit de ____.",
+      "options": [
+        "pull his socks up",
+        "spill the beans",
+        "hit the sack"
+      ],
+      "correct_index": 0,
+      "correct_text": "pull his socks up",
+      "explanation": "La question demande l’idiome qui complète la phrase pour indiquer ce que l’entraîneur a dit après de mauvais résultats. Pull his socks up signifie “se ressaisir, redoubler d’efforts”, ce qui correspond exactement au contexte. Spill the beans veut dire “révéler un secret” et hit the sack “aller se coucher”, donc inadaptés.",
+      "subject": "ANG",
+      "difficulty": "MEDIUM",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 20,
+      "question_number": 4,
+      "source_table": "questions_v2",
+      "source_id": "eaa1ffaa-4a0e-4cba-a1ba-45938615d04f",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": [
+        "LANGUAGE: Question text auto-translated EN->FR for ANG",
+        "CLARITY: Les options proposées ne sont pas toutes pertinentes par rapport à la situation décrite dans la question. 'Pull his socks up' est la seule option qui correspond logiquement à l'idée d'améliorer ses performances après des résultats médiocres, tandis que 'spill the beans' et 'hit the sack' ne sont pas appropriées dans ce contexte.",
+        "CLARITY: Options qui ne correspondent pas à la question",
+        "CLARITY: Question avec plusieurs réponses possibles parmi les options"
+      ]
+    },
+    {
+      "id": "",
+      "text": "Aminata veut parler à son ami d'un nouveau restaurant à Abidjan qui sert un délicieux attiéké. Quelle phrase est la plus correcte grammaticalement et la plus naturelle pour exprimer cela en anglais ?",
+      "options": [
+        "Aminata wants to tell her friend about a new restaurant in Abidjan which is serving a delicious attiéké.",
+        "Aminata wants to tell her friend about a new restaurant in Abidjan that serves delicious attiéké.",
+        "Aminata wants to tell her friend about a new restaurant in Abidjan what serves delicious attiéké."
+      ],
+      "correct_index": 1,
+      "correct_text": "Aminata wants to tell her friend about a new restaurant in Abidjan that serves delicious attiéké.",
+      "explanation": "The correct option is 'Aminata wants to tell her friend about a new restaurant in Abidjan that serves delicious attiéké.'  'That' is the most appropriate relative pronoun to introduce the clause describing the restaurant. 'Which' is grammatically correct, but less natural in this specific construction. 'What' is incorrect as it is not used as a relative pronoun in this context.",
+      "subject": "ANG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 20,
+      "question_number": 11,
+      "source_table": "questions_v2",
+      "source_id": "ff22224b-385b-4ff8-a2b1-51b0168e9ac7",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": [
+        "LANGUAGE: Question text auto-translated EN->FR for ANG",
+        "LANGUAGE: Explanation auto-translated EN->FR for ANG",
+        "EXPLANATION: L'explication pourrait être plus détaillée sur l'utilisation de 'which'."
+      ]
+    },
+    {
+      "id": "",
+      "text": "Un dicton ivoirien populaire dit : \"Petit à petit, l'oiseau fait son nid.\" Traduisez ce proverbe fidèlement en anglais.",
+      "options": [
+        "Little by little, the bird makes its nest.",
+        "Little by little, the bird built its nest.",
+        "Slowly, the bird is making its nest."
+      ],
+      "correct_index": 0,
+      "correct_text": "Little by little, the bird makes its nest.",
+      "explanation": "The most accurate and common translation of the proverb is 'Little by little, the bird makes its nest.'  It captures the sense of gradual progress and perseverance. Option B is grammatically correct but doesn't convey the continuous or proverbial nature as well. Option C misses the concise and widely accepted translation.",
+      "subject": "ANG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 20,
+      "question_number": 15,
+      "source_table": "questions_v2",
+      "source_id": "9152ad6b-c974-443e-974d-37ff1122612c",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": [
+        "LANGUAGE: Question text auto-translated EN->FR for ANG",
+        "LANGUAGE: Explanation auto-translated EN->FR for ANG",
+        "CLARITY: La question demande une traduction fidèle du proverbe, mais deux des options proposées sont des traductions correctes et fidèles ('Little by little, the bird makes its nest.' et 'Little by little, the bird built its nest.'), ce qui peut prêter à confusion pour l'étudiant.",
+        "CLARITY: Question avec plusieurs réponses possibles parmi les options",
+        "EXPLANATION: Manque de détails sur les options B et C",
+        "EXPLANATION: Absence d'exemples pour illustrer le sens"
+      ]
+    },
+    {
+      "id": "",
+      "text": "Quelle est la meilleure traduction de la phrase suivante en anglais : 'Le cacao ivoirien est réputé pour sa qualité exceptionnelle.' ?",
+      "options": [
+        "Ivorian cocoa is known for its exceptional quality.",
+        "The Ivorian cocoa is famous for its quality.",
+        "Cocoa from Côte d'Ivoire is knowing as exceptional quality."
+      ],
+      "correct_index": 0,
+      "correct_text": "Ivorian cocoa is known for its exceptional quality.",
+      "explanation": "Option A is the most accurate and natural-sounding translation. 'Known for' is a better idiom than 'famous for' in this context. Option C uses incorrect grammar ('knowing' instead of 'known').",
+      "subject": "ANG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 20,
+      "question_number": 16,
+      "source_table": "questions_v2",
+      "source_id": "23aba169-ada8-462d-b22f-05dc6b530b6e",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": [
+        "LANGUAGE: Question text auto-translated EN->FR for ANG",
+        "LANGUAGE: Explanation auto-translated EN->FR for ANG",
+        "CLARITY: La question demande la meilleure traduction, mais deux options sont correctes et bien formulées, ce qui peut prêter à confusion. De plus, une option contient une erreur grammaticale ('knowing as').",
+        "CLARITY: Options qui ne correspondent pas à la question",
+        "CLARITY: Question avec plusieurs réponses possibles parmi les options",
+        "EXPLANATION: L'explication ne mentionne pas explicitement pourquoi 'famous for' est moins approprié que 'known for'."
+      ]
+    },
+    {
+      "id": "",
+      "text": "Traduisez la phrase suivante en anglais : 'Le ministre a annoncé une nouvelle politique agricole pour soutenir les producteurs de cacao.'",
+      "options": [
+        "The minister has announced a new agricultural policy to support cocoa producers.",
+        "The minister announced a new agricultural policy supporting cocoa producers.",
+        "The minister is announcing a new agricultural policy for supporting cocoa producers."
+      ],
+      "correct_index": 0,
+      "correct_text": "The minister has announced a new agricultural policy to support cocoa producers.",
+      "explanation": "The correct translation uses the present perfect 'has announced' to indicate a recent announcement. 'To support' is the correct infinitive form to express the purpose of the policy.",
+      "subject": "ANG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 20,
+      "question_number": 17,
+      "source_table": "questions_v2",
+      "source_id": "b69ea610-a6ea-47bd-bfaa-dc51bead97db",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": [
+        "LANGUAGE: Question text auto-translated EN->FR for ANG",
+        "LANGUAGE: Explanation auto-translated EN->FR for ANG",
+        "EXPLANATION: L'explication pourrait inclure plus de détails sur le choix des mots pour 'new agricultural policy' et 'cocoa producers'."
+      ]
+    },
+    {
+      "id": "",
+      "text": "Une ONG locale à Abidjan organise un gala de collecte de fonds. Complétez l'extrait suivant de l'invitation : 'Vous êtes cordialement invités à une soirée d'élégance et de philanthropie alors que nous ______ des fonds pour nos programmes communautaires vitaux.'",
+      "options": [
+        "raise",
+        "arise",
+        "risen"
+      ],
+      "correct_index": 0,
+      "correct_text": "raise",
+      "explanation": "'Raise' means to collect or gather, which is the appropriate verb in this context. 'Arise' means to get up or originate, and 'risen' is the past participle of 'arise', making them grammatically incorrect in this sentence.",
+      "subject": "ANG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 20,
+      "question_number": 18,
+      "source_table": "questions_v2",
+      "source_id": "39ae8b8e-ecfb-475a-aa6b-9457d478bb82",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": [
+        "LANGUAGE: Question text auto-translated EN->FR for ANG",
+        "LANGUAGE: Explanation auto-translated EN->FR for ANG",
+        "CLARITY: La question est ambiguë car elle demande de compléter une phrase en français avec des options en anglais. De plus, les options 'arise' et 'risen' ne sont pas appropriées pour compléter la phrase, et 'raise' est la seule option correcte, ce qui rend la question peu pertinente.",
+        "CLARITY: Question ambiguë ou confuse",
+        "CLARITY: Options qui ne correspondent pas à la question",
+        "CLARITY: Question avec plusieurs réponses possibles parmi les options",
+        "EXPLANATION: Not in French",
+        "EXPLANATION: L'explication n'est pas en français",
+        "EXPLANATION: Le contexte de l'usage du mot 'raise' n'est pas expliqué en détail"
+      ]
+    },
+    {
+      "id": "",
+      "text": "Un parent de votre village vient d'arriver à Abidjan pour la première fois. Il vous demande, en Dioula, 'Comment dit-on 'Gare routière' en anglais ?'. Laquelle des traductions suivantes est la plus précise ?",
+      "options": [
+        "Bus station",
+        "Road station",
+        "Car station"
+      ],
+      "correct_index": 0,
+      "correct_text": "Bus station",
+      "explanation": "'Bus station' is the correct and widely accepted term for 'Gare routière' in English. 'Road station' and 'Car station' are not standard English phrases and would not be understood to mean 'Gare routière'.",
+      "subject": "ANG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 20,
+      "question_number": 19,
+      "source_table": "questions_v2",
+      "source_id": "3d4d279a-63dc-41fb-8839-16e3591b54e1",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": [
+        "LANGUAGE: Question text auto-translated EN->FR for ANG",
+        "EXPLANATION: Not in French",
+        "EXPLANATION: L'explication n'est pas en français",
+        "EXPLANATION: Le texte pourrait être plus détaillé"
+      ]
+    },
+    {
+      "id": "",
+      "text": "Une jeune entrepreneuse ivoirienne, Fatima, vient de lancer sa propre marque de mode en utilisant des tissus locaux. Elle souhaite écrire un slogan accrocheur pour son site web en anglais. Lequel des slogans suivants est le PLUS grammaticalement correct et attrayant ?",
+      "options": [
+        "\"Embrace tradition, wear Africa today.\"",
+        "\"Embracing tradition, you wear Africa today.\"",
+        "\"To embrace tradition, wearing Africa today.\""
+      ],
+      "correct_index": 0,
+      "correct_text": "\"Embrace tradition, wear Africa today.\"",
+      "explanation": "Option A is the most grammatically correct and appealing slogan. It uses the imperative form 'Embrace' which is direct and engaging, followed by a concise and memorable phrase. The other options are grammatically awkward or don't convey the intended message effectively.",
+      "subject": "ANG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 20,
+      "question_number": 20,
+      "source_table": "questions_v2",
+      "source_id": "7ecc8745-6c63-4578-ac77-c16b3542b953",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": [
+        "LANGUAGE: Question text auto-translated EN->FR for ANG",
+        "LANGUAGE: Explanation auto-translated EN->FR for ANG",
+        "CLARITY: La question demande de choisir le slogan le plus grammaticalement correct et attrayant, mais les critères pour 'attrayant' ne sont pas définis, ce qui rend la question subjective. De plus, plusieurs slogans peuvent être considérés comme corrects grammaticalement, ce qui peut mener à des interprétations différentes.",
+        "CLARITY: Question ambiguë ou confuse",
+        "CLARITY: Question avec plusieurs réponses possibles parmi les options",
+        "EXPLANATION: L'explication pourrait être plus détaillée en expliquant pourquoi les autres options sont grammaticalement maladroites."
+      ]
+    },
+    {
+      "id": "",
+      "text": "En dehors de la Côte d'Ivoire, quel pays africain a accueilli le plus grand nombre de réfugiés libériens durant les deux guerres civiles libériennes (1989-1997 et 1999-2003)?",
+      "options": [
+        "Guinée",
+        "Ghana",
+        "Sierra Leone"
+      ],
+      "correct_index": 0,
+      "correct_text": "Guinée",
+      "explanation": "La Guinée, partageant une longue frontière avec le Libéria, a accueilli un grand nombre de réfugiés libériens fuyant les conflits. Bien que le Ghana et la Sierra Leone aient également accueilli des réfugiés, la Guinée en a accueilli le plus grand nombre.",
+      "subject": "CG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 9,
+      "question_number": 40,
+      "source_table": "questions_v2",
+      "source_id": "ab1b5858-b504-472b-b28e-471c5242b98c",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": [
+        "EXPLANATION: manque de détails sur les chiffres exacts ou estimations",
+        "EXPLANATION: absence de contexte historique plus large"
+      ]
+    },
+    {
+      "id": "",
+      "text": "Quelle reine a, selon la tradition, conduit les Baoulés lors de la grande migration vers le centre de la Côte d’Ivoire ?",
+      "options": [
+        "Abla Pokou",
+        "Sarraounia",
+        "Yaa Asantewaa"
+      ],
+      "correct_index": 0,
+      "correct_text": "Abla Pokou",
+      "explanation": "La question demande d’identifier la reine qui, selon la tradition, a conduit le peuple baoulé lors de leur grande migration vers le centre de la Côte d’Ivoire. Il s’agit d’Abla Pokou, souveraine akan qui, d’après le récit fondateur, mena l’exode depuis l’Ashanti et permit l’installation des Baoulés en Côte d’Ivoire. Sarraounia (cheffe haoussa du Niger) et Yaa Asantewaa (reine-mère ashanti du Ghana) ne sont pas liées à la migration baoulé.",
+      "subject": "CG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 12,
+      "question_number": 26,
+      "source_table": "questions_v2",
+      "source_id": "35def4fb-18ff-411c-9681-c3e8eda8c9ee",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": []
+    },
+    {
+      "id": "",
+      "text": "La Côte d'Ivoire est le premier producteur mondial de cacao. Cependant, l'expansion rapide des plantations de cacao a été un facteur majeur de déforestation. Parmi les conséquences suivantes, quelle est la plus critique à long terme pour la durabilité environnementale et agricole du pays ?",
+      "options": [
+        "Une augmentation significative des importations de produits manufacturés.",
+        "La perte accélérée de la biodiversité et la dégradation irréversible des sols.",
+        "Un ralentissement notable du développement des infrastructures portuaires."
+      ],
+      "correct_index": 1,
+      "correct_text": "La perte accélérée de la biodiversité et la dégradation irréversible des sols.",
+      "explanation": "La déforestation massive, souvent liée à l'extension des cultures de rente comme le cacao, a pour conséquence directe et majeure la destruction des habitats naturels, menant à la perte de biodiversité. Parallèlement, l'exposition des sols et le lessivage entraînent leur érosion et leur appauvrissement, compromettant gravement la fertilité future des terres agricoles et la résilience des écosystèmes. C'est la menace la plus critique à long terme pour la durabilité du secteur agricole et l'équilibre écologique du pays. Les autres options ne sont pas des conséquences directes ou prioritaires de la déforestation liée au cacao.",
+      "subject": "CG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 14,
+      "question_number": 25,
+      "source_table": "questions_v2",
+      "source_id": "5d454386-5586-433a-a035-c146122e304f",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": []
+    },
+    {
+      "id": "",
+      "text": "La Zone de libre-échange continentale africaine (ZLECAf) a pour but essentiel de .....",
+      "options": [
+        "supprimer les visas entre États",
+        "créer une monnaie unique africaine",
+        "faciliter le commerce intra-africain"
+      ],
+      "correct_index": 2,
+      "correct_text": "faciliter le commerce intra-africain",
+      "explanation": "La question demande l’objectif essentiel de la ZLECAf. Il s’agit de faciliter le commerce intra-africain en réduisant/supprimant les droits de douane et en harmonisant règles et procédures, d’où la réponse C. Elle ne vise ni la suppression des visas (A) ni la création d’une monnaie unique (B), qui relèvent d’autres politiques.",
+      "subject": "CG",
+      "difficulty": "MEDIUM",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 20,
+      "question_number": 40,
+      "source_table": "questions_v2",
+      "source_id": "f3b9cc9b-dd04-4be5-b11a-449814bdae67",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": [
+        "EXPLANATION: L'explication pourrait être plus détaillée en expliquant comment la ZLECAf facilite le commerce intra-africain au-delà de la réduction des droits de douane."
+      ]
+    },
+    {
+      "id": "",
+      "text": "Dans un village ivoirien, chaque maison est peinte soit en rouge, soit en bleu, soit en jaune. On sait que: \n- Si une maison a un manguier devant, elle n'est jamais bleue.\n- La moitié des maisons rouges ont un manguier devant.\n- Toutes les maisons jaunes ont un manguier devant.\nQuelle affirmation est nécessairement vraie?",
+      "options": [
+        "Au moins la moitié des maisons rouges n'ont pas de manguier devant.",
+        "Toutes les maisons avec un manguier devant sont jaunes.",
+        "Il y a plus de maisons rouges que de maisons jaunes."
+      ],
+      "correct_index": 0,
+      "correct_text": "Au moins la moitié des maisons rouges n'ont pas de manguier devant.",
+      "explanation": "Puisque la moitié des maisons rouges ont un manguier devant, l'autre moitié n'en a pas. Donc, au moins la moitié des maisons rouges n'ont pas de manguier devant. Les autres options peuvent être fausses: on ne sait pas si toutes les maisons avec un manguier sont jaunes (il pourrait y avoir des maisons rouges avec manguiers), et on ne sait pas s'il y a plus de maisons rouges que jaunes.",
+      "subject": "LOG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 1,
+      "question_number": 60,
+      "source_table": "questions_v2",
+      "source_id": "cff28ee0-db66-4669-9076-3b1308116afb",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": [
+        "CLARITY: La question est confuse car elle ne précise pas clairement les relations entre les maisons rouges, bleues et jaunes par rapport aux manguiers. Les options proposées ne semblent pas découler logiquement des informations données, et il est possible d'interpréter les données de plusieurs manières, ce qui peut mener à plusieurs réponses possibles.",
+        "CLARITY: Question ambiguë ou confuse",
+        "CLARITY: Options qui ne correspondent pas à la question",
+        "CLARITY: Question avec plusieurs réponses possibles parmi les options"
+      ]
+    },
+    {
+      "id": "",
+      "text": "Un jeune entrepreneur d'Abidjan, passionné de jeux logiques, a organisé des numéros dans un tableau suivant une règle spécifique. Si les deux premières lignes sont complétées comme suit, quel nombre doit se trouver à la place du point d'interrogation dans la troisième ligne pour maintenir la même logique ?\n\n| 3 | 4 | 7 |\n|---|---|---|\n| 5 | 6 | 11 |\n|---|---|---|\n| 8 | ? | 17 |",
+      "options": [
+        "9",
+        "10",
+        "11"
+      ],
+      "correct_index": 0,
+      "correct_text": "9",
+      "explanation": "La logique appliquée dans chaque ligne est que le troisième nombre est la somme des deux premiers nombres de cette même ligne. Pour la première ligne : 3 + 4 = 7. Pour la deuxième ligne : 5 + 6 = 11. En appliquant cette même règle à la troisième ligne, nous devons avoir 8 + ? = 17. Pour trouver la valeur du point d'interrogation, on calcule 17 - 8 = 9. Donc, le nombre manquant est 9.",
+      "subject": "LOG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 2,
+      "question_number": 60,
+      "source_table": "questions_v2",
+      "source_id": "e7121941-499f-47f4-bc67-234acd97e506",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": []
+    },
+    {
+      "id": "",
+      "text": "À 4 h 36, quel est l’angle aigu (en degrés) entre les deux aiguilles d’une horloge analogique ?",
+      "options": [
+        "66",
+        "78",
+        "84"
+      ],
+      "correct_index": 1,
+      "correct_text": "78",
+      "explanation": "La question demande l’angle aigu entre les deux aiguilles à 4 h 36. L’aiguille des minutes est à 36×6 = 216°, celle des heures à 4×30 + 36×0,5 = 138°, donc l’angle aigu vaut |216−138| = 78°, soit la réponse B. Les valeurs 66° et 84° résultent d’erreurs typiques (oublier le déplacement de l’aiguille des heures ou mal convertir les vitesses angulaires).",
+      "subject": "LOG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 3,
+      "question_number": 60,
+      "source_table": "questions_v2",
+      "source_id": "a100cabe-cba6-4c50-96b1-398b06c56ae7",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": []
+    },
+    {
+      "id": "",
+      "text": "Observe cette suite de motifs représentant des pagnes traditionnels Baoulé. Le premier pagne a un cercle noir. Le deuxième a deux cercles noirs disposés horizontalement. Le troisième a trois cercles noirs disposés verticalement. Le quatrième a quatre cercles noirs disposés horizontalement. Quel motif représente le cinquième pagne de cette suite?",
+      "options": [
+        "Cinq cercles noirs disposés verticalement",
+        "Cinq cercles noirs disposés horizontalement",
+        "Six cercles noirs disposés verticalement"
+      ],
+      "correct_index": 0,
+      "correct_text": "Cinq cercles noirs disposés verticalement",
+      "explanation": "La suite alterne entre une disposition horizontale et verticale des cercles noirs. Le nombre de cercles augmente de un à chaque étape. Après quatre cercles disposés horizontalement, le prochain motif aura cinq cercles disposés verticalement.",
+      "subject": "LOG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 4,
+      "question_number": 50,
+      "source_table": "questions_v2",
+      "source_id": "572f09d0-cc3a-4a66-9808-72e76c9fe5b9",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": []
+    },
+    {
+      "id": "",
+      "text": "Adama, Fatou et Karim sont trois amis d'Abidjan qui se sont rendus au Festival des Arts. Chacun d'eux porte un vêtement traditionnel différent : un Kente, un Boubou ou un Pagne. \n1. Adama n'est pas celui qui porte le Boubou.\n2. La personne qui porte le Kente est une femme.\n3. Karim et la personne en Pagne ont longuement discuté de l'artisanat local.\n\nQuel vêtement porte Adama ?",
+      "options": [
+        "Le Pagne",
+        "Le Kente",
+        "Le Boubou"
+      ],
+      "correct_index": 0,
+      "correct_text": "Le Pagne",
+      "explanation": "Analysons les indices un par un :\n-   **Indice 2 :** « La personne qui porte le Kente est une femme. » Parmi les trois amis (Adama, Fatou, Karim), seule Fatou est une femme. Par conséquent, Fatou porte le Kente.\n-   **Indice 3 :** « Karim et la personne en Pagne ont longuement discuté de l'artisanat local. » Cet indice nous dit que Karim n'est pas la personne qui porte le Pagne. Nous savons déjà que Fatou porte le Kente. Il reste donc le Boubou et le Pagne pour Adama et Karim. Puisque Karim ne porte pas le Pagne, il doit nécessairement porter le Boubou.\n-   **Indice 1 :** « Adama n'est pas celui qui porte le Boubou. » Cette information est cohérente avec nos déductions précédentes. Puisque Fatou porte le Kente et Karim porte le Boubou, le seul vêtement restant est le Pagne, qui doit donc être porté par Adama.\n\n**En résumé :**\n-   Fatou : Kente\n-   Karim : Boubou\n-   Adama : Pagne",
+      "subject": "LOG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 4,
+      "question_number": 58,
+      "source_table": "questions_v2",
+      "source_id": "08146d4b-d4bc-4b24-8a94-dd21dab06d1d",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": []
+    },
+    {
+      "id": "",
+      "text": "Complétez le tableau de logique: 6  4  60 ; 5  3  40 ; 8  7  ?",
+      "options": [
+        "113",
+        "120",
+        "136"
+      ],
+      "correct_index": 1,
+      "correct_text": "120",
+      "explanation": "Il s’agit d’identifier la règle qui relie les deux premiers nombres au troisième sur chaque ligne. On observe que 6×(6+4)=60 et 5×(5+3)=40, donc la règle est a×(a+b) ; ainsi 8×(8+7)=8×15=120. Les autres options (113, 136) ne respectent pas cette relation.",
+      "subject": "LOG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 4,
+      "question_number": 59,
+      "source_table": "questions_v2",
+      "source_id": "70ba575d-ea37-44c6-a996-63ea5434c0fa",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": [
+        "CLARITY: La question ne fournit pas suffisamment d'informations sur la logique ou la règle à appliquer pour compléter le tableau. Sans une explication claire de la relation entre les nombres, il est impossible de déterminer la réponse correcte parmi les options fournies.",
+        "CLARITY: Question ambiguë ou confuse",
+        "CLARITY: Question mal formulée ou incomplète",
+        "CLARITY: Question qui nécessite des informations supplémentaires pour répondre"
+      ]
+    },
+    {
+      "id": "",
+      "text": "Soient T, S et O des entiers. On sait: T+T+S=23 ; S+O=16 ; T+O=17. Quelle est la valeur de T−S+O ?",
+      "options": [
+        "9",
+        "10",
+        "11"
+      ],
+      "correct_index": 1,
+      "correct_text": "10",
+      "explanation": "La question demande de calculer T−S+O à partir des équations 2T+S=23, S+O=16 et T+O=17. En soustrayant (S+O) de (T+O), on obtient T−S=1; avec 2T+S=23 et T=S+1, on trouve S=7, O=9, T=8, donc T−S+O=8−7+9=10. Les autres options (9, 11) ne correspondent pas aux valeurs de T, S et O qui satisfont simultanément le système.",
+      "subject": "LOG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 4,
+      "question_number": 60,
+      "source_table": "questions_v2",
+      "source_id": "4ba86964-eb64-4ec1-831b-960244c802da",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": [
+        "EXPLANATION: L'explication pourrait être plus détaillée sur la résolution des équations."
+      ]
+    },
+    {
+      "id": "",
+      "text": "Dans un village de Côte d'Ivoire, les artisans utilisent des cauris pour coder leurs motifs de tissage. Voici une séquence partielle de cauris : \n\nCauris : ⚪  ⚫ ⚪⚪ ⚫⚪ ⚪⚫ ⚪⚪⚪ ?\n\nSachant que chaque motif tissé doit respecter une logique précise, quel cauris complète logiquement cette séquence ?",
+      "options": [
+        "⚫",
+        "⚪",
+        "Aucun des deux"
+      ],
+      "correct_index": 1,
+      "correct_text": "⚪",
+      "explanation": "La séquence alterne entre un cauris blanc, un cauris noir, puis augmente de un le nombre de cauris blancs avant de remettre un noir. La séquence est donc : 1 blanc, 1 noir, 2 blancs, 1 noir, 3 blancs...  On a donc 1 blanc, 1 noir, 2 blancs, 1 noir, 3 blancs, il faut donc un cauris blanc (4 blancs au total pour suivre la séquence). Donc la réponse est '⚪'.",
+      "subject": "LOG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 5,
+      "question_number": 53,
+      "source_table": "questions_v2",
+      "source_id": "afd99249-4a3a-40f0-97ce-be21424d3605",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": [
+        "CLARITY: La question ne fournit pas suffisamment d'informations sur la logique précise que les motifs de tissage doivent respecter, ce qui rend difficile la détermination de la réponse correcte. De plus, sans une règle claire, plusieurs réponses pourraient être considérées comme valides.",
+        "CLARITY: Question ambiguë ou confuse",
+        "CLARITY: Question qui nécessite des informations supplémentaires pour répondre",
+        "CLARITY: Question avec plusieurs réponses possibles parmi les options",
+        "EXPLANATION: L'explication pourrait être plus concise"
+      ]
+    },
+    {
+      "id": "",
+      "text": "Au marché de Treichville, un commerçant astucieux a mis en place un système de 'valorisation' pour certains de ses produits. Le prix initial de chaque article est augmenté selon une règle logique. Voici quelques exemples de prix avant et après valorisation :\n\n- Un article de 1000 FCFA est valorisé à 1020 FCFA.\n- Un article de 2000 FCFA est valorisé à 2040 FCFA.\n- Un article de 500 FCFA est valorisé à 510 FCFA.\n\nSi un client souhaite acheter un pagne dont le prix initial est de 3500 FCFA, quel sera le prix qu'il devra payer après valorisation, selon cette même logique ?",
+      "options": [
+        "3550 FCFA",
+        "3570 FCFA",
+        "3600 FCFA"
+      ],
+      "correct_index": 1,
+      "correct_text": "3570 FCFA",
+      "explanation": "La règle de valorisation consiste à ajouter 2% du prix initial au prix initial. \n- Pour 1000 FCFA : 1000 + (1000 * 0.02) = 1000 + 20 = 1020 FCFA.\n- Pour 2000 FCFA : 2000 + (2000 * 0.02) = 2000 + 40 = 2040 FCFA.\n- Pour 500 FCFA : 500 + (500 * 0.02) = 500 + 10 = 510 FCFA.\nEn appliquant cette logique au prix de 3500 FCFA : 3500 + (3500 * 0.02) = 3500 + 70 = 3570 FCFA.",
+      "subject": "LOG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 5,
+      "question_number": 58,
+      "source_table": "questions_v2",
+      "source_id": "597316e9-3b82-43e2-a8ca-ec3ace816b01",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": []
+    },
+    {
+      "id": "",
+      "text": "Un groupe d'explorateurs parcourt la Côte d'Ivoire. Ils observent une progression logique dans les noms des localités qu'ils visitent, transformés selon une règle spécifique.\n\nSérie d'exemples:\n- YAMOUSSOUKRO devient YAM\n- ABIDJAN devient ABJ\n- BOUAKÉ devient BOU\n\nEn appliquant la même règle, si les explorateurs visitent DALOA, SAN-PÉDRO et KORHOGO, quel serait le terme transformé pour KORHOGO?",
+      "options": [
+        "KOR",
+        "KOG",
+        "HOR"
+      ],
+      "correct_index": 0,
+      "correct_text": "KOR",
+      "explanation": "La règle logique appliquée est de prendre les trois premières lettres du nom de la localité. Ainsi :\n- YAMOUSSOUKRO donne YAM\n- ABIDJAN donne ABJ\n- BOUAKÉ donne BOU\nEn appliquant cette même règle à KORHOGO, on obtient KOR.",
+      "subject": "LOG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 5,
+      "question_number": 59,
+      "source_table": "questions_v2",
+      "source_id": "d0cc199a-82ff-40b9-bede-b862a8398636",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": [
+        "CLARITY: La règle de transformation des noms de localités n'est pas explicitement définie, ce qui rend la question ambiguë. Les options fournies ne permettent pas de déterminer clairement la bonne réponse sans une compréhension précise de la règle appliquée. Il pourrait y avoir plusieurs interprétations possibles de la règle, ce qui entraîne une confusion quant à la réponse correcte.",
+        "CLARITY: Question ambiguë ou confuse",
+        "CLARITY: Question mal formulée ou incomplète",
+        "CLARITY: Options qui ne correspondent pas à la question",
+        "CLARITY: Question avec plusieurs réponses possibles parmi les options"
+      ]
+    },
+    {
+      "id": "",
+      "text": "Un vendeur de pagnes à Bouaké dispose de trois types de motifs: Éléphant, Crocodile, et Masque. Il organise ses étalages selon une logique précise. Si la première étagère présente les motifs dans l'ordre Éléphant, Crocodile, Masque, et la deuxième étagère présente Crocodile, Masque, Éléphant, quel sera l'ordre des motifs sur la troisième étagère?",
+      "options": [
+        "Masque, Éléphant, Crocodile",
+        "Éléphant, Masque, Crocodile",
+        "Crocodile, Éléphant, Masque"
+      ],
+      "correct_index": 0,
+      "correct_text": "Masque, Éléphant, Crocodile",
+      "explanation": "La séquence suit une rotation cyclique des motifs. Après Crocodile, Masque, Éléphant, le motif suivant est Masque, Éléphant, Crocodile.",
+      "subject": "LOG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 5,
+      "question_number": 60,
+      "source_table": "questions_v2",
+      "source_id": "71df49a1-9a11-4393-a363-14aae319fbf8",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": [
+        "EXPLANATION: L'explication pourrait être plus détaillée en expliquant le concept de rotation cyclique."
+      ]
+    },
+    {
+      "id": "",
+      "text": "Observe attentivement la séquence de motifs traditionnels Baoulé ci-dessous. Quel motif complète logiquement la séquence ?\n\n[Image: Ici devrait figurer une image (ou une description textuelle très précise si l'image n'est pas possible) montrant trois motifs Baoulé successifs.  Le premier motif est un carré divisé en quatre, les deux carrés supérieurs sont noirs, les deux inférieurs blancs. Le deuxième motif est un carré divisé en quatre, les deux carrés diagonaux (haut gauche à bas droite) sont noirs, les autres blancs. Le troisième motif est un carré divisé en quatre, les deux carrés verticaux (gauche et droite) sont noirs, les autres blancs.]",
+      "options": [
+        "Carré divisé en quatre, les deux carrés diagonaux (haut droite à bas gauche) sont noirs, les autres blancs.",
+        "Carré divisé en quatre, le carré supérieur gauche est noir, les trois autres blancs.",
+        "Carré divisé en quatre, tous les carrés sont noirs."
+      ],
+      "correct_index": 0,
+      "correct_text": "Carré divisé en quatre, les deux carrés diagonaux (haut droite à bas gauche) sont noirs, les autres blancs.",
+      "explanation": "La séquence alterne entre des carrés noircis par paires. Le premier motif noircit horizontalement, le deuxième en diagonale (haut gauche à bas droite), le troisième verticalement. Logiquement, le prochain motif doit noircir en diagonale (haut droite à bas gauche).",
+      "subject": "LOG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 6,
+      "question_number": 57,
+      "source_table": "questions_v2",
+      "source_id": "35410503-a501-472e-a798-3b6dd652aff6",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": [
+        "CLARITY: La question repose sur l'observation d'une séquence de motifs, mais sans l'image ou une description textuelle précise de la séquence, il est difficile de déterminer quel motif complète logiquement la séquence. De plus, sans connaître la logique ou le motif sous-jacent de la séquence, il est possible que plusieurs options soient valides.",
+        "CLARITY: Question ambiguë ou confuse",
+        "CLARITY: Question qui nécessite des informations supplémentaires pour répondre",
+        "EXPLANATION: L'explication pourrait être plus détaillée en décrivant chaque étape de la séquence."
+      ]
+    },
+    {
+      "id": "",
+      "text": "En écrivant tous les nombres de 1 à 100, combien de fois écrit-on le chiffre 9 ?",
+      "options": [
+        "18",
+        "19",
+        "20"
+      ],
+      "correct_index": 2,
+      "correct_text": "20",
+      "explanation": "On demande combien de fois le chiffre 9 apparaît en écrivant tous les entiers de 1 à 100. Il apparaît 10 fois en position des unités (9, 19, ..., 99) et 10 fois en position des dizaines (90 à 99), et 100 n’ajoute aucun 9, soit 10 + 10 = 20. Les réponses 19 et 18 sous-comptent, notamment en oubliant que 99 contient deux 9.",
+      "subject": "LOG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 6,
+      "question_number": 58,
+      "source_table": "questions_v2",
+      "source_id": "6841767b-00e0-4deb-b99c-7fd1719c15f6",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": [
+        "EXPLANATION: L'explication pourrait être plus détaillée en expliquant pourquoi chaque position est comptée séparément."
+      ]
+    },
+    {
+      "id": "",
+      "text": "Dans un village du centre de la Côte d'Ivoire, un chef de village utilise une méthode de comptage particulière pour ses ignames. Il représente chaque nombre par un symbole et suit une logique précise. Voici les trois premiers exemples: 3 est représenté par Δ□, 5 par ΔΔ□, et 8 par ΔΔ□□. Selon cette logique, comment représenterait-il le nombre 11?",
+      "options": [
+        "ΔΔΔ□□",
+        "ΔΔΔ□",
+        "ΔΔ□□□"
+      ],
+      "correct_index": 0,
+      "correct_text": "ΔΔΔ□□",
+      "explanation": "La logique est la suivante: Δ représente 3 et □ représente 2. Donc, pour représenter 11, il faut le décomposer en multiples de 3 et de 2. 11 = 3 + 3 + 3 + 2. Par conséquent, la représentation correcte est ΔΔΔ□□.",
+      "subject": "LOG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 6,
+      "question_number": 59,
+      "source_table": "questions_v2",
+      "source_id": "3c4d1bd0-5b66-4697-bacb-0371afadf0ec",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": [
+        "CLARITY: La logique de représentation des nombres par des symboles n'est pas clairement expliquée, ce qui rend difficile la détermination de la représentation correcte pour le nombre 11. Les options fournies ne semblent pas suivre une logique évidente basée sur les exemples donnés.",
+        "CLARITY: Question ambiguë ou confuse",
+        "CLARITY: Options qui ne correspondent pas à la question",
+        "CLARITY: Question qui nécessite des informations supplémentaires pour répondre"
+      ]
+    },
+    {
+      "id": "",
+      "text": "Un tailleur d'Abidjan reçoit trois coupons de tissu : un coupon rayé, un coupon à carreaux et un coupon uni. Il sait que : \n\n*  Si le coupon rayé est utilisé pour faire des chemises, alors le coupon à carreaux sera utilisé pour faire des boubous.\n*  Le coupon à carreaux n'est pas utilisé pour faire des boubous.\n\nQuelle conclusion peut-on logiquement tirer de ces informations ?",
+      "options": [
+        "Le coupon rayé est utilisé pour faire des chemises.",
+        "Le coupon rayé n'est pas utilisé pour faire des chemises.",
+        "Le coupon uni est utilisé pour faire des jupes."
+      ],
+      "correct_index": 1,
+      "correct_text": "Le coupon rayé n'est pas utilisé pour faire des chemises.",
+      "explanation": "La première affirmation est une conditionnelle (Si A alors B). La deuxième affirmation nie B (Non B). Par Modus Tollens, on peut conclure Non A. Donc, si 'Si le coupon rayé est utilisé pour faire des chemises, alors le coupon à carreaux sera utilisé pour faire des boubous' et 'Le coupon à carreaux n'est pas utilisé pour faire des boubous', alors 'Le coupon rayé n'est pas utilisé pour faire des chemises'.",
+      "subject": "LOG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 6,
+      "question_number": 60,
+      "source_table": "questions_v2",
+      "source_id": "6a7dee5b-ca45-4325-80e9-f91fd47248ec",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": [
+        "CLARITY: La question présente une contradiction logique dans les prémisses, ce qui rend difficile de tirer une conclusion claire. De plus, les options proposées ne permettent pas de répondre directement à la question posée, car elles ne sont pas toutes logiquement liées aux informations données.",
+        "CLARITY: Options qui ne correspondent pas à la question",
+        "CLARITY: Question avec plusieurs réponses possibles parmi les options"
+      ]
+    },
+    {
+      "id": "",
+      "text": "Dans une entreprise ivoirienne de distribution de cacao, trois départements (A, B et C) doivent collaborer pour optimiser la chaîne logistique. Le département A propose une méthode qui réduit les coûts de 20% mais augmente le temps de livraison de 15%. Le département B propose une méthode qui réduit les coûts de 10% et diminue le temps de livraison de 5%. Le département C propose une méthode qui maintient les coûts constants mais réduit le temps de livraison de 25%. Si l'objectif principal est de minimiser le temps de livraison tout en maintenant les coûts aussi bas que possible, quelle méthode devrait être choisie?",
+      "options": [
+        "La méthode du département A.",
+        "La méthode du département B.",
+        "La méthode du département C."
+      ],
+      "correct_index": 2,
+      "correct_text": "La méthode du département C.",
+      "explanation": "La méthode du département C est la plus appropriée car elle réduit le temps de livraison de 25%, ce qui est l'objectif principal. Bien que les coûts ne soient pas réduits, ils ne sont pas augmentés non plus, ce qui respecte l'objectif secondaire de maintenir les coûts aussi bas que possible. Les autres méthodes ne parviennent pas à réduire le temps de livraison de manière aussi significative.",
+      "subject": "LOG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 7,
+      "question_number": 53,
+      "source_table": "questions_v2",
+      "source_id": "28c20d3e-5b19-4e73-943d-42d3951c60cb",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": []
+    },
+    {
+      "id": "",
+      "text": "Un commerçant d'anacardes à Korhogo emballe ses produits dans des sacs de différentes tailles. Il a remarqué que : Un sac rouge peut contenir soit 5 sacs verts, soit 3 sacs bleus. Un sac vert peut contenir soit 2 sacs jaunes. Combien de sacs jaunes un sac bleu peut-il contenir ?",
+      "options": [
+        "10/3",
+        "10",
+        "6/5"
+      ],
+      "correct_index": 0,
+      "correct_text": "10/3",
+      "explanation": "Si un sac rouge contient 5 sacs verts et qu'un sac vert contient 2 sacs jaunes, alors un sac rouge contient 5 * 2 = 10 sacs jaunes. Un sac rouge contient également 3 sacs bleus. Donc, 3 sacs bleus contiennent 10 sacs jaunes. Par conséquent, 1 sac bleu contient 10/3 sacs jaunes.",
+      "subject": "LOG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 9,
+      "question_number": 52,
+      "source_table": "questions_v2",
+      "source_id": "c383c6f3-a8cb-4557-aee4-980c1fa2cc9a",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": [
+        "CLARITY: La question est confuse car elle ne fournit pas suffisamment d'informations pour établir une relation entre les sacs bleus et les sacs jaunes. Les options proposées ne semblent pas correspondre à la question posée, et il manque des informations pour déterminer combien de sacs jaunes un sac bleu peut contenir.",
+        "CLARITY: Question ambiguë ou confuse",
+        "CLARITY: Question mal formulée ou incomplète",
+        "CLARITY: Options qui ne correspondent pas à la question",
+        "EXPLANATION: La réponse est mathématiquement correcte mais peut être déroutante car elle implique des fractions de sacs, ce qui n'est pas intuitif dans un contexte physique."
+      ]
+    },
+    {
+      "id": "",
+      "text": "Dans une salle de classe en Côte d'Ivoire, chaque élève doit choisir un projet parmi trois options : agriculture, technologie et commerce. Si 40% des élèves choisissent l'agriculture, 35% choisissent la technologie, et le reste choisit le commerce, combien d'élèves au minimum doivent être présents pour que le nombre d'élèves choisissant le commerce soit un nombre entier ?",
+      "options": [
+        "20",
+        "15",
+        "25"
+      ],
+      "correct_index": 0,
+      "correct_text": "20",
+      "explanation": "Pour que le nombre d'élèves choisissant le commerce soit un nombre entier, le nombre total d'élèves doit être un multiple de 20. En effet, 25% des élèves choisissent le commerce (100% - 40% - 35% = 25%). Le plus petit multiple de 4 (25% = 1/4) qui est aussi un multiple de 5 (pourcentage de commerce) est 20. Ainsi, avec 20 élèves, 5 choisiront le commerce, ce qui est un nombre entier.",
+      "subject": "LOG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 9,
+      "question_number": 57,
+      "source_table": "questions_v2",
+      "source_id": "a994e4cc-3d6d-470b-ad5e-b360473d3882",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": [
+        "EXPLANATION: Confusion sur le choix du multiple",
+        "EXPLANATION: Erreur dans l'explication du multiple de 4"
+      ]
+    },
+    {
+      "id": "",
+      "text": "Dans une classe de l'École Nationale d'Administration, chaque étudiant doit choisir exactement deux cours parmi les trois proposés : Mathématiques, Économie et Informatique. Si 60% des étudiants choisissent Mathématiques, 70% choisissent Économie et 50% choisissent Informatique, quel pourcentage d'étudiants choisissent à la fois Mathématiques et Économie ?",
+      "options": [
+        "20%",
+        "30%",
+        "40%"
+      ],
+      "correct_index": 1,
+      "correct_text": "30%",
+      "explanation": "Pour résoudre ce problème, nous utilisons le principe d'inclusion-exclusion. Soit M, E et I les ensembles des étudiants choisissant respectivement Mathématiques, Économie et Informatique. Nous avons : |M| = 60%, |E| = 70%, |I| = 50%. Chaque étudiant choisit exactement deux cours, donc |M ∩ E| + |M ∩ I| + |E ∩ I| = 100%. En utilisant les pourcentages donnés, nous avons : |M ∩ E| + |M ∩ I| + |E ∩ I| = 100%. Sachant que |M| + |E| + |I| = 180%, nous avons : |M ∩ E| + |M ∩ I| + |E ∩ I| = 180% - 100% = 80%. En résolvant ce système, on trouve que |M ∩ E| = 30%.",
+      "subject": "LOG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 10,
+      "question_number": 44,
+      "source_table": "questions_v2",
+      "source_id": "9d707b5f-9155-4fb3-a05a-477e0fe0b963",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": [
+        "CLARITY: La question est ambiguë car elle ne précise pas comment les pourcentages se chevauchent entre les choix de cours. Sans information sur les chevauchements entre les choix de cours, il est impossible de déterminer précisément le pourcentage d'étudiants qui choisissent à la fois Mathématiques et Économie.",
+        "CLARITY: Question ambiguë ou confuse",
+        "CLARITY: Question qui nécessite des informations supplémentaires pour répondre",
+        "EXPLANATION: L'explication pourrait être plus détaillée sur l'application du principe d'inclusion-exclusion.",
+        "EXPLANATION: Il manque une explication sur la manière dont les pourcentages sont utilisés pour résoudre le système."
+      ]
+    },
+    {
+      "id": "",
+      "text": "Dans un village ivoirien, trois amis, Adama, Bintou et Cissé, décident de partager équitablement un champ rectangulaire de 180 mètres de long et 120 mètres de large. Ils souhaitent diviser le champ en trois parcelles de même forme et de même taille, tout en maximisant la longueur des côtés communs entre les parcelles. Quelle est la longueur maximale possible de ces côtés communs ?",
+      "options": [
+        "60 mètres",
+        "90 mètres",
+        "120 mètres"
+      ],
+      "correct_index": 0,
+      "correct_text": "60 mètres",
+      "explanation": "Pour diviser le champ en trois parcelles de même forme et de même taille, tout en maximisant la longueur des côtés communs, il faut envisager une division en bandes parallèles. La longueur maximale des côtés communs est déterminée par le plus grand diviseur commun (PGCD) des dimensions du champ. Le PGCD de 180 et 120 est 60. Ainsi, chaque parcelle aura une largeur de 60 mètres, permettant une division en trois bandes de 60 mètres de large chacune, maximisant ainsi la longueur des côtés communs.",
+      "subject": "LOG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 10,
+      "question_number": 48,
+      "source_table": "questions_v2",
+      "source_id": "5cda1232-a914-4f33-a2ea-533ee071ebc7",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": [
+        "CLARITY: La question est ambiguë car elle ne précise pas comment les parcelles doivent être disposées pour maximiser la longueur des côtés communs. Il manque des informations sur la manière dont le champ doit être divisé pour déterminer la longueur maximale des côtés communs.",
+        "CLARITY: Question ambiguë ou confuse",
+        "CLARITY: Question qui nécessite des informations supplémentaires pour répondre",
+        "EXPLANATION: L'explication pourrait être plus détaillée sur la raison pour laquelle le PGCD est utilisé pour maximiser les côtés communs."
+      ]
+    },
+    {
+      "id": "",
+      "text": "Lors d'un recensement dans la région des Savanes, un agent a noté les populations de certains villages selon une séquence particulière. Si la séquence est : 15, 23, 33, 45, 59, [?], quel est le nombre manquant ?",
+      "options": [
+        "75",
+        "73",
+        "77"
+      ],
+      "correct_index": 0,
+      "correct_text": "75",
+      "explanation": "Pour trouver le nombre manquant, il faut analyser la différence entre chaque terme consécutif :\n- La différence entre 23 et 15 est 8.\n- La différence entre 33 et 23 est 10.\n- La différence entre 45 et 33 est 12.\n- La différence entre 59 et 45 est 14.\n\nOn observe que ces différences (8, 10, 12, 14) suivent elles-mêmes une progression arithmétique, augmentant de 2 à chaque étape. Par conséquent, la prochaine différence attendue doit être 14 + 2 = 16.\n\nLe nombre manquant dans la séquence principale est donc 59 + 16 = 75.",
+      "subject": "LOG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 10,
+      "question_number": 53,
+      "source_table": "questions_v2",
+      "source_id": "0e3bbf37-813f-45a1-981d-cdbe21df40ac",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": []
+    },
+    {
+      "id": "",
+      "text": "Adama, Fatou et Jean, trois amis d'Abidjan, ont chacun acheté un pagne unique pour la fête des ignames. Les couleurs des pagnes sont le bleu indigo, le vert émeraude et le rouge flamboyant.\n\nSachant que :\n1. Le pagne de Fatou n'est pas rouge flamboyant.\n2. Le pagne d'Adama n'est ni bleu indigo ni vert émeraude.\n3. Jean n'a pas le pagne vert émeraude.\n\nQuelle est la couleur du pagne de Fatou ?",
+      "options": [
+        "Bleu indigo",
+        "Vert émeraude",
+        "Rouge flamboyant"
+      ],
+      "correct_index": 1,
+      "correct_text": "Vert émeraude",
+      "explanation": "Voici le raisonnement par élimination :\n\n1.  **Analyse de l'indice 2 (Adama)** : \"Le pagne d'Adama n'est ni bleu indigo ni vert émeraude.\" Puisqu'il n'y a que trois couleurs (bleu, vert, rouge), si Adama n'a ni le bleu ni le vert, il doit nécessairement avoir le pagne **rouge flamboyant**.\n\n2.  **Analyse de l'indice 3 (Jean)** : \"Jean n'a pas le pagne vert émeraude.\" De plus, nous savons déjà qu'Adama a le pagne rouge flamboyant, donc Jean ne peut pas l'avoir non plus. Si Jean n'a ni le vert émeraude ni le rouge flamboyant, il doit donc avoir le pagne **bleu indigo**.\n\n3.  **Deduction pour Fatou** : Puisqu'Adama a le rouge flamboyant et Jean a le bleu indigo, la seule couleur restante est le **vert émeraude**. Fatou doit donc avoir le pagne vert émeraude. Cet indice est cohérent avec l'indice 1 (\"Le pagne de Fatou n'est pas rouge flamboyant\"), car elle a le vert.\n\nPar conséquent, le pagne de Fatou est vert émeraude.",
+      "subject": "LOG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 10,
+      "question_number": 59,
+      "source_table": "questions_v2",
+      "source_id": "dee5102d-62dc-486d-9195-df9c6adc76a6",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": []
+    },
+    {
+      "id": "",
+      "text": "Trois commerçants, Adama, Bintou et Charles, vendent chacun un plat ivoirien différent sur un marché de Yopougon : l'Attiéké, le Garba et le N'Goyo. \nEn se basant sur les affirmations suivantes, déterminez qui vend quel plat :\n1. Adama ne vend pas l'Attiéké.\n2. La personne qui vend le Garba est une femme.\n3. Bintou ne vend pas le N'Goyo.\n\nSachant qu'Adama et Charles sont des hommes, et Bintou une femme, qui vend l'Attiéké ?",
+      "options": [
+        "Adama",
+        "Bintou",
+        "Charles"
+      ],
+      "correct_index": 2,
+      "correct_text": "Charles",
+      "explanation": "Nous avons trois commerçants (Adama, Bintou, Charles) et trois plats (Attiéké, Garba, N'Goyo). Chaque commerçant vend un seul plat.\n\n**Étape 1 : Analyser l'affirmation 2 et les genres.**\nL'affirmation 2 dit : « La personne qui vend le Garba est une femme. »\nParmi les commerçants, seule Bintou est une femme. Donc, **Bintou vend le Garba**.\n\n**Étape 2 : Déduire les conséquences de la vente de Garba par Bintou.**\nPuisque Bintou vend le Garba :\n*   Bintou ne vend ni l'Attiéké, ni le N'Goyo.\n*   Adama et Charles ne vendent pas le Garba.\n\n**Étape 3 : Analyser l'affirmation 3.**\nL'affirmation 3 dit : « Bintou ne vend pas le N'Goyo. »\nCeci est cohérent avec notre déduction de l'Étape 2 (Bintou vend le Garba, donc pas le N'Goyo). Cette information confirme simplement notre déduction et n'ajoute pas de nouvelle restriction essentielle pour la suite immédiate.\n\n**Étape 4 : Analyser l'affirmation 1 et les plats restants pour Adama.**\nL'affirmation 1 dit : « Adama ne vend pas l'Attiéké. »\nNous savons déjà qu'Adama ne vend pas le Garba (car Bintou le vend).\nSi Adama ne vend ni l'Attiéké (affirmation 1) ni le Garba (déduit), il ne lui reste plus qu'un seul plat à vendre : le N'Goyo.\nDonc, **Adama vend le N'Goyo**.\n\n**Étape 5 : Déterminer le plat de Charles.**\nNous avons établi que :\n*   Bintou vend le Garba.\n*   Adama vend le N'Goyo.\n\nIl ne reste qu'un seul commerçant (Charles) et un seul plat (l'Attiéké). Par élimination, **Charles vend l'Attiéké**.\n\nLa réponse correcte est donc Charles.",
+      "subject": "LOG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 11,
+      "question_number": 57,
+      "source_table": "questions_v2",
+      "source_id": "d4038c53-dbe3-4177-b6c3-5c1737b30b8a",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": []
+    },
+    {
+      "id": "",
+      "text": "Dans une salle de classe en Côte d'Ivoire, il y a 30 élèves. Chaque élève doit recevoir un manuel de mathématiques. Cependant, le nombre de manuels disponibles est inférieur de 20% au nombre total d'élèves. Combien de manuels supplémentaires sont nécessaires pour que chaque élève ait un manuel?",
+      "options": [
+        "6",
+        "5",
+        "4"
+      ],
+      "correct_index": 0,
+      "correct_text": "6",
+      "explanation": "Le nombre total d'élèves est de 30. Le nombre de manuels disponibles est 20% inférieur à 30, soit 30 - (0,2 * 30) = 24 manuels. Il manque donc 30 - 24 = 6 manuels pour que chaque élève ait un manuel. La réponse correcte est donc A.",
+      "subject": "LOG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 13,
+      "question_number": 49,
+      "source_table": "questions_v2",
+      "source_id": "9229049c-a52f-48e6-9378-b910b6a9cfa6",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": []
+    },
+    {
+      "id": "",
+      "text": "Un sculpteur Baoulé assemble des statuettes en suivant une logique précise. Voici les trois premières étapes de sa séquence:\n\nÉtape 1: Une statuette assise, tenant un tambour.\nÉtape 2: Deux statuettes debout, dos à dos.\nÉtape 3: Une statuette assise, tenant un tambour, et une statuette debout, face à la première.\n\nQuelle sera l'Étape 4, en respectant cette séquence logique?",
+      "options": [
+        "Trois statuettes assises, tenant un tambour.",
+        "Deux statuettes debout, face à face, et une statuette assise, tenant un tambour.",
+        "Une statuette debout, et deux statuettes assises, tenant un tambour."
+      ],
+      "correct_index": 1,
+      "correct_text": "Deux statuettes debout, face à face, et une statuette assise, tenant un tambour.",
+      "explanation": "La séquence alterne entre des statuettes assises et debout, avec un nombre croissant de statuettes. L'étape 1 a 1 statuette assise. L'étape 2 a 2 statuettes debout. L'étape 3 combine une statuette assise et une debout. L'étape 4, en suivant la logique, doit avoir une statuette de plus que l'étape 3, tout en respectant l'alternance. Par conséquent, il y aura deux statuettes debout (suivant le modèle initial de l'étape 2) et une statuette assise, la position face à face est cohérente avec l'évolution de la séquence.",
+      "subject": "LOG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 13,
+      "question_number": 57,
+      "source_table": "questions_v2",
+      "source_id": "9745bacb-c308-4dd0-9446-039dd78562e8",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": [
+        "CLARITY: La question ne fournit pas suffisamment d'informations sur la logique de la séquence pour déterminer l'étape suivante. Les options proposées ne semblent pas suivre une logique claire basée sur les étapes précédentes, rendant la question ambiguë et difficile à répondre sans informations supplémentaires.",
+        "CLARITY: Question ambiguë ou confuse",
+        "CLARITY: Options qui ne correspondent pas à la question",
+        "CLARITY: Question qui nécessite des informations supplémentaires pour répondre",
+        "EXPLANATION: L'explication pourrait être plus détaillée sur la logique de l'alternance et l'augmentation du nombre de statuettes.",
+        "EXPLANATION: La mention de la position 'face à face' pourrait être mieux justifiée."
+      ]
+    },
+    {
+      "id": "",
+      "text": "Dans un village ivoirien, trois amis, Adama, Bintou et Cissé, discutent de la logique derrière la distribution de l'eau potable. Adama affirme que si l'eau est distribuée le matin, alors elle ne le sera pas l'après-midi. Bintou dit que si l'eau n'est pas distribuée le matin, alors elle le sera l'après-midi. Cissé conclut que l'eau est toujours distribuée soit le matin, soit l'après-midi, mais jamais les deux. Quelle conclusion logique peut-on tirer de ces affirmations?",
+      "options": [
+        "L'eau est distribuée le matin et non l'après-midi.",
+        "L'eau n'est jamais distribuée ni le matin ni l'après-midi.",
+        "L'eau est distribuée soit le matin, soit l'après-midi, mais pas les deux."
+      ],
+      "correct_index": 2,
+      "correct_text": "L'eau est distribuée soit le matin, soit l'après-midi, mais pas les deux.",
+      "explanation": "Les affirmations d'Adama et de Bintou forment une disjonction exclusive (XOR) : soit l'eau est distribuée le matin, soit l'après-midi, mais pas les deux. Cissé résume cette logique en disant que l'eau est toujours distribuée soit le matin, soit l'après-midi, mais jamais les deux. Ainsi, la conclusion logique correcte est que l'eau est distribuée soit le matin, soit l'après-midi, mais pas les deux.",
+      "subject": "LOG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 14,
+      "question_number": 49,
+      "source_table": "questions_v2",
+      "source_id": "3fc075a7-0ee5-4158-8b3e-894f6f0d8f70",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": [
+        "EXPLANATION: L'explication pourrait être plus détaillée en expliquant comment chaque affirmation contribue à la conclusion."
+      ]
+    },
+    {
+      "id": "",
+      "text": "Une coopérative agricole ivoirienne gère trois entrepôts (Abidjan, Bouaké, San-Pédro) avec des capacités respectives de 1200, 800 et 1000 tonnes. Elle doit approvisionner quatre marchés urbains nécessitant respectivement 750, 600, 400 et 250 tonnes. Les coûts de transport par tonne sont : Abidjan vers les marchés (15, 25, 35, 20 FCFA), Bouaké vers les marchés (30, 10, 25, 15 FCFA), San-Pédro vers les marchés (40, 35, 15, 25 FCFA). Sachant que chaque entrepôt doit expédier au minimum 60% de sa capacité pour des raisons contractuelles, quelle est la contrainte la plus restrictive dans cette optimisation ?",
+      "options": [
+        "La capacité totale des entrepôts est insuffisante par rapport à la demande totale",
+        "Les contraintes de livraison minimale empêchent une allocation optimale des ressources",
+        "Les coûts de transport depuis San-Pédro sont prohibitifs pour la plupart des destinations"
+      ],
+      "correct_index": 1,
+      "correct_text": "Les contraintes de livraison minimale empêchent une allocation optimale des ressources",
+      "explanation": "Analysons systématiquement : Capacité totale = 1200+800+1000 = 3000 tonnes, Demande totale = 750+600+400+250 = 2000 tonnes. La capacité dépasse la demande de 1000 tonnes, donc l'option A est fausse. Les contraintes minimales imposent : Abidjan ≥ 720 tonnes, Bouaké ≥ 480 tonnes, San-Pédro ≥ 600 tonnes, soit un total minimal de 1800 tonnes. Cela laisse seulement 200 tonnes de flexibilité (2000-1800) pour optimiser les coûts, rendant très difficile l'allocation optimale. L'option C est incorrecte car bien que San-Pédro ait des coûts élevés vers certaines destinations, il a le coût le plus bas (15 FCFA) vers le marché 3. La contrainte de livraison minimale est donc la plus restrictive.",
+      "subject": "LOG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 15,
+      "question_number": 49,
+      "source_table": "questions_v2",
+      "source_id": "4610124f-979d-4810-abf3-cd32e122e6e0",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": [
+        "CLARITY: La question demande d'identifier la contrainte la plus restrictive, mais les options proposées ne sont pas directement liées à une analyse des contraintes spécifiques du problème. De plus, plusieurs options pourraient être considérées comme correctes selon l'interprétation des données fournies.",
+        "CLARITY: Question ambiguë ou confuse",
+        "CLARITY: Options qui ne correspondent pas à la question",
+        "CLARITY: Question avec plusieurs réponses possibles parmi les options",
+        "EXPLANATION: L'explication pourrait être plus concise",
+        "EXPLANATION: Les calculs pourraient être présentés de manière plus structurée"
+      ]
+    },
+    {
+      "id": "",
+      "text": "Un commerçant d'Abidjan organise ses marchandises en piles. Il remarque que s'il groupe ses articles par 7, il lui reste 3 articles. S'il les groupe par 11, il lui reste 5 articles. S'il les groupe par 13, il lui reste 9 articles. Sachant qu'il a moins de 1000 articles, combien d'articles possède-t-il exactement ?",
+      "options": [
+        "724 articles",
+        "451 articles",
+        "835 articles"
+      ],
+      "correct_index": 0,
+      "correct_text": "724 articles",
+      "explanation": "Il s'agit d'un système de congruences : n ≡ 3 (mod 7), n ≡ 5 (mod 11), n ≡ 9 (mod 13). En utilisant le théorème des restes chinois : Pour la première condition : n = 7k + 3. En substituant dans la deuxième : 7k + 3 ≡ 5 (mod 11), donc 7k ≡ 2 (mod 11). Comme 7 × 8 ≡ 1 (mod 11), on a k ≡ 16 ≡ 5 (mod 11). Donc n = 77m + 38. En substituant dans la troisième : 77m + 38 ≡ 9 (mod 13), soit 12m + 12 ≡ 9 (mod 13), donc 12m ≡ -3 ≡ 10 (mod 13). Comme 12 × 12 ≡ 1 (mod 13), on a m ≡ 120 ≡ 3 (mod 13). La solution générale est n = 1001p + 724. Pour n < 1000, on a p = 0, donc n = 724.",
+      "subject": "LOG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 17,
+      "question_number": 55,
+      "source_table": "questions_v2",
+      "source_id": "13b9d163-19cb-4453-9345-ecd8fc9fa24f",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": [
+        "EXPLANATION: L'explication pourrait être plus détaillée pour les lecteurs moins familiers avec le théorème des restes chinois.",
+        "EXPLANATION: Certaines étapes intermédiaires pourraient être clarifiées pour améliorer la compréhension."
+      ]
+    },
+    {
+      "id": "",
+      "text": "Lors d'un concours de mathématiques en Côte d'Ivoire, chaque participant doit résoudre un puzzle numérique complexe en un temps record. Si un participant double sa vitesse initiale pour résoudre la moitié du puzzle, puis trouve que cela lui prend 3 minutes pour compléter cette moitié, combien de temps en minutes au total prendra-t-il pour résoudre l'intégralité du puzzle s'il continue à cette vitesse doublée?",
+      "options": [
+        "6 minutes",
+        "9 minutes",
+        "12 minutes"
+      ],
+      "correct_index": 0,
+      "correct_text": "6 minutes",
+      "explanation": "Si le participant double sa vitesse pour compléter la moitié du puzzle, cela signifie qu'à vitesse normale, il lui aurait fallu 6 minutes (3 minutes à vitesse doublée) pour compléter cette moitié. Ainsi, à sa vitesse doublée, les 3 minutes sont en fait les 6 minutes qu'il aurait fallu à sa vitesse normale. Par conséquent, s'il continue à cette vitesse doublée, il résoudra l'autre moitié également en 3 minutes, ce qui donne un total de 6 minutes.",
+      "subject": "LOG",
+      "difficulty": "HARD",
+      "test_type": "exam",
+      "exam_type": "CM",
+      "test_number": 19,
+      "question_number": 54,
+      "source_table": "questions_v2",
+      "source_id": "4822174c-54a1-462f-b564-a0a10d4f2379",
+      "llm_confidence": null,
+      "validation_status": "validated",
+      "validation_notes": [
+        "EXPLANATION: L'explication pourrait être plus concise en évitant la répétition de certaines phrases."
+      ]
+    }
+  ]
+}
